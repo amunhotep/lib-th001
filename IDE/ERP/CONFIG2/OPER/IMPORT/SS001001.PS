@@ -1,0 +1,171 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG/OPER/IMPORT/SS001001.PS}
+{$IFNDEF PEAKTOP:OBJ/TLABEL.INC}                         {$I PEAKTOP:OBJ/TLABEL.INC}                  {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCEDITCOMBO.INC}                   {$I PEAKTOP:OBJ/TXCEDITCOMBO.INC}            {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}          {$I PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}   {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCPANEL.INC}                       {$I PEAKTOP:OBJ/TXCPANEL.INC}                {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TMEMO.INC}                          {$I PEAKTOP:OBJ/TMEMO.INC}                   {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCTOOLBARBUTTON.INC}               {$I PEAKTOP:OBJ/TXCTOOLBARBUTTON.INC}        {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/OPER/FORMOPER.INC}          {$I PEAKTOP:IDE/ERP/DBO/OPER/FORMOPER.INC}   {$ENDIF}
+  //================== PEAKTOP:IDE/ERP/DBO/OPER/IMPORT/SS001001.PS =============
+  procedure TERPFormOperImport_DoImport(aMemo:TMemo; const aFileName:string);
+  var
+    lkSQL :string;
+    lkExcel        :Variant;
+    lkWorkSheet    :Variant;
+    lkCols, lkRows :Integer;
+    i, j, lkDelta  :Integer;
+    lkTMC_NAME     :string;
+    lkTMC_ID       :string;
+    lkTMC_PRICE    :Extended;
+    lkTMC_PRICE_IN :Extended;
+    lkFIRM_ID      :string;
+    lkQUANT        :Extended;
+  begin
+    if not FileExists(aFileName) then
+      begin
+      Dialogs.MessageDlg('Указанный Вами файл не существует!'+#13#10+aFileName, mtWarning, [mbOk]);
+      exit;
+      end;
+    lkExcel := CreateOleObject('Excel.Application');
+    lkExcel.DisplayAlerts := true;
+    lkExcel.Visible := true;
+    lkExcel.Application.EnableEvents := false;
+    
+    lkExcel.Workbooks.Open(aFileName);
+    //получаем активный лист
+    lkWorkSheet := lkExcel.ActiveWorkbook.ActiveSheet;
+    lkRows := lkWorkSheet.UsedRange.Rows.Count;    WriteLn('Rows = '+IntToStr(lkRows));
+    lkCols := lkWorkSheet.UsedRange.Columns.Count; WriteLn('Cols = '+IntToStr(lkCols));
+
+    Dialogs.ProgressDlgShow('Обработка данных');
+    Dialogs.ProgressDlgSetProgress(0);
+    lkDelta := Trunc(lkRows / 100);                WriteLn('Delta = '+IntToStr(lkDelta));
+    if(lkDelta = 0)then lkDelta := 1;
+    j := 0;
+    aMemo.Lines.Clear;
+    for i:=3 to lkRows do
+      begin
+      lkTMC_NAME     := lkWorkSheet.Cells[i, 4].Value;
+      lkTMC_ID       := lkWorkSheet.Cells[i, 5].Value;
+      lkTMC_PRICE    := lkWorkSheet.Cells[i, 7].Value;
+      lkTMC_PRICE_IN := lkWorkSheet.Cells[i, 8].Value;
+      lkFIRM_ID      := lkWorkSheet.Cells[i, 6].Value;
+      lkQUANT        := lkWorkSheet.Cells[i, 9].Value;
+      if( (StrTrimAll(lkTMC_ID) = '') or (lkTMC_ID = '0') )then
+        begin
+        aMemo.Lines.Add('строка '+FormatFloat('0000',i)+' пропущена, не указан код ТМЦ "'+lkTMC_NAME+'"');
+        continue;
+        end;
+      lkSQL := 
+  	   'EXECUTE BLOCK AS '+SQLCRLF+
+  	   '  DECLARE VARIABLE P_ID_OLD TYPE OF COLUMN TABL$R_TMC.ID; '+SQLCRLF+
+  	   '  DECLARE VARIABLE P_ID     TYPE OF COLUMN TABL$R_TMC.ID; '+SQLCRLF+
+  	   '  DECLARE VARIABLE P_J_ID   TYPE OF COLUMN TABL$J_4.ID; '+SQLCRLF+
+  	   'BEGIN '+SQLCRLF+
+  	   '  P_ID_OLD = '''+lkTMC_ID+'''; '+SQLCRLF+
+  	   '  IF(EXISTS(SELECT E.ID FROM TABL$_EXCHANGE E WHERE (E.TB_ID = ''TABL$R_TMC'')AND(E.REC_ID_EXTERNAL = :P_ID_OLD)AND(E.TB_ID_EXTERNAL = ''Справочник.ТМЦ'') ))THEN '+SQLCRLF+
+       '    BEGIN '+SQLCRLF+
+       '    SELECT FIRST 1 COALESCE(E.REC_ID, 0) '+SQLCRLF+
+       '    FROM TABL$_EXCHANGE E '+SQLCRLF+                                 
+       '    WHERE (E.TB_ID = ''TABL$R_TMC'') '+SQLCRLF+
+       '      AND (E.REC_ID_EXTERNAL = :P_ID_OLD) '+SQLCRLF+
+       '      AND (E.TB_ID_EXTERNAL = ''Справочник.ТМЦ'') '+SQLCRLF+
+       '    INTO :P_ID; '+SQLCRLF+
+       '    END '+SQLCRLF+
+       '   ELSE '+SQLCRLF+
+       '    BEGIN '+SQLCRLF+
+  	   '    INSERT INTO TABL$R_TMC(NAME, FLAG_DELETE, ARTICLE, NUMSHOW, EDIZM_ID, '+SQLCRLF+
+  	   '      TMC_GROUP_ID, TMC_TYPE_ID, TMC_LIST_ID, TMC_BRAND_ID, DEV_TMC_BRAND_ID, TMC_CTGR_ID, OID, VEDCODE '+SQLCRLF+
+  	   '    )VALUES('''+StrReplaceStr(lkTMC_NAME,'''','''''')+''', 0, '''', '''', 1000000, 3000201, 2, 0, 0, 0, 0, :P_ID_OLD, '''' '+SQLCRLF+
+  	   '    )RETURNING ID INTO :P_ID; '+SQLCRLF+
+       '    INSERT INTO TABL$_EXCHANGE(FIRM_ID, FILIAL_ID, TB_ID, REC_ID, TB_ID_EXTERNAL, REC_ID_EXTERNAL) '+SQLCRLF+
+  	   '      VALUES(-1, 0, ''TABL$R_TMC'', :P_ID, ''Справочник.ТМЦ'', :P_ID_OLD); '+SQLCRLF+
+  	   '    END '+SQLCRLF+
+  	   '  INSERT INTO TABL$R_TMC_P(TMC_ID, VALUE_DATE, PRICE, PRICE_IN, PRICE_1, PRICE_2, PRICE_3, PRICE_4, PRICE_5) '+SQLCRLF+
+  	   '    VALUES (:P_ID, CURRENT_TIMESTAMP '+
+       ', '+StrReplaceStr(FormatFloat('#0.00', lkTMC_PRICE   )+'0',',','.')+
+       ', '+StrReplaceStr(FormatFloat('#0.00', lkTMC_PRICE_IN)+'0',',','.')+
+       ', '+StrReplaceStr(FormatFloat('#0.00', lkTMC_PRICE   )+'0',',','.')+
+       ', '+StrReplaceStr(FormatFloat('#0.00', lkTMC_PRICE   )+'0',',','.')+
+       ', '+StrReplaceStr(FormatFloat('#0.00', lkTMC_PRICE   )+'0',',','.')+
+       ', '+StrReplaceStr(FormatFloat('#0.00', lkTMC_PRICE   )+'0',',','.')+
+       ', '+StrReplaceStr(FormatFloat('#0.00', lkTMC_PRICE   )+'0',',','.')+
+       ');'+SQLCRLF+
+       '  SELECT FIRST 1 P.J_ID FROM PROC$J_INS_1000027NEW('''+lkFIRM_ID+''',NULL) P INTO :P_J_ID; '+SQLCRLF+
+       '  INSERT INTO TABL$D_1000014 (NAME, FLAG_DELETE, J_ID, TMC_ID, PRICE, QUANT, J_BILLS_ID, PRICE_TMC, WRK_ID) '+SQLCRLF+
+       '    VALUES('''', 0, :P_J_ID, :P_ID, '+
+             StrReplaceStr(FormatFloat('#0.00', lkTMC_PRICE   )+'0',',','.')+', '+
+             StrReplaceStr(FormatFloat('#0.00', lkQUANT       )+'0',',','.')+', 0, '+
+             StrReplaceStr(FormatFloat('#0.00', lkTMC_PRICE_IN)+'0',',','.')+', 0); '+SQLCRLF+
+  	   'END';
+  	  if ExecSQL(FBDataBase, lkSQL)then
+        aMemo.Lines.Add('      '+lkTMC_ID+':"'+lkTMC_NAME+'" '+FormatFloat('# ### ### ##0.00',lkTMC_PRICE_IN))
+       else 
+        aMemo.Lines.Add('ОШИБКА В СТРОКЕ '+FormatFloat('0000',i)+' "'+lkTMC_NAME+'"');
+      j := j + 1;
+      if(lkDelta <> 0)then
+        begin
+        if((j mod lkDelta) = 0)then
+          begin
+          if(lkRows <> 0)then
+            Dialogs.ProgressDlgSetProgress(Trunc(j * 100 / lkRows));
+          end;
+        end;  
+      Amunhotep.ProcessMessages;
+      end;  
+    Dialogs.ProgressDlgHide;
+  end;
+  //============================================================================
+  procedure TERPFormOperImport_actImport_OnExecute(Sender :TObject);
+  begin
+    TERPFormOperImport_DoImport(TMemo(TComponent(Sender).Owner.FindComponent('MemoLog')), TxcEditCombo(TComponent(Sender).Owner.FindComponent('edtFileName')).Text);  
+  end;
+  //============================================================================
+  procedure TERPFormOperImport_edtFileName_OnButtonClick(Sender :TObject);
+  var
+    lkFileName :string;
+  begin
+    with TxcEditCombo(Sender) do
+      begin
+      lkFileName := Text; 
+      if not PromptForFileName(lkFileName, '*.xls;*.xlsx|*.*', 'xls', 'Выберите файл', ExtractFilePath(lkFileName), false)then exit;
+      Text := lkFileName;
+      end;
+  end;
+  //============================================================================
+  function TERPFormOperImport_Create:TAmunhotepForm;
+  var
+    lkToolBar :TxcGradientPanelVista;
+    lkAct     :TCustomAction;
+    lkPnl     :TxcPanel;
+    lkLbl     :TLabel;
+    lkEdt     :TxcEditCombo;
+    lkMem     :TMemo;
+  begin
+    Result := TAmunhotepForm(TERPFormOper_Create('Импорт из Microsoft Excel','',false, []));
+    lkToolBar := CreateTxcGradientPanelVistaToolBar(Result,Result,obj_name_erp_toolbar,'',alTop, 0,38,TERPForm_DefaultToolButtonWidth, 200,xbsNone);
+    lkPnl  := CreateTxcPanel(Result, Result, obj_name_erp_paneltop, '', alTop, 0,lkToolBar.Top+lkToolBar.Height,48,200,xbsNone);
+    lkLbl  := CreateTLabel(lkPnl,lkPnl,'  Укажите путь к файлу импорта',0,0,16,200,alTop,taLeftJustify);
+    lkEdt  := CreateTxcEditCombo(Result, lkPnl, 'edtFileName', TERPForm_DefaultControlIndent, lkLbl.Top+lkLbl.Height+TERPForm_DefaultControlIndent, TERPForm_DefaultControlHeight, 480);
+    with lkEdt do
+      begin
+      AlwaysEnable  := true;
+      ReadOnly      := false;
+      Text          := 'd:\Остатки на складе.xls';
+      OnButtonClick := @TERPFormOperImport_edtFileName_OnButtonClick;
+      end;
+    lkMem  := CreateTMemo(Result,Result,'MemoLog',0,lkPnl.Top+lkPnl.Height+1,200,200,alClient);
+    lkMem.ReadOnly := true;
+    lkMem.Lines.Text := 
+      'Колонка  4 D - Наименование ТМЦ'+#13#10+
+      'Колонка  5 E - Код ТМЦ из 1С или новый (свыше 20000)'+#13#10+
+      'Колонка  6 F - Фирма учета (0,1,2)'+#13#10+
+      'Колонка  7 G - Цена ТМЦ розничная '+#13#10+
+      'Колонка  8 H - Цена ТМЦ входящая '+#13#10+
+      'Колонка  9 I - Количество ТМЦ';
+    lkAct := TERPForm_CreateAction2(Result,'actImport','Импорт данных','Выполнить импорт данных из файла','F9',0,24,@TERPFormOperImport_actImport_OnExecute,nil,lkToolBar,120,nil);
+  end; 
+  //============================================================================
+begin
+  TERPFormOperImport_Create;
+end.

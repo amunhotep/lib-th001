@@ -1,0 +1,293 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG2/RPTI/9F7DF550-E078-48D5-A216-05AA2D77D19B/DEFAULT.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$I PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC} {$I PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/CHECKBOX/INTF.INC}   {$I PEAKTOP:IDE/ERP/DBO/INPUT/CHECKBOX/INTF.INC}   {$ENDIF}
+const
+  objname_datefrom   = 'dtpDateFrom';
+  objname_dateto     = 'dtpDateTo';
+  objname_auto       = 'cbxAuto';
+  //============================================================================
+  function TERPFormRpti_GetExportFilter(aOwner:TComponent):string;
+  begin
+    Result := 
+      msg_erp_lbldatefrom+' "'+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+'" '+
+      msg_erp_lbldateto  +' "'+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto))+'" ';
+  end;
+  //============================================================================
+  function TERPFormRpti_OnGetSQL(aOwner:TComponent;var aSQL:string):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnGetSQLFileName(aOwner:TComponent;var aFileName:string);
+  begin
+     // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnProcessParams(aOwner:TComponent;aQr :TxFBQuery);
+  begin
+    with aQr do
+      begin
+      ParamByName('DATE_FROM').AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+' 00:00:00';
+      ParamByName('DATE_TO'  ).AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto)+1)+' 00:00:00';
+      ParamByName('CHECKAUTO').AsString := InputIntf_CheckBox_Checked(aOwner, objname_auto);
+      end;  
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnChart(aOwner:TComponent; aParent:TWinControl);
+  var
+    lkPC :TxcPageControlEx;
+    lkTS :TxcTabSheet;
+  begin
+    aParent.Free;
+    exit;
+    lkPC := CreateTxcPageControlEx(aOwner, aParent, 'PCCharts', 0,0,600,600, alClient);
+    lkPC.MultiLine := false;
+    TxcPageControlEx_ActivateDefaultPage(lkPC);
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnTerms(aOwner:TComponent;aParent:TWinControl);
+  var
+    lkLastTop :Integer;
+  begin
+    lkLastTop := 4;
+    lkLastTop := lkLastTop + InputIntf_DatePeriod_Create(aOwner, aParent, 'gbDatePeriod', 'Укажите период', 4, lkLastTop, 44, 360,objname_datefrom,objname_dateto,StartOfTheMonth(Now),EndOfTheMonth(Now)).Height;
+    lkLastTop := lkLastTop + 4;
+    with InputIntf_CheckBox_Create  (aOwner,aParent,objname_auto,'По автомобилям (нет галочки - тогда по сотрудникам)',4,lkLastTop, 20,360) do
+      begin
+      lkLastTop := lkLastTop + Height;
+      Checked   := true;
+      end;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_DBGridEh_OnGetCellParams_HideZero(Sender: TObject; Column: TColumnEh; AFont: TFont; var Background: TColor; State: TGridDrawState);
+  begin
+   if(Column.Tag = 666)then exit;
+   if(not(Column.Field.DataSet.Active))then exit;
+   if(Column.Field.DataSet.RecordCount = 0)then exit;
+   if(Column.Field.AsFloat = 0)then 
+     aFont.Color := Background;
+  end;  
+  //============================================================================
+  function TERPFormRpti_OnColumnsCreate(aOwner:TComponent; aDBG:TDBGridEh):Boolean;
+  begin
+    Result := False;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_Columns_OnEditButtonClick(Sender :TObject; var Handled :Boolean);
+  var
+    lkDBG    :TDBGridEh;
+    lkTypes  :string;
+    lkPlace  :string;
+    lkScript :string;
+  begin
+    Handled := true;
+    lkDBG   := TDBGridEh(TComponent(Sender).Owner.Owner);
+    if not lkDBG.DataSource.DataSet.Active then exit;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsCreated(aOwner:TComponent; aDBG:TDBGridEh);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsLoad(aOwner:TComponent; aDBG:TDBGridEh);
+  var
+    lkCol :TColumnEh;
+  begin
+    aDBG.SumList.Active := False;
+    aDBG.FrozenCols := 0;
+    aDBG.Columns.Clear;
+    aDBG.OnGetCellParams := @TERPFormRpti_DBGridEh_OnGetCellParams_HideZero;
+    lkCol := CreateTColumnEh(aDBG,'OBJ_ID'   ,'#0','Объект отчёта|Код', 60, taRightJustify);
+    lkCol.Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lkCol.Tag   := 666;
+    lkCol := CreateTColumnEh(aDBG,'OBJ_NAME' ,'','Объект отчёта|Название', 120, taLeftJustify);
+    lkCol.Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lkCol.Tag   := 666;
+    with lkCol.Footer do
+      begin
+      Color         := lkCol.Color;
+      Alignment     := lkCol.Alignment;
+      Font.Style    := [fsBold];
+      DisplayFormat := lkCol.DisplayFormat;
+      ValueType     := fvtStaticText;
+      Value         := 'ИТОГО';
+      end;
+    lkCol := CreateTColumnEh(aDBG,'TMC_KM_MIN'   ,'### ### ##0','Показания спидометра|начальные', 60, taRightJustify);
+    lkCol.Color := $C0FFC0;
+    lkCol := CreateTColumnEh(aDBG,'TMC_KM_MAX'   ,'### ### ##0','Показания спидометра|конечные' , 60, taRightJustify);
+    lkCol.Color := $C0FFC0;
+    lkCol := CreateTColumnEh(aDBG,'TMC_KM'       ,'### ### ##0','Показания спидометра|пробег'   , 60, taRightJustify);
+    lkCol.Color := $C0FFC0;
+    with lkCol.Footer do
+      begin
+      Color         := lkCol.Color;
+      Alignment     := lkCol.Alignment;
+      Font.Style    := [fsBold];
+      DisplayFormat := lkCol.DisplayFormat;
+      ValueType     := fvtSum;
+      end;
+
+    lkCol := CreateTColumnEh(aDBG, 'ORDERS1', '# ### ##0', 'Заказы|Диспетчер', 48, taRightJustify);
+    lkCol.Color := Amunhotep.MainForm.StyleManager.Colors.Window;
+    with lkCol.Footer do
+      begin
+      Color         := lkCol.Color;
+      Alignment     := lkCol.Alignment;
+      Font.Style    := [fsBold];
+      DisplayFormat := lkCol.DisplayFormat;
+      ValueType     := fvtSum;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'ORDERS2', '# ### ##0', 'Заказы|Подбор', 48, taRightJustify);
+    lkCol.Color := Amunhotep.MainForm.StyleManager.Colors.Window;
+    with lkCol.Footer do
+      begin
+      Color         := lkCol.Color;
+      Alignment     := lkCol.Alignment;
+      Font.Style    := [fsBold];
+      DisplayFormat := lkCol.DisplayFormat;
+      ValueType     := fvtSum;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'ORDERSTOTAL', '# ### ##0', 'Заказы|ВСЕГО', 48, taRightJustify);
+    lkCol.Color := Amunhotep.MainForm.StyleManager.Colors.Window;
+    with lkCol.Footer do
+      begin
+      Color         := lkCol.Color;
+      Alignment     := lkCol.Alignment;
+      Font.Style    := [fsBold];
+      DisplayFormat := lkCol.DisplayFormat;
+      ValueType     := fvtSum;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'ORDERSRET', '# ### ##0', 'Заказы|Отказ', 48, taRightJustify);
+    lkCol.Color := $C0FFFF;
+    with lkCol.Footer do
+      begin
+      Color         := lkCol.Color;
+      Alignment     := lkCol.Alignment;
+      Font.Style    := [fsBold];
+      DisplayFormat := lkCol.DisplayFormat;
+      ValueType     := fvtSum;
+      end;
+    
+    lkCol := CreateTColumnEh(aDBG, 'SALESPLAN', '# ### ##0.00', 'Продажи|План', 68, taRightJustify);
+    lkCol.Color := Amunhotep.MainForm.StyleManager.Colors.Window;
+    with lkCol.Footer do
+      begin
+      Color         := lkCol.Color;
+      Alignment     := lkCol.Alignment;
+      Font.Style    := [fsBold];
+      DisplayFormat := lkCol.DisplayFormat;
+      ValueType     := fvtSum;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'SALESREGIONSLEN', '# ### ##0.00', 'Продажи|За город', 56, taRightJustify);
+    lkCol.Color := Amunhotep.MainForm.StyleManager.Colors.Window;
+    with lkCol.Footer do
+      begin
+      Color         := lkCol.Color;
+      Alignment     := lkCol.Alignment;
+      Font.Style    := [fsBold];
+      DisplayFormat := lkCol.DisplayFormat;
+      ValueType     := fvtSum;
+      end;
+
+    lkCol := CreateTColumnEh(aDBG, 'SUMMED', '# ### ##0.00', 'Расходы|Мед./Мех.', 56, taRightJustify);
+    lkCol.Color := Amunhotep.MainForm.StyleManager.Colors.Window;
+    with lkCol.Footer do
+      begin
+      Color         := lkCol.Color;
+      Alignment     := lkCol.Alignment;
+      Font.Style    := [fsBold];
+      DisplayFormat := lkCol.DisplayFormat;
+      ValueType     := fvtSum;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'SUMTAXES', '# ### ##0.00', 'Расходы|Штрафы', 56, taRightJustify);
+    lkCol.Color := Amunhotep.MainForm.StyleManager.Colors.Window;
+    with lkCol.Footer do
+      begin
+      Color         := lkCol.Color;
+      Alignment     := lkCol.Alignment;
+      Font.Style    := [fsBold];
+      DisplayFormat := lkCol.DisplayFormat;
+      ValueType     := fvtSum;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'SUMTAX', '# ### ##0.00', 'Расходы|Налоги', 56, taRightJustify);
+    lkCol.Color := Amunhotep.MainForm.StyleManager.Colors.Window;
+    with lkCol.Footer do
+      begin
+      Color         := lkCol.Color;
+      Alignment     := lkCol.Alignment;
+      Font.Style    := [fsBold];
+      DisplayFormat := lkCol.DisplayFormat;
+      ValueType     := fvtSum;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'SUMWASH', '# ### ##0.00', 'Расходы|Мойка', 56, taRightJustify);
+    lkCol.Color := Amunhotep.MainForm.StyleManager.Colors.Window;
+    with lkCol.Footer do
+      begin
+      Color         := lkCol.Color;
+      Alignment     := lkCol.Alignment;
+      Font.Style    := [fsBold];
+      DisplayFormat := lkCol.DisplayFormat;
+      ValueType     := fvtSum;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'SALESTOTAL', '# ### ##0.00', 'Выручка|Всего', 68, taRightJustify);
+    lkCol.Color := Amunhotep.MainForm.StyleManager.Colors.Window;
+    with lkCol.Footer do
+      begin
+      Color         := lkCol.Color;
+      Alignment     := lkCol.Alignment;
+      Font.Style    := [fsBold];
+      DisplayFormat := lkCol.DisplayFormat;
+      ValueType     := fvtSum;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'SUMCHECK', '# ### ##0.00', 'Выручка|Чеками', 68, taRightJustify);
+    lkCol.Color := Amunhotep.MainForm.StyleManager.Colors.Window;
+    with lkCol.Footer do
+      begin
+      Color         := lkCol.Color;
+      Alignment     := lkCol.Alignment;
+      Font.Style    := [fsBold];
+      DisplayFormat := lkCol.DisplayFormat;
+      ValueType     := fvtSum;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'SALESFACT', '# ### ##0.00', 'Выручка|Сдано факт', 68, taRightJustify);
+    lkCol.Color := Amunhotep.MainForm.StyleManager.Colors.Window;
+    with lkCol.Footer do
+      begin
+      Color         := lkCol.Color;
+      Alignment     := lkCol.Alignment;
+      Font.Style    := [fsBold];
+      DisplayFormat := lkCol.DisplayFormat;
+      ValueType     := fvtSum;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'SALESDIFF', '# ### ##0.00', 'Выручка|Разница', 68, taRightJustify);
+    lkCol.Color := $80C0FF;
+    with lkCol.Footer do
+      begin
+      Color         := lkCol.Color;
+      Alignment     := lkCol.Alignment;
+      Font.Style    := [fsBold];
+      DisplayFormat := lkCol.DisplayFormat;
+      ValueType     := fvtSum;
+      end;
+    aDBG.FooterRowCount := 1;
+    aDBG.FrozenCols     := 2;
+    aDBG.SumList.Active := True;
+  end;
+  //============================================================================
+  function TERPFormRpti_OnPrint(aOwner:TComponent):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_BeforePreview(aOwner:TComponent; aRpt:TxReport);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+begin
+  TERPForm_ExecSQL([], StringsLoadFromFile( StrAbsolutePath('./DBCHECK.SQL', ScriptName) ) );
+
+  TERPFormRpti_Create('{9F7DF550-E078-48D5-A216-05AA2D77D19B}');
+end.

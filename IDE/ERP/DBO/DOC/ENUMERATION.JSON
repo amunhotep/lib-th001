@@ -1,0 +1,50 @@
+﻿{"MESSAGES":[
+   {"NAME":"MSG_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Настройки документов"}
+     ,{"LANG":"1000056","TXT":"Settings of Documents"}
+     ,{"LANG":"1000204","TXT":"Paramètres de documents"}
+     ,{"LANG":"1000123","TXT":"Einstellungen von Dokumenten"}
+     ,{"LANG":"1000071","TXT":"Налаштування документів"}
+     ,{"LANG":"1000008","TXT":"Налады дакументаў"}
+   ]}
+  ,{"NAME":"MSG_TSSETTINGS_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Настройки"}
+     ,{"LANG":"1000056","TXT":"Settings"}
+     ,{"LANG":"1000204","TXT":"Paramètres"}
+     ,{"LANG":"1000123","TXT":"Einstellungen"}
+     ,{"LANG":"1000071","TXT":"Налаштування"}
+     ,{"LANG":"1000008","TXT":"Налады"}
+   ]}
+  ,{"NAME":"MSG_TSENUMS_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Нумераторы"}
+     ,{"LANG":"1000056","TXT":"Numerators"}
+     ,{"LANG":"1000204","TXT":"Numerateurs"}
+     ,{"LANG":"1000123","TXT":"Zähler"}
+     ,{"LANG":"1000071","TXT":"Нумератори"}
+     ,{"LANG":"1000008","TXT":"Нумаратары"}
+   ]}
+  ,{"NAME":"MSG_DOCUMENT_DEMOSTR","CAPTION":[
+      {"LANG":"1000054","TXT":"Образец отображения строки документа в журнале"}
+     ,{"LANG":"1000056","TXT":"Sample of the Document string in the Journal"}
+     ,{"LANG":"1000204","TXT":"Exemple de chaîne de document dans le Journal"}
+     ,{"LANG":"1000123","TXT":"Beispiel für die Dokumentzeichenfolge im Journal"}
+     ,{"LANG":"1000071","TXT":"Зразок відображення рядка документу в Журналі"}
+     ,{"LANG":"1000008","TXT":"Ўзор адлюстравання радкі дакумента ў Журнале"}
+   ]}
+  ,{"NAME":"MSG_HDR_DISPLAY_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Настройки визуального отображения документов в Журналах"}
+     ,{"LANG":"1000056","TXT":"Settings for the visual display of Documents in the Journals"}
+     ,{"LANG":"1000204","TXT":"Paramètres d'affichage visuel des Documents dans les Journaux"}
+     ,{"LANG":"1000123","TXT":"Einstellungen für die visuelle Darstellung von Dokumenten in den Journalen"}
+     ,{"LANG":"1000071","TXT":"Налаштування візуального відображення документів в Журналах"}
+     ,{"LANG":"1000008","TXT":"Налады візуальнага адлюстравання дакументаў у Журналах"}
+   ]}
+  ,{"NAME":"MSG_HDR_ENUM_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Настройки нумераторов документов"}
+     ,{"LANG":"1000056","TXT":"Settings of Documents Numbering"}
+     ,{"LANG":"1000204","TXT":"Paramètres de numérotation des Documents"}
+     ,{"LANG":"1000123","TXT":"Einstellungen der Dokumentennummerierung"}
+     ,{"LANG":"1000071","TXT":"Налаштування нумераторів документів"}
+     ,{"LANG":"1000008","TXT":"Налады нумаратарав дакументаў"}
+   ]}
+]}

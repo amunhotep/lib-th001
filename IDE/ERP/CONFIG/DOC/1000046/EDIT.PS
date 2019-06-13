@@ -1,0 +1,775 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}         {$I PEAKTOP:GLOBAL_VARIABLES.INC}        {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TCOLUMNEH.INC}            {$I PEAKTOP:OBJ/TCOLUMNEH.INC}           {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TIMAGELIST.INC}           {$I PEAKTOP:OBJ/TIMAGELIST.INC}          {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TACTION.INC}              {$I PEAKTOP:OBJ/TACTION.INC}             {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/OBJECTNAMES.INC}  {$I PEAKTOP:IDE/ERP/DBO/OBJECTNAMES.INC} {$ENDIF}
+const
+  msg_invalid_resource  = 'Неверный файл ресурсов'; 
+  msg_caption           = 'DB:CONFIG/DOC/1000046/EDIT.XFM'; 
+  msg_lbldocnumber      = 'Номер'; 
+  msg_lblfirmname       = 'Фирма'; 
+  msg_lblfilialname     = 'Филиал'; 
+  msg_lblusername       = 'Пользователь'; 
+  msg_lbldatecommit     = 'Дата'; 
+  msg_lbldocsum         = 'Сумма'; 
+  msg_lblname           = 'Примечание'; 
+  msg_tsdoc             = 'Документ'; 
+  msg_tscoments         = 'Коментарии'; 
+  msg_tschilds          = 'Подчиненные'; 
+  msg_tsparents         = 'Зависит'; 
+  msg_actsave           = 'Сохранить' ; msg_actsave_hint      = 'Сохранить документ'; 
+  msg_actcommit         = 'Провести'  ; msg_actcommit_hint    = 'Провести документ'; 
+  msg_actuncommit       = 'Отменить'  ; msg_actuncommit_hint  = 'Отменить проведение документа'; 
+  msg_actcalc           = 'Рассчитать'; msg_actcalc_hint      = 'Рассчитать ведомость зарплаты'; 
+  msg_actprint          = 'Печать'    ; msg_actprint_hint     = 'Печать документа'; 
+var 
+  DocForm          :TAmunhotepForm; 
+  TopBar           :TxcGradientPanelVista; 
+  ImgLogo          :TImage; 
+  PCDoc            :TxcPageControl; 
+  HSplitter        :TSplitter; 
+  ToolBarDoc       :TxcGradientPanel; 
+  pnlDoc           :TxcGradientPanel; 
+  dbeDOCNUMBER     :TDBEditEh; 
+  dbeFIRM_NAME     :TDBEditEh; 
+  dbeFILIAL_NAME   :TDBEditEh; 
+  dbeUSER_NAME     :TDBEditEh; 
+  dbdtpDATE_COMMIT :TDBDateTimeEditEh; 
+  dbneDOCSUM       :TDBNumberEditEh; 
+  dbeNAME          :TDBEditEh; 
+  dbgDoc           :TDBGridEh; 
+  dbgDocLog        :TDBGridEh; 
+  trDoc            :TxFBTransaction; 
+  qrJrnl           :TxFBQuery; 
+  dtsDoc           :TxFBDataSet; 
+  qrDocLog         :TxFBQuery; 
+  DSqrJrnl         :TDataSource; 
+  DSdtsDoc         :TDataSource; 
+  DSqrDocLog       :TDataSource; 
+var
+  DocId     :string;
+  DocFirmId :string;
+  //============================================================================
+  procedure CloseDataSets;
+  begin
+    if trDoc.InTransaction then trDoc.Commit; 
+  end;
+  //============================================================================
+  procedure RefreshView;
+  begin 
+    CloseDataSets; 
+    qrJrnl.SQL.Text := 'SELECT * FROM PROC$D_4('''+DocId+''')';
+    dtsDoc.SelectSQL.Text := 
+      'SELECT D0000.J_ID AS J_ID, D0000.FLAG_DELETE, D0000.ID, D0000.WRK_ID, D0000.WRK_POST_ID, D0000.FILIAL_ID '+#13#10+
+      '      ,(SELECT FIRST 1 R0003.NAME FROM TABL$R_WRK R0003 WHERE (R0003.ID = D0000.WRK_ID)) AS WRK_ID_ '+#13#10+
+      '      ,(SELECT FIRST 1 R0005.NAME FROM TABL$R_WRK_POSTS R0005 WHERE (R0005.ID = D0000.WRK_POST_ID)) AS WRK_POST_ID_ '+#13#10+
+      '      ,(SELECT FIRST 1 R0006.NAME FROM TABL$R_FILIALS   R0006 WHERE (R0006.ID = D0000.FILIAL_ID)  ) AS FILIAL_ID_ '+#13#10+
+      '      ,D0000.HOURS_PLAN, D0000.HOURS_FACT, D0000.TARIF, D0000.SUMCALC, D0000.SUMVAC, D0000.SUMFINHELP, D0000.SUMFINHELP2 '+#13#10+
+      '      ,D0000.SUMHOSPITAL, D0000.SUMHOSPITAL2, D0000.SUMCALCTOTAL, D0000.TAXPENSION, D0000.TAXUNEMPLOYMENT '+#13#10+
+      '      ,D0000.TAXINSURANCE, D0000.TAXSINGLE, D0000.TAXINCOME, D0000.TAXTOTAL '+#13#10+
+      '      ,D0000.SUMADVANCE, D0000.SUMTOPAY, D0000.NAME '+#13#10+
+      'FROM   TABL$D_1000046 D0000 '+#13#10+ 
+      'WHERE (D0000.J_ID = '''+DocId+''') '+#13#10+
+      'ORDER BY WRK_POST_ID, WRK_ID_ ';      
+    dtsDoc.RefreshSQL.Text := 
+      'SELECT D0000.J_ID AS J_ID, D0000.FLAG_DELETE, D0000.ID, D0000.WRK_ID, D0000.WRK_POST_ID, D0000.FILIAL_ID '+#13#10+
+      '      ,(SELECT FIRST 1 R0003.NAME FROM TABL$R_WRK R0003 WHERE (R0003.ID = D0000.WRK_ID)) AS WRK_ID_ '+#13#10+
+      '      ,(SELECT FIRST 1 R0005.NAME FROM TABL$R_WRK_POSTS R0005 WHERE (R0005.ID = D0000.WRK_POST_ID)) AS WRK_POST_ID_ '+#13#10+
+      '      ,(SELECT FIRST 1 R0006.NAME FROM TABL$R_FILIALS   R0006 WHERE (R0006.ID = D0000.FILIAL_ID)  ) AS FILIAL_ID_ '+#13#10+
+      '      ,D0000.HOURS_PLAN, D0000.HOURS_FACT, D0000.TARIF, D0000.SUMCALC, D0000.SUMVAC, D0000.SUMFINHELP, D0000.SUMFINHELP2 '+#13#10+
+      '      ,D0000.SUMHOSPITAL, D0000.SUMHOSPITAL2, D0000.SUMCALCTOTAL, D0000.TAXPENSION, D0000.TAXUNEMPLOYMENT '+#13#10+
+      '      ,D0000.TAXINSURANCE, D0000.TAXSINGLE, D0000.TAXINCOME, D0000.TAXTOTAL '+#13#10+
+      '      ,D0000.SUMADVANCE, D0000.SUMTOPAY, D0000.NAME '+#13#10+
+      'FROM   TABL$D_1000046 D0000 '+#13#10+ 
+      'WHERE (D0000.ID = ?ID) '+#13#10; 
+    dtsDoc.ModifySQL.Text := 
+      'UPDATE TABL$D_1000046 D SET '+#13#10+
+      '   D.HOURS_PLAN   = ?HOURS_PLAN '+#13#10+
+      '  ,D.HOURS_FACT   = ?HOURS_FACT '+#13#10+
+      '  ,D.FILIAL_ID    = ?FILIAL_ID '+#13#10+
+      '  ,D.SUMVAC       = ?SUMVAC '+#13#10+
+      '  ,D.SUMFINHELP   = ?SUMFINHELP '+#13#10+
+      '  ,D.SUMFINHELP2  = ?SUMFINHELP2 '+#13#10+
+      '  ,D.SUMHOSPITAL  = ?SUMHOSPITAL '+#13#10+
+      '  ,D.SUMHOSPITAL2 = ?SUMHOSPITAL2 '+#13#10+
+      '  ,D.NAME         = ?NAME '+#13#10+
+      'WHERE (D.ID = ?ID) '+#13#10;      
+    dtsDoc.DeleteSQL.Text := 'DELETE FROM TABL$D_1000046 D WHERE (D.ID = ?ID)';
+    qrDocLog.DataSource := DSdtsDoc;  
+    qrDocLog.SQL.Text := 'SELECT DL.* FROM TABL$D_1000046LOG DL WHERE (DL.D_ID = ?ID) ORDER BY DL.ID ';      
+    try 
+      qrJrnl.Open; 
+    except 
+      // Dialogs.MessageDlg(qrRef.SQL.Text, mtError, [mbOk]);
+    end;
+  end;
+  //============================================================================
+  procedure qrJrnl_AfterOpen(DataSet :TDataSet);
+  begin
+  
+  end;
+  //============================================================================
+  procedure qrJrnl_BeforeClose(DataSet :TDataSet);
+  begin
+    if dtsDoc.Active then
+      begin
+      if(dtsDoc.State = dsEdit)then
+        try
+          dtsDoc.Post;
+        except
+          dtsDoc.Cancel;
+        end;
+      dtsDoc.Close;
+      end;
+  end;
+  //============================================================================
+  procedure qrJrnl_AfterScroll(DataSet :TDataSet);
+  begin
+    if not dtsDoc.Active then try dtsDoc.Open; except end;
+    DocForm.SetCaption(DataSet.FieldByName('TYPE_NAME').AsString+' '+DataSet.FieldByName('DOCNUMBERSTR').AsString);
+    TopBar.Caption := #$20#$20#$20#$20#$20#$20+DocForm.Caption;
+    //dbgDoc.Color      := DataSet.FieldByName('COLOR_BGR').AsInteger;
+    //dbgDoc.Font.Color := DataSet.FieldByName('COLOR_FRG').AsInteger;
+    if(DataSet.FieldByName('FLAG_COMMIT').AsInteger = 0)then
+      begin
+      dbgDoc.ReadOnly := false;
+      dbgDoc.Options  := [dgEditing,dgTitles,dgIndicator,dgColumnResize,dgColLines,dgRowLines,dgTabs,dgConfirmDelete,dgCancelOnExit]; 
+      end
+     else
+      begin
+      dbgDoc.ReadOnly := true;
+      dbgDoc.Options  := [dgRowSelect, dgAlwaysShowSelection,dgTitles,dgIndicator,dgColumnResize,dgColLines,dgRowLines,dgTabs]; 
+      end; 
+  end;
+  //============================================================================
+  procedure dtsDoc_AfterOpen(DataSet :TDataSet);
+  begin
+    if not qrDocLog.Active then try qrDocLog.Open; except end;
+  end;
+  //============================================================================
+  procedure dtsDoc_BeforeClose(DataSet :TDataSet);
+  begin
+    if qrDocLog.Active then qrDocLog.Close;
+  end;
+  //============================================================================
+  procedure dtsDoc_AfterScroll(DataSet :TDataSet);
+  begin
+  end;
+  //============================================================================
+  procedure actSave_OnExecute(Sender :TObject);
+  begin
+    RefreshView;
+  end;
+  //============================================================================
+  procedure actSave_OnUpdate(Sender :TObject);
+  var
+    lkEnabled :Boolean;
+  begin
+    lkEnabled := qrJrnl.Active;
+    if(lkEnabled)then lkEnabled := dtsDoc.Active;
+    TCustomAction(Sender).Enabled := lkEnabled;
+  end;
+  //============================================================================
+  procedure actCommit_OnExecute(Sender :TObject);
+  begin
+    if(Dialogs.MessageDlg(msg_actcommit_hint+' ?', mtConfirmation,[mbYes,mbNo])=mrYes)then
+      begin
+      CloseDataSets;
+      ExecSQL(trDoc.DefaultDataBase, 'UPDATE TABL$J_4 J SET J.FLAG_COMMIT = 1 WHERE (J.ID = '+DocId+')');
+      RefreshView;
+      end;
+  end;
+  //============================================================================
+  procedure actCommit_OnUpdate(Sender :TObject);
+  var
+    lkEnabled :Boolean;
+  begin
+    lkEnabled := qrJrnl.Active;
+    if(lkEnabled)then lkEnabled := (qrJrnl.FieldByName('FLAG_COMMIT').AsInteger = 0);
+    TCustomAction(Sender).Enabled := lkEnabled;
+  end;
+  //============================================================================
+  procedure actUnCommit_OnExecute(Sender :TObject);
+  begin
+    if(Dialogs.MessageDlg(msg_actuncommit_hint+' ?', mtConfirmation,[mbYes,mbNo])=mrYes)then
+      begin
+      CloseDataSets;
+      ExecSQL(trDoc.DefaultDataBase, 'UPDATE TABL$J_4 J SET J.FLAG_COMMIT = 0 WHERE (J.ID = '+DocId+')');
+      RefreshView;
+      end;
+  end;
+  //============================================================================
+  procedure actUnCommit_OnUpdate(Sender :TObject);
+  var
+    lkEnabled :Boolean;
+  begin
+    lkEnabled := qrJrnl.Active;
+    if(lkEnabled)then lkEnabled := (qrJrnl.FieldByName('FLAG_COMMIT').AsInteger <> 0);
+    TCustomAction(Sender).Enabled := lkEnabled;
+  end;
+  //============================================================================
+  procedure actCalc_OnExecute(Sender :TObject);
+  begin
+    CloseDataSets;
+    ExecSQL(trDoc.DefaultDataBase, 'EXECUTE PROCEDURE PROC$D_CALC_1000046('''+DocId+''')');
+    RefreshView;  
+  end;
+  //============================================================================
+  procedure actPrint_OnExecute(Sender :TObject);
+  begin
+    SetGlobalVariable('J_ID', DocId);
+    call(StrAbsolutePath('./PRINT.PS', ScriptName));
+  end;
+  //============================================================================
+  procedure DocForm_OnClose(Sender :TObject; var Action :TCloseAction);
+  begin
+    Action := caFree;
+    AutoFree; 
+  end; 
+  //============================================================================
+  function DocForm_Create:TAmunhotepForm;
+  var
+    lkFileName :string;
+    lkResBody  :string;
+    lkStrm     :TMemoryStream;
+    lkLbl      :TLabel;
+    lkAct      :TAction;
+    lkTS       :TTabSheet;
+    lkPM       :TPopupMenu;
+    lkMM       :TMainMenu;
+    lkCol      :TColumnEh;
+    i          :Integer;
+  begin
+    DontAutoFree;
+    lkFileName := StrAbsolutePath('./EDIT.XFM', ScriptName);
+    lkResBody  := StringsLoadFromFile(lkFileName);
+    if(lkResBody = '')then 
+      begin
+      Dialogs.MessageDlg(msg_invalid_resource+#13#10+lkFileName, mtWarning, [mbOK]);
+      exit;
+      end;
+    Result          := TAmunhotepForm(StrToComponent(lkResBody));
+    Result.OnClose  := @DocForm_OnClose;
+    //Result.FileName := lkFileName;
+    Result.Icon.LoadFromFile(PrepareAbsoleteFileName(ERP_ObjectIcon(ERP_OBJECTTYPE_DOC)));
+    Result.SetCaption(msg_caption);
+    TopBar := TxcGradientPanelVista(Result.FindComponent('TopBar')); 
+    with TopBar do 
+      begin 
+      Caption    := #$20#$20#$20#$20#$20#$20+msg_caption; 
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Window; 
+      Font.Name  := 'Verdana'; 
+      Font.Size  := 14; 
+      Font.Style := [fsBold]; 
+      end; 
+    ImgLogo := TImage(Result.FindComponent('ImgLogo')); 
+    ImgLogo.Picture.Bitmap.LoadFromFile(PrepareAbsoleteFileName(ERP_ObjectBitmap(ERP_OBJECTTYPE_DOC))); 
+    PCDoc                                := TxcPageControl(Result.FindComponent('PCDoc'));
+    PCDoc.StyleManager                   := Amunhotep.MainForm.StyleManager;
+    PCDoc.Font.Style                     := [fsBold]; 
+    lkTS := TTabSheet(Result.FindComponent('tsDoc'));     lkTS.Caption := msg_tsdoc    ;
+    lkTS := TTabSheet(Result.FindComponent('tsComents')); lkTS.Caption := msg_tscoments; lkTS.PageControl := nil;
+    lkTS := TTabSheet(Result.FindComponent('tsChilds'));  lkTS.Caption := msg_tschilds ; lkTS.PageControl := nil;
+    lkTS := TTabSheet(Result.FindComponent('tsParents')); lkTS.Caption := msg_tsparents; lkTS.PageControl := nil;
+    HSplitter                            := TSplitter(Result.FindComponent('HSplitter'));
+    ToolBarDoc                           := TxcGradientPanel(Result.FindComponent('ToolBarDoc'));
+    pnlDoc                               := TxcGradientPanel(Result.FindComponent('pnlDoc'));
+    lkLbl := TLabel(Result.FindComponent('lblDocNumber'));  lkLbl.Caption := msg_lbldocnumber ;
+    lkLbl := TLabel(Result.FindComponent('lblFirmName'));   lkLbl.Caption := msg_lblfirmname ;
+    lkLbl := TLabel(Result.FindComponent('lblFilialName')); lkLbl.Caption := msg_lblfilialname ;
+    lkLbl := TLabel(Result.FindComponent('lblUserName'));   lkLbl.Caption := msg_lblusername ;
+    lkLbl := TLabel(Result.FindComponent('lblDateCommit')); lkLbl.Caption := msg_lbldatecommit ;
+    lkLbl := TLabel(Result.FindComponent('lblDocSum'));     lkLbl.Caption := msg_lbldocsum ;
+    lkLbl := TLabel(Result.FindComponent('lblName'));       lkLbl.Caption := msg_lblname ;
+    dbeDOCNUMBER := TDBEditEh(Result.FindComponent('dbeDOCNUMBER'));
+    with dbeDOCNUMBER do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      end; 
+    dbeFIRM_NAME := TDBEditEh(Result.FindComponent('dbeFIRM_NAME'));
+    with dbeFIRM_NAME do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      end; 
+    dbeFILIAL_NAME := TDBEditEh(Result.FindComponent('dbeFILIAL_NAME'));
+    with dbeFILIAL_NAME do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      end; 
+    dbeUSER_NAME := TDBEditEh(Result.FindComponent('dbeUSER_NAME'));
+    with dbeUSER_NAME do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      end; 
+    dbdtpDATE_COMMIT := TDBDateTimeEditEh(Result.FindComponent('dbdtpDATE_COMMIT'));
+    with dbdtpDATE_COMMIT do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      end; 
+    dbneDOCSUM := TDBNumberEditEh(Result.FindComponent('dbneDOCSUM'));
+    with dbneDOCSUM do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      end; 
+    dbeNAME := TDBEditEh(Result.FindComponent('dbeNAME'));
+    with dbeNAME do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      end; 
+      
+    dbgDoc := TDBGridEh(Result.FindComponent('dbgDoc'));
+    with dbgDoc do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      FixedColor      := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      TitleFont.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      TitleFont.Style := [fsBold];
+      UseMultiTitle   := true;
+      DrawMemoText    := true; 
+      FrozenCols      := 0; 
+      FooterRowCount  := 1; 
+      SumList.Active  := true; 
+      AllowedOperations:= [alopUpdateEh, alopDeleteEh];
+      Columns.Clear;
+      lkCol := CreateTColumnEh(dbgDoc,'ID','# ### ##0','Документ|номер записи', 60,taRightJustify);
+      with lkCol do
+        begin
+        Color    := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+        ReadOnly := true;
+        with Footer do 
+          begin
+          Color         := lkCol.Color;
+          Alignment     := taRightJustify;
+          DisplayFormat := lkCol.DisplayFormat;
+          ValueType     := fvtCount;
+          end;
+        end;
+      lkCol := CreateTColumnEh(dbgDoc,'WRK_ID_','','Документ|Сотрудник',80,taLeftJustify);
+      with lkCol do
+        begin
+        Color    := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+        ReadOnly := true;
+        with Footer do 
+          begin
+          Color         := lkCol.Color;
+          Alignment     := taLeftJustify;
+          Value         := 'ИТОГО';
+          ValueType     := fvtStaticText;
+          end;
+        end;
+      lkCol := CreateTColumnEh(dbgDoc,'WRK_POST_ID_','','Документ|Должность',96,taLeftJustify);
+      with lkCol do
+        begin
+        Color    := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+        ReadOnly := true;
+        with Footer do 
+          begin
+          Color         := lkCol.Color;
+          Alignment     := taLeftJustify;
+          Value         := '';
+          ValueType     := fvtStaticText;
+          end;
+        end;
+      lkCol := CreateTColumnEh(dbgDoc,'FILIAL_ID','','Документ|Филиал',96,taLeftJustify);
+      with lkCol do
+        begin
+        Color    := Amunhotep.MainForm.StyleManager.Colors.Window;
+        ReadOnly := False;
+        lkResBody := ''; GetField(FBDataBase, 'TABL$R_FILIALS', 'LIST(ID, ASCII_CHAR(13)||ASCII_CHAR(10))'  , '', lkResBody); KeyList.Text  := lkResBody;
+        lkResBody := ''; GetField(FBDataBase, 'TABL$R_FILIALS', 'LIST(NAME, ASCII_CHAR(13)||ASCII_CHAR(10))', '', lkResBody); PickList.Text := lkResBody;
+        NotInKeyListIndex := 0;
+        AlwaysShowEditButton := True;  
+        AutoDropDown := True;  
+        with Footer do 
+          begin
+          Color         := lkCol.Color;
+          Alignment     := taLeftJustify;
+          Value         := '';
+          ValueType     := fvtStaticText;
+          end;
+        end;
+      if( (DocFirmId = '0') or (DocFirmId = '2') )then
+        begin  
+        lkCol := CreateTColumnEh(dbgDoc,'HOURS_PLAN','# ### ##0.0','Отработано часов|план', 60,taRightJustify);
+        with lkCol do
+          begin
+          Color                := Amunhotep.MainForm.StyleManager.Colors.Window;
+          AlwaysShowEditButton := true;
+          ButtonStyle          := cbsDropDown;
+          AutoDropDown         := true;
+          ReadOnly             := false;
+          with Footer do 
+            begin
+            Color         := lkCol.Color;
+            Alignment     := taRightJustify;
+            DisplayFormat := lkCol.DisplayFormat;
+            ValueType     := fvtSum;
+            end;
+          end;
+        lkCol := CreateTColumnEh(dbgDoc,'HOURS_FACT','# ### ##0.0','Отработано часов|факт', 60,taRightJustify);
+        with lkCol do
+          begin
+          Color                := Amunhotep.MainForm.StyleManager.Colors.Window;
+          AlwaysShowEditButton := true;
+          ButtonStyle          := cbsDropDown;
+          AutoDropDown         := true;
+          ReadOnly             := false;
+          with Footer do 
+            begin
+            Color         := lkCol.Color;
+            Alignment     := taRightJustify;
+            DisplayFormat := lkCol.DisplayFormat;
+            ValueType     := fvtSum;
+            end;
+          end;
+        lkCol := CreateTColumnEh(dbgDoc,'TARIF','# ### ##0.00','Отработано часов|тариф', 40,taRightJustify);
+        with lkCol do
+          begin
+          Color                := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+          ReadOnly             := true;
+          with Footer do 
+            begin
+            Color         := lkCol.Color;
+            Alignment     := taLeftJustify;
+            Value         := '';
+            ValueType     := fvtStaticText;
+            end;
+          end;
+        end;
+
+      lkCol := CreateTColumnEh(dbgDoc,'SUMCALC','# ### ##0.00'       ,'Начисления|начислено (зарплата)', 60,taRightJustify);
+      with lkCol do
+        begin
+        Color                := $00E8C0FF;
+        ReadOnly             := true;
+        with Footer do 
+          begin
+          Color         := lkCol.Color;
+          Alignment     := taRightJustify;
+          DisplayFormat := lkCol.DisplayFormat;
+          ValueType     := fvtSum;
+          end;
+        end;
+      if( (DocFirmId = '0') or (DocFirmId = '2') )then
+        begin  
+        lkCol := CreateTColumnEh(dbgDoc,'SUMFINHELP','# ### ##0.00' ,'Начисления|Материальная помощь|Облагаемая', 60,taRightJustify);
+        with lkCol do
+          begin
+          Color                := Amunhotep.MainForm.StyleManager.Colors.Window;
+          AlwaysShowEditButton := true;
+          ButtonStyle          := cbsDropDown;
+          AutoDropDown         := true;
+          ReadOnly             := false;
+          with Footer do 
+            begin
+            Color         := lkCol.Color;
+            Alignment     := taRightJustify;
+            DisplayFormat := lkCol.DisplayFormat;
+            ValueType     := fvtSum;
+            end;
+          end;
+        lkCol := CreateTColumnEh(dbgDoc,'SUMFINHELP2','# ### ##0.00' ,'Начисления|Материальная помощь|Не облагаемая', 60,taRightJustify);
+        with lkCol do
+          begin
+          Color                := $00A0C0FF;
+          AlwaysShowEditButton := true;
+          ButtonStyle          := cbsDropDown;
+          AutoDropDown         := true;
+          ReadOnly             := false;
+          with Footer do 
+            begin
+            Color         := lkCol.Color;
+            Alignment     := taRightJustify;
+            DisplayFormat := lkCol.DisplayFormat;
+            ValueType     := fvtSum;
+            end;
+          end;
+        lkCol := CreateTColumnEh(dbgDoc,'SUMVAC','# ### ##0.00'       ,'Начисления|отпуск.', 60,taRightJustify);
+        with lkCol do
+          begin
+          Color                := Amunhotep.MainForm.StyleManager.Colors.Window;
+          AlwaysShowEditButton := true;
+          ButtonStyle          := cbsDropDown;
+          AutoDropDown         := true;
+          ReadOnly             := false;
+          with Footer do 
+            begin
+            Color         := lkCol.Color;
+            Alignment     := taRightJustify;
+            DisplayFormat := lkCol.DisplayFormat;
+            ValueType     := fvtSum;
+            end;
+          end;
+        lkCol := CreateTColumnEh(dbgDoc,'SUMHOSPITAL','# ### ##0.00'       ,'Начисления|Больничные от|СоцСтраха', 60,taRightJustify);
+        with lkCol do
+          begin
+          Color                := Amunhotep.MainForm.StyleManager.Colors.Window;
+          AlwaysShowEditButton := true;
+          ButtonStyle          := cbsDropDown;
+          AutoDropDown         := true;
+          ReadOnly             := false;
+          with Footer do 
+            begin
+            Color         := lkCol.Color;
+            Alignment     := taRightJustify;
+            DisplayFormat := lkCol.DisplayFormat;
+            ValueType     := fvtSum;
+            end;
+          end;
+        lkCol := CreateTColumnEh(dbgDoc,'SUMHOSPITAL2','# ### ##0.00'      ,'Начисления|Больничные от|Предприятия', 60,taRightJustify);
+        with lkCol do
+          begin
+          Color                := Amunhotep.MainForm.StyleManager.Colors.Window;
+          AlwaysShowEditButton := true;
+          ButtonStyle          := cbsDropDown;
+          AutoDropDown         := true;
+          ReadOnly             := false;
+          with Footer do 
+            begin
+            Color         := lkCol.Color;
+            Alignment     := taRightJustify;
+            DisplayFormat := lkCol.DisplayFormat;
+            ValueType     := fvtSum;
+            end;
+          end;
+        end;  
+      if(DocFirmId = '1')then
+        begin
+        lkCol := CreateTColumnEh(dbgDoc,'SUMVAC','# ### ##0.00'       ,'Начисления|добавить', 60,taRightJustify);
+        with lkCol do
+          begin
+          Color                := Amunhotep.MainForm.StyleManager.Colors.Window;
+          AlwaysShowEditButton := true;
+          ButtonStyle          := cbsDropDown;
+          AutoDropDown         := true;
+          ReadOnly             := false;
+          with Footer do 
+            begin
+            Color         := lkCol.Color;
+            Alignment     := taRightJustify;
+            DisplayFormat := lkCol.DisplayFormat;
+            ValueType     := fvtSum;
+            end;
+          end;
+        end;  
+      lkCol := CreateTColumnEh(dbgDoc,'SUMCALCTOTAL','# ### ##0.00'       ,'Начисления|НАЧИСЛЕНО', 60,taRightJustify);
+      with lkCol do
+        begin
+        Color                := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+        ReadOnly             := true;
+        with Footer do 
+          begin
+          Color         := lkCol.Color;
+          Alignment     := taRightJustify;
+          DisplayFormat := lkCol.DisplayFormat;
+          ValueType     := fvtSum;
+          end;
+        end;
+      if( (DocFirmId = '0') or (DocFirmId = '2') )then
+        begin  
+        lkCol := CreateTColumnEh(dbgDoc,'TAXPENSION','# ### ##0.00'       ,'Удержания|справочно|пенс.', 48,taRightJustify);
+        with lkCol do
+          begin
+          Color                := $00FFE8C0;
+          ReadOnly             := true;
+          with Footer do 
+            begin
+            Color         := lkCol.Color;
+            Alignment     := taRightJustify;
+            DisplayFormat := lkCol.DisplayFormat;
+            ValueType     := fvtSum;
+            end;
+          end;
+        lkCol := CreateTColumnEh(dbgDoc,'TAXUNEMPLOYMENT','# ### ##0.00'       ,'Удержания|справочно|безраб.', 48,taRightJustify);
+        with lkCol do
+          begin
+          Color                := $00FFE8C0;
+          ReadOnly             := true;
+          with Footer do 
+            begin
+            Color         := lkCol.Color;
+            Alignment     := taRightJustify;
+            DisplayFormat := lkCol.DisplayFormat;
+            ValueType     := fvtSum;
+            end;
+          end;
+        lkCol := CreateTColumnEh(dbgDoc,'TAXINSURANCE','# ### ##0.00'       ,'Удержания|справочно|соц.страх.', 48,taRightJustify);
+        with lkCol do
+          begin
+          Color                := $00FFE8C0;
+          ReadOnly             := true;
+          with Footer do 
+            begin
+            Color         := lkCol.Color;
+            Alignment     := taRightJustify;
+            DisplayFormat := lkCol.DisplayFormat;
+            ValueType     := fvtSum;
+            end;
+          end;
+        lkCol := CreateTColumnEh(dbgDoc,'TAXSINGLE','# ### ##0.00'       ,'Удержания|единый платеж', 60,taRightJustify);
+        with lkCol do
+          begin
+          Color                := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+          ReadOnly             := true;
+          with Footer do 
+            begin
+            Color         := lkCol.Color;
+            Alignment     := taRightJustify;
+            DisplayFormat := lkCol.DisplayFormat;
+            ValueType     := fvtSum;
+            end;
+          end;
+        lkCol := CreateTColumnEh(dbgDoc,'TAXINCOME','# ### ##0.00'       ,'Удержания|подоход.', 60,taRightJustify);
+        with lkCol do
+          begin
+          Color                := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+          ReadOnly             := true;
+          with Footer do 
+            begin
+            Color         := lkCol.Color;
+            Alignment     := taRightJustify;
+            DisplayFormat := lkCol.DisplayFormat;
+            ValueType     := fvtSum;
+            end;
+          end;
+        end;  
+      if(DocFirmId = '1')then
+        begin  
+        lkCol := CreateTColumnEh(dbgDoc,'TAXINCOME','# ### ##0.00'       ,'Удержания|премии или штрафы', 60,taRightJustify);
+        with lkCol do
+          begin
+          Color                := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+          ReadOnly             := true;
+          with Footer do 
+            begin
+            Color         := lkCol.Color;
+            Alignment     := taRightJustify;
+            DisplayFormat := lkCol.DisplayFormat;
+            ValueType     := fvtSum;
+            end;
+          end;
+        end;  
+      lkCol := CreateTColumnEh(dbgDoc,'TAXTOTAL','# ### ##0.00'       ,'Удержания|ВСЕГО УДЕЖАНО', 60,taRightJustify);
+      with lkCol do
+        begin
+        Color                := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+        ReadOnly             := true;
+        with Footer do 
+          begin
+          Color         := lkCol.Color;
+          Alignment     := taRightJustify;
+          DisplayFormat := lkCol.DisplayFormat;
+          ValueType     := fvtSum;
+          end;
+        end;
+      lkCol := CreateTColumnEh(dbgDoc,'SUMADVANCE','# ### ##0.00'       ,'Аванс (кредит 6611)', 60,taRightJustify);
+      with lkCol do
+        begin
+        Color                := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+        ReadOnly             := true;
+        with Footer do 
+          begin
+          Color         := lkCol.Color;
+          Alignment     := taRightJustify;
+          DisplayFormat := lkCol.DisplayFormat;
+          ValueType     := fvtSum;
+          end;
+        end;
+      lkCol := CreateTColumnEh(dbgDoc,'SUMTOPAY','# ### ##0.00'       ,'К выплате', 60,taRightJustify);
+      with lkCol do
+        begin
+        Color                := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+        ReadOnly             := true;
+        with Footer do 
+          begin
+          Color         := lkCol.Color;
+          Alignment     := taRightJustify;
+          DisplayFormat := lkCol.DisplayFormat;
+          ValueType     := fvtSum;
+          end;
+        end;
+      lkCol := CreateTColumnEh(dbgDoc,'NAME',''       ,'Примечания',200,taLeftJustify);
+      with lkCol do
+        begin
+        Color                := Amunhotep.MainForm.StyleManager.Colors.Window;
+        ReadOnly             := false;
+        with Footer do 
+          begin
+          Color         := lkCol.Color;
+          Alignment     := taRightJustify;
+          DisplayFormat := lkCol.DisplayFormat;
+          Value         := '';
+          ValueType     := fvtStaticText;
+          end;
+        end;
+      FrozenCols := 4; 
+      end; 
+    dbgDocLog := TDBGridEh(Result.FindComponent('dbgDocLog'));
+    with dbgDocLog do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      Font.Style      := [];
+      FixedColor      := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      TitleFont.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      TitleFont.Style := [fsBold];
+      UseMultiTitle   := true;
+      DrawMemoText    := true; 
+      FrozenCols      := 0; 
+      FooterRowCount  := 0; 
+      RowHeight       := 40;
+      SumList.Active  := false; 
+      Columns.Clear;
+      lkCol := CreateTColumnEh(dbgDocLog,'NAME'  ,'','Запись'    ,240,taLeftJustify );
+      lkCol := CreateTColumnEh(dbgDocLog,'COMENT','','Примечание',680,taLeftJustify );
+      end; 
+    trDoc := TxFBTransaction(Result.FindComponent('trDoc'));
+    with trDoc do 
+      begin 
+      DefaultDataBase := FBDataBase; 
+      Params.Clear; 
+      Params.Add('isc_tpb_read_committed'); 
+      Params.Add('isc_tpb_write'); 
+      Params.Add('isc_tpb_rec_version'); 
+      Params.Add('isc_tpb_nowait'); 
+      end; 
+    qrJrnl := TxFBQuery(Result.FindComponent('qrJrnl'));
+    with qrJrnl do
+      begin 
+      AfterOpen   := @qrJrnl_AfterOpen;
+      BeforeClose := @qrJrnl_BeforeClose;
+      AfterScroll := @qrJrnl_AfterScroll;
+      end 
+    dtsDoc  := TxFBDataSet(Result.FindComponent('dtsDoc'));
+    with dtsDoc do
+      begin 
+      AfterOpen   := @dtsDoc_AfterOpen;
+      BeforeClose := @dtsDoc_BeforeClose;
+      AfterScroll := @dtsDoc_AfterScroll;
+      end 
+    qrDocLog := TxFBQuery(Result.FindComponent('qrDocLog'));
+    DSqrJrnl                             := TDataSource(Result.FindComponent('DSqrJrnl'));
+    DSdtsDoc                             := TDataSource(Result.FindComponent('DSdtsDoc'));
+    DSqrDocLog                           := TDataSource(Result.FindComponent('DSqrDocLog'));
+    lkAct := FindTAction(Result,'actSave'    ,msg_actsave    ,msg_actsave_hint    ,'Ctrl+S',0,107); lkAct.OnExecute:=@actSave_OnExecute;     lkAct.OnUpdate:=@actSave_OnUpdate; 
+    lkAct := FindTAction(Result,'actCommit'  ,msg_actcommit  ,msg_actcommit_hint  ,'Ctrl+C',0,298); lkAct.OnExecute:=@actCommit_OnExecute;   lkAct.OnUpdate:=@actCommit_OnUpdate; 
+    lkAct := FindTAction(Result,'actUnCommit',msg_actuncommit,msg_actuncommit_hint,'Ctrl+U',0,297); lkAct.OnExecute:=@actUnCommit_OnExecute; lkAct.OnUpdate:=@actUnCommit_OnUpdate; 
+    lkAct := FindTAction(Result,'actCalc'    ,msg_actcalc    ,msg_actcalc_hint    ,'F9'    ,0,344); lkAct.OnExecute:=@actCalc_OnExecute;     lkAct.OnUpdate:=@actCommit_OnUpdate; 
+    lkAct := FindTAction(Result,'actPrint'   ,msg_actprint   ,msg_actprint_hint   ,'Ctrl+P',0,105); lkAct.OnExecute:=@actPrint_OnExecute;     
+    RefreshView;
+    Amunhotep.MainForm.TaskBar.ButtonByForm(Result).Down := true;
+  end;
+  //============================================================================
+begin
+  DocId   := GetGlobalVariable('J_ID');
+  GetField(FBDataBase, 'TABL$J_4','FIRM_ID','ID='''+DocId+''' ', DocFirmId);
+  DocForm := DocForm_Create;
+end.

@@ -1,0 +1,36 @@
+{$IFNDEF PEAKTOP:IDE/ERP/CONFIG/REF/FIRMS/DIALOGCASEITEM.INC}
+  {$I PEAKTOP:IDE/ERP/CONFIG/REF/FIRMS/DIALOGCASEITEM.INC}
+{$ENDIF}  
+var
+  lkFirmId :string;
+  lkDocIds :array of string;
+  lkSQL    :string;
+begin
+  if not ERPDialogCaseReferenceItem_Firm_Execute(lkFirmId) then exit;
+
+  lkSQL := 
+    'EXECUTE BLOCK RETURNS ( '+SQLCRLF+
+    '   J_ID       TYPE OF COLUMN TABL$J_4.ID '+SQLCRLF+
+    '  ,DOCTYPE_ID TYPE OF COLUMN TABL$J_4.TYPE_ID '+SQLCRLF+
+    ')AS '+SQLCRLF+
+    '  DECLARE VARIABLE P_FIRM_ID     TYPE OF COLUMN TABL$J_4.FIRM_ID; '+SQLCRLF+
+    '  DECLARE VARIABLE P_PARENT_J_ID TYPE OF COLUMN TABL$J_4.ID; '+SQLCRLF+
+    'BEGIN '+SQLCRLF+
+    '  P_FIRM_ID     = '+lkFirmId+'; '+SQLCRLF+
+    '  P_PARENT_J_ID = NULL; '+SQLCRLF+
+    '  DOCTYPE_ID    = 1000088; '+SQLCRLF+
+    ' '+SQLCRLF+
+    '  SELECT FIRST 1 P.J_ID '+SQLCRLF+
+    '  FROM   PROC$J_INS(:P_PARENT_J_ID, :P_FIRM_ID, :DOCTYPE_ID) P '+SQLCRLF+
+    '  INTO   :J_ID; '+SQLCRLF+
+    '  UPDATE OR INSERT INTO TABL$J_1000087 (J_ID, WRK_ID, TMC_ID, DATE_VALUE, DATE_END) '+SQLCRLF+
+    '    VALUES (:J_ID, 0, 0, CURRENT_TIMESTAMP, DATEADD(1 YEAR TO CURRENT_TIMESTAMP)) '+SQLCRLF+
+    '    MATCHING (J_ID); '+SQLCRLF+
+    '  SUSPEND; '+SQLCRLF+
+    'END';
+
+  SetLength(lkDocIds, 1)
+  if not TERPForm_SelectSQLParams([], lkSQL, [],[], ['J_ID'], lkDocIds)then exit;
+  SetGlobalVariable('J_ID', lkDocIds[0]);
+  call(StrAbsolutePath('./EDIT.PS', ScriptName));  
+end.

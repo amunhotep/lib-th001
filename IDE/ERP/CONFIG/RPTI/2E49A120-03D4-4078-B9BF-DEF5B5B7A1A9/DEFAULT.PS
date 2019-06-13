@@ -1,0 +1,202 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG/RPTI/2E49A120-03D4-4078-B9BF-DEF5B5B7A1A9/DEFAULT.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$I PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC} {$I PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}        {$I PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}        {$ENDIF}
+const
+  objname_datefrom   = 'dtpDateFrom';
+  objname_dateto     = 'dtpDateTo';
+  objname_firms      = 'gbFirms';
+  msg_input_firms    = 'Выберите фирмы учета';
+const
+  FIELD_FORMAT       = '# ### ### ##0.00';
+  COLOR_FIXED        = $FFC0C0;
+  COLOR_FULL         = $C0FFC0; 
+  COLOR_ITEM         = $FFF0F0; 
+   //============================================================================
+  procedure ERP_Report_DBGridEh_OnGetCellParams(Sender:TObject; Column:TColumnEh; AFont: TFont; var Background:TColor; State:TGridDrawState);
+  begin
+    if(not(Column.Field.DataSet.Active))then exit;
+    if(Column.Field.DataSet.RecordCount = 0)then exit;
+    if(Column.Field.DataSet.FieldByName('FLAG_MAIN').AsInteger = 1)then
+      begin
+      aFont.Style := aFont.Style + [fsBold];
+      aFont.Size  := 9;
+      end
+     else
+      begin
+      aFont.Style := aFont.Style - [fsBold];
+      aFont.Size  := 8;
+      end;
+    if(Column.Field.DataSet.FieldByName('FLAG_DEBET').AsInteger = 2)then
+      aFont.Color := clBlack
+     else if(Column.Field.DataSet.FieldByName('FLAG_DEBET').AsInteger = 0)then
+      aFont.Color := clNavy
+     else
+      aFont.Color := clMaroon;
+  end;
+  //============================================================================
+  function TERPFormRpti_GetExportFilter(aOwner:TComponent):string;
+  begin
+    Result := 
+      msg_erp_lbldatefrom+' "'+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+'" '+
+      msg_erp_lbldateto  +' "'+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto))+'" '+
+      'Фирмы учета: "'+InputIntf_Ref_GetNames(aOwner.FindComponent(objname_firms))+'" ';
+  end;
+  //============================================================================
+  function TERPFormRpti_OnGetSQL(aOwner:TComponent;var aSQL:string):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnGetSQLFileName(aOwner:TComponent;var aFileName:string);
+  begin
+     // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnProcessParams(aOwner:TComponent;aQr :TxFBQuery);
+  begin
+    with aQr do
+      begin
+      ParamByName('FIRM_IDS' ).AsString := InputIntf_Ref_GetIds(aOwner.FindComponent(objname_firms));
+      ParamByName('DATE_FROM').AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+' 05:00:00';
+      ParamByName('DATE_TO'  ).AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto)+1)+' 04:59:59';
+      end;  
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnChart(aOwner:TComponent; aParent:TWinControl);
+  var
+    lkPC :TxcPageControlEx;
+    lkTS :TxcTabSheet;
+  begin
+    aParent.Free;
+    exit;
+    lkPC := CreateTxcPageControlEx(aOwner, aParent, 'PCCharts', 0,0,600,600, alClient);
+    lkPC.MultiLine := false;
+    TxcPageControlEx_ActivateDefaultPage(lkPC);
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnTerms(aOwner:TComponent;aParent:TWinControl);
+  var
+    lkLastTop :Integer;
+  begin
+    lkLastTop := 4;
+    lkLastTop := lkLastTop + InputIntf_DatePeriod_Create(aOwner, aParent, 'gbDatePeriod', 'Укажите период', 4, lkLastTop, 44, 360,objname_datefrom,objname_dateto,StartOfTheMonth(Now),EndOfTheMonth(Now)).Height;
+    lkLastTop := lkLastTop + 4;
+    lkLastTop := lkLastTop + InputIntf_Ref_Create(aOwner,aParent,objname_firms   ,msg_input_firms   ,4,lkLastTop, 0,360,'TABL$R_FIRMS',TERPForm_Settings(aOwner).Values[ERP_SETTINGS_TABLENAME]).Height;
+    lkLastTop := lkLastTop + 4;
+  end;
+  //============================================================================
+  function TERPFormRpti_OnColumnsCreate(aOwner:TComponent; aDBG:TDBGridEh):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_Columns_OnEditButtonClick(Sender :TObject; var Handled :Boolean);
+  var
+    lkDBG    :TDBGridEh;
+    lkTypes  :string;
+    lkPlace  :string;
+    lkScript :string;
+  begin
+    Handled := true;
+    lkDBG   := TDBGridEh(TComponent(Sender).Owner.Owner);
+    if not lkDBG.DataSource.DataSet.Active then exit;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsCreated(aOwner:TComponent; aDBG:TDBGridEh);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsLoad(aOwner:TComponent; aDBG:TDBGridEh);
+  var
+    lkCol      :TColumnEh;
+  begin
+    aDBG.Visible    := false; 
+    aDBG.FrozenCols := 0;
+    aDBG.Columns.Clear;
+    lkCol := CreateTColumnEh(aDBG,'FLAG_DEBET','','Статья|+/-', 20, taLeftJustify);
+    with lkCol do
+      begin
+      Color                := COLOR_FIXED;
+      KeyList.Clear;     PickList.Clear;
+      KeyList.Add('0');  PickList.Add('Кредит');
+      KeyList.Add('1');  PickList.Add('Дебет');
+      KeyList.Add('2');  PickList.Add('Итог');
+      ImageList      := CreateTImageList(aDBG, 'ilDebet', [362, 361, 262]);
+      end;
+    lkCol := CreateTColumnEh(aDBG,'NAME','','Статья|Название', 240, taLeftJustify);
+    with lkCol do
+      begin
+      Color                := COLOR_FIXED;
+      HideDuplicates       := True;
+      end;
+    lkCol := CreateTColumnEh(aDBG,'SUBKONTO','','Статья|Субконто', 320, taLeftJustify);
+    with lkCol do
+      begin
+      Color                := COLOR_ITEM;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'SMAIN', FIELD_FORMAT, 'Сумма|ВСЕГО|Сумма', 120, taRightJustify );
+    with lkCol do
+      begin
+      Color                := COLOR_FULL;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'PMAIN', FIELD_FORMAT, 'Сумма|ВСЕГО|%', 60, taRightJustify );
+    with lkCol do
+      begin
+      Color                := COLOR_FULL;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'S1000001', FIELD_FORMAT, 'Сумма|Краматоский 11|Сумма', 104, taRightJustify );
+    with lkCol do
+      begin
+      Color                := COLOR_ITEM;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'P1000001', FIELD_FORMAT, 'Сумма|Краматоский 11|%', 48, taRightJustify );
+    with lkCol do
+      begin
+      Color                := COLOR_ITEM;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'S1000002', FIELD_FORMAT, 'Сумма|Марата 6|Сумма', 104, taRightJustify );
+    with lkCol do
+      begin
+      Color                := COLOR_ITEM;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'P1000002', FIELD_FORMAT, 'Сумма|Марата 6|%', 48, taRightJustify );
+    with lkCol do
+      begin
+      Color                := COLOR_ITEM;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'S1000003', FIELD_FORMAT, 'Сумма|ДаВинчи|Сумма', 104, taRightJustify );
+    with lkCol do
+      begin
+      Color                := COLOR_ITEM;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'P1000003', FIELD_FORMAT, 'Сумма|ДаВинчи|%', 48, taRightJustify );
+    with lkCol do
+      begin
+      Color                := COLOR_ITEM;
+      end;
+    aDBG.RowHeight        := 16;
+    aDBG.FrozenCols       := 3;  
+    aDBG.FooterRowCount   := 0;
+    aDBG.SumList.Active   := False;
+    aDBG.STFilter.Visible := False;
+    aDBG.OnGetCellParams  := @ERP_Report_DBGridEh_OnGetCellParams;
+    aDBG.Visible          := true;
+  end;
+  //============================================================================
+  function TERPFormRpti_OnPrint(aOwner:TComponent):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_BeforePreview(aOwner:TComponent; aRpt:TxReport);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  
+
+begin
+  TERPFormRpti_Create('{2E49A120-03D4-4078-B9BF-DEF5B5B7A1A9}');
+end.

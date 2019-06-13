@@ -1,0 +1,113 @@
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/USERS/TOOLBAR.INC}   {$I PEAKTOP:IDE/ERP/DBO/USERS/TOOLBAR.INC} {$ENDIF}
+var
+  lkAct     :TAction;
+  lkToolBar :TxcGradientPanelVista;
+  lkTBB     :TxcToolBarButton;
+  lkStr     :string;
+begin
+  DontAutoFree;
+  lkToolBar := CreateToolBarRole('1000014');
+  lkToolBar.ShowHint := True;
+  //----------------- DOC 
+  lkAct   := FindTAction(Amunhotep.MainForm, 'act1000014Doc1000017', 'Б.В.','Новая Банковская Выписка','',0, 378); 
+  with lkAct do
+    begin
+    Tag       := 1000017;
+    OnExecute := @actDocNew2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name, 0,0,20,40, alLeft, lkAct); lkTBB.ShowCaption := true;
+
+  lkAct   := FindTAction(Amunhotep.MainForm, 'act1000014Doc1000020', 'ПКО','Новый Приходный кассовый ордер','',0, 301); 
+  with lkAct do
+    begin
+    Tag       := 1000020;
+    OnExecute := @actDocNew2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name, 40,0,20,48, alLeft, lkAct); lkTBB.ShowCaption := true;
+  lkAct   := FindTAction(Amunhotep.MainForm, 'act1000014Doc1000021', 'РКО','Новый Расходный кассовый ордер','',0, 306); 
+  with lkAct do
+    begin
+    Tag       := 1000021;
+    OnExecute := @actDocNew2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name, 98,0,20,48, alLeft, lkAct); lkTBB.ShowCaption := true;
+
+
+  lkAct   := FindTAction(Amunhotep.MainForm, 'act1000014Doc1000026', 'ПН','Новая Приходная накладная','',0, 307); 
+  with lkAct do
+    begin
+    Tag       := 1000026;
+    OnExecute := @actDocNew2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name, 148,0,20,48, alLeft, lkAct); lkTBB.ShowCaption := true;
+  lkAct   := FindTAction(Amunhotep.MainForm, 'act1000014Doc1000028', 'РН','Новая Расходная накладная','',0, 374); 
+  with lkAct do
+    begin
+    Tag       := 1000028;
+    OnExecute := @actDocNew2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name,188,0,20,48, alLeft, lkAct); lkTBB.ShowCaption := true;
+
+  lkAct   := FindTAction(Amunhotep.MainForm, 'act1000014Doc1000027', 'ВО','Новый Ввод остаков ТМЦ','',0, 307); 
+  with lkAct do
+    begin
+    Tag       := 1000027;
+    OnExecute := @actDocNew2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name, 228,0,20,48, alLeft, lkAct); lkTBB.ShowCaption := true;
+  lkAct   := FindTAction(Amunhotep.MainForm, 'act1000014Doc1000029', 'АС','Новый Акт списания остаков ТМЦ','',0, 374); 
+  with lkAct do
+    begin
+    Tag       := 1000029;
+    OnExecute := @actDocNew2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name,268,0,20,48, alLeft, lkAct); lkTBB.ShowCaption := true;
+
+  //----------------- JRNL 
+  lkAct   := FindTAction(Amunhotep.MainForm, 'act1000014Jrnl1000017', 'Б.В.','Журнал Банковских Выписок','',0, 464); 
+  with lkAct do
+    begin
+    Tag       := 1000017;
+    OnExecute := @actJrnl2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name, 600,0,20,40, alLeft, lkAct); lkTBB.ShowCaption := true;
+
+  lkAct   := FindTAction(Amunhotep.MainForm, 'act1000014Jrnl1000020', 'ПКО','Журнал Приходных кассовых ордеров','',0, 352); 
+  with lkAct do
+    begin
+    Tag       := 1000020;
+    OnExecute := @actJrnl2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name, 640,0,20,48, alLeft, lkAct); lkTBB.ShowCaption := true;
+  lkAct   := FindTAction(Amunhotep.MainForm, 'act1000014Jrnl1000021', 'РКО','Журнал Расходных кассовых ордеров','',0, 426); 
+  with lkAct do
+    begin
+    Tag       := 1000021;
+    OnExecute := @actJrnl2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name, 698,0,20,48, alLeft, lkAct); lkTBB.ShowCaption := true;
+  
+  //----------------- RPT 
+  lkAct   := FindTAction(Amunhotep.MainForm, 'act1000014RptCash', 'Касса','Кассовая книга','',0, 48); 
+  with lkAct do
+    begin
+    HelpKeyWord := 'E51612C6-B8D4-4ABC-AD47-6C81E894B795';
+    OnExecute   := @actRpt2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name, 998,0,20,48, alLeft, lkAct); lkTBB.ShowCaption := true;
+  lkAct := FindTAction(Amunhotep.MainForm, 'act1000014RptJO1', 'Расходы','Расходы по элементам','',0, 48); 
+  with lkAct do
+    begin
+    HelpKeyWord := '8771B68C-3BC9-465A-A6AF-DFD47EE6120D';
+    OnExecute   := @actRpt2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name,1098,0,20,64, alLeft, lkAct); lkTBB.ShowCaption := true;
+
+  lkAct := FindTAction(Amunhotep.MainForm, 'act1000014RptOTCHET', 'Отчёт','Отчёт по работе гаражных машин','',0, 48); 
+  with lkAct do
+    begin
+    HelpKeyWord := '9F7DF550-E078-48D5-A216-05AA2D77D19B';
+    OnExecute   := @actRpt2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name,1098,0,20,64, alLeft, lkAct); lkTBB.ShowCaption := true;
+end.

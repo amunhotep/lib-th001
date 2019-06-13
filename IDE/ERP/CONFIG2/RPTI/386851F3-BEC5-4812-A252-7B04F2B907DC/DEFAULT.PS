@@ -1,0 +1,84 @@
+{$DEFINE DB:CONFIG/RPTI/386851F3-BEC5-4812-A252-7B04F2B907DC/DEFAULT.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$I PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$ENDIF}
+  //============================================================================
+  function TERPFormRpti_GetExportFilter(aOwner:TComponent):string;
+  begin
+    Result := '';
+    // do nothing, default handler
+  end;
+  //============================================================================
+  function  TERPFormRpti_OnGetSQL(aOwner:TComponent;var aSQL:string):Boolean;
+  begin
+    Result := false;
+    // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnGetSQLFileName(aOwner:TComponent;var aFileName:string);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnProcessParams(aOwner:TComponent;aQr :TxFBQuery);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnChart(aOwner:TComponent; aParent:TWinControl);
+  var
+    lkPC :TxcPageControlEx;
+    lkTS :TxcTabSheet;
+  begin
+    lkPC := CreateTxcPageControlEx(aOwner, aParent, 'PCCharts', 0,0,600,600, alClient);
+    lkPC.MultiLine := false;
+    lkTS := TERPFormRpti_CreateTabSheetChartBar(aOwner,lkPC,'CS_COUNT','По кол-ву контрагентов','Сравнительный график количества контрагентов от года рождения'   ,TERPForm_DBGridMain(aOwner).Columns[0].FieldName);
+    with TBarSeries(aOwner.FindComponent('TBarSeries_CS_COUNT'))do
+      begin
+      Color            := Amunhotep.MainForm.StyleManager.Colors.HotTrackBorder;
+      ColorEachPoint   := false;
+      YValues.Order    := loNone;
+      YValues.DateTime := false;
+      end;
+    lkTS := TERPFormRpti_CreateTabSheetChartBar(aOwner,lkPC,'SUMPC'   ,'По сумме процентов'    ,'Сравнительный график суммы погашенных процентов от года рождения',TERPForm_DBGridMain(aOwner).Columns[0].FieldName);
+    with TBarSeries(aOwner.FindComponent('TBarSeries_SUMPC'))do
+      begin
+      Color            := Amunhotep.MainForm.StyleManager.Colors.HotTrackBorder;
+      ColorEachPoint   := false;
+      YValues.Order    := loNone;
+      YValues.DateTime := false;
+      end;
+    TxcPageControlEx_ActivateDefaultPage(lkPC);
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnTerms(aOwner:TComponent;aParent:TWinControl);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  function TERPFormRpti_OnColumnsCreate(aOwner:TComponent; aDBG:TDBGridEh):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsCreated(aOwner:TComponent; aDBG:TDBGridEh);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsLoad(aOwner:TComponent; aDBG:TDBGridEh);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  function  TERPFormRpti_OnPrint(aOwner:TComponent):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_BeforePreview(aOwner:TComponent; aRpt:TxReport);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+begin
+  TERPFormRpti_Create('{386851F3-BEC5-4812-A252-7B04F2B907DC}');  
+end.   

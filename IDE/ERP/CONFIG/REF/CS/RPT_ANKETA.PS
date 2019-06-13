@@ -1,0 +1,57 @@
+{$DEFINE DB:CONFIG/REF/CS/RPT_ANKETA.PS}
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}  {$I PEAKTOP:GLOBAL_VARIABLES.INC}  {$ENDIF}
+var
+  lkCS_ID      :string;
+  lkStr        :string;
+  lkRes        :string;
+  lkSQL        :string;
+  lkRpt        :TxReport;
+  lkImg        :TxrImage;
+  lkLbl        :TxrLabel;
+  lkMr         :TModalResult;
+begin
+  lkCS_ID := GetGlobalVariable('CS_ID');
+  if((lkCS_ID='NULL')or(StrTrimAll(lkCS_ID)=''))then exit;
+  lkStr := 'Распечатать анкету физического лица резидента ? '+#13#10+
+           '------------------------------------------------'+#13#10+
+           '[Да ] - Распечатать анкету физического лица резидента'+#13#10+
+           '[Нет] - Распечатать анкету физического лица нерезидента'+#13#10+
+           '[OK ] - Распечатать доверенности контрагента'+#13#10+
+           '[Отмена] - Отмена печати';
+  lkMr := Dialogs.MessageDlg(lkStr, mtConfirmation, [mbYes,mbNo,mbOk, mbCancel]);
+  if(lkMr = mrCancel)then exit;
+  
+  if(lkMr = mrYes)then
+    lkRes := StringsLoadFromFile(StrAbsolutePath('./RPT_ANKETA00.XFM',ScriptName))
+   else 
+    if(lkMr = mrNo)then
+      lkRes := StringsLoadFromFile(StrAbsolutePath('./RPT_ANKETA01.XFM',ScriptName))
+     else 
+      lkRes := StringsLoadFromFile(StrAbsolutePath('./RPT_DOVER00.XFM',ScriptName))
+   ;
+  lkRpt := TxReport(StrToComponent(lkRes));
+  if(lkMr <> mrOK)then
+    lkSQL := StringsLoadFromFile(StrAbsolutePath('./RPT_ANKETA00.SQL',ScriptName))
+   else 
+    lkSQL := StringsLoadFromFile(StrAbsolutePath('./RPT_DOVER00.SQL',ScriptName));
+//  lkSQL := StrReplaceStr(lkSQL, '?CS_ID', ' '''+lkCS_ID+''' ');
+  lkRpt.DataBase := FBDataBase;
+  while(lkRpt.DataSets.Count < 2)do
+    lkRpt.DataSets.Add;
+  lkRpt.DataSets[0].SQL.Text := lkSQL;
+  with lkRpt.DataSets[0].Query do
+    begin
+    Prepare;
+    ParamByName('CS_ID').AsString := lkCS_ID;
+    end;
+  lkRpt.DataSets[1].SQL.Text := 'SELECT PR.* FROM PROC$R_FIRMS_ENT_CONST(0) PR ';
+  lkImg := TxrImage(lkRpt.FindComponent('ImgLogo'));
+  lkRes := StrAbsolutePath('../conf/ent/logo.bmp', Amunhotep.ExeName);
+  if FileExists(lkRes)then
+    try
+      lkImg.Picture.LoadFromFile(lkRes);
+    except
+    end;
+  lkRpt.Prepare;
+  lkRpt.Preview;
+end.

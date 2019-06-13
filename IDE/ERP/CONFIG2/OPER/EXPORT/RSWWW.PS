@@ -1,0 +1,215 @@
+{$DEFINE PEAKTOP:IDE/ERP/DBO/OPER/IMPORT/SS001001.PS}
+{$IFNDEF PEAKTOP:SYSUTILS/FILES/SEARCH_UTILS.INC}        {$I PEAKTOP:SYSUTILS/FILES/SEARCH_UTILS.INC}  {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TLABEL.INC}                         {$I PEAKTOP:OBJ/TLABEL.INC}                   {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCEDITCOMBO.INC}                   {$I PEAKTOP:OBJ/TXCEDITCOMBO.INC}             {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}          {$I PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}    {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCPANEL.INC}                       {$I PEAKTOP:OBJ/TXCPANEL.INC}                 {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TMEMO.INC}                          {$I PEAKTOP:OBJ/TMEMO.INC}                    {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCTOOLBARBUTTON.INC}               {$I PEAKTOP:OBJ/TXCTOOLBARBUTTON.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/INTERFACE/SYNEDIT/DEFAULT.INC}      {$I PEAKTOP:OBJ/INTERFACE/SYNEDIT/DEFAULT.INC}{$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/OPER/FORMOPER.INC}          {$I PEAKTOP:IDE/ERP/DBO/OPER/FORMOPER.INC}   {$ENDIF}
+  //================== PEAKTOP:IDE/ERP/DBO/OPER/IMPORT/SS001001.PS =============
+  procedure TERPFormOperExportRSWWW_DoImport(aSynEdit:TSynEdit; const aFileName:string);
+  var
+    lkTr :TxFBTransaction;
+    lkQr :TxFBQuery;
+    lkStr:string;
+    lkSLCtgr:TStringList;
+  begin
+    lkSLCtgr := TStringList.Create;
+
+    aSynEdit.Lines.Clear;
+    lkTr := TxFBTransaction.Create(nil);
+    with lkTr do
+      begin
+      DefaultDataBase := FBDataBase;
+      with Params do
+        begin
+        Clear;
+        Add('isc_tpb_read_committed');
+        Add('isc_tpb_read');
+        Add('isc_tpb_rec_version');
+        Add('isc_tpb_nowait');
+        end;
+      end;
+    lkQr := TxFBQuery.Create(lkTr);
+    lkStr := '';
+
+    lkStr := lkStr + 'DELETE FROM `tabl$r_edizm`; '+#13#10;
+    lkQr.SQL.Text := 'SELECT T.* FROM TABL$R_EDIZM T ORDER BY T.ID ';
+    lkQr.Open;
+    lkQr.First;
+    while not lkQr.EOF do
+      begin
+      lkStr := lkStr + 
+      'INSERT INTO `tabl$r_edizm`(ID, NAME, FLAG_DELETE, SHORT_NAME)VALUES('+
+            ''''+lkQr.FieldByName('ID').AsString+
+        ''', '''+lkQr.FieldByName('NAME').AsString+
+        ''', '''+lkQr.FieldByName('FLAG_DELETE').AsString+
+        ''', '''+AnsiLowerCase(lkQr.FieldByName('SHORT_NAME').AsString)+
+        '''); '+#13#10;
+      lkQr.Next;
+      end;
+    if lkTr.InTransaction then 
+      lkTr.Commit;
+    
+
+    lkStr := lkStr + 'DELETE FROM `tabl$r_tmc_group`; '+#13#10;
+    lkQr.SQL.Text := 'SELECT T.* FROM TABL$R_TMC_GROUP T ORDER BY T.ID ';
+    lkQr.Open;
+    lkQr.First;
+    while not lkQr.EOF do
+      begin
+      lkStr := lkStr + 
+      'INSERT INTO `tabl$r_tmc_group`(ID, NAME, FLAG_DELETE, PARENT_ID, IMAGE_PATH)VALUES('+
+            ''''+lkQr.FieldByName('ID').AsString+
+        ''', '''+lkQr.FieldByName('NAME').AsString+
+        ''', '''+lkQr.FieldByName('FLAG_DELETE').AsString+
+        ''', '''+lkQr.FieldByName('PARENT_ID').AsString+
+        ''', '''+lkQr.FieldByName('IMAGE_PATH').AsString+
+        '''); '+#13#10;
+      lkQr.Next;
+      end;
+    if lkTr.InTransaction then 
+      lkTr.Commit;
+
+    lkStr := lkStr + 'DELETE FROM `tabl$r_tmc_ctgr`; '+#13#10;
+    lkQr.SQL.Text := 'SELECT DISTINCT(T.GROUPNAME) AS GROUPNAME FROM TABL$R_TMC_GROUPSHARE T ';
+    lkSLCtgr.Clear;
+    lkQr.Open;
+    lkQr.First;
+    while not lkQr.EOF do
+      begin
+      lkSLCtgr.Add(StrReplaceStr(lkQr.FieldByName('GROUPNAME').AsString, '''', '&#39'));
+      lkStr := lkStr + 
+      'INSERT INTO `tabl$r_tmc_ctgr`(ID, PARENT_ID, NAME, FLAG_DELETE, IMAGE_PATH)VALUES('+
+            ''''+IntToStr(lkSLCtgr.Count)+
+        ''', ''0'', '''+StrReplaceStr(lkQr.FieldByName('GROUPNAME').AsString, '''', '&#39')+
+        ''', ''0'', ''images/groups/root'+FormatFloat('000', lkSLCtgr.Count)+'.jpg''); '+#13#10;
+      lkQr.Next;
+      end;
+    if lkTr.InTransaction then 
+      lkTr.Commit;
+
+
+    lkStr := lkStr + 'DELETE FROM `tabl$r_tmc_groupshare`; '+#13#10;
+    lkQr.SQL.Text := 'SELECT T.* FROM TABL$R_TMC_GROUPSHARE T ORDER BY T.ID ';
+    lkQr.Open;
+    lkQr.First;
+    while not lkQr.EOF do
+      begin
+      lkStr := lkStr + 
+      'INSERT INTO `tabl$r_tmc_groupshare`(ID, GROUPNAME, ORDERID, NAME, FLAG_DELETE, TMC_GROUP_ID, IMG_FILE)VALUES('+
+            ''''+lkQr.FieldByName('ID').AsString+
+        ''', '''+StrReplaceStr(lkQr.FieldByName('GROUPNAME').AsString, '''', '&#39')+
+        ''', '''+lkQr.FieldByName('ORDERID').AsString+
+        ''', '''+StrReplaceStr(lkQr.FieldByName('NAME').AsString, '''', '&#39')+
+        ''', '''+lkQr.FieldByName('FLAG_DELETE').AsString+
+        ''', '''+lkQr.FieldByName('TMC_GROUP_ID').AsString+
+        ''', '''+StrReplaceStr( StrReplaceStr(AnsiLowerCase(lkQr.FieldByName('IMG_FILE').AsString), 'peaktop:img/config/rs/', 'images/groups/'), '.bmp', '.png')+
+        '''); '+#13#10;
+      lkQr.Next;
+      end;
+    if lkTr.InTransaction then 
+      lkTr.Commit;
+
+    lkStr := lkStr + 'DELETE FROM `tabl$r_tmc`; '+#13#10;
+    lkQr.SQL.Text := 
+    '  SELECT R.* '+#13#10+
+    '        ,(SELECT FIRST 1 COALESCE(T0008.NAME, '''') FROM TABL$R_TMC_BRANDS T0008 WHERE (T0008.ID = R.DEV_TMC_BRAND_ID)) AS DEV_TMC_BRAND_ID_ '+#13#10+ 
+    '        ,(SELECT FIRST 1 COALESCE(T0009.NAME, '''') FROM TABL$R_TMC_BRANDS T0009 WHERE (T0009.ID = R.TMC_BRAND_ID)) AS TMC_BRAND_ID_ '+#13#10+  
+    '        ,(SELECT FIRST 1 COALESCE(T0010.NAME, '''') FROM TABL$R_TMC_TYPES T0010 WHERE (T0010.ID = R.TMC_TYPE_ID)) AS TMC_TYPE_ID_ '+#13#10+  
+    '        ,(SELECT FIRST 1 COALESCE(T0012.SHORT_NAME, '''') FROM TABL$R_EDIZM T0012 WHERE (T0012.ID = R.EDIZM_ID)) AS EDIZM_ID_ '+#13#10+  
+    '        ,(SELECT FIRST 1 COALESCE(T0018.PATH, '''') FROM TABL$R_TMC_GROUP T0018 WHERE (T0018.ID = R.TMC_GROUP_ID)) AS TMC_GROUP_ID_ '+#13#10+  
+    '        ,(SELECT FIRST 1 T0021.PRICE_IN FROM TABL$R_TMC_P T0021 WHERE ((T0021.TMC_ID) = R.ID)AND(T0021.VALUE_DATE = R.VALUE_DATE )) AS PRICE_IN '+#13#10+  
+    '        ,(SELECT FIRST 1 T0022.PRICE FROM TABL$R_TMC_P T0022 WHERE ((T0022.TMC_ID) = R.ID)AND(T0022.VALUE_DATE = R.VALUE_DATE )) AS PRICE '+#13#10+  
+    '        ,(SELECT FIRST 1 T0023.PRICE_1 FROM TABL$R_TMC_P T0023 WHERE ((T0023.TMC_ID) = R.ID)AND(T0023.VALUE_DATE = R.VALUE_DATE )) AS PRICE_1 '+#13#10+  
+    '        ,(SELECT FIRST 1 T0024.PRICE_2 FROM TABL$R_TMC_P T0024 WHERE ((T0024.TMC_ID) = R.ID)AND(T0024.VALUE_DATE = R.VALUE_DATE )) AS PRICE_2 '+#13#10+  
+    '        ,(SELECT FIRST 1 T0025.PRICE_3 FROM TABL$R_TMC_P T0025 WHERE ((T0025.TMC_ID) = R.ID)AND(T0025.VALUE_DATE = R.VALUE_DATE )) AS PRICE_3 '+#13#10+  
+    '        ,(SELECT FIRST 1 T0026.PRICE_4 FROM TABL$R_TMC_P T0026 WHERE ((T0026.TMC_ID) = R.ID)AND(T0026.VALUE_DATE = R.VALUE_DATE )) AS PRICE_4 '+#13#10+  
+    '        ,(SELECT FIRST 1 T0027.PRICE_5 FROM TABL$R_TMC_P T0027 WHERE ((T0027.TMC_ID) = R.ID)AND(T0027.VALUE_DATE = R.VALUE_DATE )) AS PRICE_5 '+#13#10+  
+    '  FROM   TABL$R_TMC R '+#13#10+
+    '  ORDER BY R.ID ';  
+    lkQr.Open;
+    lkQr.First;
+    while not lkQr.EOF do
+      begin
+      lkStr := lkStr + 
+      'INSERT INTO `tabl$r_tmc`(TMC_GROUP_ID, ID, NAME, FLAG_DELETE, FLAG_LOCKED, EDIZM_ID, EDIZM_SNAME, IMAGE_PATH, TMC_CTGR_ID, PRICE, COMENT)VALUES('+
+            ''''+lkQr.FieldByName('TMC_GROUP_ID').AsString+
+        ''', '''+lkQr.FieldByName('ID').AsString+
+        ''', '''+StrReplaceStr(lkQr.FieldByName('NAME').AsString, '''', '&#39')+
+        ''', '''+lkQr.FieldByName('FLAG_DELETE').AsString+
+        ''', '''+lkQr.FieldByName('FLAG_LOCKED').AsString+
+        ''', '''+lkQr.FieldByName('EDIZM_ID').AsString+
+        ''', '''+StrReplaceStr(AnsiLowerCase(lkQr.FieldByName('EDIZM_ID_').AsString), '''', '&#39')+
+        ''', '''+lkQr.FieldByName('EXTERNAL_FILE').AsString+
+        ''', '''+lkQr.FieldByName('TMC_CTGR_ID').AsString+
+        ''', '''+StrReplaceStr(lkQr.FieldByName('PRICE').AsString, ',', '.')+
+        ''', '''+StrReplaceStr(Copy(lkQr.FieldByName('COMENT').AsString, 1, 1024), '''', '&#39')+
+        '''); '+#13#10;
+      lkQr.Next;
+      end;
+    if lkTr.InTransaction then 
+      lkTr.Commit;
+
+    if lkTr.InTransaction then 
+      lkTr.Commit;
+    lkTr.Free;    
+    aSynEdit.Lines.Text := lkStr;  
+    StringsSaveToFile(aFileName, lkStr);
+  end;
+  //============================================================================
+  procedure TERPFormOperExportRSWWW_actImport_OnExecute(Sender :TObject);
+  begin
+    TERPFormOperExportRSWWW_DoImport(
+      TSynEdit(TComponent(Sender).Owner.FindComponent('SynEdit')),
+      TxcEditCombo(TComponent(Sender).Owner.FindComponent('edtFileName')).Text
+    );  
+  end;
+  //============================================================================
+  procedure TERPFormOperExportRSWWW_edtFileName_OnButtonClick(Sender :TObject);
+  var
+    lkFileName :string;
+  begin
+    with TxcEditCombo(Sender) do
+      begin
+      lkFileName := Text; 
+      if not PromptForFileName(lkFileName, '*.sql;*.sql|*.*', 'sql', 'Выберите файл', ExtractFilePath(lkFileName), true)then exit;
+      Text := lkFileName;
+      end;
+  end;
+  //============================================================================
+  function TERPFormOperExportRSWWW_Create:TAmunhotepForm;
+  var
+    lkToolBar  :TxcGradientPanelVista;
+    lkAct      :TCustomAction;
+    lkPnl      :TxcPanel;
+    lkLbl      :TLabel;
+    lkEdt      :TxcEditCombo;
+    lkEdtPrefix:TxcEditCombo;
+    lkEdtRoot  :TxcEditCombo;
+    lkSE       :TSynEdit;
+    lkStr      :string;
+  begin
+    Result := TAmunhotepForm(TERPFormOper_Create('Экспорт ТМЦ на сайт','',false, []));
+    lkToolBar := CreateTxcGradientPanelVistaToolBar(Result,Result,obj_name_erp_toolbar,'',alTop, 0,38,TERPForm_DefaultToolButtonWidth, 200,xbsNone);
+    lkPnl  := CreateTxcPanel(Result, Result, obj_name_erp_paneltop, '', alTop, 0,lkToolBar.Top+lkToolBar.Height,48,200,xbsNone);
+    lkLbl  := CreateTLabel(lkPnl,lkPnl,'Укажите путь к файлу экспорта',TERPForm_DefaultControlIndent,TERPForm_DefaultControlIndent,TERPForm_DefaultControlHeight,220,alNone,taLeftJustify);
+    lkEdt  := CreateTxcEditCombo(Result, lkPnl, 'edtFileName', TERPForm_DefaultControlIndent, lkLbl.Top+lkLbl.Height+TERPForm_DefaultControlIndent, TERPForm_DefaultControlHeight, 420);
+    with lkEdt do
+      begin
+      AlwaysEnable  := true;
+      ReadOnly      := false;
+      Text          := 'D:\home\MyDownloads\davinci.co.ua_'+FormatDateTime('yyyymmdd_hhnnss', Now)+'.SQL';
+      OnButtonClick := @TERPFormOperExportRSWWW_edtFileName_OnButtonClick;
+      end;
+    lkPnl  := CreateTxcPanel(Result, Result, obj_name_erp_panelclient, '', alClient, 0,lkPnl.Top+lkPnl.Height,200,200,xbsNone);
+    lkSE := Interface_SynEdit_Create(Result, lkPnl, 'SynEdit');
+    RegisterSynEdit(lkSE, ftSQL);
+    lkAct := TERPForm_CreateAction2(Result,'actImport','Экспорт данных','Выполнить экспорт данных в файл','F9',0,24,@TERPFormOperExportRSWWW_actImport_OnExecute,nil,lkToolBar,120,nil);
+  end; 
+  //============================================================================
+begin
+  TERPFormOperExportRSWWW_Create;
+end.

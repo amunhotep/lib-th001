@@ -1,0 +1,51 @@
+{$IFNDEF PEAKTOP:IDE/ERP/CONFIG/REF/FIRMS/DIALOGCASEITEM.INC}
+  {$I PEAKTOP:IDE/ERP/CONFIG/REF/FIRMS/DIALOGCASEITEM.INC}
+{$ENDIF}  
+var
+  lkFirmId :string;
+  lkDocIds :array of string;
+  lkSQL    :string;
+begin
+  if not ERPDialogCaseReferenceItem_Firm_Execute(lkFirmId) then exit;
+  lkSQL :=  
+    'EXECUTE BLOCK RETURNS ( '+SQLCRLF+
+    '  J_ID       TYPE OF COLUMN TABL$J_4.ID '+SQLCRLF+
+    ' ,DOCTYPE_ID TYPE OF COLUMN TABL$J_4.TYPE_ID '+SQLCRLF+
+    ')AS '+SQLCRLF+
+    '  DECLARE VARIABLE P_FIRM_ID   TYPE OF COLUMN TABL$J_4.FIRM_ID; '+SQLCRLF+
+    '  DECLARE VARIABLE P_PAYSRC_ID TYPE OF COLUMN TABL$J_1000016.PAYSRC_ID; '+SQLCRLF+
+    'BEGIN '+SQLCRLF+
+    '  P_FIRM_ID  = '+lkFirmId+'; '+SQLCRLF+
+    '  DOCTYPE_ID = 1000020; '+SQLCRLF+
+    '  P_PAYSRC_ID = 0; '+SQLCRLF+
+    '  SELECT FIRST 1 COALESCE(PS.ID, 0) '+SQLCRLF+
+    '  FROM   TABL$R_PAYSRC PS, TABL$R_FILIALS FL '+SQLCRLF+
+    '  WHERE  (PS.FIRM_ID = :P_FIRM_ID) '+SQLCRLF+
+    '    AND  (PS.TYPE_ID = 2) '+SQLCRLF+
+    '    AND  (FL.ID      = PS.FILIAL_ID) '+SQLCRLF+
+    '    AND  (FL.GUID    = (SELECT FIRST 1 P1.GUID FROM PROC$_DB_GUID P1)) '+SQLCRLF+
+    '  INTO   :P_PAYSRC_ID; '+SQLCRLF+
+    '  IF(:P_PAYSRC_ID = 0)THEN '+SQLCRLF+
+    '    BEGIN '+SQLCRLF+
+    '    SELECT FIRST 1 COALESCE(PS.ID, 0) '+SQLCRLF+
+    '    FROM   TABL$R_PAYSRC PS, TABL$R_FILIALS FL '+SQLCRLF+
+    '    WHERE  (PS.FIRM_ID = :P_FIRM_ID) '+SQLCRLF+
+    '      AND  (FL.ID      = PS.FILIAL_ID) '+SQLCRLF+
+    '      AND  (FL.GUID    = (SELECT FIRST 1 P1.GUID FROM PROC$_DB_GUID P1)) '+SQLCRLF+
+    '    INTO   :P_PAYSRC_ID; '+SQLCRLF+
+    '    END '+SQLCRLF+
+    ' '+SQLCRLF+
+    '  SELECT FIRST 1 P.J_ID FROM PROC$J$INS(NULL, :P_FIRM_ID, :DOCTYPE_ID) P INTO :J_ID; '+SQLCRLF+
+    ' '+SQLCRLF+
+    '  UPDATE OR INSERT INTO TABL$J_1000016(J_ID, PAYSRC_ID, ACC_ID, SUBKONTO_ID, EXPTYPE_ID, REASON) '+SQLCRLF+
+    '    VALUES (:J_ID, :P_PAYSRC_ID, 361, 0, 1000003, NULL) '+SQLCRLF+
+    '    MATCHING(J_ID); '+SQLCRLF+
+    ' '+SQLCRLF+
+    '  SUSPEND; '+SQLCRLF+
+    'END';
+
+  SetLength(lkDocIds, 1)
+  if not TERPForm_SelectSQLParams([], lkSQL, [],[], ['J_ID'], lkDocIds)then exit;
+  SetGlobalVariable('J_ID', lkDocIds[0]);
+  call(StrAbsolutePath('../1000016/EDIT.PS', ScriptName));  
+end.

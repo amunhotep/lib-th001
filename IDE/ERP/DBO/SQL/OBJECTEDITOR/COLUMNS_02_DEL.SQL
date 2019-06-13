@@ -1,0 +1,3 @@
+DELETE FROM TABL$_TB_COLS TC 
+WHERE  (TC.TB_ID = ?TB_ID)
+  AND  (TC.ID    = ?ID)

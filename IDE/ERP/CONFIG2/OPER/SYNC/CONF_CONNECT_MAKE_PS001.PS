@@ -1,0 +1,148 @@
+var
+  lkSaveConfigPath :string;
+  lkAliasPrefix    :string;
+  
+  lkTr     :TxFBTransaction;
+  lkQr     :TxFBQuery;
+  lkDBPath :string;
+  lkFCMain :TxFBFileConfig;
+  lkFC     :TxFBFileConfig;
+  lkSrvItem:TxsServer;
+  lkAliases:string;
+begin
+  lkSaveConfigPath := 'D:\projects\iss\amunhotep\PS001\';
+  lkAliasPrefix    := 'LOMBARDFILIAL';
+  
+  lkTr := TxFBTransaction.Create(nil);
+  with lkTr do
+    begin
+    DefaultDataBase := FBDataBase;
+    with Params do
+      begin
+      Clear;
+      Add('isc_tpb_read_committed');
+      Add('isc_tpb_nowait');
+      Add('isc_tpb_rec_version');
+      Add('isc_tpb_read');
+      end;
+    end;
+  lkQr := TxFBQuery.Create(lkTr);
+  lkQR.SQL.Text := 'SELECT F.* FROM TABL$R_FILIALS F WHERE (F.FLAG_DELETE = 0) ORDER BY F.ID ';
+  lkQr.Open;
+
+  lkFCMain  := TxFBFileConfig.Create(nil);
+  lkSrvItem := lkFCMain.Servers.Add;
+  with lkSrvItem do
+    begin
+    AutoConnect     := true;
+    BackupOptions   := [boIgnoreChecksums, boIgnoreLimbo, boOldMetadataDesc, boNonTransportable, boConvertExtTables];
+    RestorePageSize := xps8192;
+    RestoreOptions  := [roNoShadow, roNoValidityCheck, roOneRelationAtATime, roCreateNewDB, roUseAllSpace];
+    ServerIP        := '192.168.1.210/3050';
+    ServerName      := 'Центральный сервер';
+    ServerProtocol  := prtTCP;
+    CodePage        := 'WIN1251';
+    UserName        := 'SYSDBA';
+    UserPassword    := 'masterkey';
+    UserRole        := '';
+    end;
+
+  lkQr.First;
+  while not lkQr.EOF do
+    begin
+    lkDBPath := lkQr.FieldByName('DATABASE_NAME_REMOTE').AsString;
+    Delete(lkDBPath, 1, Pos(':',lkDBPath));
+    lkDBPath := UpperCase(lkDBPath);
+    WriteLn(lkDBPath);
+    if(lkQr.FieldByName('ID').AsInteger = 0)then
+      begin
+      with lkSrvItem.DataBases.Add do
+        begin
+        AliasName   := 'Главная база';
+        DBFileName  := lkQr.FieldByName('DATABASE_NAME').AsString;
+        LoginPrompt := false;
+        LoginServer := true;
+        CodePage    := 'WIN1251';
+        end;    
+      end
+     else
+      begin
+      lkAliases := 
+        lkAliasPrefix+'='+lkDBPath+#13#10+
+        lkAliasPrefix+'LOG='+StrReplaceStr(lkDBPath, '.FDB', '_LOG.FDB')+#13#10+
+        lkAliasPrefix+'BLOB='+StrReplaceStr(lkDBPath, '.FDB', '_BLOB.FDB')+#13#10+
+        lkAliasPrefix+FormatFloat('00', lkQr.FieldByName('ID').AsInteger - 1000000)+'='+lkDBPath+#13#10+
+        lkAliasPrefix+FormatFloat('00', lkQr.FieldByName('ID').AsInteger - 1000000)+'LOG='+StrReplaceStr(lkDBPath, '.FDB', '_LOG.FDB')+#13#10+
+        lkAliasPrefix+FormatFloat('00', lkQr.FieldByName('ID').AsInteger - 1000000)+'BLOB='+StrReplaceStr(lkDBPath, '.FDB', '_BLOB.FDB')+#13#10+
+        '';
+      StringsSaveToFile(lkSaveConfigPath+'aliases_filial'+FormatFloat('00', lkQr.FieldByName('ID').AsInteger - 1000000)+'.conf', lkAliases);  
+
+      lkFC := TxFBFileConfig.Create(nil);
+      with lkFC.Servers.Add do
+        begin
+        AutoConnect     := true;
+        BackupOptions   := [boIgnoreChecksums, boIgnoreLimbo, boOldMetadataDesc, boNonTransportable, boConvertExtTables];
+        RestorePageSize := xps8192;
+        RestoreOptions  := [roNoShadow, roNoValidityCheck, roOneRelationAtATime, roCreateNewDB, roUseAllSpace];
+        ServerIP        := '127.0.0.1/3050';
+        ServerName      := 'localhost';
+        ServerProtocol  := prtTCP;
+        CodePage        := 'WIN1251';
+        UserName        := 'SYSDBA';
+        UserPassword    := 'masterkey';
+        UserRole        := '';
+        with DataBases.Add do
+          begin
+          AliasName   := lkQr.FieldByName('NAME').AsString;
+          DBFileName  := lkDBPath;
+          LoginPrompt := false;
+          LoginServer := true;
+          CodePage    := 'WIN1251';
+          end;    
+        end;
+      SaveEncryptTxFBFileConfig(lkSaveConfigPath+'fb_ps_001pharmacia_filial_'+FormatFloat('00', lkQr.FieldByName('ID').AsInteger - 1000000)+'.conf', lkFC);
+      lkFC.Free;  
+
+      // local database copy in main server
+      with lkSrvItem.DataBases.Add do
+        begin
+        AliasName   := lkQr.FieldByName('NAME').AsString;
+        DBFileName  := lkQr.FieldByName('DATABASE_NAME').AsString;
+        LoginPrompt := false;
+        LoginServer := true;
+        CodePage    := 'WIN1251';
+        end;    
+      // remote filial database;
+      with lkFCMain.Servers.Add do
+        begin
+        AutoConnect     := true;
+        BackupOptions   := [boIgnoreChecksums, boIgnoreLimbo, boOldMetadataDesc, boNonTransportable, boConvertExtTables];
+        RestorePageSize := xps8192;
+        RestoreOptions  := [roNoShadow, roNoValidityCheck, roOneRelationAtATime, roCreateNewDB, roUseAllSpace];
+        ServerIP        := StrTrimAll(lkQr.FieldByName('IP').AsString)+'/3050';
+        ServerName      := lkQr.FieldByName('NAME').AsString+' - удалённо';
+        ServerProtocol  := prtTCP;
+        CodePage        := 'WIN1251';
+        UserName        := 'SYSDBA';
+        UserPassword    := 'masterkey';
+        UserRole        := '';
+        with DataBases.Add do
+          begin
+          AliasName   := lkQr.FieldByName('NAME').AsString;
+          DBFileName  := lkDBPath;
+          LoginPrompt := false;
+          LoginServer := true;
+          CodePage    := 'WIN1251';
+          end;    
+        end;
+      end; 
+    
+    lkQr.Next;
+    end;
+  if lkTr.InTransaction then
+    lkTr.Commit;
+  lkTr.Free;    
+
+  SaveEncryptTxFBFileConfig(lkSaveConfigPath+'fb_ps_001pharmacia.conf', lkFCMain);
+  lkFCMain.Free;  
+end.

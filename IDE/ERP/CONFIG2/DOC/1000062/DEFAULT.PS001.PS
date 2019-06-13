@@ -1,0 +1,11 @@
+{$I ../$COMMON.INC}
+begin
+  JrnlCaptionAdd := 'Невозвраты';
+  JrnlDateInit   := true;
+  JrnlDateFrom   := StrToDate('01.04.2010'); 
+  JrnlDateTo     := Now; 
+  Jrnl_HardFilter_Add('STATE_ID'   , '(STATE_ID NOT IN (1,2)) AND (DOCSUMLEFT <= 0.01)');
+  Jrnl_HardFilter_Add('FLAG_COMMIT', '(FLAG_COMMIT = 1)');
+//  Jrnl_HardFilter_Add('FILIAL_ID', '(FILIAL_ID = 1000011)');
+  JrnlForm := JtnlForm_Create('1000062');
+end.

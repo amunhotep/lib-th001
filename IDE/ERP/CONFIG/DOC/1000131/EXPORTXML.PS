@@ -1,0 +1,1617 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG/DOC/1000131/EXPORTXML.PS}
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}                  {$I PEAKTOP:GLOBAL_VARIABLES.INC}                   {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TLABEL.INC}                        {$I PEAKTOP:OBJ/TLABEL.INC}                         {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TEDIT.INC}                         {$I PEAKTOP:OBJ/TEDIT.INC}                          {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TDATETIMEPICKER.INC}               {$I PEAKTOP:OBJ/TDATETIMEPICKER.INC}                {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANEL.INC}              {$I PEAKTOP:OBJ/TXCGRADIENTPANEL.INC}               {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/$COMMON/FORMERP.INC}       {$I PEAKTOP:IDE/ERP/DBO/$COMMON/FORMERP.INC}        {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/$COMMON/FORMERP_NAMES.INC} {$I PEAKTOP:IDE/ERP/DBO/$COMMON/FORMERP_NAMES.INC}  {$ENDIF}
+  //============================================================================
+  function GetAttr(aOwner:TComponent; const aNAME:string):string;
+  var
+    lkCmp :TComponent;
+  begin
+    Result := '';
+    lkCmp := nil;
+    lkCmp := aOwner.FindComponent('edt'+aNAME);
+    if(lkCmp = nil)then exit;
+    if(UpperCase(lkCmp.ClassName) = 'TEDIT')then 
+      Result := TEdit(lkCmp).Text
+     else
+      Result := FormatDateTime('ddmmyyyy', TDateTimePicker(lkCmp).Date);  
+  end;
+  //============================================================================
+  function GetTagHORIG(const aValue:Integer):string;
+  begin
+    if(aValue = 1) then Result := '    <HORIG1>1</HORIG1>' else Result := '    <HORIG1 xsi:nil="true"></HORIG1>';
+  end;
+  //============================================================================
+  function GetTagHTYPR(const aValue:Integer):string;
+  begin
+    if(aValue = 1) then Result := '    <HTYPR>02</HTYPR>' else Result := '    <HTYPR xsi:nil="true"></HTYPR>';
+  end;
+  //============================================================================
+  function GetTagHERPN(const aValue:Integer):string;
+  begin
+    if(aValue = 1) then Result := '    <HERPN>1</HERPN>' else Result := '    <HERPN xsi:nil="true"></HERPN>';
+  end;
+  //============================================================================
+  procedure actExport_OnExecute(Sender :TObject);
+  var
+    lkOwner    :TComponent;
+    lkFileName :string;
+    lkFileExprt:string;
+    lkXML      :string;
+    lkXML_01   :string;
+    lkXML_02   :string;
+    lkXML_03   :string;
+    lkXML_04   :string;
+    lkXML_05   :string;
+    lkXML_06   :string;
+    lkXML_07   :string;
+    lkXML_08   :string;
+    lkJ_ID     :string;
+    lkCS_ID    :string;
+    lkTr       :TxFBTransaction;
+    lkQrCS     :TxFBQuery;
+    lkQrEnt    :TxFBQuery;
+    lkQrJrnl   :TxFBQuery;
+    lkQrJrnlNN :TxFBQuery;
+    lkQrDoc    :TxFBQuery;
+    i          :Integer;
+  begin
+    lkOwner := TComponent(Sender).Owner;
+    lkJ_ID := TForm(lkOwner).HelpKeyWord;
+    GetField(FBDataBase, 'TABL$J_1000014', 'CS_ID', 'J_ID = '+lkJ_ID, lkCS_ID);
+    lkTr    := TxFBTransaction.Create(nil);
+    with lkTr do
+      begin
+      DefaultDataBase := FBDataBase;
+      with Params do
+        begin
+        Clear;
+        Add('isc_tpb_read_committed');
+        Add('isc_tpb_read');
+        Add('isc_tpb_rec_version');
+        Add('isc_tpb_nowait');
+        end;
+      end;
+    lkQrEnt := TxFBQuery.Create(lkTr);
+    with lkQrEnt do
+      begin
+      SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/DOC/4/RPT_DEFAULT02.SQL');
+      Prepare;
+      ParamByName('J_ID').AsString := lkJ_ID;
+      if not Active then try Open; except end;
+      end;
+    lkQrCS := TxFBQuery.Create(lkTr);
+    with lkQrCS do
+      begin
+      SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/REF/CS/RPT0000.SQL');
+      Prepare;
+      ParamByName('CS_ID').AsString := lkCS_ID;
+      if not Active then try Open; except end;
+      end;
+    lkQrJrnl := TxFBQuery.Create(lkTr);
+    with lkQrJrnl do
+      begin
+      SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/DOC/1000014/RPT_DEFAULT01.SQL');
+      Prepare;
+      ParamByName('J_ID').AsString := lkJ_ID;
+      if not Active then try Open; except end;
+      end;
+    lkQrJrnlNN := TxFBQuery.Create(lkTr);
+    with lkQrJrnlNN do
+      begin
+      SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/DOC/1000014/RPT_DEFAULT01.SQL');
+      Prepare;
+      ParamByName('J_ID').AsString := lkQrJrnl.FieldByName('J_1000131_ID').AsString;
+      if not Active then try Open; except end;
+      end;
+    lkQrDoc := TxFBQuery.Create(lkTr);
+    with lkQrDoc do
+      begin
+      SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/DOC/1000014/RPT_DEFAULT00.SQL');
+      Prepare;
+      ParamByName('J_ID').AsString := lkJ_ID;
+      if not Active then try Open; except end;
+      end;
+    if(lkQrJrnl.FieldByName('TYPE_ID').AsString = '1000131')then
+      lkFileName := GetAttr(lkOwner,'C_REG')+GetAttr(lkOwner,'C_RAJ')+GetAttr(lkOwner,'TIN')+
+        'F12010051'+FormatFloat('000000000', StrToInt(GetAttr(lkOwner,'C_DOC_CNT')))+'1'+
+        Copy(GetAttr(lkOwner,'D_FILL'), 3,6)+GetAttr(lkOwner,'C_REG')+GetAttr(lkOwner,'C_RAJ')+'.xml'
+     else   
+      lkFileName := GetAttr(lkOwner,'C_REG')+GetAttr(lkOwner,'C_RAJ')+GetAttr(lkOwner,'TIN')+
+        'F12012051'+FormatFloat('000000000', StrToInt(GetAttr(lkOwner,'C_DOC_CNT')))+'1'+
+        Copy(GetAttr(lkOwner,'D_FILL'), 3,6)+GetAttr(lkOwner,'C_REG')+GetAttr(lkOwner,'C_RAJ')+'.xml';
+    lkXML := '<?xml version="1.0" encoding="windows-1251"?>'+SQLCRLF;
+    if(lkQrJrnl.FieldByName('TYPE_ID').AsString = '1000131')then
+      lkXML := lkXML + '<DECLAR xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="F1201005.xsd">'+SQLCRLF
+     else
+      lkXML := lkXML + '<DECLAR xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="F1201205.xsd">'+SQLCRLF;
+    lkXML := lkXML +       
+      '  <DECLARHEAD>'+SQLCRLF+
+      '    <TIN>'+GetAttr(lkOwner,'TIN')+'</TIN>'+SQLCRLF+
+      '    <C_DOC>F12</C_DOC>'+SQLCRLF;
+    if(lkQrJrnl.FieldByName('TYPE_ID').AsString = '1000131')then
+      lkXML := lkXML + '    <C_DOC_SUB>010</C_DOC_SUB>'+SQLCRLF
+     else 
+      lkXML := lkXML + '    <C_DOC_SUB>012</C_DOC_SUB>'+SQLCRLF;
+    lkXML := lkXML +       
+      '    <C_DOC_VER>5</C_DOC_VER>'+SQLCRLF+
+      '    <C_DOC_TYPE>'+GetAttr(lkOwner,'C_DOC_TYPE')+'</C_DOC_TYPE>'+SQLCRLF+
+      '    <C_DOC_CNT>'+GetAttr(lkOwner,'C_DOC_CNT')+'</C_DOC_CNT>'+SQLCRLF+
+      '    <C_REG>'+GetAttr(lkOwner,'C_REG')+'</C_REG>'+SQLCRLF+
+      '    <C_RAJ>'+GetAttr(lkOwner,'C_RAJ')+'</C_RAJ>'+SQLCRLF+
+      '    <PERIOD_MONTH>'+GetAttr(lkOwner,'PERIOD_MONTH')+'</PERIOD_MONTH>'+SQLCRLF+
+      '    <PERIOD_TYPE>'+GetAttr(lkOwner,'PERIOD_TYPE')+'</PERIOD_TYPE>'+SQLCRLF+
+      '    <PERIOD_YEAR>'+GetAttr(lkOwner,'PERIOD_YEAR')+'</PERIOD_YEAR>'+SQLCRLF+
+      '    <C_STI_ORIG>'+GetAttr(lkOwner,'C_STI_ORIG')+'</C_STI_ORIG>'+SQLCRLF+
+      '    <C_DOC_STAN>'+GetAttr(lkOwner,'C_DOC_STAN')+'</C_DOC_STAN>'+SQLCRLF+
+      '    <LINKED_DOCS xsi:nil="true"/>'+SQLCRLF+
+      '    <D_FILL>'+GetAttr(lkOwner,'D_FILL')+'</D_FILL>'+SQLCRLF+
+      '    <SOFTWARE>OPZ 1.30.33</SOFTWARE>'+SQLCRLF+
+      '  </DECLARHEAD>'+SQLCRLF+
+      '  <DECLARBODY>'+SQLCRLF;
+    if(lkQrJrnl.FieldByName('TYPE_ID').AsString = '1000131')then
+      begin
+      lkXML := lkXML + 
+        '    <HCOPY>1</HCOPY>'+SQLCRLF+
+        '    <HEL xsi:nil="true"></HEL>'+SQLCRLF+
+        GetTagHERPN(lkQrJrnl.FieldByName('FLAG_LOCK').AsInteger)+SQLCRLF+
+        GetTagHORIG(lkQrJrnl.FieldByName('FLAG_PNP02').AsInteger)+SQLCRLF+
+        GetTagHTYPR(lkQrJrnl.FieldByName('FLAG_PNP02').AsInteger)+SQLCRLF+
+        '    <HFILL>'+FormatDateTime('ddmmyyyy',lkQrJrnl.FieldByName('DATE_COMMIT').AsDateTime)+'</HFILL>'+SQLCRLF+
+        '    <HNUM>'+lkQrJrnl.FieldByName('DOCNUMBER').AsString+'</HNUM>'+SQLCRLF+
+        '    <HNUM1 xsi:nil="true"></HNUM1>'+SQLCRLF+
+        '    <HNUM2 xsi:nil="true"></HNUM2>'+SQLCRLF+
+        '    <HNAMESEL>'+lkQrEnt.FieldByName('ENT_CS_NAME2').AsString+'</HNAMESEL>'+SQLCRLF+
+        '    <HNAMEBUY>'+lkQrCS.FieldByName('CS_NAME2').AsString+'</HNAMEBUY>'+SQLCRLF+
+        '    <HKSEL>'+lkQrEnt.FieldByName('ENT_CS_INN').AsString+'</HKSEL>'+SQLCRLF+
+        '    <HKBUY>'+lkQrCS.FieldByName('CS_INN').AsString+'</HKBUY>'+SQLCRLF+
+        '    <HLOCSEL>'+lkQrEnt.FieldByName('ENT_CS_ADDR_NAME_2').AsString+'</HLOCSEL>'+SQLCRLF+
+        '    <HLOCBUY>'+lkQrCS.FieldByName('CS_ADDR_NAME').AsString+'</HLOCBUY>'+SQLCRLF;
+      if(StrTrimAll(lkQrEnt.FieldByName('ENT_CS_PHONE_2').AsString) <> '')then  
+        lkXML := lkXML + '    <HTELSEL>'+lkQrEnt.FieldByName('ENT_CS_PHONE_2').AsString+'</HTELSEL>'+SQLCRLF
+       else
+        lkXML := lkXML + '    <HTELSEL xsi:nil="true"></HTELSEL>'+SQLCRLF;
+      if(StrTrimAll(lkQrCS.FieldByName('CS_PHONE_2').AsString) <> '')then  
+        lkXML := lkXML + '    <HTELBUY>'+lkQrCS.FieldByName('CS_PHONE_2').AsString+'</HTELBUY>'+SQLCRLF
+       else
+        lkXML := lkXML + '    <HTELBUY xsi:nil="true"></HTELBUY>'+SQLCRLF;
+      lkXML := lkXML +
+    		'    <H01G1S>'+lkQrJrnl.FieldByName('CS_DOCS_NAME').AsString+'</H01G1S>'+SQLCRLF+
+    		'    <H01G2D>'+FormatDateTime('ddmmyyyy',lkQrJrnl.FieldByName('CS_DOCS_DATE').AsDateTime)+'</H01G2D>'+SQLCRLF+
+    		'    <H01G3S>'+lkQrJrnl.FieldByName('CS_DOCS_NUMBER').AsString+'</H01G3S>'+SQLCRLF+
+    		'    <H02G1S>оплата з поточного рахунку</H02G1S>'+SQLCRLF;
+      end
+     else
+      begin
+      lkXML := lkXML +       
+        '    <HCOPY>1</HCOPY>'+SQLCRLF+
+        '    <HEL xsi:nil="true"></HEL>'+SQLCRLF+
+        GetTagHERPN(lkQrJrnl.FieldByName('FLAG_LOCK').AsInteger)+SQLCRLF+
+        GetTagHORIG(lkQrJrnl.FieldByName('FLAG_PNP02').AsInteger)+SQLCRLF+
+        GetTagHTYPR(lkQrJrnl.FieldByName('FLAG_PNP02').AsInteger)+SQLCRLF+
+        '    <HNUM>'+lkQrJrnl.FieldByName('DOCNUMBER').AsString+'</HNUM>'+SQLCRLF+
+        '    <HNUM1 xsi:nil="true"></HNUM1>'+SQLCRLF+
+        '    <HNUM2 xsi:nil="true"></HNUM2>'+SQLCRLF+
+        '    <HFILL>'+FormatDateTime('ddmmyyyy',lkQrJrnl.FieldByName('DATE_COMMIT').AsDateTime)+'</HFILL>'+SQLCRLF+
+        '    <HPODFILL>'+FormatDateTime('ddmmyyyy',lkQrJrnl.FieldByName('J_1000131_DATE_COMMIT').AsDateTime)+'</HPODFILL>'+SQLCRLF+
+        '    <HPODNUM>'+lkQrJrnl.FieldByName('J_1000131_DOCNUMBER').AsString+'</HPODNUM>'+SQLCRLF+
+        '    <HPODNUM1 xsi:nil="true"></HPODNUM1>'+SQLCRLF+
+        '    <HPODNUM2 xsi:nil="true"></HPODNUM2>'+SQLCRLF+
+        '    <H01G1D>'+FormatDateTime('ddmmyyyy',lkQrJrnlNN.FieldByName('CS_DOCS_DATE').AsDateTime)+'</H01G1D>'+SQLCRLF+
+        '    <H01G2S>'+lkQrJrnlNN.FieldByName('CS_DOCS_NUMBER').AsString+'</H01G2S>'+SQLCRLF+
+        '    <HNAMESEL>'+lkQrEnt.FieldByName('ENT_CS_NAME2').AsString+'</HNAMESEL>'+SQLCRLF+
+        '    <HNAMEBUY>'+lkQrCS.FieldByName('CS_NAME2').AsString+'</HNAMEBUY>'+SQLCRLF+
+        '    <HKSEL>'+lkQrEnt.FieldByName('ENT_CS_INN').AsString+'</HKSEL>'+SQLCRLF+
+        '    <HKBUY>'+lkQrCS.FieldByName('CS_INN').AsString+'</HKBUY>'+SQLCRLF+
+        '    <HLOCSEL>'+lkQrEnt.FieldByName('ENT_CS_ADDR_NAME_2').AsString+'</HLOCSEL>'+SQLCRLF+
+        '    <HLOCBUY>'+lkQrCS.FieldByName('CS_ADDR_NAME').AsString+'</HLOCBUY>'+SQLCRLF;
+      if(StrTrimAll(lkQrEnt.FieldByName('ENT_CS_PHONE_2').AsString) <> '')then  
+        lkXML := lkXML + '    <HTELSEL>'+lkQrEnt.FieldByName('ENT_CS_PHONE_2').AsString+'</HTELSEL>'+SQLCRLF;
+      if(StrTrimAll(lkQrCS.FieldByName('CS_PHONE_2').AsString) <> '')then  
+        lkXML := lkXML + '    <HTELBUY>'+lkQrCS.FieldByName('CS_PHONE_2').AsString+'</HTELBUY>'+SQLCRLF;
+      lkXML := lkXML +
+        '    <H02G1S>'+lkQrJrnlNN.FieldByName('CS_DOCS_NAME').AsString+'</H02G1S>'+SQLCRLF+
+        '    <H02G2D>'+FormatDateTime('ddmmyyyy',lkQrJrnlNN.FieldByName('CS_DOCS_DATE').AsDateTime)+'</H02G2D>'+SQLCRLF+
+        '    <H02G3S>'+lkQrJrnlNN.FieldByName('CS_DOCS_NUMBER').AsString+'</H02G3S>'+SQLCRLF+
+        '    <H04G1D>'+FormatDateTime('ddmmyyyy',lkQrJrnl.FieldByName('J_1000131_DATE_COMMIT').AsDateTime)+'</H04G1D>'+SQLCRLF+
+        '    <H03G1S>оплата з поточного рахунку</H03G1S>'+SQLCRLF;
+      end; 
+    lkXML_01 := '';
+    lkXML_02 := '';
+    lkXML_03 := '';
+    lkXML_04 := '';
+    lkXML_05 := '';
+    lkXML_06 := '';
+    lkXML_07 := '';
+    lkXML_08 := '';
+    i := 1;
+    lkQrDoc.FetchAll;
+    lkQrDoc.First;
+    while not lkQrDoc.EOF do
+      begin
+      if(lkQrJrnl.FieldByName('TYPE_ID').AsString = '1000131')then
+        begin
+        lkXML_01 := lkXML_01+'    <RXXXXG2D ROWNUM="'+IntToStr(i)+'">'+FormatDateTime('ddmmyyyy',lkQrJrnl.FieldByName('DATE_COMMIT').AsDateTime)+'</RXXXXG2D>'+SQLCRLF;
+        lkXML_02 := lkXML_02+'    <RXXXXG3S ROWNUM="'+IntToStr(i)+'">'+lkQrDoc.FieldByName('TMC_NAME').AsString+'</RXXXXG3S>'+SQLCRLF;
+        if(StrTrimAll(StrCiphersOnlyInt(lkQrDoc.FieldByName('TMC_VEDCODE').AsString)) <> '')then
+          lkXML_03 := lkXML_03+'    <RXXXXG4 ROWNUM="'+IntToStr(i)+'">'+StrCiphersOnlyInt(lkQrDoc.FieldByName('TMC_VEDCODE').AsString)+'</RXXXXG4>'+SQLCRLF;
+        lkXML_04 := lkXML_04+'    <RXXXXG4S ROWNUM="'+IntToStr(i)+'">'+lkQrDoc.FieldByName('TMC_EDIZM_SHORT').AsString+'</RXXXXG4S>'+SQLCRLF;
+        lkXML_05 := lkXML_05+'    <RXXXXG5 ROWNUM="'+IntToStr(i)+'">'+StrReplaceStr(FormatFloat('#0',lkQrDoc.FieldByName('QUANT').AsFloat),',','.')+'</RXXXXG5>'+SQLCRLF;
+        lkXML_07 := lkXML_07+'    <RXXXXG6 ROWNUM="'+IntToStr(i)+'">'+StrReplaceStr(FormatFloat('#0.00',lkQrDoc.FieldByName('PRICEPRINT').AsFloat),',','.')+'</RXXXXG6>'+SQLCRLF;
+        lkXML_08 := lkXML_08+'    <RXXXXG7 ROWNUM="'+IntToStr(i)+'">'+StrReplaceStr(FormatFloat('#0.00',lkQrDoc.FieldByName('TOTALPRINTWONDP').AsFloat),',','.')+'</RXXXXG7>'+SQLCRLF;
+        end
+       else
+        begin
+        lkXML_01 := lkXML_01+'    <RXXXXG1D ROWNUM="'+IntToStr(i)+'">'+FormatDateTime('ddmmyyyy',lkQrJrnl.FieldByName('DATE_COMMIT').AsDateTime)+'</RXXXXG1D>'+SQLCRLF;
+        lkXML_02 := lkXML_02+'    <RXXXXG2S ROWNUM="'+IntToStr(i)+'">'+lkQrDoc.FieldByName('NAME').AsString+'</RXXXXG2S>'+SQLCRLF;
+        lkXML_03 := lkXML_03+'    <RXXXXG3S ROWNUM="'+IntToStr(i)+'">'+lkQrDoc.FieldByName('TMC_NAME').AsString+'</RXXXXG3S>'+SQLCRLF;
+        if(StrTrimAll(StrCiphersOnlyInt(lkQrDoc.FieldByName('TMC_VEDCODE').AsString)) <> '')then
+          lkXML_04 := lkXML_04+'    <RXXXXG4 ROWNUM="'+IntToStr(i)+'">'+StrCiphersOnlyInt(lkQrDoc.FieldByName('TMC_VEDCODE').AsString)+'</RXXXXG4>'+SQLCRLF;
+        lkXML_05 := lkXML_05+'    <RXXXXG4S ROWNUM="'+IntToStr(i)+'">'+lkQrDoc.FieldByName('TMC_EDIZM_SHORT').AsString+'</RXXXXG4S>'+SQLCRLF;
+        lkXML_06 := lkXML_06+'    <RXXXXG5 ROWNUM="'+IntToStr(i)+'">'+StrReplaceStr(FormatFloat('#0.000000',(-1)*lkQrDoc.FieldByName('QUANT').AsFloat),',','.')+'</RXXXXG5>'+SQLCRLF;
+        lkXML_07 := lkXML_07+'    <RXXXXG6 ROWNUM="'+IntToStr(i)+'">'+StrReplaceStr(FormatFloat('#0.00',lkQrDoc.FieldByName('PRICEPRINT').AsFloat),',','.')+'0000000000</RXXXXG6>'+SQLCRLF;
+        lkXML_08 := lkXML_08+'    <RXXXXG9 ROWNUM="'+IntToStr(i)+'">'+StrReplaceStr(FormatFloat('#0.00',(-1)*lkQrDoc.FieldByName('TOTALPRINTWONDP').AsFloat),',','.')+'</RXXXXG9>'+SQLCRLF;
+        end; 
+      lkQrDoc.Next;
+      i := i + 1;
+      end;
+    if(lkQrJrnl.FieldByName('TYPE_ID').AsString = '1000131')then
+      lkXML := lkXML + lkXML_01+lkXML_02+lkXML_03+lkXML_04+lkXML_05+lkXML_06+lkXML_07+lkXML_08+ 
+        '    <R01G7>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_SUM').AsFloat),',','.')+'</R01G7>'+SQLCRLF+
+        '    <R01G8 xsi:nil="true"></R01G8>'+SQLCRLF+
+        '    <R01G9 xsi:nil="true"></R01G9>'+SQLCRLF+
+        '    <R01G10 xsi:nil="true"></R01G10>'+SQLCRLF+
+        '    <R01G11>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_SUM').AsFloat),',','.')+'</R01G11>'+SQLCRLF+
+        '    <R02G11 xsi:nil="true"></R02G11>'+SQLCRLF+
+        '    <R03G7>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_NDP').AsFloat),',','.')+'</R03G7>'+SQLCRLF+
+        '    <R03G8 xsi:nil="true"></R03G8>'+SQLCRLF+
+        '    <R03G9 xsi:nil="true"></R03G9>'+SQLCRLF+
+        '    <R03G10S xsi:nil="true"></R03G10S>'+SQLCRLF+
+        '    <R03G11>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_NDP').AsFloat),',','.')+'</R03G11>'+SQLCRLF+
+        '    <R04G7>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_SUMNDP').AsFloat),',','.')+'</R04G7>'+SQLCRLF+
+        '    <R04G8 xsi:nil="true"></R04G8>'+SQLCRLF+
+        '    <R04G9 xsi:nil="true"></R04G9>'+SQLCRLF+
+        '    <R04G10 xsi:nil="true"></R04G10>'+SQLCRLF+
+        '    <R04G11>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_SUMNDP').AsFloat),',','.')+'</R04G11>'+SQLCRLF+
+        '    <R003G10S xsi:nil="true"></R003G10S>'+SQLCRLF+
+        '    <H10G1S>'+lkQrEnt.FieldByName('ENT_CS_WRK_NAME_DIR').AsString+'</H10G1S>'+SQLCRLF
+     else   
+      lkXML := lkXML + lkXML_01+lkXML_02+lkXML_03+lkXML_04+lkXML_05+lkXML_06+lkXML_07+lkXML_08+ 
+        '    <R01G9>'+StrReplaceStr(FormatFloat('#0.00',(-1)*lkQrJrnl.FieldByName('P_SUM').AsFloat),',','.')+'</R01G9>'+SQLCRLF+
+        '    <R01G10 xsi:nil="true"></R01G10>'+SQLCRLF+
+        '    <R01G11 xsi:nil="true"></R01G11>'+SQLCRLF+
+        '    <R02G9>'+StrReplaceStr(FormatFloat('#0.00',(-1)*lkQrJrnl.FieldByName('P_NDP').AsFloat),',','.')+'</R02G9>'+SQLCRLF+
+        '    <H10G1D>'+GetAttr(lkOwner,'D_FILL')+'</H10G1D>'+SQLCRLF+
+        '    <H10G2S>'+lkQrEnt.FieldByName('ENT_CS_WRK_NAME_DIR').AsString+'</H10G2S>'+SQLCRLF;
+    if lkTr.InTransaction then
+      lkTr.Commit;
+    lkTr.Free;  
+    lkXML := lkXML +'  </DECLARBODY>'+SQLCRLF+'</DECLAR>';
+    
+    lkFileExprt := GetAttr(lkOwner,'PathToFile');
+
+    i := Length(lkFileExprt);
+    while((i > 0) and (  (lkFileExprt[i] = #$20) 
+                       or(lkFileExprt[i] = #13) 
+                       or(lkFileExprt[i] = #10)
+                       or(lkFileExprt[i] = '/')
+                       or(lkFileExprt[i] = '\')    
+    ))do 
+      begin
+      Delete(lkFileExprt, i, 1);
+      i := Length(lkFileExprt);
+      end;
+    lkFileExprt := lkFileExprt + '\' + lkFileName;  
+    if FileExists(lkFileExprt) then
+      if(Dialogs.MessageDlg('Файл "'+lkFileExprt+'" уже существует.'+SQLCRLF+'Перезаписать ?', mtConfirmation, [mbYes, mbNo]) <> mrYes)then exit;
+    if StringsSaveToFile(lkFileExprt, lkXML) then 
+      Dialogs.MessageDlg('Выгрузка налоговой накладной выполнена в файл '+SQLCRLF+lkFileExprt, mtInformation, [mbOK]);
+    if(Dialogs.MessageDlg('Заблокировать документ для редактирования ?', mtConfirmation, [mbYes, mbNo]) = mrYes)then 
+      ExecSQL(FBDataBase, 'UPDATE TABL$J_4 J SET J.FLAG_LOCK = 1 WHERE (J.ID = '''+lkJ_ID+''');');
+  end;
+  //============================================================================
+  procedure actExport20140922_OnExecute(Sender :TObject);
+  var
+    lkOwner    :TComponent;
+    lkFileName :string;
+    lkFileExprt:string;
+    lkXML      :string;
+    lkXML_01   :string;
+    lkXML_02   :string;
+    lkXML_03   :string;
+    lkXML_04   :string;
+    lkXML_05   :string;
+    lkXML_06   :string;
+    lkXML_07   :string;
+    lkXML_08   :string;
+    lkJ_ID     :string;
+    lkCS_ID    :string;
+    lkTr       :TxFBTransaction;
+    lkQrCS     :TxFBQuery;
+    lkQrEnt    :TxFBQuery;
+    lkQrJrnl   :TxFBQuery;
+    lkQrJrnlNN :TxFBQuery;
+    lkQrDoc    :TxFBQuery;
+    i          :Integer;
+  begin
+    lkOwner := TComponent(Sender).Owner;
+    lkJ_ID := TForm(lkOwner).HelpKeyWord;
+    GetField(FBDataBase, 'TABL$J_1000014', 'CS_ID', 'J_ID = '+lkJ_ID, lkCS_ID);
+    lkTr    := TxFBTransaction.Create(nil);
+    with lkTr do
+      begin
+      DefaultDataBase := FBDataBase;
+      with Params do
+        begin
+        Clear;
+        Add('isc_tpb_read_committed');
+        Add('isc_tpb_read');
+        Add('isc_tpb_rec_version');
+        Add('isc_tpb_nowait');
+        end;
+      end;
+    lkQrEnt := TxFBQuery.Create(lkTr);
+    with lkQrEnt do
+      begin
+      SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/DOC/4/RPT_DEFAULT02.SQL');
+      Prepare;
+      ParamByName('J_ID').AsString := lkJ_ID;
+      if not Active then try Open; except end;
+      end;
+    lkQrCS := TxFBQuery.Create(lkTr);
+    with lkQrCS do
+      begin
+      SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/REF/CS/RPT0000.SQL');
+      Prepare;
+      ParamByName('CS_ID').AsString := lkCS_ID;
+      if not Active then try Open; except end;
+      end;
+    lkQrJrnl := TxFBQuery.Create(lkTr);
+    with lkQrJrnl do
+      begin
+      SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/DOC/1000014/RPT_DEFAULT01.SQL');
+      Prepare;
+      ParamByName('J_ID').AsString := lkJ_ID;
+      if not Active then try Open; except end;
+      end;
+    lkQrJrnlNN := TxFBQuery.Create(lkTr);
+    with lkQrJrnlNN do
+      begin
+      SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/DOC/1000014/RPT_DEFAULT01.SQL');
+      Prepare;
+      ParamByName('J_ID').AsString := lkQrJrnl.FieldByName('J_1000131_ID').AsString;
+      if not Active then try Open; except end;
+      end;
+    lkQrDoc := TxFBQuery.Create(lkTr);
+    with lkQrDoc do
+      begin
+      SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/DOC/1000014/RPT_DEFAULT00.SQL');
+      Prepare;
+      ParamByName('J_ID').AsString := lkJ_ID;
+      if not Active then try Open; except end;
+      end;
+    if(lkQrJrnl.FieldByName('TYPE_ID').AsString = '1000131')then
+      lkFileName := GetAttr(lkOwner,'C_REG')+GetAttr(lkOwner,'C_RAJ')+GetAttr(lkOwner,'TIN')+
+        'F12010061'+FormatFloat('000000000', StrToInt(GetAttr(lkOwner,'C_DOC_CNT')))+'1'+
+        Copy(GetAttr(lkOwner,'D_FILL'), 3,6)+GetAttr(lkOwner,'C_REG')+GetAttr(lkOwner,'C_RAJ')+'.xml'
+     else   
+      lkFileName := GetAttr(lkOwner,'C_REG')+GetAttr(lkOwner,'C_RAJ')+GetAttr(lkOwner,'TIN')+
+        'F12012051'+FormatFloat('000000000', StrToInt(GetAttr(lkOwner,'C_DOC_CNT')))+'1'+
+        Copy(GetAttr(lkOwner,'D_FILL'), 3,6)+GetAttr(lkOwner,'C_REG')+GetAttr(lkOwner,'C_RAJ')+'.xml';
+    lkXML := '<?xml version="1.0" encoding="windows-1251"?>'+SQLCRLF;
+    if(lkQrJrnl.FieldByName('TYPE_ID').AsString = '1000131')then
+      lkXML := lkXML + '<DECLAR xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="F1201006.xsd">'+SQLCRLF
+     else
+      lkXML := lkXML + '<DECLAR xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="F1201205.xsd">'+SQLCRLF;
+    lkXML := lkXML +       
+      '  <DECLARHEAD>'+SQLCRLF+
+      '    <TIN>'+GetAttr(lkOwner,'TIN')+'</TIN>'+SQLCRLF+
+      '    <C_DOC>F12</C_DOC>'+SQLCRLF;
+    if(lkQrJrnl.FieldByName('TYPE_ID').AsString = '1000131')then
+      lkXML := lkXML + '    <C_DOC_SUB>010</C_DOC_SUB>'+SQLCRLF
+     else 
+      lkXML := lkXML + '    <C_DOC_SUB>012</C_DOC_SUB>'+SQLCRLF;
+    lkXML := lkXML +       
+      '    <C_DOC_VER>6</C_DOC_VER>'+SQLCRLF+
+      '    <C_DOC_TYPE>'+GetAttr(lkOwner,'C_DOC_TYPE')+'</C_DOC_TYPE>'+SQLCRLF+
+      '    <C_DOC_CNT>'+GetAttr(lkOwner,'C_DOC_CNT')+'</C_DOC_CNT>'+SQLCRLF+
+      '    <C_REG>'+GetAttr(lkOwner,'C_REG')+'</C_REG>'+SQLCRLF+
+      '    <C_RAJ>'+GetAttr(lkOwner,'C_RAJ')+'</C_RAJ>'+SQLCRLF+
+      '    <PERIOD_MONTH>'+GetAttr(lkOwner,'PERIOD_MONTH')+'</PERIOD_MONTH>'+SQLCRLF+
+      '    <PERIOD_TYPE>'+GetAttr(lkOwner,'PERIOD_TYPE')+'</PERIOD_TYPE>'+SQLCRLF+
+      '    <PERIOD_YEAR>'+GetAttr(lkOwner,'PERIOD_YEAR')+'</PERIOD_YEAR>'+SQLCRLF+
+      '    <C_STI_ORIG>'+GetAttr(lkOwner,'C_STI_ORIG')+'</C_STI_ORIG>'+SQLCRLF+
+      '    <C_DOC_STAN>'+GetAttr(lkOwner,'C_DOC_STAN')+'</C_DOC_STAN>'+SQLCRLF+
+      '    <LINKED_DOCS xsi:nil="true"/>'+SQLCRLF+
+      '    <D_FILL>'+GetAttr(lkOwner,'D_FILL')+'</D_FILL>'+SQLCRLF+
+      '    <SOFTWARE>OPZ 1.30.41</SOFTWARE>'+SQLCRLF+
+      '  </DECLARHEAD>'+SQLCRLF+
+      '  <DECLARBODY>'+SQLCRLF;
+    if(lkQrJrnl.FieldByName('TYPE_ID').AsString = '1000131')then
+      begin
+      lkXML := lkXML + 
+        '    <HCOPY>1</HCOPY>'+SQLCRLF+
+        '    <HEL xsi:nil="true"></HEL>'+SQLCRLF+
+        GetTagHERPN(lkQrJrnl.FieldByName('FLAG_LOCK').AsInteger)+SQLCRLF+
+        GetTagHORIG(lkQrJrnl.FieldByName('FLAG_PNP02').AsInteger)+SQLCRLF+
+        GetTagHTYPR(lkQrJrnl.FieldByName('FLAG_PNP02').AsInteger)+SQLCRLF+
+        '    <HFILL>'+FormatDateTime('ddmmyyyy',lkQrJrnl.FieldByName('DATE_COMMIT').AsDateTime)+'</HFILL>'+SQLCRLF+
+        '    <HNUM>'+lkQrJrnl.FieldByName('DOCNUMBER').AsString+'</HNUM>'+SQLCRLF+
+        '    <HNUM1 xsi:nil="true"></HNUM1>'+SQLCRLF+
+        '    <HNUM2 xsi:nil="true"></HNUM2>'+SQLCRLF+
+        '    <HNAMESEL>'+lkQrEnt.FieldByName('ENT_CS_NAME2').AsString+'</HNAMESEL>'+SQLCRLF+
+        '    <HNAMEBUY>'+lkQrCS.FieldByName('CS_NAME2').AsString+'</HNAMEBUY>'+SQLCRLF+
+        '    <HKSEL>'+lkQrEnt.FieldByName('ENT_CS_INN').AsString+'</HKSEL>'+SQLCRLF+
+        '    <HKBUY>'+lkQrCS.FieldByName('CS_INN').AsString+'</HKBUY>'+SQLCRLF+
+        '    <HLOCSEL>'+lkQrEnt.FieldByName('ENT_CS_ADDR_NAME_2').AsString+'</HLOCSEL>'+SQLCRLF+
+        '    <HLOCBUY>'+lkQrCS.FieldByName('CS_ADDR_NAME').AsString+'</HLOCBUY>'+SQLCRLF;
+      if(StrTrimAll(lkQrEnt.FieldByName('ENT_CS_PHONE_2').AsString) <> '')then  
+        lkXML := lkXML + '    <HTELSEL>'+lkQrEnt.FieldByName('ENT_CS_PHONE_2').AsString+'</HTELSEL>'+SQLCRLF
+       else
+        lkXML := lkXML + '    <HTELSEL xsi:nil="true"></HTELSEL>'+SQLCRLF;
+      if(StrTrimAll(lkQrCS.FieldByName('CS_PHONE_2').AsString) <> '')then  
+        lkXML := lkXML + '    <HTELBUY>'+lkQrCS.FieldByName('CS_PHONE_2').AsString+'</HTELBUY>'+SQLCRLF
+       else
+        lkXML := lkXML + '    <HTELBUY xsi:nil="true"></HTELBUY>'+SQLCRLF;
+      lkXML := lkXML +
+    		'    <H01G1S>'+lkQrJrnl.FieldByName('CS_DOCS_NAME').AsString+'</H01G1S>'+SQLCRLF+
+    		'    <H01G2D>'+FormatDateTime('ddmmyyyy',lkQrJrnl.FieldByName('CS_DOCS_DATE').AsDateTime)+'</H01G2D>'+SQLCRLF+
+    		'    <H01G3S>'+lkQrJrnl.FieldByName('CS_DOCS_NUMBER').AsString+'</H01G3S>'+SQLCRLF+
+    		'    <H02G1S>оплата з поточного рахунку</H02G1S>'+SQLCRLF;
+      end
+     else
+      begin
+      lkXML := lkXML +       
+        '    <HCOPY>1</HCOPY>'+SQLCRLF+
+        '    <HEL xsi:nil="true"></HEL>'+SQLCRLF+
+        GetTagHERPN(lkQrJrnl.FieldByName('FLAG_LOCK').AsInteger)+SQLCRLF+
+        GetTagHORIG(lkQrJrnl.FieldByName('FLAG_PNP02').AsInteger)+SQLCRLF+
+        GetTagHTYPR(lkQrJrnl.FieldByName('FLAG_PNP02').AsInteger)+SQLCRLF+
+        '    <HNUM>'+lkQrJrnl.FieldByName('DOCNUMBER').AsString+'</HNUM>'+SQLCRLF+
+        '    <HNUM1 xsi:nil="true"></HNUM1>'+SQLCRLF+
+        '    <HNUM2 xsi:nil="true"></HNUM2>'+SQLCRLF+
+        '    <HFILL>'+FormatDateTime('ddmmyyyy',lkQrJrnl.FieldByName('DATE_COMMIT').AsDateTime)+'</HFILL>'+SQLCRLF+
+        '    <HPODFILL>'+FormatDateTime('ddmmyyyy',lkQrJrnl.FieldByName('J_1000131_DATE_COMMIT').AsDateTime)+'</HPODFILL>'+SQLCRLF+
+        '    <HPODNUM>'+lkQrJrnl.FieldByName('J_1000131_DOCNUMBER').AsString+'</HPODNUM>'+SQLCRLF+
+        '    <HPODNUM1 xsi:nil="true"></HPODNUM1>'+SQLCRLF+
+        '    <HPODNUM2 xsi:nil="true"></HPODNUM2>'+SQLCRLF+
+        '    <H01G1D>'+FormatDateTime('ddmmyyyy',lkQrJrnlNN.FieldByName('CS_DOCS_DATE').AsDateTime)+'</H01G1D>'+SQLCRLF+
+        '    <H01G2S>'+lkQrJrnlNN.FieldByName('CS_DOCS_NUMBER').AsString+'</H01G2S>'+SQLCRLF+
+        '    <HNAMESEL>'+lkQrEnt.FieldByName('ENT_CS_NAME2').AsString+'</HNAMESEL>'+SQLCRLF+
+        '    <HNAMEBUY>'+lkQrCS.FieldByName('CS_NAME2').AsString+'</HNAMEBUY>'+SQLCRLF+
+        '    <HKSEL>'+lkQrEnt.FieldByName('ENT_CS_INN').AsString+'</HKSEL>'+SQLCRLF+
+        '    <HKBUY>'+lkQrCS.FieldByName('CS_INN').AsString+'</HKBUY>'+SQLCRLF+
+        '    <HLOCSEL>'+lkQrEnt.FieldByName('ENT_CS_ADDR_NAME_2').AsString+'</HLOCSEL>'+SQLCRLF+
+        '    <HLOCBUY>'+lkQrCS.FieldByName('CS_ADDR_NAME').AsString+'</HLOCBUY>'+SQLCRLF;
+      if(StrTrimAll(lkQrEnt.FieldByName('ENT_CS_PHONE_2').AsString) <> '')then  
+        lkXML := lkXML + '    <HTELSEL>'+lkQrEnt.FieldByName('ENT_CS_PHONE_2').AsString+'</HTELSEL>'+SQLCRLF;
+      if(StrTrimAll(lkQrCS.FieldByName('CS_PHONE_2').AsString) <> '')then  
+        lkXML := lkXML + '    <HTELBUY>'+lkQrCS.FieldByName('CS_PHONE_2').AsString+'</HTELBUY>'+SQLCRLF;
+      lkXML := lkXML +
+        '    <H02G1S>'+lkQrJrnlNN.FieldByName('CS_DOCS_NAME').AsString+'</H02G1S>'+SQLCRLF+
+        '    <H02G2D>'+FormatDateTime('ddmmyyyy',lkQrJrnlNN.FieldByName('CS_DOCS_DATE').AsDateTime)+'</H02G2D>'+SQLCRLF+
+        '    <H02G3S>'+lkQrJrnlNN.FieldByName('CS_DOCS_NUMBER').AsString+'</H02G3S>'+SQLCRLF+
+        '    <H04G1D>'+FormatDateTime('ddmmyyyy',lkQrJrnl.FieldByName('J_1000131_DATE_COMMIT').AsDateTime)+'</H04G1D>'+SQLCRLF+
+        '    <H03G1S>оплата з поточного рахунку</H03G1S>'+SQLCRLF;
+      end; 
+    lkXML_01 := '';
+    lkXML_02 := '';
+    lkXML_03 := '';
+    lkXML_04 := '';
+    lkXML_05 := '';
+    lkXML_06 := '';
+    lkXML_07 := '';
+    lkXML_08 := '';
+    i := 1;
+    lkQrDoc.FetchAll;
+    lkQrDoc.First;
+    while not lkQrDoc.EOF do
+      begin
+      if(lkQrJrnl.FieldByName('TYPE_ID').AsString = '1000131')then
+        begin
+        lkXML_01 := lkXML_01+'    <RXXXXG2D ROWNUM="'+IntToStr(i)+'">'+FormatDateTime('ddmmyyyy',lkQrJrnl.FieldByName('DATE_COMMIT').AsDateTime)+'</RXXXXG2D>'+SQLCRLF;
+        lkXML_02 := lkXML_02+'    <RXXXXG3S ROWNUM="'+IntToStr(i)+'">'+lkQrDoc.FieldByName('TMC_NAME').AsString+'</RXXXXG3S>'+SQLCRLF;
+        if(StrTrimAll(StrCiphersOnlyInt(lkQrDoc.FieldByName('TMC_VEDCODE').AsString)) <> '')then
+          lkXML_03 := lkXML_03+'    <RXXXXG4 ROWNUM="'+IntToStr(i)+'">'+StrCiphersOnlyInt(lkQrDoc.FieldByName('TMC_VEDCODE').AsString)+'</RXXXXG4>'+SQLCRLF;
+        lkXML_04 := lkXML_04+'    <RXXXXG4S ROWNUM="'+IntToStr(i)+'">'+lkQrDoc.FieldByName('TMC_EDIZM_SHORT').AsString+'</RXXXXG4S>'+SQLCRLF;
+        lkXML_05 := lkXML_05+'    <RXXXXG5 ROWNUM="'+IntToStr(i)+'">'+StrReplaceStr(FormatFloat('#0',lkQrDoc.FieldByName('QUANT').AsFloat),',','.')+'</RXXXXG5>'+SQLCRLF;
+        lkXML_07 := lkXML_07+'    <RXXXXG6 ROWNUM="'+IntToStr(i)+'">'+StrReplaceStr(FormatFloat('#0.00',lkQrDoc.FieldByName('PRICEPRINT').AsFloat),',','.')+'</RXXXXG6>'+SQLCRLF;
+        lkXML_08 := lkXML_08+'    <RXXXXG7 ROWNUM="'+IntToStr(i)+'">'+StrReplaceStr(FormatFloat('#0.00',lkQrDoc.FieldByName('TOTALPRINTWONDP').AsFloat),',','.')+'</RXXXXG7>'+SQLCRLF;
+        end
+       else
+        begin
+        lkXML_01 := lkXML_01+'    <RXXXXG1D ROWNUM="'+IntToStr(i)+'">'+FormatDateTime('ddmmyyyy',lkQrJrnl.FieldByName('DATE_COMMIT').AsDateTime)+'</RXXXXG1D>'+SQLCRLF;
+        lkXML_02 := lkXML_02+'    <RXXXXG2S ROWNUM="'+IntToStr(i)+'">'+lkQrDoc.FieldByName('NAME').AsString+'</RXXXXG2S>'+SQLCRLF;
+        lkXML_03 := lkXML_03+'    <RXXXXG3S ROWNUM="'+IntToStr(i)+'">'+lkQrDoc.FieldByName('TMC_NAME').AsString+'</RXXXXG3S>'+SQLCRLF;
+        if(StrTrimAll(StrCiphersOnlyInt(lkQrDoc.FieldByName('TMC_VEDCODE').AsString)) <> '')then
+          lkXML_04 := lkXML_04+'    <RXXXXG4 ROWNUM="'+IntToStr(i)+'">'+StrCiphersOnlyInt(lkQrDoc.FieldByName('TMC_VEDCODE').AsString)+'</RXXXXG4>'+SQLCRLF;
+        lkXML_05 := lkXML_05+'    <RXXXXG4S ROWNUM="'+IntToStr(i)+'">'+lkQrDoc.FieldByName('TMC_EDIZM_SHORT').AsString+'</RXXXXG4S>'+SQLCRLF;
+        lkXML_06 := lkXML_06+'    <RXXXXG5 ROWNUM="'+IntToStr(i)+'">'+StrReplaceStr(FormatFloat('#0.000000',(-1)*lkQrDoc.FieldByName('QUANT').AsFloat),',','.')+'</RXXXXG5>'+SQLCRLF;
+        lkXML_07 := lkXML_07+'    <RXXXXG6 ROWNUM="'+IntToStr(i)+'">'+StrReplaceStr(FormatFloat('#0.00',lkQrDoc.FieldByName('PRICEPRINT').AsFloat),',','.')+'0000000000</RXXXXG6>'+SQLCRLF;
+        lkXML_08 := lkXML_08+'    <RXXXXG9 ROWNUM="'+IntToStr(i)+'">'+StrReplaceStr(FormatFloat('#0.00',(-1)*lkQrDoc.FieldByName('TOTALPRINTWONDP').AsFloat),',','.')+'</RXXXXG9>'+SQLCRLF;
+        end; 
+      lkQrDoc.Next;
+      i := i + 1;
+      end;
+    if(lkQrJrnl.FieldByName('TYPE_ID').AsString = '1000131')then
+      lkXML := lkXML + lkXML_01+lkXML_02+lkXML_03+lkXML_04+lkXML_05+lkXML_06+lkXML_07+lkXML_08+ 
+        '    <R01G7>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_SUM').AsFloat),',','.')+'</R01G7>'+SQLCRLF+
+        '    <R01G8 xsi:nil="true"></R01G8>'+SQLCRLF+
+        '    <R01G9 xsi:nil="true"></R01G9>'+SQLCRLF+
+        '    <R01G10 xsi:nil="true"></R01G10>'+SQLCRLF+
+        '    <R01G11>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_SUM').AsFloat),',','.')+'</R01G11>'+SQLCRLF+
+        '    <R02G11 xsi:nil="true"></R02G11>'+SQLCRLF+
+        '    <R03G7>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_NDP').AsFloat),',','.')+'</R03G7>'+SQLCRLF+
+        '    <R03G109 xsi:nil="true"></R03G109>'+SQLCRLF+
+        '    <R03G11>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_NDP').AsFloat),',','.')+'</R03G11>'+SQLCRLF+
+        '    <R04G7>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_SUMNDP').AsFloat),',','.')+'</R04G7>'+SQLCRLF+
+        '    <R04G109 xsi:nil="true"></R04G109>'+SQLCRLF+
+        '    <R04G8 xsi:nil="true"></R04G8>'+SQLCRLF+
+        '    <R04G9 xsi:nil="true"></R04G9>'+SQLCRLF+
+        '    <R04G10 xsi:nil="true"></R04G10>'+SQLCRLF+
+        '    <R04G11>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_SUMNDP').AsFloat),',','.')+'</R04G11>'+SQLCRLF+
+        '    <H10G1S>'+lkQrEnt.FieldByName('ENT_CS_WRK_NAME_DIR').AsString+'</H10G1S>'+SQLCRLF+
+        '    <R003G10S xsi:nil="true"></R003G10S>'+SQLCRLF
+     else   
+      lkXML := lkXML + lkXML_01+lkXML_02+lkXML_03+lkXML_04+lkXML_05+lkXML_06+lkXML_07+lkXML_08+ 
+        '    <R01G9>'+StrReplaceStr(FormatFloat('#0.00',(-1)*lkQrJrnl.FieldByName('P_SUM').AsFloat),',','.')+'</R01G9>'+SQLCRLF+
+        '    <R01G10 xsi:nil="true"></R01G10>'+SQLCRLF+
+        '    <R01G11 xsi:nil="true"></R01G11>'+SQLCRLF+
+        '    <R02G9>'+StrReplaceStr(FormatFloat('#0.00',(-1)*lkQrJrnl.FieldByName('P_NDP').AsFloat),',','.')+'</R02G9>'+SQLCRLF+
+        '    <H10G1D>'+GetAttr(lkOwner,'D_FILL')+'</H10G1D>'+SQLCRLF+
+        '    <H10G2S>'+lkQrEnt.FieldByName('ENT_CS_WRK_NAME_DIR').AsString+'</H10G2S>'+SQLCRLF;
+    if lkTr.InTransaction then
+      lkTr.Commit;
+    lkTr.Free;  
+    lkXML := lkXML +'  </DECLARBODY>'+SQLCRLF+'</DECLAR>';
+    
+    lkFileExprt := GetAttr(lkOwner,'PathToFile');
+
+    i := Length(lkFileExprt);
+    while((i > 0) and (  (lkFileExprt[i] = #$20) 
+                       or(lkFileExprt[i] = #13) 
+                       or(lkFileExprt[i] = #10)
+                       or(lkFileExprt[i] = '/')
+                       or(lkFileExprt[i] = '\')    
+    ))do 
+      begin
+      Delete(lkFileExprt, i, 1);
+      i := Length(lkFileExprt);
+      end;
+    lkFileExprt := lkFileExprt + '\' + lkFileName;  
+    if FileExists(lkFileExprt) then
+      if(Dialogs.MessageDlg('Файл "'+lkFileExprt+'" уже существует.'+SQLCRLF+'Перезаписать ?', mtConfirmation, [mbYes, mbNo]) <> mrYes)then exit;
+    if StringsSaveToFile(lkFileExprt, lkXML) then 
+      Dialogs.MessageDlg('Выгрузка налоговой накладной выполнена в файл '+SQLCRLF+lkFileExprt, mtInformation, [mbOK]);
+    if(Dialogs.MessageDlg('Заблокировать документ для редактирования ?', mtConfirmation, [mbYes, mbNo]) = mrYes)then 
+      ExecSQL(FBDataBase, 'UPDATE TABL$J_4 J SET J.FLAG_LOCK = 1 WHERE (J.ID = '''+lkJ_ID+''');');
+  end;
+  //============================================================================
+  function TmcEdIzmCode(const Flag, EdIzmId:Integer):string;
+  begin
+    Result := '0101';
+    if(Flag = 1)then Result := '2454' else
+      case EdIzmId of
+        1000000 : Result := '2009';
+        1000001 : Result := '0101';
+        1000025 : Result := '2454';
+        1000028 : Result := '2084';
+      end;
+  end;
+  //============================================================================
+  function TmcEdIzmName(const Flag:Integer; const aName:string):string;
+  begin
+    if(Flag = 1)then Result := 'грн' else Result := AnsiLowerCase(aName);
+  end;
+  //============================================================================
+  procedure actExport20141114_OnExecute(Sender :TObject);
+  var
+    lkOwner    :TComponent;
+    lkFileName :string;
+    lkFileExprt:string;
+    lkXML      :string;
+    lkXML_01   :string;
+    lkXML_02   :string;
+    lkXML_03   :string;
+    lkXML_04   :string;
+    lkXML_05   :string;
+    lkXML_06   :string;
+    lkXML_07   :string;
+    lkXML_08   :string;
+    lkXML_09   :string;
+    lkJ_ID     :string;
+    lkCS_ID    :string;
+    lkTr       :TxFBTransaction;
+    lkQrCS     :TxFBQuery;
+    lkQrEnt    :TxFBQuery;
+    lkQrJrnl   :TxFBQuery;
+    lkQrJrnlNN :TxFBQuery;
+    lkQrDoc    :TxFBQuery;
+    i          :Integer;
+      lkStr :string;
+      lkVOLD:Boolean;
+    lkDocSum,
+    lkDocNDP   :Extended;  
+  begin
+      lkVOLD := False;
+      lkStr := '';
+      GetField(FBDataBase,'MON$DATABASE' ,'MON$DATABASE_NAME','', lkStr);
+      lkVOLD := (Pos('SS_001TOOLSWORLD.FDB', lkStr) > 0);
+
+    lkOwner := TComponent(Sender).Owner;
+    lkJ_ID := TForm(lkOwner).HelpKeyWord;
+    GetField(FBDataBase, 'TABL$J_1000014', 'CS_ID', 'J_ID = '+lkJ_ID, lkCS_ID);
+    lkTr    := TxFBTransaction.Create(nil);
+    with lkTr do
+      begin
+      DefaultDataBase := FBDataBase;
+      with Params do
+        begin
+        Clear;
+        Add('isc_tpb_read_committed');
+        Add('isc_tpb_read');
+        Add('isc_tpb_rec_version');
+        Add('isc_tpb_nowait');
+        end;
+      end;
+    lkQrEnt := TxFBQuery.Create(lkTr);
+    with lkQrEnt do
+      begin
+      SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/DOC/4/RPT_DEFAULT02.SQL');
+      Prepare;
+      ParamByName('J_ID').AsString := lkJ_ID;
+      if not Active then try Open; except end;
+      end;
+    lkQrCS := TxFBQuery.Create(lkTr);
+    with lkQrCS do
+      begin
+      SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/REF/CS/RPT0000.SQL');
+      Prepare;
+      ParamByName('CS_ID').AsString := lkCS_ID;
+      if not Active then try Open; except end;
+      end;
+    lkQrJrnl := TxFBQuery.Create(lkTr);
+    with lkQrJrnl do
+      begin
+      SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/DOC/1000014/RPT_DEFAULT01.SQL');
+      Prepare;
+      ParamByName('J_ID').AsString := lkJ_ID;
+      if not Active then try Open; except end;
+      end;
+    lkQrJrnlNN := TxFBQuery.Create(lkTr);
+    with lkQrJrnlNN do
+      begin
+      SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/DOC/1000014/RPT_DEFAULT01.SQL');
+      Prepare;
+      ParamByName('J_ID').AsString := lkQrJrnl.FieldByName('J_1000131_ID').AsString;
+      if not Active then try Open; except end;
+      end;
+    lkQrDoc := TxFBQuery.Create(lkTr);
+    with lkQrDoc do
+      begin
+      SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/DOC/1000014/RPT_DEFAULT00.SQL');
+      Prepare;
+      ParamByName('J_ID').AsString := lkJ_ID;
+      if not Active then try Open; except end;
+      end;
+    if(lkQrJrnl.FieldByName('TYPE_ID').AsString = '1000131')then
+      lkFileName := GetAttr(lkOwner,'C_REG')+GetAttr(lkOwner,'C_RAJ')+GetAttr(lkOwner,'TIN')+
+        'F12010071'+FormatFloat('000000000', StrToInt(GetAttr(lkOwner,'C_DOC_CNT')))+'1'+
+        Copy(GetAttr(lkOwner,'D_FILL'), 3,6)+GetAttr(lkOwner,'C_REG')+GetAttr(lkOwner,'C_RAJ')+'.xml'
+     else   
+      lkFileName := GetAttr(lkOwner,'C_REG')+GetAttr(lkOwner,'C_RAJ')+GetAttr(lkOwner,'TIN')+
+        'F12012071'+FormatFloat('000000000', StrToInt(GetAttr(lkOwner,'C_DOC_CNT')))+'1'+
+        Copy(GetAttr(lkOwner,'D_FILL'), 3,6)+GetAttr(lkOwner,'C_REG')+GetAttr(lkOwner,'C_RAJ')+'.xml';
+    
+    lkXML := '<?xml version="1.0" encoding="windows-1251"?>'+SQLCRLF;
+    if(lkQrJrnl.FieldByName('TYPE_ID').AsString = '1000131')then
+      lkXML := lkXML + '<DECLAR xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="F1201007.xsd">'+SQLCRLF
+     else
+      lkXML := lkXML + '<DECLAR xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="F1201207.xsd">'+SQLCRLF;
+    lkXML := lkXML +       
+      '  <DECLARHEAD>'+SQLCRLF+
+      '    <TIN>'+GetAttr(lkOwner,'TIN')+'</TIN>'+SQLCRLF+
+      '    <C_DOC>F12</C_DOC>'+SQLCRLF;
+    if(lkQrJrnl.FieldByName('TYPE_ID').AsString = '1000131')then
+      lkXML := lkXML + '    <C_DOC_SUB>010</C_DOC_SUB>'+SQLCRLF
+     else 
+      lkXML := lkXML + '    <C_DOC_SUB>012</C_DOC_SUB>'+SQLCRLF;
+    lkXML := lkXML +       
+      '    <C_DOC_VER>7</C_DOC_VER>'+SQLCRLF+
+      '    <C_DOC_TYPE>'+GetAttr(lkOwner,'C_DOC_TYPE')+'</C_DOC_TYPE>'+SQLCRLF+
+      '    <C_DOC_CNT>'+GetAttr(lkOwner,'C_DOC_CNT')+'</C_DOC_CNT>'+SQLCRLF+
+      '    <C_REG>'+GetAttr(lkOwner,'C_REG')+'</C_REG>'+SQLCRLF+
+      '    <C_RAJ>'+GetAttr(lkOwner,'C_RAJ')+'</C_RAJ>'+SQLCRLF+
+      '    <PERIOD_MONTH>'+GetAttr(lkOwner,'PERIOD_MONTH')+'</PERIOD_MONTH>'+SQLCRLF+
+      '    <PERIOD_TYPE>'+GetAttr(lkOwner,'PERIOD_TYPE')+'</PERIOD_TYPE>'+SQLCRLF+
+      '    <PERIOD_YEAR>'+GetAttr(lkOwner,'PERIOD_YEAR')+'</PERIOD_YEAR>'+SQLCRLF+
+      '    <C_STI_ORIG>'+GetAttr(lkOwner,'C_STI_ORIG')+'</C_STI_ORIG>'+SQLCRLF+
+      '    <C_DOC_STAN>'+GetAttr(lkOwner,'C_DOC_STAN')+'</C_DOC_STAN>'+SQLCRLF+
+      '    <LINKED_DOCS xsi:nil="true"/>'+SQLCRLF+
+      '    <D_FILL>'+GetAttr(lkOwner,'D_FILL')+'</D_FILL>'+SQLCRLF+
+      '    <SOFTWARE>OPZ 1.30.42</SOFTWARE>'+SQLCRLF+
+      '  </DECLARHEAD>'+SQLCRLF+
+      '  <DECLARBODY>'+SQLCRLF;
+    if(lkQrJrnl.FieldByName('TYPE_ID').AsString = '1000131')then
+      begin
+      lkXML := lkXML + 
+        GetTagHERPN(lkQrJrnl.FieldByName('FLAG_LOCK').AsInteger)+SQLCRLF+
+        '    <H01 xsi:nil="true"></H01>'+SQLCRLF+
+        GetTagHORIG(lkQrJrnl.FieldByName('FLAG_PNP02').AsInteger)+SQLCRLF+
+        GetTagHTYPR(lkQrJrnl.FieldByName('FLAG_PNP02').AsInteger)+SQLCRLF+
+        '    <HFILL>'+FormatDateTime('ddmmyyyy',lkQrJrnl.FieldByName('DATE_COMMIT').AsDateTime)+'</HFILL>'+SQLCRLF+
+        '    <HNUM>'+lkQrJrnl.FieldByName('DOCNUMBER').AsString+'</HNUM>'+SQLCRLF+
+        '    <HNUM1 xsi:nil="true"></HNUM1>'+SQLCRLF+
+        '    <HNUM2 xsi:nil="true"></HNUM2>'+SQLCRLF+
+        '    <HNAMESEL>'+lkQrEnt.FieldByName('ENT_CS_NAME2').AsString+'</HNAMESEL>'+SQLCRLF+
+        '    <HNAMEBUY>'+lkQrCS.FieldByName('CS_NAME2').AsString+'</HNAMEBUY>'+SQLCRLF+
+        '    <HKSEL>'+lkQrEnt.FieldByName('ENT_CS_INN').AsString+'</HKSEL>'+SQLCRLF+
+        '    <HKBUY>'+lkQrCS.FieldByName('CS_INN').AsString+'</HKBUY>'+SQLCRLF+
+        '    <HLOCSEL>'+lkQrEnt.FieldByName('ENT_CS_ADDR_NAME_2').AsString+'</HLOCSEL>'+SQLCRLF+
+        '    <HLOCBUY>'+lkQrCS.FieldByName('CS_ADDR_NAME').AsString+'</HLOCBUY>'+SQLCRLF;
+      if(StrTrimAll(lkQrEnt.FieldByName('ENT_CS_PHONE_2').AsString) <> '')then  
+        lkXML := lkXML + '    <HTELSEL>'+lkQrEnt.FieldByName('ENT_CS_PHONE_2').AsString+'</HTELSEL>'+SQLCRLF
+       else
+        lkXML := lkXML + '    <HTELSEL xsi:nil="true"></HTELSEL>'+SQLCRLF;
+      if(StrTrimAll(lkQrCS.FieldByName('CS_PHONE_2').AsString) <> '')then  
+        lkXML := lkXML + '    <HTELBUY>'+lkQrCS.FieldByName('CS_PHONE_2').AsString+'</HTELBUY>'+SQLCRLF
+       else
+        lkXML := lkXML + '    <HTELBUY xsi:nil="true"></HTELBUY>'+SQLCRLF;
+      lkXML := lkXML +
+    		'    <H01G1S>'+lkQrJrnl.FieldByName('CS_DOCS_NAME').AsString+'</H01G1S>'+SQLCRLF+
+    		'    <H01G2D>'+FormatDateTime('ddmmyyyy',lkQrJrnl.FieldByName('CS_DOCS_DATE').AsDateTime)+'</H01G2D>'+SQLCRLF+
+    		'    <H01G3S>'+lkQrJrnl.FieldByName('CS_DOCS_NUMBER').AsString+'</H01G3S>'+SQLCRLF+
+    		'    <H02G1S>оплата з поточного рахунку</H02G1S>'+SQLCRLF;
+      end
+     else
+      begin
+      lkXML := lkXML +
+        GetTagHERPN(lkQrJrnl.FieldByName('FLAG_LOCK').AsInteger)+SQLCRLF+
+        '    <H01 xsi:nil="true"></H01>'+SQLCRLF+
+        GetTagHORIG(lkQrJrnl.FieldByName('FLAG_PNP02').AsInteger)+SQLCRLF+
+        GetTagHTYPR(lkQrJrnl.FieldByName('FLAG_PNP02').AsInteger)+SQLCRLF+
+        '    <HNUM>'+lkQrJrnl.FieldByName('DOCNUMBER').AsString+'</HNUM>'+SQLCRLF+
+        '    <HNUM1 xsi:nil="true"></HNUM1>'+SQLCRLF+
+        '    <HNUM2 xsi:nil="true"></HNUM2>'+SQLCRLF+
+        '    <HFILL>'+FormatDateTime('ddmmyyyy',lkQrJrnl.FieldByName('DATE_COMMIT').AsDateTime)+'</HFILL>'+SQLCRLF+
+        '    <HPODFILL>'+FormatDateTime('ddmmyyyy',lkQrJrnl.FieldByName('J_1000131_DATE_COMMIT').AsDateTime)+'</HPODFILL>'+SQLCRLF+
+        '    <HPODNUM>'+lkQrJrnl.FieldByName('J_1000131_DOCNUMBER').AsString+'</HPODNUM>'+SQLCRLF+
+        '    <HPODNUM1 xsi:nil="true"></HPODNUM1>'+SQLCRLF+
+        '    <HPODNUM2 xsi:nil="true"></HPODNUM2>'+SQLCRLF+
+        '    <H01G1D>'+FormatDateTime('ddmmyyyy',lkQrJrnlNN.FieldByName('CS_DOCS_DATE').AsDateTime)+'</H01G1D>'+SQLCRLF+
+        '    <H01G2S>'+lkQrJrnlNN.FieldByName('CS_DOCS_NUMBER').AsString+'</H01G2S>'+SQLCRLF+
+        '    <HNAMESEL>'+lkQrEnt.FieldByName('ENT_CS_NAME2').AsString+'</HNAMESEL>'+SQLCRLF+
+        '    <HNAMEBUY>'+lkQrCS.FieldByName('CS_NAME2').AsString+'</HNAMEBUY>'+SQLCRLF+
+        '    <HKSEL>'+lkQrEnt.FieldByName('ENT_CS_INN').AsString+'</HKSEL>'+SQLCRLF+
+        '    <HKBUY>'+lkQrCS.FieldByName('CS_INN').AsString+'</HKBUY>'+SQLCRLF+
+        '    <HLOCSEL>'+lkQrEnt.FieldByName('ENT_CS_ADDR_NAME_2').AsString+'</HLOCSEL>'+SQLCRLF+
+        '    <HLOCBUY>'+lkQrCS.FieldByName('CS_ADDR_NAME').AsString+'</HLOCBUY>'+SQLCRLF;
+      if(StrTrimAll(lkQrEnt.FieldByName('ENT_CS_PHONE_2').AsString) <> '')then  
+        lkXML := lkXML + '    <HTELSEL>'+lkQrEnt.FieldByName('ENT_CS_PHONE_2').AsString+'</HTELSEL>'+SQLCRLF
+       else
+        lkXML := lkXML + '    <HTELSEL xsi:nil="true"></HTELSEL>'+SQLCRLF;
+      if(StrTrimAll(lkQrCS.FieldByName('CS_PHONE_2').AsString) <> '')then  
+        lkXML := lkXML + '    <HTELBUY>'+lkQrCS.FieldByName('CS_PHONE_2').AsString+'</HTELBUY>'+SQLCRLF
+       else
+        lkXML := lkXML + '    <HTELBUY xsi:nil="true"></HTELBUY>'+SQLCRLF;
+      lkXML := lkXML +
+        '    <H02G1S>'+lkQrJrnlNN.FieldByName('CS_DOCS_NAME').AsString+'</H02G1S>'+SQLCRLF+
+        '    <H02G2D>'+FormatDateTime('ddmmyyyy',lkQrJrnlNN.FieldByName('CS_DOCS_DATE').AsDateTime)+'</H02G2D>'+SQLCRLF+
+        '    <H02G3S>'+lkQrJrnlNN.FieldByName('CS_DOCS_NUMBER').AsString+'</H02G3S>'+SQLCRLF;
+      end; 
+    lkXML_01 := '';
+    lkXML_02 := '';
+    lkXML_03 := '';
+    lkXML_04 := '';
+    lkXML_05 := '';
+    lkXML_06 := '';
+    lkXML_07 := '';
+    lkXML_08 := '';
+    lkXML_09 := '';
+    i := 1;
+    lkDocSum := 0;
+    lkDocNDP := 0;
+    lkQrDoc.FetchAll;
+    lkQrDoc.First;
+    while not lkQrDoc.EOF do
+      begin
+      if(lkQrJrnl.FieldByName('TYPE_ID').AsString = '1000131')then
+        begin
+        lkXML_01 := lkXML_01+'    <RXXXXG2D ROWNUM="'+IntToStr(i)+'">'+FormatDateTime('ddmmyyyy',lkQrJrnl.FieldByName('DATE_COMMIT').AsDateTime)+'</RXXXXG2D>'+SQLCRLF;
+        lkXML_02 := lkXML_02+'    <RXXXXG3S ROWNUM="'+IntToStr(i)+'">'+lkQrDoc.FieldByName('TMC_NAME').AsString+'</RXXXXG3S>'+SQLCRLF;
+        if(StrTrimAll(StrCiphersOnlyInt(lkQrDoc.FieldByName('TMC_VEDCODE').AsString)) <> '')then
+          lkXML_03 := lkXML_03+'    <RXXXXG4 ROWNUM="'+IntToStr(i)+'">'+StrCiphersOnlyInt(lkQrDoc.FieldByName('TMC_VEDCODE').AsString)+'</RXXXXG4>'+SQLCRLF;
+        lkXML_04 := lkXML_04+'    <RXXXXG4S ROWNUM="'+IntToStr(i)+'">'+TmcEdIzmName(lkQrDoc.FieldByName('TMC_TYPE_FLAG').AsInteger, lkQrDoc.FieldByName('TMC_EDIZM_SHORT').AsString)+'</RXXXXG4S>'+SQLCRLF;
+        lkXML_05 := lkXML_05+'    <RXXXXG105_2S ROWNUM="'+IntToStr(i)+'">'+lkQrDoc.FieldByName('TMC_EDIZM_KSPOVO_CODE').AsString+'</RXXXXG105_2S>'+SQLCRLF;
+        lkXML_06 := lkXML_06+'    <RXXXXG5 ROWNUM="'+IntToStr(i)+'">'+StrReplaceStr(FormatFloat('#0.000',lkQrDoc.FieldByName('QUANT').AsFloat),',','.')+'</RXXXXG5>'+SQLCRLF;
+        lkXML_07 := lkXML_07+'    <RXXXXG6 ROWNUM="'+IntToStr(i)+'">'+StrReplaceStr(FormatFloat('#0.00',lkQrDoc.FieldByName('PRICEPRINT').AsFloat),',','.')+'</RXXXXG6>'+SQLCRLF;
+        lkXML_08 := lkXML_08+'    <RXXXXG7 ROWNUM="'+IntToStr(i)+'">'+StrReplaceStr(FormatFloat('#0.00',lkQrDoc.FieldByName('TOTALPRINTWONDP').AsFloat),',','.')+'</RXXXXG7>'+SQLCRLF;
+        end
+       else
+        begin
+        lkXML_01 := lkXML_01+'    <RXXXXG1D ROWNUM="'+IntToStr(i)+'">'+FormatDateTime('ddmmyyyy',lkQrJrnl.FieldByName('DATE_COMMIT').AsDateTime)+'</RXXXXG1D>'+SQLCRLF;
+        lkXML_02 := lkXML_02+'    <RXXXXG2S ROWNUM="'+IntToStr(i)+'">'+lkQrDoc.FieldByName('NAME').AsString+'</RXXXXG2S>'+SQLCRLF;
+        lkXML_03 := lkXML_03+'    <RXXXXG3S ROWNUM="'+IntToStr(i)+'">'+lkQrDoc.FieldByName('TMC_NAME').AsString+'</RXXXXG3S>'+SQLCRLF;
+        if(StrTrimAll(StrCiphersOnlyInt(lkQrDoc.FieldByName('TMC_VEDCODE').AsString)) <> '')then
+          lkXML_04 := lkXML_04+'    <RXXXXG4 ROWNUM="'+IntToStr(i)+'">'+StrCiphersOnlyInt(lkQrDoc.FieldByName('TMC_VEDCODE').AsString)+'</RXXXXG4>'+SQLCRLF;
+        lkXML_05 := lkXML_05+'    <RXXXXG4S ROWNUM="'+IntToStr(i)+'">'+TmcEdIzmName(lkQrDoc.FieldByName('TMC_TYPE_FLAG').AsInteger, lkQrDoc.FieldByName('TMC_EDIZM_SHORT').AsString)+'</RXXXXG4S>'+SQLCRLF;
+        lkXML_06 := lkXML_06+'    <RXXXXG105_2S ROWNUM="'+IntToStr(i)+'">'+lkQrDoc.FieldByName('TMC_EDIZM_KSPOVO_CODE').AsString+'</RXXXXG105_2S>'+SQLCRLF;
+        if(lkQrDoc.FieldByName('DELTA_PRICE').AsFloat <> 0)then
+          begin // изменение цены
+          lkXML_07 := lkXML_07+'    <RXXXXG7 ROWNUM="'+IntToStr(i)+'">'+StrReplaceStr(FormatFloat('#0.000000',lkQrDoc.FieldByName('BILL_QUANT').AsFloat),',','.')+'</RXXXXG5>'+SQLCRLF;
+          lkXML_08 := lkXML_08+'    <RXXXXG8 ROWNUM="'+IntToStr(i)+'">'+StrReplaceStr(FormatFloat('#0.00',lkQrDoc.FieldByName('DELTA_PRICEPRINT').AsFloat),',','.')+'0000000000</RXXXXG6>'+SQLCRLF;
+          lkXML_09 := lkXML_09+'    <RXXXXG9 ROWNUM="'+IntToStr(i)+'">'+StrReplaceStr(
+            FormatFloat('#0.00', lkQrDoc.FieldByName('DELTA_TOTALPRINT').AsFloat - lkQrDoc.FieldByName('DELTA_NDPTOTALPRINT').AsFloat)
+          ,',','.')+'</RXXXXG9>'+SQLCRLF;
+          lkDocSum := lkDocSum + (lkQrDoc.FieldByName('DELTA_TOTALPRINT').AsFloat - lkQrDoc.FieldByName('DELTA_NDPTOTALPRINT').AsFloat);
+          lkDocNDP := lkDocNDP + lkQrDoc.FieldByName('DELTA_NDPTOTALPRINT').AsFloat;
+          end
+         else
+          begin // изменение кол-ва
+          lkXML_07 := lkXML_07+'    <RXXXXG5 ROWNUM="'+IntToStr(i)+'">'+StrReplaceStr(FormatFloat('#0.000000',(-1)*lkQrDoc.FieldByName('QUANT').AsFloat),',','.')+'</RXXXXG5>'+SQLCRLF;
+          lkXML_08 := lkXML_08+'    <RXXXXG6 ROWNUM="'+IntToStr(i)+'">'+StrReplaceStr(FormatFloat('#0.00',lkQrDoc.FieldByName('PRICEPRINT').AsFloat),',','.')+'0000000000</RXXXXG6>'+SQLCRLF;
+          lkXML_09 := lkXML_09+'    <RXXXXG9 ROWNUM="'+IntToStr(i)+'">'+StrReplaceStr(
+            FormatFloat('#0.00', (-1) * (lkQrDoc.FieldByName('DELTA_TOTALPRINT').AsFloat - lkQrDoc.FieldByName('DELTA_NDPTOTALPRINT').AsFloat) )
+          ,',','.')+'</RXXXXG9>'+SQLCRLF;
+          end; 
+        end; 
+      lkQrDoc.Next;
+      i := i + 1;
+      end;
+    if(lkQrJrnl.FieldByName('TYPE_ID').AsString = '1000131')then
+      begin
+      lkXML := lkXML + lkXML_01+lkXML_02+lkXML_03+lkXML_04+lkXML_05+lkXML_06+lkXML_07+lkXML_08+lkXML_09+
+        '    <R01G7>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_SUM').AsFloat),',','.')+'</R01G7>'+SQLCRLF+
+        '    <R01G109 xsi:nil="true"></R01G109>'+SQLCRLF+
+        '    <R01G8 xsi:nil="true"></R01G8>'+SQLCRLF+
+        '    <R01G9 xsi:nil="true"></R01G9>'+SQLCRLF+
+        '    <R01G10 xsi:nil="true"></R01G10>'+SQLCRLF+
+        '    <R01G11>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_SUM').AsFloat),',','.')+'</R01G11>'+SQLCRLF+
+        '    <R02G11 xsi:nil="true"></R02G11>'+SQLCRLF+
+        '    <R03G7>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_NDP').AsFloat),',','.')+'</R03G7>'+SQLCRLF+
+        '    <R03G109 xsi:nil="true"></R03G109>'+SQLCRLF+
+        '    <R03G10S xsi:nil="true"></R03G10S>'+SQLCRLF+
+        '    <R03G11>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_NDP').AsFloat),',','.')+'</R03G11>'+SQLCRLF+
+        '    <R04G7>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_SUMNDP').AsFloat),',','.')+'</R04G7>'+SQLCRLF+
+        '    <R04G109 xsi:nil="true"></R04G109>'+SQLCRLF+
+        '    <R04G8 xsi:nil="true"></R04G8>'+SQLCRLF+
+        '    <R04G9 xsi:nil="true"></R04G9>'+SQLCRLF+
+        '    <R04G10 xsi:nil="true"></R04G10>'+SQLCRLF+
+        '    <R04G11>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_SUMNDP').AsFloat),',','.')+'</R04G11>'+SQLCRLF;
+      if lkVOLD then
+        lkXML := lkXML + '    <H10G1S>В.І.Линський'+'</H10G1S>'+SQLCRLF
+       else  
+        lkXML := lkXML + '    <H10G1S>'+lkQrEnt.FieldByName('ENT_CS_WRK_NAME_DIR').AsString+'</H10G1S>'+SQLCRLF;
+      lkXML := lkXML + '    <R003G10S xsi:nil="true"></R003G10S>'+SQLCRLF
+      end  
+     else
+      begin  
+      if(lkQrDoc.FieldByName('DELTA_PRICE').AsFloat <> 0)then
+        begin // изменение цены
+        lkXML := lkXML + lkXML_01+lkXML_02+lkXML_03+lkXML_04+lkXML_05+lkXML_06+lkXML_07+lkXML_08+lkXML_09+ 
+          '    <R01G9>'+StrReplaceStr(FormatFloat('#0.00', lkDocSum),',','.')+'</R01G9>'+SQLCRLF+
+          '    <R01G111 xsi:nil="true"></R01G111>'+SQLCRLF+
+          '    <R01G10 xsi:nil="true"></R01G10>'+SQLCRLF+
+          '    <R01G11 xsi:nil="true"></R01G11>'+SQLCRLF+
+          '    <R02G9>'+StrReplaceStr(FormatFloat('#0.00', lkDocNDP),',','.')+'</R02G9>'+SQLCRLF+
+          '    <R02G111 xsi:nil="true"></R02G111>'+SQLCRLF;
+        end
+       else
+        begin // изменение кол-ва
+        lkXML := lkXML + lkXML_01+lkXML_02+lkXML_03+lkXML_04+lkXML_05+lkXML_06+lkXML_07+lkXML_08+lkXML_09+ 
+          '    <R01G9>'+StrReplaceStr(FormatFloat('#0.00',(-1)*lkQrJrnl.FieldByName('P_SUM').AsFloat),',','.')+'</R01G9>'+SQLCRLF+
+          '    <R01G111 xsi:nil="true"></R01G111>'+SQLCRLF+
+          '    <R01G10 xsi:nil="true"></R01G10>'+SQLCRLF+
+          '    <R01G11 xsi:nil="true"></R01G11>'+SQLCRLF+
+          '    <R02G9>'+StrReplaceStr(FormatFloat('#0.00',(-1)*lkQrJrnl.FieldByName('P_NDP').AsFloat),',','.')+'</R02G9>'+SQLCRLF+
+          '    <R02G111 xsi:nil="true"></R02G111>'+SQLCRLF;
+        end;
+      if lkVOLD then
+        lkXML := lkXML + '    <H10G2S>В.І.Линський'+'</H10G2S>'+SQLCRLF
+       else  
+        lkXML := lkXML + '    <H10G2S>'+lkQrEnt.FieldByName('ENT_CS_WRK_NAME_DIR').AsString+'</H10G2S>'+SQLCRLF;
+      end;  
+        
+    if lkTr.InTransaction then
+      lkTr.Commit;
+    lkTr.Free;  
+    lkXML := lkXML +'  </DECLARBODY>'+SQLCRLF+'</DECLAR>';
+    
+    lkFileExprt := GetAttr(lkOwner,'PathToFile');
+
+    i := Length(lkFileExprt);
+    while((i > 0) and (  (lkFileExprt[i] = #$20) 
+                       or(lkFileExprt[i] = #13) 
+                       or(lkFileExprt[i] = #10)
+                       or(lkFileExprt[i] = '/')
+                       or(lkFileExprt[i] = '\')    
+    ))do 
+      begin
+      Delete(lkFileExprt, i, 1);
+      i := Length(lkFileExprt);
+      end;
+    lkFileExprt := lkFileExprt + '\' + lkFileName;  
+    if FileExists(lkFileExprt) then
+      if(Dialogs.MessageDlg('Файл "'+lkFileExprt+'" уже существует.'+SQLCRLF+'Перезаписать ?', mtConfirmation, [mbYes, mbNo]) <> mrYes)then exit;
+    if StringsSaveToFile(lkFileExprt, lkXML) then 
+      Dialogs.MessageDlg('Выгрузка налоговой накладной выполнена в файл '+SQLCRLF+lkFileExprt, mtInformation, [mbOK]);
+    if(Dialogs.MessageDlg('Заблокировать документ для редактирования ?', mtConfirmation, [mbYes, mbNo]) = mrYes)then 
+      ExecSQL(FBDataBase, 'UPDATE TABL$J_4 J SET J.FLAG_LOCK = 1 WHERE (J.ID = '''+lkJ_ID+''');');
+  end;
+
+  //============================================================================
+  procedure actExport20160401_OnExecute(Sender :TObject);
+  var
+    lkOwner    :TComponent;
+    lkFileName :string;
+    lkFileExprt:string;
+    lkXML      :string;
+    lkXML_01   :string;
+    lkXML_02   :string;
+    lkXML_03   :string;
+    lkXML_04   :string;
+    lkXML_05   :string;
+    lkXML_06   :string;
+    lkXML_07   :string;
+    lkXML_08   :string;
+    lkXML_09   :string;
+    lkJ_ID     :string;
+    lkCS_ID    :string;
+    lkTr       :TxFBTransaction;
+    lkQrCS     :TxFBQuery;
+    lkQrEnt    :TxFBQuery;
+    lkQrJrnl   :TxFBQuery;
+    lkQrJrnlNN :TxFBQuery;
+    lkQrDoc    :TxFBQuery;
+    i          :Integer;
+      lkStr :string;
+      lkVOLD:Boolean;
+    lkDocSum,
+    lkDocNDP   :Extended;  
+  begin
+      lkVOLD := False;
+      lkStr := '';
+      GetField(FBDataBase,'MON$DATABASE' ,'MON$DATABASE_NAME','', lkStr);
+      lkVOLD := (Pos('SS_001TOOLSWORLD.FDB', lkStr) > 0);
+
+    lkOwner := TComponent(Sender).Owner;
+    lkJ_ID := TForm(lkOwner).HelpKeyWord;
+    GetField(FBDataBase, 'TABL$J_1000014', 'CS_ID', 'J_ID = '+lkJ_ID, lkCS_ID);
+    lkTr    := TxFBTransaction.Create(nil);
+    with lkTr do
+      begin
+      DefaultDataBase := FBDataBase;
+      with Params do
+        begin
+        Clear;
+        Add('isc_tpb_read_committed');
+        Add('isc_tpb_read');
+        Add('isc_tpb_rec_version');
+        Add('isc_tpb_nowait');
+        end;
+      end;
+    lkQrEnt := TxFBQuery.Create(lkTr);
+    with lkQrEnt do
+      begin
+      SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/DOC/4/RPT_DEFAULT02.SQL');
+      Prepare;
+      ParamByName('J_ID').AsString := lkJ_ID;
+      if not Active then try Open; except end;
+      end;
+    lkQrCS := TxFBQuery.Create(lkTr);
+    with lkQrCS do
+      begin
+      SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/REF/CS/RPT0000.SQL');
+      Prepare;
+      ParamByName('CS_ID').AsString := lkCS_ID;
+      if not Active then try Open; except end;
+      end;
+    lkQrJrnl := TxFBQuery.Create(lkTr);
+    with lkQrJrnl do
+      begin
+      SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/DOC/1000014/RPT_DEFAULT01.SQL');
+      Prepare;
+      ParamByName('J_ID').AsString := lkJ_ID;
+      if not Active then try Open; except end;
+      end;
+    lkQrJrnlNN := TxFBQuery.Create(lkTr);
+    with lkQrJrnlNN do
+      begin
+      SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/DOC/1000014/RPT_DEFAULT01.SQL');
+      Prepare;
+      ParamByName('J_ID').AsString := lkQrJrnl.FieldByName('J_1000131_ID').AsString;
+      if not Active then try Open; except end;
+      end;
+    lkQrDoc := TxFBQuery.Create(lkTr);
+    with lkQrDoc do
+      begin
+      SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/DOC/1000014/RPT_DEFAULT00.SQL');
+      Prepare;
+      ParamByName('J_ID').AsString := lkJ_ID;
+      if not Active then try Open; except end;
+      end;
+    if(lkQrJrnl.FieldByName('TYPE_ID').AsString = '1000131')then
+      lkFileName := GetAttr(lkOwner,'C_REG')+GetAttr(lkOwner,'C_RAJ')+GetAttr(lkOwner,'TIN')+
+        'F12010081'+FormatFloat('000000000', StrToInt(GetAttr(lkOwner,'C_DOC_CNT')))+'1'+
+        Copy(GetAttr(lkOwner,'D_FILL'), 3,6)+GetAttr(lkOwner,'C_REG')+GetAttr(lkOwner,'C_RAJ')+'.xml'
+     else   
+      lkFileName := GetAttr(lkOwner,'C_REG')+GetAttr(lkOwner,'C_RAJ')+GetAttr(lkOwner,'TIN')+
+        'F12012081'+FormatFloat('000000000', StrToInt(GetAttr(lkOwner,'C_DOC_CNT')))+'1'+
+        Copy(GetAttr(lkOwner,'D_FILL'), 3,6)+GetAttr(lkOwner,'C_REG')+GetAttr(lkOwner,'C_RAJ')+'.xml';
+    
+    lkXML := '<?xml version="1.0" encoding="windows-1251"?>'+SQLCRLF;
+    if(lkQrJrnl.FieldByName('TYPE_ID').AsString = '1000131')then
+      lkXML := lkXML + '<DECLAR xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="F1201008.xsd">'+SQLCRLF
+     else
+      lkXML := lkXML + '<DECLAR xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="F1201208.xsd">'+SQLCRLF;
+    lkXML := lkXML +       
+      '  <DECLARHEAD>'+SQLCRLF+
+      '    <TIN>'+GetAttr(lkOwner,'TIN')+'</TIN>'+SQLCRLF+
+      '    <C_DOC>F12</C_DOC>'+SQLCRLF;
+    if(lkQrJrnl.FieldByName('TYPE_ID').AsString = '1000131')then
+      lkXML := lkXML + '    <C_DOC_SUB>010</C_DOC_SUB>'+SQLCRLF
+     else 
+      lkXML := lkXML + '    <C_DOC_SUB>012</C_DOC_SUB>'+SQLCRLF;
+    lkXML := lkXML +       
+      '    <C_DOC_VER>8</C_DOC_VER>'+SQLCRLF+
+      '    <C_DOC_TYPE>'+GetAttr(lkOwner,'C_DOC_TYPE')+'</C_DOC_TYPE>'+SQLCRLF+
+      '    <C_DOC_CNT>'+GetAttr(lkOwner,'C_DOC_CNT')+'</C_DOC_CNT>'+SQLCRLF+
+      '    <C_REG>'+GetAttr(lkOwner,'C_REG')+'</C_REG>'+SQLCRLF+
+      '    <C_RAJ>'+GetAttr(lkOwner,'C_RAJ')+'</C_RAJ>'+SQLCRLF+
+      '    <PERIOD_MONTH>'+GetAttr(lkOwner,'PERIOD_MONTH')+'</PERIOD_MONTH>'+SQLCRLF+
+      '    <PERIOD_TYPE>'+GetAttr(lkOwner,'PERIOD_TYPE')+'</PERIOD_TYPE>'+SQLCRLF+
+      '    <PERIOD_YEAR>'+GetAttr(lkOwner,'PERIOD_YEAR')+'</PERIOD_YEAR>'+SQLCRLF+
+      '    <C_STI_ORIG>'+GetAttr(lkOwner,'C_STI_ORIG')+'</C_STI_ORIG>'+SQLCRLF+
+      '    <C_DOC_STAN>'+GetAttr(lkOwner,'C_DOC_STAN')+'</C_DOC_STAN>'+SQLCRLF+
+      '    <LINKED_DOCS xsi:nil="true"/>'+SQLCRLF+
+      '    <D_FILL>'+GetAttr(lkOwner,'D_FILL')+'</D_FILL>'+SQLCRLF+
+      '    <SOFTWARE>OPZ 1.33.3.0</SOFTWARE>'+SQLCRLF+
+      '  </DECLARHEAD>'+SQLCRLF+
+      '  <DECLARBODY>'+SQLCRLF;
+    if(lkQrJrnl.FieldByName('TYPE_ID').AsString = '1000131')then
+      begin
+      lkXML := lkXML + 
+        '    <H03 xsi:nil="true"></H03>'+SQLCRLF+
+        '    <R03G10S xsi:nil="true"></R03G10S>'+SQLCRLF+
+        GetTagHORIG(lkQrJrnl.FieldByName('FLAG_PNP02').AsInteger)+SQLCRLF+
+        GetTagHTYPR(lkQrJrnl.FieldByName('FLAG_PNP02').AsInteger)+SQLCRLF+
+        '    <HFILL>'+FormatDateTime('ddmmyyyy',lkQrJrnl.FieldByName('DATE_COMMIT').AsDateTime)+'</HFILL>'+SQLCRLF+
+        '    <HNUM>'+lkQrJrnl.FieldByName('DOCNUMBER').AsString+'</HNUM>'+SQLCRLF+
+        '    <HNUM1 xsi:nil="true"></HNUM1>'+SQLCRLF+
+        '    <HNAMESEL>'+lkQrEnt.FieldByName('ENT_CS_NAME2').AsString+'</HNAMESEL>'+SQLCRLF+
+        '    <HNAMEBUY>'+lkQrCS.FieldByName('CS_NAME2').AsString+'</HNAMEBUY>'+SQLCRLF+
+        '    <HKSEL>'+lkQrEnt.FieldByName('ENT_CS_INN').AsString+'</HKSEL>'+SQLCRLF+
+        '    <HNUM2 xsi:nil="true"></HNUM2>'+SQLCRLF+
+        '    <HKBUY>'+lkQrCS.FieldByName('CS_INN').AsString+'</HKBUY>'+SQLCRLF+
+        '    <HFBUY xsi:nil="true"></HFBUY>'+SQLCRLF+
+        '    <R04G11>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_SUMNDP').AsFloat),',','.')+'</R04G11>'+SQLCRLF+
+        '    <R03G11>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_NDP').AsFloat),',','.')+'</R03G11>'+SQLCRLF+
+        '    <R03G7>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_NDP').AsFloat),',','.')+'</R03G7>'+SQLCRLF+
+        '    <R03G109 xsi:nil="true"></R03G109>'+SQLCRLF+
+        '    <R01G7>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_SUM').AsFloat),',','.')+'</R01G7>'+SQLCRLF+
+        '    <R01G109 xsi:nil="true"></R01G109>'+SQLCRLF+
+        '    <R01G9 xsi:nil="true"></R01G9>'+SQLCRLF+
+        '    <R01G8 xsi:nil="true"></R01G8>'+SQLCRLF+
+        '    <R01G10 xsi:nil="true"></R01G10>'+SQLCRLF+
+        '    <R02G11 xsi:nil="true"></R02G11>'+SQLCRLF;
+      end
+     else
+      begin
+      end; 
+    lkXML_01 := '';
+    lkXML_02 := '';
+    lkXML_03 := '';
+    lkXML_04 := '';
+    lkXML_05 := '';
+    lkXML_06 := '';
+    lkXML_07 := '';
+    lkXML_08 := '';
+    lkXML_09 := '';
+    i := 1;
+    lkDocSum := 0;
+    lkDocNDP := 0;
+    lkQrDoc.FetchAll;
+    lkQrDoc.First;
+    while not lkQrDoc.EOF do
+      begin
+      if(lkQrJrnl.FieldByName('TYPE_ID').AsString = '1000131')then
+        begin
+        lkXML_02 := lkXML_02+'    <RXXXXG3S ROWNUM="'+IntToStr(i)+'">'+lkQrDoc.FieldByName('TMC_NAME').AsString+'</RXXXXG3S>'+SQLCRLF;
+        if(StrTrimAll(StrCiphersOnlyInt(lkQrDoc.FieldByName('TMC_VEDCODE').AsString)) <> '')then
+          lkXML_03 := lkXML_03+'    <RXXXXG4 ROWNUM="'+IntToStr(i)+'">'+StrCiphersOnlyInt(lkQrDoc.FieldByName('TMC_VEDCODE').AsString)+'</RXXXXG4>'+SQLCRLF;
+        lkXML_04 := lkXML_04+'    <RXXXXG4S ROWNUM="'+IntToStr(i)+'">'+TmcEdIzmName(lkQrDoc.FieldByName('TMC_TYPE_FLAG').AsInteger, lkQrDoc.FieldByName('TMC_EDIZM_SHORT').AsString)+'</RXXXXG4S>'+SQLCRLF;
+        lkXML_05 := lkXML_05+'    <RXXXXG105_2S ROWNUM="'+IntToStr(i)+'">'+lkQrDoc.FieldByName('TMC_EDIZM_KSPOVO_CODE').AsString+'</RXXXXG105_2S>'+SQLCRLF;
+        lkXML_06 := lkXML_06+'    <RXXXXG5 ROWNUM="'+IntToStr(i)+'">'+StrReplaceStr(FormatFloat('#0.000',lkQrDoc.FieldByName('QUANT').AsFloat),',','.')+'</RXXXXG5>'+SQLCRLF;
+        lkXML_07 := lkXML_07+'    <RXXXXG6 ROWNUM="'+IntToStr(i)+'">'+StrReplaceStr(FormatFloat('#0.00',lkQrDoc.FieldByName('PRICEPRINT').AsFloat),',','.')+'</RXXXXG6>'+SQLCRLF;
+        lkXML_08 := lkXML_08+'    <RXXXXG008 ROWNUM="'+IntToStr(i)+'">20</RXXXXG008>'+SQLCRLF;
+        lkXML_09 := lkXML_09+'    <RXXXXG009 ROWNUM="'+IntToStr(i)+'" xsi:nil="true"></RXXXXG009>'+SQLCRLF;
+        lkXML_01 := lkXML_01+'    <RXXXXG010 ROWNUM="'+IntToStr(i)+'">'+StrReplaceStr(FormatFloat('#0.00',lkQrDoc.FieldByName('TOTALPRINTWONDP').AsFloat),',','.')+'</RXXXXG010>'+SQLCRLF;
+        end
+       else
+        begin
+        
+        end; 
+      lkQrDoc.Next;
+      i := i + 1;
+      end;
+    if(lkQrJrnl.FieldByName('TYPE_ID').AsString = '1000131')then
+      begin
+      lkXML := lkXML + lkXML_02+lkXML_03+lkXML_04+lkXML_05+lkXML_06+lkXML_07+lkXML_08+lkXML_09+lkXML_01+
+        '    <R03G10S xsi:nil="true"></R03G10S>'+SQLCRLF;
+      if lkVOLD then
+        lkXML := lkXML + '    <HBOS>В.І.Линський'+'</HBOS>'+SQLCRLF
+       else  
+        lkXML := lkXML + '    <HBOS>'+lkQrEnt.FieldByName('ENT_CS_WRK_NAME_DIR').AsString+'</HBOS>'+SQLCRLF;
+      lkXML := lkXML +
+        '    <HKBOS>'+lkQrEnt.FieldByName('ENT_CS_INN').AsString+'</HKBOS>'+SQLCRLF+
+        '    <R003G10S xsi:nil="true"></R003G10S>'+SQLCRLF;
+      end  
+     else
+      begin  
+      lkXML := lkXML + lkXML_02+lkXML_03+lkXML_04+lkXML_05+lkXML_06+lkXML_07+lkXML_08+lkXML_09+lkXML_01+
+        '    <R03G10S xsi:nil="true"></R03G10S>'+SQLCRLF;
+      if lkVOLD then
+        lkXML := lkXML + '    <HBOS>В.І.Линський'+'</HBOS>'+SQLCRLF
+       else  
+        lkXML := lkXML + '    <HBOS>'+lkQrEnt.FieldByName('ENT_CS_WRK_NAME_DIR').AsString+'</HBOS>'+SQLCRLF;
+      lkXML := lkXML +
+        '    <HKBOS>'+lkQrEnt.FieldByName('ENT_CS_INN').AsString+'</HKBOS>'+SQLCRLF+
+        '    <R003G10S xsi:nil="true"></R003G10S>'+SQLCRLF;
+      end;  
+        
+    if lkTr.InTransaction then
+      lkTr.Commit;
+    lkTr.Free;  
+    lkXML := lkXML +'  </DECLARBODY>'+SQLCRLF+'</DECLAR>';
+    
+    lkFileExprt := GetAttr(lkOwner,'PathToFile');
+
+    i := Length(lkFileExprt);
+    while((i > 0) and (  (lkFileExprt[i] = #$20) 
+                       or(lkFileExprt[i] = #13) 
+                       or(lkFileExprt[i] = #10)
+                       or(lkFileExprt[i] = '/')
+                       or(lkFileExprt[i] = '\')    
+    ))do 
+      begin
+      Delete(lkFileExprt, i, 1);
+      i := Length(lkFileExprt);
+      end;
+    lkFileExprt := lkFileExprt + '\' + lkFileName;  
+    if FileExists(lkFileExprt) then
+      if(Dialogs.MessageDlg('Файл "'+lkFileExprt+'" уже существует.'+SQLCRLF+'Перезаписать ?', mtConfirmation, [mbYes, mbNo]) <> mrYes)then exit;
+    if StringsSaveToFile(lkFileExprt, lkXML) then 
+      Dialogs.MessageDlg('Выгрузка налоговой накладной выполнена в файл '+SQLCRLF+lkFileExprt, mtInformation, [mbOK]);
+    if(Dialogs.MessageDlg('Заблокировать документ для редактирования ?', mtConfirmation, [mbYes, mbNo]) = mrYes)then 
+      ExecSQL(FBDataBase, 'UPDATE TABL$J_4 J SET J.FLAG_LOCK = 1 WHERE (J.ID = '''+lkJ_ID+''');');
+  end;
+  //============================================================================
+  procedure actExport20170301_OnExecute(Sender :TObject);
+  var
+    lkOwner    :TComponent;
+    lkFileName :string;
+    lkFileExprt:string;
+    lkXML      :string;
+    lkJ_ID     :string;
+    lkCS_ID    :string;
+    lkTr       :TxFBTransaction;
+    lkQrCS     :TxFBQuery;
+    lkQrEnt    :TxFBQuery;
+    lkQrJrnl   :TxFBQuery;
+    lkQrJrnlNN :TxFBQuery;
+    lkQrDoc    :TxFBQuery;
+    i          :Integer;
+      lkStr :string;
+      lkVOLD:Boolean;
+    lkDocSum,
+    lkDocNDP   :Extended;  
+  begin
+      lkVOLD := False;
+      lkStr := '';
+      GetField(FBDataBase,'MON$DATABASE' ,'MON$DATABASE_NAME','', lkStr);
+      lkVOLD := (Pos('SS_001TOOLSWORLD.FDB', lkStr) > 0);
+
+    lkOwner := TComponent(Sender).Owner;
+    lkJ_ID := TForm(lkOwner).HelpKeyWord;
+    GetField(FBDataBase, 'TABL$J_1000014', 'CS_ID', 'J_ID = '+lkJ_ID, lkCS_ID);
+    lkTr    := TxFBTransaction.Create(nil);
+    with lkTr do
+      begin
+      DefaultDataBase := FBDataBase;
+      with Params do
+        begin
+        Clear;
+        Add('isc_tpb_read_committed');
+        Add('isc_tpb_read');
+        Add('isc_tpb_rec_version');
+        Add('isc_tpb_nowait');
+        end;
+      end;
+    lkQrEnt := TxFBQuery.Create(lkTr);
+    with lkQrEnt do
+      begin
+      SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/DOC/4/RPT_DEFAULT02.SQL');
+      Prepare;
+      ParamByName('J_ID').AsString := lkJ_ID;
+      if not Active then try Open; except end;
+      end;
+    lkQrCS := TxFBQuery.Create(lkTr);
+    with lkQrCS do
+      begin
+      SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/REF/CS/RPT0000.SQL');
+      Prepare;
+      ParamByName('CS_ID').AsString := lkCS_ID;
+      if not Active then try Open; except end;
+      end;
+    lkQrJrnl := TxFBQuery.Create(lkTr);
+    with lkQrJrnl do
+      begin
+      SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/DOC/1000014/RPT_DEFAULT01.SQL');
+      Prepare;
+      ParamByName('J_ID').AsString := lkJ_ID;
+      if not Active then try Open; except end;
+      end;
+    lkQrJrnlNN := TxFBQuery.Create(lkTr);
+    with lkQrJrnlNN do
+      begin
+      SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/DOC/1000014/RPT_DEFAULT01.SQL');
+      Prepare;
+      ParamByName('J_ID').AsString := lkQrJrnl.FieldByName('J_1000131_ID').AsString;
+      if not Active then try Open; except end;
+      end;
+    lkQrDoc := TxFBQuery.Create(lkTr);
+    with lkQrDoc do
+      begin
+      SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/DOC/1000014/RPT_DEFAULT00.SQL');
+      Prepare;
+      ParamByName('J_ID').AsString := lkJ_ID;
+      if not Active then try Open; except end;
+      end;
+
+    lkFileName := 
+      GetAttr(lkOwner,'C_REG')+
+      GetAttr(lkOwner,'C_RAJ')+
+      GetAttr(lkOwner,'TIN')+
+      'F1201009'+FormatFloat('000000000', StrToInt(GetAttr(lkOwner,'C_DOC_CNT')))+'1'+
+      Copy(GetAttr(lkOwner,'D_FILL'), 3,6)+GetAttr(lkOwner,'C_REG')+GetAttr(lkOwner,'C_RAJ')+'.xml';
+    
+    i := 0;
+    lkXML := 
+    '<?xml version="1.0" encoding="windows-1251"?> '+SQLCRLF+
+    '<ZVIT> '+SQLCRLF+
+    '  <TRANSPORT> '+SQLCRLF+
+    '    <VERSION>4.1</VERSION> '+SQLCRLF+
+    '    <CREATEDATE>'+FormatDateTime('dd.mm.yyyy',lkQrJrnl.FieldByName('DATE_COMMIT').AsDateTime)+'</CREATEDATE> '+SQLCRLF+
+    '  </TRANSPORT> '+SQLCRLF+
+    '  <ORG> '+SQLCRLF+
+    '    <FIELDS> '+SQLCRLF+
+    '      <EDRPOU>'+lkQrEnt.FieldByName('ENT_CS_INN').AsString+'</EDRPOU> '+SQLCRLF+
+    '    </FIELDS> '+SQLCRLF+
+    '    <CARD> '+SQLCRLF+
+    '      <FIELDS> '+SQLCRLF+
+    '        <PERTYPE>0</PERTYPE> '+SQLCRLF+
+    '        <PERDATE>'+FormatDateTime('dd.mm.yyyy', StartOfTheMonth(lkQrJrnl.FieldByName('DATE_COMMIT').AsDateTime) )+'</PERDATE> '+SQLCRLF+
+    '        <DOCID>'+lkQrJrnl.FieldByName('DOCNUMBER').AsString+'</DOCID> '+SQLCRLF+
+    '        <NOTATION /> '+SQLCRLF+
+    '        <CHARCODE>F1201009</CHARCODE> '+SQLCRLF+
+    '      </FIELDS> '+SQLCRLF+
+    '      <DOCUMENT> '+SQLCRLF;
+    
+    
+    // Продавец
+    lkXML := lkXML +
+    //'        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="REP_KS"><VALUE>2906554235</VALUE></ROW> '+SQLCRLF+
+    '        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="FIRM_NAME"><VALUE>'+lkQrEnt.FieldByName('ENT_CS_NAME2').AsString+'</VALUE></ROW> '+SQLCRLF+
+    '        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="FIRM_INN"><VALUE>'+lkQrEnt.FieldByName('ENT_CS_INN').AsString+'</VALUE></ROW> '+SQLCRLF;
+    if(StrTrimAll(lkQrEnt.FieldByName('ENT_CS_EDRPOU').AsString) <> '')then
+    lkXML := lkXML +
+    '        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="FIRM_EDRPOU"><VALUE>'+lkQrEnt.FieldByName('ENT_CS_EDRPOU').AsString+'</VALUE></ROW> '+SQLCRLF;
+    lkXML := lkXML +
+    '        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="INN"><VALUE>'+lkQrEnt.FieldByName('ENT_CS_INN').AsString+'</VALUE></ROW> '+SQLCRLF;
+    
+
+    // Покупатель
+    lkXML := lkXML +
+    '        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="N3"><VALUE>'+lkQrCS.FieldByName('CS_NAME2').AsString+'</VALUE></ROW> '+SQLCRLF+
+    '        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="N4"><VALUE>'+lkQrCS.FieldByName('CS_INN').AsString+'</VALUE></ROW> '+SQLCRLF;
+    if(StrTrimAll(lkQrCS.FieldByName('CS_EDRPOU').AsString) <> '')then
+    lkXML := lkXML +
+    '        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="EDR_POK"><VALUE>'+lkQrCS.FieldByName('CS_EDRPOU').AsString+'</VALUE></ROW> '+SQLCRLF;
+    
+
+    // Номер накладной с номером филиала
+    lkXML := lkXML +
+    //'        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="DEPT_POK"><VALUE>0001</VALUE></ROW> '+SQLCRLF+
+    '        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="N2_1"><VALUE>'+lkQrJrnl.FieldByName('DOCNUMBER').AsString+'</VALUE></ROW> '+SQLCRLF+
+    '        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="N2_11"><VALUE>'+lkQrJrnl.FieldByName('DOCNUMBER').AsString+'</VALUE></ROW> '+SQLCRLF;
+    //'        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="N2_13"><VALUE>0</VALUE></ROW> '+SQLCRLF+
+    
+    // Ц.П.Д. 
+    //lkXML := lkXML +
+    //'        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="N8"><VALUE>'+lkQrJrnl.FieldByName('CS_DOCS_NAME').AsString+'</VALUE></ROW> '+SQLCRLF;
+    //if(StrCiphersOnlyInt(lkQrJrnl.FieldByName('CS_DOCS_NUMBER').AsString) <> '')then
+    //  lkXML := lkXML +
+    //  '        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="N81"><VALUE>'+lkQrJrnl.FieldByName('CS_DOCS_NUMBER').AsString+'</VALUE></ROW> '+SQLCRLF;
+    //lkXML := lkXML +
+    //'        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="N82"><VALUE>'+FormatDateTime('dd.mm.yyyy',lkQrJrnl.FieldByName('CS_DOCS_DATE').AsDateTime)+'</VALUE></ROW> '+SQLCRLF;
+    
+
+    // Счёт-фактура
+    //if(lkQrJrnl.FieldByName('J_1000075_ID').AsInteger <> 0)then
+    //lkXML := lkXML +
+    //'        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="N22"><VALUE>'+StrCiphersOnlyInt(lkQrJrnl.FieldByName('J_1000075_DOCNUMBERSTR').AsString)+'</VALUE></ROW> '+SQLCRLF+
+    //'        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="N23"><VALUE>'+FormatDateTime('dd.mm.yyyy',lkQrJrnl.FieldByName('J_1000075_DATE_COMMIT').AsDateTime)+'</VALUE></ROW> '+SQLCRLF;
+
+
+    //Усього обсяги постачання за основною ставкою (код ставки 20)
+    lkXML := lkXML +
+    '        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="A5_7"><VALUE>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_SUM').AsFloat),',','.')+'</VALUE></ROW> '+SQLCRLF+
+    //Усього обсяги постачання за ставкою            7 % (код ставки 7)
+    //'        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="A5_71"><VALUE>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_SUM').AsFloat),',','.')+'</VALUE></ROW> '+SQLCRLF+
+    //Усього обсяги постачання на митній території України за ставкою 0% (код ставки 902)
+    //'        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="A5_8"><VALUE>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_SUM').AsFloat),',','.')+'</VALUE></ROW> '+SQLCRLF+
+    //Усього обсяги постачання при експорті товарів за ставкою 0% (код ставки 901)
+    //'        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="A5_9"><VALUE>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_SUM').AsFloat),',','.')+'</VALUE></ROW> '+SQLCRLF+
+    //Усього обсяги операцій, звільнених від оподаткування (код ставки 903)
+    //'        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="A5_10"><VALUE>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_SUM').AsFloat),',','.')+'</VALUE></ROW> '+SQLCRLF+
+    
+    
+    //Загальна сума податку на додану вартість, у тому числі:
+    '        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="A6_11"><VALUE>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_NDP').AsFloat),',','.')+'</VALUE></ROW> '+SQLCRLF+
+    //Загальна сума податку на додану вартість за основною ставкою
+    '        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="A6_7"><VALUE>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_NDP').AsFloat),',','.')+'</VALUE></ROW> '+SQLCRLF+
+    //Загальна сума податку на додану вартість за ставкою 7%
+    //'        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="A6_71"><VALUE>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_NDP').AsFloat),',','.')+'</VALUE></ROW> '+SQLCRLF+
+
+
+    //Загальна сума кошті,що підлягають сплаті з урахуванням податку на додану вартість
+    '        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="A7_11"><VALUE>'+StrReplaceStr(FormatFloat('#0.00',lkQrJrnl.FieldByName('P_SUMNDP').AsFloat),',','.')+'</VALUE></ROW> '+SQLCRLF+
+
+    // Дата надання
+    '        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="N11"><VALUE>'+FormatDateTime('dd.mm.yyyy',lkQrJrnl.FieldByName('DATE_COMMIT').AsDateTime)+'</VALUE></ROW> '+SQLCRLF;
+    
+    // Не підлягає виданню отримувачу (покупцю) з причини
+    if(lkQrJrnl.FieldByName('FLAG_PNP02').AsInteger = 1)then
+      lkXML := lkXML +
+      '        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="N13"><VALUE>1</VALUE></ROW> '+SQLCRLF+
+      '        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="N14"><VALUE>02</VALUE></ROW> '+SQLCRLF;
+
+    lkXML := lkXML +
+    // Відповідні пункти, якими передбачено звільнення від оподаткування
+    //'        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="N16"><VALUE>Статут  ПКУ №455</VALUE></ROW> '+SQLCRLF+
+    // Зведена податкова накладна
+    // '        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="N25"><VALUE>1</VALUE></ROW> '+
+    // Подпись
+    '        <ROW LINE="'+IntToStr(i)+'" TAB="0" NAME="N10"><VALUE>В.І. Линський</VALUE></ROW> '+SQLCRLF;
+    lkQrDoc.FetchAll;
+    lkQrDoc.First;
+    while not lkQrDoc.EOF do
+      begin
+      lkXML := lkXML +
+      //Порядковий номер рядка у динамічній таблиці
+      '        <ROW LINE="'+IntToStr(i)+'" TAB="1" NAME="TAB1_A1"><VALUE>'+IntToStr(i+1)+'</VALUE></ROW> '+SQLCRLF+ 
+      //Код виду діяльності сільськогосподарського товаровиробника:   
+      //'        <ROW LINE="'+IntToStr(i)+'" TAB="1" NAME="TAB1_A11"><VALUE></VALUE></ROW> '+SQLCRLF+
+      //Номенклатура поставки товарів: 
+      '        <ROW LINE="'+IntToStr(i)+'" TAB="1" NAME="TAB1_A13"><VALUE>'+lkQrDoc.FieldByName('TMC_NAME').AsString+'</VALUE></ROW> '+SQLCRLF;
+
+      //Код товару згідно з УКТ ЗЕД:
+      if(lkQrDoc.FieldByName('TMC_TYPE_FLAG').AsInteger <> 1)then
+      lkXML := lkXML +
+      '        <ROW LINE="'+IntToStr(i)+'" TAB="1" NAME="TAB1_A131"><VALUE>'+lkQrDoc.FieldByName('TMC_VEDCODE').AsString+'</VALUE></ROW> '+SQLCRLF;
+
+      //Ознака імпортованого товару:
+      if(lkQrDoc.FieldByName('TMC_STATEFINE').AsInteger = 1)then
+      lkXML := lkXML +
+      '        <ROW LINE="'+IntToStr(i)+'" TAB="1" NAME="TAB1_A132"><VALUE>1</VALUE></ROW> '+SQLCRLF;
+
+      //Послуги згідно з ДКПП:
+      if(lkQrDoc.FieldByName('TMC_TYPE_FLAG').AsInteger = 1)then
+      lkXML := lkXML +
+      '        <ROW LINE="'+IntToStr(i)+'" TAB="1" NAME="TAB1_A133"><VALUE>'+lkQrDoc.FieldByName('TMC_VEDCODE').AsString+'</VALUE></ROW> '+SQLCRLF;
+
+      lkXML := lkXML +
+      //Одиниця виміру товару/послуги (умовне позначення (українське):
+      '        <ROW LINE="'+IntToStr(i)+'" TAB="1" NAME="TAB1_A14"><VALUE>'+TmcEdIzmName(lkQrDoc.FieldByName('TMC_TYPE_FLAG').AsInteger, lkQrDoc.FieldByName('TMC_EDIZM_SHORT').AsString)+'</VALUE></ROW> '+SQLCRLF+
+
+      //Одиниця виміру товару/послуги (код):
+      '        <ROW LINE="'+IntToStr(i)+'" TAB="1" NAME="TAB1_A141"><VALUE>'+lkQrDoc.FieldByName('TMC_EDIZM_KSPOVO_CODE').AsString+'</VALUE></ROW> '+SQLCRLF+
+
+      //Кількість: 
+      '        <ROW LINE="'+IntToStr(i)+'" TAB="1" NAME="TAB1_A15"><VALUE>'+StrReplaceStr(FormatFloat('#0.000',lkQrDoc.FieldByName('QUANT').AsFloat),',','.')+'</VALUE></ROW> '+SQLCRLF+
+
+      //Ціна постачання одиниці товару\послуги:
+      '        <ROW LINE="'+IntToStr(i)+'" TAB="1" NAME="TAB1_A16"><VALUE>'+StrReplaceStr(FormatFloat('#0.00',lkQrDoc.FieldByName('PRICEPRINT').AsFloat),',','.')+'</VALUE></ROW> '+SQLCRLF+
+
+      //Код ставки:
+      //   20 При начислении обязательств по операциям, облагаемым по основной ставке 20%        I, II, III, V
+      //    7 При начислении обязательств по операциям, облагаемым по ставке 7%                  I, II, IV, VI
+      //  901 При осуществлении операций по вывозу товаров за пределы таможенной территории 
+      //      Украины, которые облагают НДС по ставке 0%                                         I, VII
+      //  902 При осуществлении операций по поставке товаров/услуг на таможенной территории 
+      //      Украины, облагаемых по ставке 0%, в том числе при поставке услуг международной 
+      //      перевозки пассажиров и грузов	                                                     I, VIII
+      //  903 При осуществлении операций по поставке товаров/услуг, освобожденных от НДС         I, IX      
+      '        <ROW LINE="'+IntToStr(i)+'" TAB="1" NAME="TAB1_A8"><VALUE>20</VALUE></ROW> '+SQLCRLF+
+
+      //Код пільги:
+      //'        <ROW LINE="'+IntToStr(i)+'" TAB="1" NAME="TAB1_A9"><VALUE>18010585</VALUE></ROW> '+SQLCRLF+
+
+      //Обсяги постачання (база оподаткування) без урахування податку на додану вартість:
+      '        <ROW LINE="'+IntToStr(i)+'" TAB="1" NAME="TAB1_A10"><VALUE>'+StrReplaceStr(FormatFloat('#0.00',lkQrDoc.FieldByName('TOTALPRINTWONDP').AsFloat),',','.')+'</VALUE></ROW> '+SQLCRLF;
+
+      lkQrDoc.Next;
+      i := i + 1;
+      end;
+        
+    if lkTr.InTransaction then
+      lkTr.Commit;
+    lkTr.Free;  
+    lkXML := lkXML +
+      '      </DOCUMENT> '+SQLCRLF+
+      '    </CARD> '+SQLCRLF+
+      '  </ORG> '+SQLCRLF+
+      '</ZVIT>';
+
+    lkFileExprt := GetAttr(lkOwner,'PathToFile');
+
+    i := Length(lkFileExprt);
+    while((i > 0) and (  (lkFileExprt[i] = #$20) 
+                       or(lkFileExprt[i] = #13) 
+                       or(lkFileExprt[i] = #10)
+                       or(lkFileExprt[i] = '/')
+                       or(lkFileExprt[i] = '\')    
+    ))do 
+      begin
+      Delete(lkFileExprt, i, 1);
+      i := Length(lkFileExprt);
+      end;
+    lkFileExprt := lkFileExprt + '\' + lkFileName;  
+    if FileExists(lkFileExprt) then
+      if(Dialogs.MessageDlg('Файл "'+lkFileExprt+'" уже существует.'+SQLCRLF+'Перезаписать ?', mtConfirmation, [mbYes, mbNo]) <> mrYes)then exit;
+    if StringsSaveToFile(lkFileExprt, lkXML) then 
+      Dialogs.MessageDlg('Выгрузка налоговой накладной выполнена в файл '+SQLCRLF+lkFileExprt, mtInformation, [mbOK]);
+    if(Dialogs.MessageDlg('Заблокировать документ для редактирования ?', mtConfirmation, [mbYes, mbNo]) = mrYes)then 
+      ExecSQL(FBDataBase, 'UPDATE TABL$J_4 J SET J.FLAG_LOCK = 1 WHERE (J.ID = '''+lkJ_ID+''');');
+  end;
+  //============================================================================
+  function CreateExportForm(const aJ_ID, aTYPE_ID:string):TAmunhotepForm;
+  var
+    lkStr :string;
+    lkPnl :TxcGradientPanel;
+    lkLbl :TLabel;
+    lkEdt :TEdit;
+    lkDtp :TDateTimePicker;
+    lkVOLD :Boolean;
+    lkTBB1 :TxcToolBarButton;
+    lkTBB2 :TxcToolBarButton;
+    lkTBB3 :TxcToolBarButton;
+    lkTBB4 :TxcToolBarButton;
+    lkTBB5 :TxcToolBarButton;
+    lkJNumb:string;
+    lkJNum :Integer;
+    lkJDate:TDateTime;
+    lkNNDS :string;
+  begin
+    lkVOLD := True;
+    lkStr := '';
+    GetField(FBDataBase,'MON$DATABASE' ,'MON$DATABASE_NAME','', lkStr);
+    if(Pos('SS_001TOOLSWORLD.FDB', lkStr) > 0)then
+      lkVOLD := False;
+
+    GetField(FBDataBase,'TABL$J_4' ,'DOCNUMBERSTR','ID = '+aJ_ID, lkJNumb);
+    GetField(FBDataBase,'TABL$J_4' ,'DOCNUMBER'   ,'ID = '+aJ_ID, lkStr);  lkJNum  := StrToInt(lkStr);
+    GetField(FBDataBase,'TABL$J_4' ,'DATE_COMMIT' ,'ID = '+aJ_ID, lkStr);  lkJDate := StrToDateTime(lkStr);
+    GetField(FBDataBase,'TABL$R_CS','INN'         ,'ID = (SELECT FIRST 1 F.CS_ID FROM TABL$J_4 J4, TABL$R_FIRMS F WHERE (J4.ID = '+aJ_ID+')AND(F.ID = J4.FIRM_ID))', lkNNDS);
+    Result := TAmunhotepForm(TERPForm_Create('Экспорт Налоговой накладной "'+lkJNumb+'" в XML',  ERP_FILENAME_ICO_DOC, ERP_FILENAME_BMP_DOC, false, nil));
+    Result.HelpKeyWord := aJ_ID;
+    with TxcGradientPanelVista(Result.FindComponent(obj_name_erp_topbar)) do
+      begin
+      StyleManager          := nil;
+      Colors.HotTrack       := ERP_ObjectColorLight(ERP_OBJECTTYPE_DOC);
+      Colors.HotTrackBorder := ERP_ObjectColor(ERP_OBJECTTYPE_DOC);
+      end;
+    lkPnl := CreateTxcGradientPanel(Result, Result, obj_name_erp_panelclient, '', alClient, 0,0,20,160, xbsNone, gdRightToLeft);
+    lkLbl := CreateTLabel(lkPnl, lkPnl, 'Тип периода (PERIOD_TYPE)' , 4, 4, 18, 240, alNone, taLeftJustify);    
+    lkEdt := CreateTEdit(Result, lkPnl, 'edtPERIOD_TYPE', lkLbl.Left+lkLbl.Width, lkLbl.Top, lkLbl.Height, 120); lkEdt.Text := '1';
+    lkLbl := CreateTLabel(lkPnl, lkPnl, 'Тип периода (PERIOD_MONTH)', 4,24, 18, 240, alNone, taLeftJustify);    
+    lkEdt := CreateTEdit(Result, lkPnl, 'edtPERIOD_MONTH', lkLbl.Left+lkLbl.Width, lkLbl.Top, lkLbl.Height, 120); lkEdt.Text := FormatDateTime('mm', lkJDate);
+    lkLbl := CreateTLabel(lkPnl, lkPnl, 'Тип периода (PERIOD_YEAR)' , 4,44, 18, 240, alNone, taLeftJustify);    
+    lkEdt := CreateTEdit(Result, lkPnl, 'edtPERIOD_YEAR', lkLbl.Left+lkLbl.Width, lkLbl.Top, lkLbl.Height, 120);  lkEdt.Text := FormatDateTime('yyyy', lkJDate);
+    lkLbl := CreateTLabel(lkPnl, lkPnl, 'Номер испр. документа(C_DOC_TYPE)' , 4,64, 18, 240, alNone, taLeftJustify);    
+    lkEdt := CreateTEdit(Result, lkPnl, 'edtC_DOC_TYPE', lkLbl.Left+lkLbl.Width, lkLbl.Top, lkLbl.Height, 120); lkEdt.Text := '0' ;
+    lkLbl := CreateTLabel(lkPnl, lkPnl, 'Номер документа в периоде (C_DOC_CNT)' , 4,84, 18, 240, alNone, taLeftJustify);    
+    lkEdt := CreateTEdit(Result, lkPnl, 'edtC_DOC_CNT', lkLbl.Left+lkLbl.Width, lkLbl.Top, lkLbl.Height, 120);    lkEdt.Text := IntToStr(lkJNum);
+    lkLbl := CreateTLabel(lkPnl, lkPnl, 'Состояние отчета (C_DOC_STAN)' , 4,104, 18, 240, alNone, taLeftJustify);    
+    lkEdt := CreateTEdit(Result, lkPnl, 'edtC_DOC_STAN', lkLbl.Left+lkLbl.Width, lkLbl.Top, lkLbl.Height, 120); lkEdt.Text := '1';
+    lkLbl := CreateTLabel(lkPnl, lkPnl, 'Код региона (C_REG)' , 4,124, 18, 240, alNone, taLeftJustify);    
+    lkEdt := CreateTEdit(Result, lkPnl, 'edtC_REG', lkLbl.Left+lkLbl.Width, lkLbl.Top, lkLbl.Height, 120);      lkEdt.Text := '05';
+    lkLbl := CreateTLabel(lkPnl, lkPnl, 'Код района (C_RAJ)' , 4,144, 18, 240, alNone, taLeftJustify);    
+    lkEdt := CreateTEdit(Result, lkPnl, 'edtC_RAJ', lkLbl.Left+lkLbl.Width, lkLbl.Top, lkLbl.Height, 120);      lkEdt.Text := '15';
+    lkLbl := CreateTLabel(lkPnl, lkPnl, 'Номер отдела ГНА (C_STI_ORIG)' , 4,164, 18, 240, alNone, taLeftJustify);    
+    lkEdt := CreateTEdit(Result, lkPnl, 'edtC_STI_ORIG', lkLbl.Left+lkLbl.Width, lkLbl.Top, lkLbl.Height, 120); lkEdt.Text := '515';
+    lkLbl := CreateTLabel(lkPnl, lkPnl, 'Дата заполнения (D_FILL)' , 4,184, 18, 240, alNone, taLeftJustify);    
+    lkDtp := CreateTDateTimePicker(Result, lkPnl, 'edtD_FILL', lkLbl.Left+lkLbl.Width, lkLbl.Top, lkLbl.Height, 120, Now);
+    lkLbl := CreateTLabel(lkPnl, lkPnl, 'Номер плательщика (TIN)' , 4,204, 18, 240, alNone, taLeftJustify);    
+    lkEdt := CreateTEdit(Result, lkPnl, 'edtTIN', lkLbl.Left+lkLbl.Width, lkLbl.Top, lkLbl.Height, 120);        lkEdt.Text := lkNNDS;
+    lkLbl := CreateTLabel(lkPnl, lkPnl, 'Имя каталога экспорта' , 4,244, 18, 240, alNone, taLeftJustify);    
+
+    lkEdt := CreateTEdit(Result, lkPnl, 'edtPathToFile', lkLbl.Left+lkLbl.Width, lkLbl.Top, lkLbl.Height, 320);        
+    if FileExists(StrAbsolutePath('..\conf\export_best_zvit.conf', Amunhotep.ExeName))then
+      lkEdt.Text := StringsLoadFromFile(StrAbsolutePath('..\conf\export_best_zvit.conf', Amunhotep.ExeName))
+     else   
+      lkEdt.Text := 'D:\';
+      
+    lkTBB1 := CreateTxcToolBarButton(Result, lkPnl,'tbbExport','Экcпорт в XML по стандарту 2011.11.01', 'Экспорт в XML по стандарту 2011.11.01',lkEdt.Left,lkEdt.Top+lkEdt.Height+4,20,lkEdt.Width, alNone, 24, nil);
+    with lkTBB1 do
+      begin
+      ShowHint    := true;
+      ShowCaption := true;
+      OnClick     := @actExport_OnExecute;
+      end;
+    lkTBB2 := CreateTxcToolBarButton(Result, lkPnl,'tbbExport20140922','Экcпорт в XML по стандарту 2014.09.22', 'Экспорт в XML по стандарту 2014.09.22',lkTBB1.Left,lkTBB1.Top+lkTBB1.Height+4,20,lkTBB1.Width, alNone, 24, nil);
+    with lkTBB2 do
+      begin
+      ShowHint    := true;
+      ShowCaption := true;
+      OnClick     := @actExport20140922_OnExecute;
+      end;
+    lkTBB3 := CreateTxcToolBarButton(Result, lkPnl,'tbbExport20141114','Экcпорт в XML по стандарту 2014.11.14', 'Экспорт в XML по стандарту 2014.11.14',lkTBB1.Left,lkTBB2.Top+lkTBB2.Height+4,20,lkTBB1.Width, alNone, 24, nil);
+    with lkTBB3 do
+      begin
+      ShowHint    := true;
+      ShowCaption := true;
+      OnClick     := @actExport20141114_OnExecute;
+      end;
+    lkTBB4 := CreateTxcToolBarButton(Result, lkPnl,'tbbExport20160401','Экcпорт в XML по стандарту 2016.04.01', 'Экспорт в XML по стандарту 2016.04.01',lkTBB1.Left,lkTBB3.Top+lkTBB3.Height+4,20,lkTBB1.Width, alNone, 24, nil);
+    with lkTBB4 do
+      begin
+      ShowHint    := true;
+      ShowCaption := true;
+      OnClick     := @actExport20160401_OnExecute;
+      end;
+    lkTBB5 := CreateTxcToolBarButton(Result, lkPnl,'tbbExport20170301','Экcпорт в M.E.Doc 2017.03.01', 'Экспорт в M.E.Doc 2017.03.01',lkTBB1.Left,lkTBB4.Top+lkTBB4.Height+4,20,lkTBB1.Width, alNone, 24, nil);
+    with lkTBB5 do
+      begin
+      ShowHint    := true;
+      ShowCaption := true;
+      OnClick     := @actExport20170301_OnExecute;
+      end;
+
+    lkLbl := CreateTLabel(lkPnl, lkPnl, '', 4,lkTBB5.Top +lkTBB5.Height+4, 96, lkTBB2.Left+lkTBB2.Width, alNone, taLeftJustify);
+    lkLbl.Font.Color := clBlue;
+    lkLbl.Font.Size  := 10;
+    lkLbl.Font.Style := [fsBold];      
+    lkLbl.Caption := 
+      'Имя каталога экспорта можно задать одной строчкой в файле '+SQLCRLF+
+      '  '+StrAbsolutePath('..\conf\export_best_zvit.conf', Amunhotep.ExeName); 
+    lkTBB1.Visible := lkVOLD;  
+    lkTBB2.Visible := lkVOLD;  
+    lkTBB3.Visible := lkVOLD;  
+    lkTBB4.Visible := lkVOLD;  
+  end;
+  //============================================================================
+var
+  lkJ_ID    :string;
+  lkTYPE_ID :string;
+  lkFLAG    :string;
+begin
+  lkJ_ID := GetGlobalVariable('J_ID');
+  GetField(FBDataBase, 'TABL$J_4', 'TYPE_ID', 'ID = '+lkJ_ID, lkTYPE_ID);
+  if(not((lkTYPE_ID = '1000131') or (lkTYPE_ID = '1000134')))then
+    begin
+    Dialogs.MessageDlg('Выгружать можно только "Исходящие налоговые накладные" или "Корректировки налоговых накладных" !', mtWarning, [mbOK]);
+    exit;
+    end;
+  GetField(FBDataBase, 'TABL$J_4', 'FLAG_COMMIT', 'ID = '+lkJ_ID, lkFLAG);
+  if(lkFLAG <> '1')then
+    begin
+    Dialogs.MessageDlg('Перед выгрузкой документ необходимо провести !', mtWarning, [mbOK]);
+    exit;
+    end;
+  CreateExportForm(lkJ_ID, lkTYPE_ID);
+end.

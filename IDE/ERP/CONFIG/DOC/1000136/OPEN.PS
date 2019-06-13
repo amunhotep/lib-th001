@@ -1,0 +1,11 @@
+{*******************************************************************************
+ 
+  1000136         —чет-јкт 
+ 
+********************************************************************************}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/DOC/OPEN.INC}             {$I PEAKTOP:IDE/ERP/DBO/DOC/OPEN.INC}             {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/CONFIG/DOC/EXTRACTTYPEID.INC} {$I PEAKTOP:IDE/ERP/CONFIG/DOC/EXTRACTTYPEID.INC} {$ENDIF}
+begin
+  if ERP_DialogDocOpen_Execute(ExtractTypeIdFromCurrentScript, erp_temporary_document_id) then
+    ERP_OpenDocument(ExtractTypeIdFromCurrentScript, erp_temporary_document_id);
+end.

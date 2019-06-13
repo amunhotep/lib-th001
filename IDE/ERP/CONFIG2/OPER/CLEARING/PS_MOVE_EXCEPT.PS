@@ -1,0 +1,208 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG/OPER/CLEARING/PS_MOVE_EXCEPT.PS}
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}            {$I PEAKTOP:GLOBAL_VARIABLES.INC}             {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TACTION.INC}                 {$I PEAKTOP:OBJ/TACTION.INC}                  {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TIMAGELIST.INC}              {$I PEAKTOP:OBJ/TIMAGELIST.INC}               {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TCOLUMNEH.INC}               {$I PEAKTOP:OBJ/TCOLUMNEH.INC}                {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TDBGRIDEH.INC}               {$I PEAKTOP:OBJ/TDBGRIDEH.INC}                {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCPANEL.INC}                {$I PEAKTOP:OBJ/TXCPANEL.INC}                 {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}   {$I PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}    {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGROUPBAR.INC}             {$I PEAKTOP:OBJ/TXCGROUPBAR.INC}              {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCTOOLBARBUTTON.INC}        {$I PEAKTOP:OBJ/TXCTOOLBARBUTTON.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXFBDATASETS.INC}            {$I PEAKTOP:OBJ/TXFBDATASETS.INC}             {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/$COMMON/FORMERP.INC} {$I PEAKTOP:IDE/ERP/DBO/$COMMON/FORMERP.INC}  {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/DOC/OPEN.INC}                  {$I PEAKTOP:IDE/ERP/DBO/DOC/OPEN.INC}                  {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/DBGRID/GETCELLPARAMS_JRNL.INC} {$I PEAKTOP:IDE/ERP/DBO/DBGRID/GETCELLPARAMS_JRNL.INC} {$ENDIF}
+const
+  erp_table_prefix = 'TABL$J_1000062_FCC7C1EDCFB2F1D4';
+  msg_caption      = 'Перемещение залогов';  
+  msg_item_unknown = '<Неизвестно>';
+  //============================================================================
+  procedure CloseDataSets(aOwner :TComponent);
+  begin
+    with TxFBTransaction(aOwner.FindComponent(obj_name_erp_data_trmain)) do
+      if InTransaction then
+        begin
+        with TxFBQuery(FindComponent(obj_name_erp_data_qrmain)) do
+          if Active then 
+            Close;
+        Commit;
+        end;
+  end;
+  //============================================================================
+  procedure RefreshView(aOwner :TComponent);
+  var
+    lkSQL   :string;
+    lkRecNo :Integer;
+  begin
+    lkSQL := StringsLoadFromFile(StrAbsolutePath('./PS_MOVE_EXCEPT_SELECT.SQL',ScriptName) );
+    lkSQL := StrReplaceStr(lkSQL, '<TABLE_NAME>', erp_table_prefix);
+//    Dialogs.MessageDlg(lkSQL, mtInformation, [mbOK]);
+    lkRecNo := 0;
+    with TxFBTransaction(aOwner.FindComponent(obj_name_erp_data_trmain)) do
+      with TxFBQuery(FindComponent(obj_name_erp_data_qrmain)) do
+        if Active then
+          lkRecNo := RecNo;
+    CloseDataSets(aOwner);
+    with TxFBTransaction(aOwner.FindComponent(obj_name_erp_data_trmain)) do
+      begin
+      with TxFBQuery(FindComponent(obj_name_erp_data_qrmain)) do
+        begin
+        ParamCheck := false;
+        SQL.Text   := lkSQL;
+        Open;
+        if(Active and(lkRecNo > 0))then
+          RecNo := lkRecNo;  
+        end;
+      end;
+  end;
+  //============================================================================
+  procedure TERPFormOperPSMoveExcept_actIns_OnExecute(Sender :TObject);
+  var
+    lkStr          :string;
+    lkDocNumberStr :string;
+  begin
+    lkStr := '';
+    if not ERP_DialogDocOpen_Execute('1000062', lkStr) then exit;
+    GetField(FBDataBase, 'TABL$J_4','DOCNUMBERSTR','ID = '+lkStr, lkDocNumberStr);
+    ExecSQL(FBDataBase, 'UPDATE OR INSERT INTO '+erp_table_prefix+'(DOCNUMBERSTR) VALUES('''+lkDocNumberStr+''')MATCHING(DOCNUMBERSTR);');    
+    RefreshView(TComponent(Sender).Owner);
+  end;
+  //============================================================================
+  procedure TERPFormOperPSMoveExcept_actDel_OnExecute(Sender :TObject);
+  var 
+    lkSQL :string;
+  begin
+    lkSQL := '';
+    with TxFBTransaction(TComponent(Sender).Owner.FindComponent(obj_name_erp_data_trmain)) do
+      with TxFBQuery(FindComponent(obj_name_erp_data_qrmain)) do
+        begin
+        if not Active then exit;
+        if not(RecordCount>0)then exit;
+        if(Dialogs.MessageDlg('Удалить Д.Ф.К. №'+FieldByName('DOCNUMBERSTR').AsString+' из списка?', mtConfirmation, [mbYes, mbNo]) <> mrYes)then exit;
+        lkSQL := 'DELETE FROM '+erp_table_prefix+' T1 WHERE (TRIM(T1.DOCNUMBERSTR) = '''+FieldByName('DOCNUMBERSTR').AsString+''');';
+        end;
+    ExecSQL(FBDataBase, lkSQL);    
+    RefreshView(TComponent(Sender).Owner);
+  end;
+  //============================================================================
+  procedure TERPFormOperPSMoveExcept_actDel_OnUpdate(Sender :TObject);
+  var
+    lkEnabled :Boolean;
+  begin
+    lkEnabled := false;
+    with TxFBTransaction(TComponent(Sender).Owner.FindComponent(obj_name_erp_data_trmain)) do
+      with TxFBQuery(FindComponent(obj_name_erp_data_qrmain)) do
+        begin
+        lkEnabled := Active;
+        if lkEnabled then
+          lkEnabled := (RecordCount>0);
+        end;
+    TCustomAction(Sender).Enabled := lkEnabled;    
+  end;
+  //============================================================================
+  procedure TERPFormOperPSMoveExcept_actClr_OnExecute(Sender :TObject);
+  var 
+    lkSQL :string;
+  begin
+    lkSQL := '';
+    with TxFBTransaction(TComponent(Sender).Owner.FindComponent(obj_name_erp_data_trmain)) do
+      with TxFBQuery(FindComponent(obj_name_erp_data_qrmain)) do
+        begin
+        if not Active then exit;
+        if not(RecordCount>0)then exit;
+        end;
+    if(Dialogs.MessageDlg('Удалить все Д.Ф.К. из списка?', mtConfirmation, [mbYes, mbNo]) <> mrYes)then exit;
+    lkSQL := 'DELETE FROM '+erp_table_prefix+' T1;';
+    ExecSQL(FBDataBase, lkSQL);    
+    RefreshView(TComponent(Sender).Owner);
+  end;
+  //============================================================================
+  procedure TERPFormOperPSMoveExcept_actExec_OnExecute(Sender :TObject);
+  var 
+    lkSQL :string;
+  begin
+    lkSQL := StringsLoadFromFile(StrAbsolutePath('./PS_MOVE_EXCEPT_EXEC.SQL',ScriptName) );
+    if(Dialogs.MessageDlg('Переместить остальные Д.Ф.К., кроме тех, что из списка?', mtConfirmation, [mbYes, mbNo]) <> mrYes)then exit;
+    if ExecSQL(FBDataBase, lkSQL) then
+      Dialogs.MessageDlg('Перемещение выполнено. На складе оставлены только те залоги, которые в списке.', mtInformation, [mbOK]);    
+  end;  
+  //============================================================================
+  procedure TERPFormOperPSMoveExcept_OnClose(Sender :TObject; var Action :TCloseAction);
+  begin
+    CloseDataSets(TComponent(Sender));
+    Action := caFree;
+  end; 
+  //============================================================================
+  function TERPFormOperPSMoveExcept_Create:TAmunhotepForm;
+  var
+    lkIL        :TImageList;
+    lkGB        :TxcGroupBar;
+    lkPnlClient :TxcPanel;
+    lkToolBar   :TxcGradientPanelVista;
+    lkTr        :TxFBTransaction;
+    lkQr        :TxFBQuery;
+    lkDS        :TDataSource;
+    lkDBG       :TDBGridEh;
+    lkCol       :TColumnEh;
+    lkEv        :TxFBEvents;
+    lkAct       :TCustomAction;
+    lkTBB       :TxcToolBarButton;
+  begin
+    DontAutoFree;
+    ExecSQL(FBDataBase, 
+      'EXECUTE BLOCK AS '+SQLCRLF+
+      '  DECLARE VARIABLE P_SQL DOMN$PSTRING; '+SQLCRLF+
+      'BEGIN '+SQLCRLF+
+      '  IF(NOT(EXISTS( '+SQLCRLF+
+      '    SELECT R.RDB$RELATION_ID '+SQLCRLF+
+      '    FROM   RDB$RELATIONS R '+SQLCRLF+
+      '    WHERE  (TRIM(R.RDB$RELATION_NAME) = '''+erp_table_prefix+''') '+SQLCRLF+
+      '  )))THEN '+SQLCRLF+
+      '    BEGIN '+SQLCRLF+
+      '    P_SQL = ''CREATE TABLE '+erp_table_prefix+' (DOCNUMBERSTR DOMN$PSTRING);''; '+SQLCRLF+
+      '    EXECUTE STATEMENT :P_SQL; '+SQLCRLF+
+      '    END '+SQLCRLF+
+      'END');    
+    Result := TAmunhotepForm(TERPForm_Create(msg_caption, ERP_FILENAME_ICO_DOC, ERP_FILENAME_BMP_DOC, false, @TERPFormOperPSMoveExcept_OnClose));
+    with TxcGradientPanelVista(Result.FindComponent(obj_name_erp_topbar)) do
+      begin
+      StyleManager          := nil;
+      Colors.HotTrack       := ERP_ObjectColorLight(ERP_OBJECTTYPE_OPER);
+      Colors.HotTrackBorder := ERP_ObjectColor(ERP_OBJECTTYPE_OPER);
+      end;  
+    lkPnlClient := CreateTxcPanel(Result, Result, 'pnlClient','',alClient, 0,0,0,0, xbsNone);
+    lkToolBar   := CreateTxcGradientPanelVistaToolBar(Result, lkPnlClient, 'ToolBar', '', alTop, 0,0,24,200, xbsRaized);
+    CreateTxFBTransQuery(Result,obj_name_erp_data_trmain, obj_name_erp_data_qrmain, 'DS'+obj_name_erp_data_qrmain, ['isc_tpb_read_committed', 'isc_tpb_read', 'isc_tpb_rec_version', 'isc_tpb_nowait'], lkTr, lkQR, lkDS)  
+    lkDBG := CreateTDBGridEh(Result, lkPnlClient, lkDS, obj_name_erp_data_dbgmain, 0,0,0,0, alClient);
+    lkDBG.Options := [dgTitles,dgIndicator,dgColumnResize,dgColLines,dgRowLines,dgTabs,dgRowSelect,dgAlwaysShowSelection,dgConfirmDelete,dgCancelOnExit];
+    lkDBG.OnGetCellParams := @ERP_DBGridEh_OnGetCellParams_Jrnl;
+    lkDBG.Columns.Clear;
+    lkCol := CreateTColumnEh(lkDBG,'DOCNUMBERSTR'  ,''          ,'ДФК|Номер'                  , 80,taLeftJustify );
+    lkCol := CreateTColumnEh(lkDBG,'ID'            ,''          ,'ДФК|код'                    , 60,taRightJustify);
+    lkCol := CreateTColumnEh(lkDBG,'CS_ID'         ,''          ,'Контрагент|Код'             , 60,taRightJustify);
+    lkCol := CreateTColumnEh(lkDBG,'CS_ID_'        ,''          ,'Контрагент|Название'        ,160,taLeftJustify);
+    lkCol := CreateTColumnEh(lkDBG,'CS_ADDR_ID_'   ,''          ,'Контрагент|Адрес'           ,200,taLeftJustify);
+    lkCol := CreateTColumnEh(lkDBG,'CS_DOC'        ,''          ,'Контрагент|Документ'        ,120,taLeftJustify);
+    lkCol := CreateTColumnEh(lkDBG,'STATE_ID_'     ,''          ,'ДФК|состояние'              , 60,taLeftJustify);
+    lkCol := CreateTColumnEh(lkDBG,'TMC_GROUP_ID_' ,''          ,'ДФК|вид'                    , 96,taLeftJustify);
+    lkCol := CreateTColumnEh(lkDBG,'MASSA_BRUTTO'  ,'# ##0.000' ,'ДФК|Масса|общая'            , 60,taRightJustify);
+    lkCol := CreateTColumnEh(lkDBG,'MASSA_INS'     ,'# ##0.000' ,'ДФК|Масса|вставок'          , 60,taRightJustify);
+    lkCol := CreateTColumnEh(lkDBG,'MASSA_NETTO'   ,'# ##0.000' ,'ДФК|Масса|чистая'           , 60,taRightJustify);
+    lkCol := CreateTColumnEh(lkDBG,'DOCSUMLEFT'    ,'# ##0.00'  ,'ДФК|остаток по телу кредита', 72,taRightJustify);
+    lkCol := CreateTColumnEh(lkDBG,'DATE_COMMIT'   ,'dd.mm.yyyy','ДФК|Дата'                   , 72,taLeftJustify);
+    lkCol := CreateTColumnEh(lkDBG,'FIRM_ID_'      ,''          ,'ДФК|Фирма'                  , 80,taLeftJustify);
+    lkCol := CreateTColumnEh(lkDBG,'FILIAL_ID_'    ,''          ,'ДФК|Филиал'                 , 80,taLeftJustify);
+    lkCol := CreateTColumnEh(lkDBG,'USER_ID_'      ,''          ,'ДФК|Пользователь'           , 80,taLeftJustify);
+    lkCol := CreateTColumnEh(lkDBG,'WRK_NAME'      ,''          ,'ДФК|Сотрудник'              , 80,taLeftJustify);
+    lkAct := TERPForm_CreateAction2(Result,'actIns' ,'Добавить'   ,'Добавить Д.Ф.К. в список'                     ,'Ctrl+Ins',0, 307,@TERPFormOperPSMoveExcept_actIns_OnExecute ,nil                                      ,lkToolBar,80,nil);
+    lkAct := TERPForm_CreateAction2(Result,'actDel' ,'Удалить'    ,'Удалить Д.Ф.К. из списка'                     ,'Ctrl+Del',0, 309,@TERPFormOperPSMoveExcept_actDel_OnExecute ,@TERPFormOperPSMoveExcept_actDel_OnUpdate,lkToolBar,80,nil);
+    lkAct := TERPForm_CreateAction2(Result,'actClr' ,'Очистить'   ,'Удалить все Д.Ф.К. из списка'                 ,''        ,0,  67,@TERPFormOperPSMoveExcept_actClr_OnExecute ,@TERPFormOperPSMoveExcept_actDel_OnUpdate,lkToolBar,80,nil);
+    lkAct := TERPForm_CreateAction2(Result,'actExec','Переместить','Переместить остальные Д.Ф.К., кроме из списка','Ctrl+E'  ,0, 460,@TERPFormOperPSMoveExcept_actExec_OnExecute,@TERPFormOperPSMoveExcept_actDel_OnUpdate,lkToolBar,96,nil);
+    RefreshView(Result);
+  end;
+
+var
+  lkFrm :TAmunhotepForm;  
+begin
+  lkFrm := TERPFormOperPSMoveExcept_Create;
+end.

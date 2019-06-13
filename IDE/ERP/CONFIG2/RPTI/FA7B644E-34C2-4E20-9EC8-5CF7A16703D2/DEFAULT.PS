@@ -1,0 +1,343 @@
+{$DEFINE DB:CONFIG/RPTI/FA7B644E-34C2-4E20-9EC8-5CF7A16703D2/DEFAULT.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$I PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/DATEMONTH/INTF.INC}  {$I PEAKTOP:IDE/ERP/DBO/INPUT/DATEMONTH/INTF.INC}  {$ENDIF}
+const
+  FIELD_PREFIX = 'CS_CNT';   
+  //============================================================================
+  function TERPFormRpti_GetExportFilter(aOwner:TComponent):string;
+  begin
+    Result := 'С '+FormatDateTime('dd.mm.yyyy', InputIntf_DateMonth_Date(aOwner, 'gbDateMonth', InputIntf_DateMonth_DateFrom))+' по '+
+              FormatDateTime('dd.mm.yyyy', InputIntf_DateMonth_Date(aOwner, 'gbDateMonth', InputIntf_DateMonth_DateTo))+'г. '+#13#10#$20#$20+
+              'Отчет сформирован: '+FormatDateTime('dd.mm.yyyy в hh:nn:ss', Now)
+  end;
+  //============================================================================
+  function  TERPFormRpti_OnGetSQL(aOwner:TComponent;var aSQL:string):Boolean;
+  begin
+    Result := true;
+    aSQL :=  TxsStringsHolder(aOwner.FindComponent(obj_name_erp_data_settings)).Items[1].Strings.Text;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnGetSQLFileName(aOwner:TComponent;var aFileName:string);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnProcessParams(aOwner:TComponent;aQr :TxFBQuery);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnChart(aOwner:TComponent; aParent:TWinControl);
+  var
+    lkPC :TxcPageControlEx;
+    lkTS :TxcTabSheet;
+  begin
+    lkPC := CreateTxcPageControlEx(aOwner, aParent, 'PCCharts', 0,0,600,600, alClient);
+    lkPC.MultiLine := false;
+    lkTS := TERPFormRpti_CreateTabSheetChartPie(aOwner, lkPC, FIELD_PREFIX,'Долевой'      ,'Долевой график посещаемости контрагентов'      , 'FILIAL_NAME');
+    lkTS := TERPFormRpti_CreateTabSheetChartBar(aOwner, lkPC, FIELD_PREFIX,'Сравнительный','Сравнительный график посещаемости контрагентов', 'FILIAL_NAME');
+    TxcPageControlEx_ActivateDefaultPage(lkPC);
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnTerms(aOwner:TComponent;aParent:TWinControl);
+  var
+    lkLastTop :Integer;
+  begin
+    lkLastTop := 4;
+    lkLastTop := lkLastTop + InputIntf_DateMonth_Create(aOwner, aParent, 'gbDateMonth', 'Укажите период', 4, lkLastTop, 44, 360).Height;
+    lkLastTop := lkLastTop + 4;
+  end;
+  //============================================================================
+  function TERPFormRpti_OnColumnsCreate(aOwner:TComponent; aDBG:TDBGridEh):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsCreated(aOwner:TComponent; aDBG:TDBGridEh);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsLoad(aOwner:TComponent; aDBG:TDBGridEh);
+  var
+    lkDateFrom:TDateTime;
+    lkDateTo  :TDateTime;
+    lkCol     :TColumnEh;
+    lkFld     :string;
+    lkSQL     :string;
+    lkSQLVars :string;
+    lkSQLBody :string;
+  begin
+    lkDateFrom := InputIntf_DateMonth_Date(aOwner, 'gbDateMonth', InputIntf_DateMonth_DateFrom);
+    lkDateTo   := InputIntf_DateMonth_Date(aOwner, 'gbDateMonth', InputIntf_DateMonth_DateTo  );
+
+    aDBG.FrozenCols := 0;
+    aDBG.Columns.Clear;
+    aDBG.OnGetCellParams := @ERP_DBGridEh_OnGetCellParams_Rpti_HideZeroInt;
+    lkCol := CreateTColumnEh(aDBG,'FILIAL_NAME','','Филиал', 80, taLeftJustify);
+    lkCol.Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lkCol.Tag   := 666;
+
+    lkFLD       := FIELD_PREFIX;
+    lkCol       := CreateTColumnEh(aDBG, lkFLD, '# ### ##0', 'Всего', 40, taRightJustify);
+    lkCol.Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lkCol.Tag   := -1;
+    with lkCol.Footer do
+      begin
+      Alignment     := lkCol.Alignment;
+      Color         := aDBG.FixedColor;
+      FieldName     := lkCol.FieldName;
+      DisplayFormat := lkCol.DisplayFormat;
+      ValueType     := fvtSum;
+      end;
+    lkSQLVars   := '  ,'+lkFLD+'         TYPE OF COLUMN TABL$R_CS.ID '+SQLCRLF;
+    lkSQLBody   := 
+      '    SELECT COUNT(DISTINCT P.CS_ID) FROM TABL$P_CS_MOVE P '+SQLCRLF+
+      '    WHERE (P.DATE_COMMIT BETWEEN '''+FormatDateTime('dd.mm.yyyy',StartOfTheMonth(lkDateTo))+' 00:00:00'' AND '''+FormatDateTime('dd.mm.yyyy',lkDateTo)+' 23:59:59'') '+SQLCRLF+
+      '      AND ((P.FILIAL_ID+0) = :FILIAL_ID) '+SQLCRLF+
+      '    INTO  :'+lkFLD+'; '+SQLCRLF;   
+    while(lkDateFrom <= lkDateTo)do
+      begin
+      lkFLD := FIELD_PREFIX + FormatDateTime('yyyymmdd', lkDateFrom);
+      lkCol := CreateTColumnEh(aDBG, lkFLD, '# ### ##0', FormatDateTime('yyyy|mm|dd|ddd', lkDateFrom), 30, taRightJustify);
+      lkCol.Tag := StrToInt(FormatDateTime('dd', lkDateFrom)); 
+      if(DayOfWeek(lkDateFrom) = 1)then
+        lkCol.Color := $FFC0FF;
+      lkCol.ColParams.Text := FormatDateTime('ddd', lkDateFrom);  
+      with lkCol.Footer do
+        begin
+        Alignment     := lkCol.Alignment;
+        Color         := aDBG.FixedColor;
+        DisplayFormat := lkCol.DisplayFormat;
+        FieldName     := lkCol.FieldName;
+        ValueType     := fvtSum;
+        end;
+      lkSQLVars := lkSQLVars + '  ,'+lkFLD+' TYPE OF COLUMN TABL$R_CS.ID '+SQLCRLF;
+      lkSQLBody := lkSQLBody +
+        '    SELECT COUNT(DISTINCT P.CS_ID) FROM TABL$P_CS_MOVE P '+SQLCRLF+
+        '    WHERE (P.DATE_COMMIT BETWEEN '''+FormatDateTime('dd.mm.yyyy',lkDateFrom  )+' 00:00:00'' AND '''+FormatDateTime('dd.mm.yyyy',lkDateFrom)+' 23:59:59'') '+SQLCRLF+
+        '      AND ((P.FILIAL_ID+0) = :FILIAL_ID) '+SQLCRLF+
+        '    INTO  :'+lkFLD+'; '+SQLCRLF;   
+      lkDateFrom := lkDateFrom + 1;
+      end;
+    lkSQL :=   
+      'EXECUTE BLOCK RETURNS( '+SQLCRLF+
+      '   FILIAL_ID      TYPE OF COLUMN TABL$R_FILIALS.ID '+SQLCRLF+
+      '  ,FILIAL_NAME    TYPE OF COLUMN TABL$R_FILIALS.NAME '+SQLCRLF+
+      lkSQLVars+
+      ')AS '+SQLCRLF+
+      'BEGIN '+SQLCRLF+
+      '  FOR '+SQLCRLF+
+      '    SELECT F.ID, F.NAME '+SQLCRLF+
+      '    FROM   TABL$R_FILIALS F '+SQLCRLF+
+      '    WHERE  (F.FLAG_DELETE = 0) '+SQLCRLF+
+      '    ORDER BY F.ID '+SQLCRLF+
+      '    INTO   :FILIAL_ID, :FILIAL_NAME '+SQLCRLF+
+      '  DO '+SQLCRLF+
+      '    BEGIN '+SQLCRLF+
+      lkSQLBody+
+      '    SUSPEND; '+SQLCRLF+
+      '    END '+SQLCRLF+
+      'END ';
+    aDBG.FooterRowCount := 1;  
+    aDBG.FrozenCols     := 2;
+    aDBG.SumList.Active := true;   
+    with TxsStringsHolder(aOwner.FindComponent(obj_name_erp_data_settings)) do
+      begin
+      while(Items.Count < 2)do
+        Items.Add;
+      Items[1].Strings.Text := lkSQL;
+      end;
+  end;
+  //============================================================================
+  function  TERPFormRpti_OnPrint(aOwner:TComponent):Boolean;
+  var
+    lkStr          :string;
+    lkRpt          :TxReport;
+    lkImg          :TxrImage;
+    lkBndSummary   :TxrBand;
+    lkBndDetail    :TxrBand;
+    lkBndPageHeader:TxrBand;
+    lkLBL          :TxrLabel;
+    lkExpr         :TxrExpression;
+    i, lkLastLeft  :Integer;
+    lkDBG          :TDBGridEh;
+  begin
+    Result := true; // override handler
+    lkDBG := TERPForm_DBGridMain(aOwner);
+    lkStr := StringsLoadFromFile(StrAbsolutePath('./RPT_DEFAULT.XFM', ScriptName));
+    lkRpt := TxReport(StrToComponent(lkStr));
+    with lkRpt do
+      begin
+      Title    := TERPForm_Settings(aOwner).Values[ERP_SETTINGS_TABLECAPTION];
+      DataBase := FBDataBase;
+      while(DataSets.Count < 2)do
+        DataSets.Add;
+      with DataSets[0] do
+        begin  
+        SQL.Text := TxsStringsHolder(aOwner.FindComponent(obj_name_erp_data_settings)).Items[1].Strings.Text;
+        Query.Prepare;
+        if(Query.Params.Count > 0)then
+          TERPFormRpti_OnProcessParams(aOwner, Query);
+        end;
+      with DataSets[1] do
+        begin  
+        SQL.Text := StringsLoadFromFile(StrAbsolutePath('../../DOC/4/RPT_DEFAULT02_0.SQL', ScriptName));
+        end;  
+      end;
+    lkBndPageHeader := TxrBand(lkRpt.FindComponent('bndPageHeader'));
+    lkBndDetail     := TxrBand(lkRpt.FindComponent('bndDetail'));
+    lkBndSummary    := TxrBand(lkRpt.FindComponent('bndSummary'));
+    lkImg := nil;
+    if(lkRpt.FindComponent('ImgLogo')   <> nil)then lkImg := TxrImage(lkRpt.FindComponent('ImgLogo'));
+    if(lkRpt.FindComponent('ImageLogo') <> nil)then lkImg := TxrImage(lkRpt.FindComponent('ImageLogo'));
+    if(lkImg <> nil)then
+      begin
+      lkStr := StrAbsolutePath('../conf/ent/logo.bmp', Amunhotep.ExeName);
+      if FileExists(lkStr)then
+        try lkImg.Picture.LoadFromFile(lkStr) except end;
+      end;
+    lkLBL := nil;
+    if(lkRpt.FindComponent('lblCaption') <> nil)then lkLBL := TxrLabel(lkRpt.FindComponent('lblCaption'));
+    if(lkLBL <> nil)then
+      lkLBL.Caption := TERPForm_Settings(aOwner).Values[ERP_SETTINGS_TABLECAPTION]+#13#10#$20#$20+TERPFormRpti_GetExportFilter(aOwner);
+    lkLastLeft := 0;  
+    with lkDBG do 
+      for i:=0 to Columns.Count-1 do 
+        if Columns[i].Visible then
+      begin
+      lkLBL := TxrLabel.Create(lkRpt);
+      with lkLBL do
+        begin
+        Parent := lkBndPageHeader;
+        Left   := lkLastLeft;
+        Top    := 108;
+        Height := 40;
+        Width  := Columns[i].Width;
+        Color  := FixedColor;
+        Alignment := taCenter;
+             if(Columns[i].Tag = 666)then Caption := StrReplaceStr(Columns[i].Title.Caption,'|',#13#10)
+        else if(Columns[i].Tag =  -1)then Caption := 'ВСЕГО'
+        else                              Caption := IntToStr(Columns[i].Tag)+#13#10+Columns[i].ColParams.Text;
+        with Font do
+          begin
+          Color := Columns[i].Title.Font.Color;
+          Name  := Columns[i].Title.Font.Name;
+          Style := Columns[i].Title.Font.Style;
+          Size  := Columns[i].Title.Font.Size;
+          end;
+        with Frame do
+          begin
+          Width := 1;
+          Left  := (i = 0);
+          Top   := true;
+          Bottom:= true;
+          Right := true;
+          end;
+        end;
+      lkExpr := TxrExpression.Create(lkRpt);
+      with lkExpr do
+        begin
+        Parent := lkBndDetail;
+        Left   := lkLastLeft;
+        Top    := 0;
+        Height := 16;
+        Width  := Columns[i].Width;
+        Color  := Columns[i].Color;
+        if(Columns[i].Tag <> 666)then
+          Expression := 'IF('+Columns[i].FieldName+'<>0,'+Columns[i].FieldName+','' '')'
+         else 
+          Expression := Columns[i].FieldName;
+        Alignment := Columns[i].Alignment;
+        Mask      := Columns[i].DisplayFormat+#$20;
+        with Font do
+          begin
+          Color := Columns[i].Font.Color;
+          Name  := Columns[i].Font.Name;
+          Style := Columns[i].Font.Style;
+          Size  := Columns[i].Font.Size;
+          end;
+        with Frame do
+          begin
+          Width := 1;
+          Left  := (i = 0);
+          Bottom:= true;
+          Right := true;
+          end;
+        end;
+      if(FooterRowCount > 0)then
+        begin
+        if(Columns[i].Footer.FieldName <> '')then
+          begin
+          lkExpr := TxrExpression.Create(lkRpt);
+          with lkExpr do
+            begin
+            Parent := lkBndSummary;
+            Left   := lkLastLeft;
+            Top    := 0;
+            Height := 16;
+            Width  := Columns[i].Width;
+            Color  := Columns[i].Footer.Color;
+            Expression := 'SUM('+Columns[i].Footer.FieldName+')'
+            Alignment := Columns[i].Footer.Alignment;
+            Mask      := Columns[i].Footer.DisplayFormat+#$20;
+            with Font do
+              begin
+              Color := Columns[i].Footer.Font.Color;
+              Name  := Columns[i].Footer.Font.Name;
+              Style := Columns[i].Footer.Font.Style;
+              Size  := Columns[i].Footer.Font.Size;
+              end;
+            with Frame do
+              begin
+              Width := 1;
+              Left  := (i = 0);
+              Bottom:= true;
+              Right := true;
+              end;
+            end;
+          end
+         else
+          begin
+          lkLBL := TxrLabel.Create(lkRpt);
+          with lkLBL do
+            begin
+            Parent := lkBndSummary;
+            Left   := lkLastLeft;
+            Top    := 0;
+            Height := 16;
+            Width  := Columns[i].Width;
+            Color  := FixedColor;
+            Caption:= '';
+            with Font do
+              begin
+              Color := Columns[i].Title.Font.Color;
+              Name  := Columns[i].Title.Font.Name;
+              Style := Columns[i].Title.Font.Style;
+              Size  := Columns[i].Title.Font.Size;
+              end;
+            with Frame do
+              begin
+              Width := 1;
+              Left  := (i = 0);
+              Top   := false;
+              Bottom:= true;
+              Right := true;
+              end;
+            end;
+          end; 
+        end;  
+      lkLastLeft := lkLastLeft + lkLBL.Width;
+      end; 
+    lkRpt.Prepare;
+    lkRpt.Preview;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_BeforePreview(aOwner:TComponent; aRpt:TxReport);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+begin
+  TERPFormRpti_Create('{FA7B644E-34C2-4E20-9EC8-5CF7A16703D2}');  
+end.   

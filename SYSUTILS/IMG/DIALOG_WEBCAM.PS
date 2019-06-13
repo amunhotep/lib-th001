@@ -1,0 +1,137 @@
+{$DEFINE PEAKTOP:SYSUTILS/IMG/DIALOG_WEBCAM.PS}
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}                        {$I PEAKTOP:GLOBAL_VARIABLES.INC}                        {$ENDIF}
+{$IFNDEF PEAKTOP:SYSUTILS/IMG/CONVERT/BMP2JPEG.INC}           {$I PEAKTOP:SYSUTILS/IMG/CONVERT/BMP2JPEG.INC}           {$ENDIF}
+{$IFNDEF PEAKTOP:COM/MICROSOFT/WINDOWS/USER32.DLL.INC}        {$I PEAKTOP:COM/MICROSOFT/WINDOWS/USER32.DLL.INC}        {$ENDIF}
+{$IFNDEF PEAKTOP:COM/MICROSOFT/WINDOWS/ADVAPI.DLL.CAPTURE.INC}{$I PEAKTOP:COM/MICROSOFT/WINDOWS/ADVAPI.DLL.CAPTURE.INC}{$ENDIF}
+{$IFNDEF PEAKTOP:COM/MICROSOFT/WINDOWS/KERNEL32.DLL.INC}      {$I PEAKTOP:COM/MICROSOFT/WINDOWS/KERNEL32.DLL.INC}      {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}               {$I PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}               {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCTOOLBARBUTTON.INC}                    {$I PEAKTOP:OBJ/TXCTOOLBARBUTTON.INC}                    {$ENDIF}
+{$IFNDEF PEAKTOP:SYSUTILS/IMG/DIALOG_WEBCAM.INC}              {$I PEAKTOP:SYSUTILS/IMG/DIALOG_WEBCAM.INC}              {$ENDIF}
+var 
+  hWndCamera :THandle;
+  //============================================================================
+  procedure DialogWebCam_Timer_OnTimer(Sender :TObject);
+  begin
+    if(hWndCamera <> 0)then 
+      SendMessageA(hWndCamera, WM_CAP_GRAB_FRAME, 0, 0);   
+  end;
+  //============================================================================
+  procedure DialogWebCam_Playing_OnClick(Sender :TObject);
+  var
+    lkBool :Boolean;
+  begin
+    lkBool := (TxcToolBarButton(Sender).Tag = 1);
+    TxsTimer(TComponent(Sender).Owner.FindComponent('Timer')).Enabled := lkBool;
+    if lkBool then
+      begin
+      TxcToolBarButton(Sender).Caption    := 'Пауза';
+      TxcToolBarButton(Sender).Hint       := 'Приостановить воспроизведение';
+      TxcToolBarButton(Sender).ImageIndex := 70;
+      TxcToolBarButton(Sender).Tag        := 0;
+      end
+     else   
+      begin
+      TxcToolBarButton(Sender).Caption    := 'Запустить';
+      TxcToolBarButton(Sender).Hint       := 'Запустить воспроизведение';
+      TxcToolBarButton(Sender).ImageIndex := 24;
+      TxcToolBarButton(Sender).Tag        := 1;
+      end  
+  end;
+  //============================================================================
+  procedure DialogWebCam_Ok_OnClick(Sender :TObject);
+  begin
+    TForm(TComponent(Sender).Owner).ModalResult := mrOk;
+  end;
+  //============================================================================
+  procedure DialogWebCam_Cancel_OnClick(Sender :TObject);
+  begin
+    TForm(TComponent(Sender).Owner).ModalResult := mrCancel;
+  end;
+  //============================================================================
+  function DialogWebCam_Execute(const aFileName:string):Boolean;
+  var
+    lkForm     :TForm;
+    lkTopBar   :TxcGradientPanelVista;
+    lkToolBar  :TxcGradientPanelVista;
+    lkTBB      :TxcToolBarButton;
+    lkTimer    :TxsTimer;
+  begin
+    lkForm := TForm.Create(nil);
+    with lkForm do
+      begin
+      Caption     := Amunhotep.Title;
+      Color       := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      BorderStyle := bsDialog;
+      BorderIcons := [biSystemMenu];
+      Position    := poDesktopCenter;
+      Width       := 660;
+      Height      := 480;
+      Font.Size   := 7;
+      end;
+    lkTopBar  := CreateTxcGradientPanelVista(lkForm, lkForm,'TopBar', #$20#$20#$20#$20#$20#$20+'Получение изображения с WEB-камеры',alTop,0,0,34,98,xbsRaized);  
+    lkToolBar := CreateTxcGradientPanelVistaToolBar(lkForm, lkForm,'ToolBar','',alBottom,0,0,32,200,xbsRaized);
+    lkToolBar.Font.Style := [fsBold];  
+    lkTBB     := CreateTxcToolBarButton(lkForm, lkToolBar, 'tbbPlaying','Остановить','Остановить воспроизведение',0,0,24,80,alLeft, 70, nil);
+    lkTBB.ShowCaption := true;
+    lkTBB.Tag         := 0;
+    lkTBB.OnClick     := @DialogWebCam_Playing_OnClick;
+    lkTBB             := CreateTxcToolBarButton(lkForm, lkToolBar, 'tbbOk','Вставить','Вставить изображение',0,0,24,80,alRight, 143, nil);
+    lkTBB.ShowCaption := true;
+    lkTBB.OnClick     := @DialogWebCam_Ok_OnClick;
+    lkTBB             := CreateTxcToolBarButton(lkForm, lkToolBar, 'tbbCancel',' Отмена','Отмена',0,0,24,80,alRight, 171, nil);
+    lkTBB.ShowCaption := true;
+    lkTBB.OnClick     := @DialogWebCam_Cancel_OnClick;
+    hWndCamera := capCreateCaptureWindowA('AMUNHOTEP'+RandomHexStr(8), $40000000 or $10000000 {WS_CHILD or WS_VISIBLE} ,
+                   0,lkTopBar.Top+lkTopBar.Height+1,lkForm.Width-8,
+                   lkForm.Height - (lkTopBar.Height + lkToolBar.Height + 32)
+                   ,lkForm.Handle, 0); //создаем область для вывода получаемых в будущем картинок
+    if(hWndCamera <> 0)then 
+      SendMessageA(hWndCamera, WM_CAP_DRIVER_CONNECT, 0, 0);  //забираем картинку с вебкамеры
+    lkTimer := TxsTimer.Create(lkForm);
+    with lkTimer do
+      begin
+      Name     := 'Timer';
+      Interval := 100;
+      OnTimer  := @DialogWebCam_Timer_OnTimer;
+      Enabled  := true;
+      end;
+    Result := (lkForm.ShowModal = mrOk);   
+    if Result then
+      begin
+      if(hWndCamera <> 0)then
+        SendMessageA_PChar(hWndCamera, WM_CAP_SAVEDIB, 0, aFileName);
+      end;
+    if(hWndCamera <> 0)then
+      begin
+      SendMessageA(hWndCamera, WM_CAP_DRIVER_DISCONNECT, 0, 0);  //"отключаемся" от веб-камеры
+      end;
+    lkForm.Free;
+
+    CloseHandle(hWndCamera);
+    hWndCamera := 0;
+  end;
+
+var
+  lkFileName    :string;
+  lkTmpFileName :string;
+  lkFileExt     :string;  
+  lkConvert     :Boolean;
+begin
+  lkFileName := GetGlobalVariable(DialogWebCam_FileNameBufferVar);
+  lkFileExt  := ExtractFileExt(lkFileName);
+  lkConvert  := (UpperCase(lkFileExt) = '.JPG') or (UpperCase(lkFileExt) = '.JPEG');
+  lkTmpFileName := lkFileName; 
+  if lkConvert then
+    lkTmpFileName := lkTmpFileName+'.BMP'
+  if DialogWebCam_Execute(lkTmpFileName)then
+    begin
+    if lkConvert then
+      begin
+      Image_BmpToJpeg_FileName(lkTmpFileName, lkFileName);
+      DeleteFile(lkTmpFileName);
+      end;
+    SetGlobalVariable(DialogWebCam_FileNameBufferVar, lkFileName);
+    end 
+   else
+    SetGlobalVariable(DialogWebCam_FileNameBufferVar, ''); 
+end.

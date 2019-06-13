@@ -1,0 +1,7 @@
+{$IFNDEF PEAKTOP:APPL/MANAGE/DEFAULT.INC}  {$I ./DEFAULT.INC} {$ENDIF}
+var
+  lkPnl  :TxcPanel;
+begin
+  Amunhotep.MainForm.FormStyle := fsNormal;
+  lkPnl  := ManageInterface_Create(Amunhotep.MainForm, Amunhotep.MainForm);
+end.

@@ -1,0 +1,35 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}         {$I PEAKTOP:GLOBAL_VARIABLES.INC}        {$ENDIF}
+{$IFNDEF PEAKTOP:SYSUTILS/PREVIEW_REPORT.INC}  {$I PEAKTOP:SYSUTILS/PREVIEW_REPORT.INC} {$ENDIF}  
+{$IFNDEF PEAKTOP:APPL/FILEPROCESS/DEFAULT.INC} {$I ./DEFAULT.INC}                       {$ENDIF}
+  //============================================================================
+  procedure Amunhotep_MainForm_OnProcessFile(Sender:TObject; const FileName:string; var Handled:Boolean);
+  var
+    lkFileExt :string;
+  begin
+    SetGlobalVariable(FileProcessingGlobalVariableName, FileName);
+    lkFileExt := UpperCase(ExtractFileExt(FileName)); 
+    if(lkFileExt[1] = '.')then
+      Delete(lkFileExt, 1, 1);
+    if((lkFileExt = 'BMP')or(lkFileExt = 'ICO')or(lkFileExt = 'JPG')or(lkFileExt = 'GIF')or(lkFileExt = 'PNG'))then 
+      begin 
+      call(StrAbsolutePath('BMP/DEFAULT.PS', ScriptName)); 
+      Handled := true; 
+      exit;
+      end;  
+    if(lkFileExt = 'RTF')then 
+      begin 
+      call(StrAbsolutePath('RTF/DEFAULT.PS', ScriptName)); 
+      Handled := true; 
+      exit; 
+      end;
+    if((lkFileExt = 'XRP')or(lkFileExt = 'XRPT'))then
+      begin
+      PreviewReportByFileName(FileName);
+      Handled := true;
+      end;  
+  end;
+  //============================================================================
+begin
+  DontAutoFree;
+  Amunhotep.MainForm.OnProcessFile := @Amunhotep_MainForm_OnProcessFile;    
+end.

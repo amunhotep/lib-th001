@@ -1,0 +1,165 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG/RPTI/C78850CD-0621-4F4D-8562-4975066A2463/DEFAULT.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$I PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC} {$I PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}        {$I PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}        {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/CHECKBOX/INTF.INC}   {$I PEAKTOP:IDE/ERP/DBO/INPUT/CHECKBOX/INTF.INC}   {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCEDITCOMBO.INC}                  {$I PEAKTOP:OBJ/TXCEDITCOMBO.INC}                  {$ENDIF}
+const
+  objname_datefrom   = 'dtpDateFrom';
+  objname_dateto     = 'dtpDateTo';
+  objname_firms      = 'gbFirms';
+  objname_acc        = 'edtAccount';
+  objname_subkonto   = 'cbxSubkonto';
+  objname_debet      = 'cbxDebet';
+  msg_input_firms    = 'Выберите фирмы учета';
+  msg_input_debet    = 'ДЕБЕТОВЫЙ ОБОРОТ';
+  msg_input_subkonto = 'РАСКРЫВАТЬ ОБОРОТЫ ПО СУБКОНТО';
+  //============================================================================
+  function TERPFormRpti_GetExportFilter(aOwner:TComponent):string;
+  var
+    lkStr :string;
+  begin
+    if TxcCheckBox(aOwner.FindComponent(objname_debet   )).Checked then
+      lkStr := 'Дебетовый оборот' else lkStr := 'Кредитовый оборот';
+    Result := 
+      msg_erp_lbldatefrom+' "'+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+'" '+
+      msg_erp_lbldateto  +' "'+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto))+'" '+
+      'Фирмы учета: "'+InputIntf_Ref_GetNames(aOwner.FindComponent(objname_firms))+'" '+
+      'Счет: "'+TxcEditCombo(aOwner.FindComponent(objname_acc)).Text+'" Тип отчета: "'+lkStr+'"';
+  end;
+  //============================================================================
+  function TERPFormRpti_OnGetSQL(aOwner:TComponent;var aSQL:string):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnGetSQLFileName(aOwner:TComponent;var aFileName:string);
+  begin
+     // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnProcessParams(aOwner:TComponent;aQr :TxFBQuery);
+  begin
+    with aQr do
+      begin
+      ParamByName('FIRM_IDS' ).AsString := InputIntf_Ref_GetIds(aOwner.FindComponent(objname_firms));
+      ParamByName('DATE_FROM').AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+' 00:00:00';
+      ParamByName('DATE_TO'  ).AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto)+1)+' 00:00:00';
+      ParamByName('ACC_ID'   ).AsString := IntToStr(aOwner.FindComponent(objname_acc).Tag);
+      ParamByName('SUBKONTO' ).AsString := InputIntf_CheckBox_Checked(aOwner, objname_subkonto);
+      ParamByName('DEBET'    ).AsString := InputIntf_CheckBox_Checked(aOwner, objname_debet   );
+      end;  
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnChart(aOwner:TComponent; aParent:TWinControl);
+  var
+    lkPC :TxcPageControlEx;
+    lkTS :TxcTabSheet;
+  begin
+    aParent.Free;
+    exit;
+    lkPC := CreateTxcPageControlEx(aOwner, aParent, 'PCCharts', 0,0,600,600, alClient);
+    lkPC.MultiLine := false;
+    TxcPageControlEx_ActivateDefaultPage(lkPC);
+  end;
+  //============================================================================
+  procedure TERPFormRpti_edtAccount_OnButtonClick(Sender :TObject);
+  var
+    lkStr :string;
+  begin
+    with TxcEditCombo(Sender) do
+      begin
+      SetGlobalVariable('ACC_ID', IntToStr(Tag));
+      call('DB:CONFIG/REF/BUHG_ACCS/DEFAULT_DLG.PS');
+      lkStr := GetGlobalVariable('ACC_ID');
+      if( (UpperCase(lkStr) = 'NULL') or (StrTrimAll(lkStr)='') )then exit;
+      Tag := StrToInt(lkStr);
+      GetField(FBDataBase, 'TABL$R_BUHG_ACCS', 'NAME', 'ID = '+lkStr, lkStr);
+      Text := lkStr;
+      end;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnTerms(aOwner:TComponent;aParent:TWinControl);
+  var
+    lkLastTop :Integer;
+    lkGrb     :TxcGroupBox;
+    lkEdt     :TxcEditCombo;
+    lkStr     :string;
+  begin
+    lkLastTop := 4;
+    lkLastTop := lkLastTop + InputIntf_DatePeriod_Create(aOwner, aParent, 'gbDatePeriod', 'Укажите период', 4, lkLastTop, 44, 360,objname_datefrom,objname_dateto,StartOfTheMonth(Now),EndOfTheMonth(Now)).Height;
+    lkLastTop := lkLastTop + 4;
+    lkLastTop := lkLastTop + InputIntf_Ref_Create(aOwner,aParent,objname_firms   ,msg_input_firms   ,4,lkLastTop, 0,360,'TABL$R_FIRMS',TERPForm_Settings(aOwner).Values[ERP_SETTINGS_TABLENAME]).Height;
+    lkLastTop := lkLastTop + 4;
+    lkGrb     := CreateTxcGroupBox(aOwner, aParent, '', 'Выберите счет',alNone,4,lkLastTop,48,360);
+    lkLastTop := lkLastTop + lkGrb.Height + 4;
+    lkStr     := GetGlobalVariable('ACC_ID');
+    if( (StrTrimAll(lkStr) = '') or (UpperCase(lkStr) = 'NULL') )then
+      lkStr   := '361'; 
+    lkEdt := CreateTxcEditCombo(aOwner,lkGrb,objname_acc,TERPForm_DefaultControlIndent,20,20,lkGrb.Width-(TERPForm_DefaultControlIndent*2));
+    with lkEdt do
+      begin
+      Color         := Amunhotep.MainForm.StyleManager.Colors.Window;
+      GlyphKind     := gkEllipsis;
+      ReadOnly      := true;
+      AlwaysEnable  := true;
+      Font.Style    := [fsBold];
+      Tag           := StrToInt(lkStr);
+      GetField(FBDataBase, 'TABL$R_BUHG_ACCS', 'NAME', 'ID = '+lkStr, lkStr);
+      Text          := lkStr;
+      OnButtonClick := @TERPFormRpti_edtAccount_OnButtonClick;
+      end;
+    lkLastTop := lkLastTop + InputIntf_CheckBox_Create  (aOwner,aParent,objname_debet   ,msg_input_debet   ,4,lkLastTop, 20,360).Height;
+    lkLastTop := lkLastTop + 4;
+    lkLastTop := lkLastTop + InputIntf_CheckBox_Create  (aOwner,aParent,objname_subkonto,msg_input_subkonto,4,lkLastTop, 20,360).Height;
+    lkLastTop := lkLastTop + 4;
+    TxcCheckBox(aOwner.FindComponent(objname_debet   )).Checked := (GetGlobalVariable('FLAG_DEBET') = '1'); 
+    TxcCheckBox(aOwner.FindComponent(objname_subkonto)).Checked := true; 
+  end;
+  //============================================================================
+  function TERPFormRpti_OnColumnsCreate(aOwner:TComponent; aDBG:TDBGridEh):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_Columns_OnEditButtonClick(Sender :TObject; var Handled :Boolean);
+  var
+    lkDBG    :TDBGridEh;
+    lkTypes  :string;
+    lkPlace  :string;
+    lkScript :string;
+  begin
+    Handled := true;
+    lkDBG   := TDBGridEh(TComponent(Sender).Owner.Owner);
+    if not lkDBG.DataSource.DataSet.Active then exit;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsCreated(aOwner:TComponent; aDBG:TDBGridEh);
+  var
+    i :Integer;
+  begin
+    for i:=0 to aDBG.Columns.Count-1 do
+      if(Pos('KACC_S', aDBG.Columns[i].FieldName) <> 1)then
+        aDBG.Columns[i].HideDuplicates := true;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsLoad(aOwner:TComponent; aDBG:TDBGridEh);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  function TERPFormRpti_OnPrint(aOwner:TComponent):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_BeforePreview(aOwner:TComponent; aRpt:TxReport);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  
+
+begin
+  TERPFormRpti_Create('{C78850CD-0621-4F4D-8562-4975066A2463}');
+end.

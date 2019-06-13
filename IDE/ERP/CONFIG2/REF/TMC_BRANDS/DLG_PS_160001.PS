@@ -1,0 +1,74 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}  {$I PEAKTOP:GLOBAL_VARIABLES.INC}      {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/FIREBIRD/DIALOGS/CUSTOM.INC}
+  {$I PEAKTOP:IDE/FIREBIRD/DIALOGS/CUSTOM.INC}
+{$ENDIF}
+  //============================================================================
+  function DialogContries_Execute(const aCaption:string; var aTMCBrandId:string):Boolean;
+  var
+    lkForm        :TForm;
+    lkImg         :TImage;
+    lkPanelClient :TxcGradientPanel;
+    lkListView    :TListView;
+    lkLI          :TListItem;
+    lkSL          :TStringList;
+    i             :Integer;
+    lkStr         :string;
+  begin
+    Result := false;
+    lkForm        := FirebirdDialog_Create(aCaption,'Выбрать', 'Отмена');
+    lkForm.Height := 480;
+    lkForm.Width  := 680;
+    lkPanelClient := TxcGradientPanel(lkForm.FindComponent('PanelClient'));
+    lkImg         := TImage(lkForm.FindComponent('ImageLogo'));
+    lkImg.Visible := false;
+    lkImg.Width   := 0;
+    lkListView := TListView.Create(lkForm);
+    with lkListView do
+      begin
+      Parent     := lkPanelClient;
+      Align      := alClient;
+      Ctl3d      := false;
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      Font.Style := [fsBold];
+      Font.Name  := 'Verdana';
+      Font.Size  := 8;
+      ReadOnly   := true;
+      ViewStyle  := vsList;
+      Items.Clear;
+      if GetField(FBdataBase, 'TABL$R_TMC_BRANDS', 'ID||''||''||NAME', 'PARENT_ID = 160001 OR ID=0 ORDER BY NAME', lkStr)then
+        begin
+        lkSL := TStringList.Create;
+        lkSL.Text := lkStr;
+        for i:=0 to lkSL.Count-1 do
+          begin
+          lkStr := lkSL[i];
+          Delete(lkStr, 1, Pos('||',lkStr) + 1); 
+          lkLI := lkListView.Items.Add;
+          lkLI.Caption := lkStr;
+          lkLI.Subitems.Clear;
+          lkLI.SubItems.Add(StrCiphersOnlyInt(Copy(lkSL[i], 1, Pos('||',lkSL[i]))));
+          if(aTMCBrandId = lkLI.SubItems[0])then
+            ItemIndex := i;  
+          end;
+        lkSL.Free;
+        end;
+      if( (Items.Count > 0) and(ItemIndex < 0) )then  
+        ItemIndex  := 0;
+      end;
+    lkForm.ActiveControl := lkListView;  
+    Result := (lkForm.ShowModal = mrOk);
+    if Result then
+      begin
+      aTMCBrandId := lkListView.Selected.SubItems[0];
+      end;
+    lkForm.Free;
+  end;
+
+var
+  lkTMCBrandId :string;
+begin
+  lkTMCBrandId := GetGlobalVariable('TMC_BRAND_ID');
+  if(DialogContries_Execute('Выберите торговую марку ТМЦ', lkTMCBrandId))then
+    SetGlobalVariable('TMC_BRAND_ID', lkTMCBrandId);
+end.  

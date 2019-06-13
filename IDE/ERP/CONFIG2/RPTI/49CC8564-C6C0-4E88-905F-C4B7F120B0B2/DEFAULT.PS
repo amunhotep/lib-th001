@@ -1,0 +1,232 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG2/RPTI/49CC8564-C6C0-4E88-905F-C4B7F120B0B2/DEFAULT.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}            {$I PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}            {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC}    {$I PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC}    {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}           {$I PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}           {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/CHECKBOX/INTF.INC}      {$I PEAKTOP:IDE/ERP/DBO/INPUT/CHECKBOX/INTF.INC}      {$ENDIF}
+const
+  objname_datefrom   = 'dtpDateFrom';
+  objname_dateto     = 'dtpDateTo';
+  objname_sort       = 'rgSort';
+  objname_firms      = 'gbFirms';
+  objname_places     = 'gbPlaces';
+  objname_checkquant = 'cbxCheckQuant';
+  objname_checkzero  = 'cbxCheckZero';
+  msg_sort           = 'Сортировать прайс';
+  msg_sort_ctgr      = 'По категории';
+  msg_sort_brand     = 'По марке продажи';
+  msg_sort_group     = 'По группе';
+  msg_input_firms    = 'Выберите фирмы учета';
+  msg_input_places   = 'Выберите места хранения';
+  msg_input_quant    = 'Показывать остатки суммарно';
+  msg_input_zero     = 'Не показывать нулевые';
+  //============================================================================
+  procedure TERPFormRpti_actRefEdt_OnExecute(Sender :TObject);
+  begin
+    with TERPForm_ActiveDataSet(TComponent(Sender).Owner) do
+      begin
+      if not Active then exit;
+      if not(RecordCount>0)then exit;
+      if(FieldByName('ID').AsInteger = 0)then exit;
+      SetGlobalVariable('TMC_ID', FieldByName('ID').AsString);
+      call(StrAbsolutePath('../../REF/TMC/DEFAULT_ITEM.PS', ScriptName));
+      end;
+  end;
+  //============================================================================
+  function TERPFormRpti_GetExportFilter(aOwner:TComponent):string;
+  begin
+    Result := '';
+  end;
+  //============================================================================
+  function TERPFormRpti_OnGetSQL(aOwner:TComponent;var aSQL:string):Boolean;
+  begin
+    Result := False; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnGetSQLFileName(aOwner:TComponent;var aFileName:string);
+  begin
+     // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnProcessParams(aOwner:TComponent;aQr :TxFBQuery);
+  var
+    lkSQL :string;
+  begin
+    lkSQL := aQR.SQL.Text;
+    with TxcRadioGroup(aOwner.FindComponent(objname_sort)) do
+      case ItemIndex of
+        0:begin
+          lkSQL := StrReplaceStr(lkSQL, '/*ORDER*/', 'TC.ORDERID, TC.NAME, ');
+          lkSQL := StrReplaceStr(lkSQL, '/*SORT*/' , 
+                      '    REPORT_ID   = :TMC_CTGR_ID; '+SQLCRLF+
+                      '    REPORT_NAME = :TMC_CTGR_NAME;'+SQLCRLF 
+                   );
+          end;
+        1:begin
+          lkSQL := StrReplaceStr(lkSQL, '/*ORDER*/', 'TB.ORDERID, TB.NAME, ');
+          lkSQL := StrReplaceStr(lkSQL, '/*SORT*/' , 
+                      '    REPORT_ID   = :TMC_BRAND_ID; '+SQLCRLF+
+                      '    REPORT_NAME = :TMC_BRAND_NAME;'+SQLCRLF 
+                   );
+          end;
+        2:begin
+          lkSQL := StrReplaceStr(lkSQL, '/*ORDER*/', 'TG.PATH, ');
+          lkSQL := StrReplaceStr(lkSQL, '/*SORT*/' , 
+                      '    REPORT_ID   = :TMC_GROUP_ID; '+SQLCRLF+
+                      '    REPORT_NAME = :TMC_GROUP_PATH;'+SQLCRLF 
+                   );
+          end;
+        3:begin
+          lkSQL := StrReplaceStr(lkSQL, '/*ORDER*/', 'TC.ORDERID, TB.ORDERID, TC.NAME, TB.NAME, ');
+          lkSQL := StrReplaceStr(lkSQL, '/*SORT*/' , 
+                      '    REPORT_ID   = :TMC_CTGR_ID; '+SQLCRLF+
+                      '    REPORT_NAME = :TMC_CTGR_NAME;'+SQLCRLF 
+                   );
+          end;
+        4:begin
+          lkSQL := StrReplaceStr(lkSQL, '/*ORDER*/', 'TB.ORDERID, TC.ORDERID, TB.NAME, TC.NAME, ');
+          lkSQL := StrReplaceStr(lkSQL, '/*SORT*/' , 
+                      '    REPORT_ID   = :TMC_BRAND_ID; '+SQLCRLF+
+                      '    REPORT_NAME = :TMC_BRAND_NAME;'+SQLCRLF 
+                   );
+          end;
+      end;
+    aQR.SQL.Text := lkSQL;
+    with aQr do
+      begin
+      ParamByName('PQ_TMC_GROUP_ID').AsString := '1';
+      ParamByName('PQ_QUANT'       ).AsString := InputIntf_CheckBox_Checked(aOwner, objname_checkquant);
+      ParamByName('PQ_DATE_FROM'   ).AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+' 00:00:00';
+      ParamByName('PQ_FIRM_IDS'    ).AsString := InputIntf_Ref_GetIds(aOwner.FindComponent(objname_firms));
+      ParamByName('PQ_PLACE_IDS'   ).AsString := InputIntf_Ref_GetIds(aOwner.FindComponent(objname_places));
+      ParamByName('PQ_ZERO'        ).AsString := InputIntf_CheckBox_Checked(aOwner, objname_checkzero);
+      end;  
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnChart(aOwner:TComponent; aParent:TWinControl);
+  var
+    lkPC :TxcPageControlEx;
+    lkTS :TxcTabSheet;
+  begin
+    aParent.Free;
+    exit;
+    lkPC := CreateTxcPageControlEx(aOwner, aParent, 'PCCharts', 0,0,600,600, alClient);
+    lkPC.MultiLine := false;
+    TxcPageControlEx_ActivateDefaultPage(lkPC);
+  end;
+  //============================================================================
+  procedure TERPFormRpti_cbxCheckQuant_OnClick(Sender :TObject);
+  begin
+    with TxcCheckBox(Sender) do
+      begin
+      TWinControl( Owner.FindComponent('gbDatePeriod'   ) ).Visible := Checked;
+      TWinControl( Owner.FindComponent(objname_firms    ) ).Visible := Checked;
+      TWinControl( Owner.FindComponent(objname_places   ) ).Visible := Checked;
+      TWinControl( Owner.FindComponent(objname_checkzero) ).Visible := Checked;
+      end;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnTerms(aOwner:TComponent;aParent:TWinControl);
+  var
+    lkLastTop :Integer;
+    lkRG      :TxcRadioGroup;
+    lkCBX     :TxcCheckBox;
+  begin
+    lkLastTop := 4;
+    lkRG      := TxcRadioGroup.Create(aOwner);
+    with lkRG do
+      begin
+      Name         := objname_sort;
+      Parent       := aParent;
+      Left         := 4;
+      Top          := lkLastTop;
+      Height       := 160;
+      Width        := 360;
+      StyleManager := Amunhotep.MainForm.StyleManager;
+      Caption      := msg_sort;
+      with Items do
+        begin
+        Clear;
+        Add(msg_sort_ctgr);
+        Add(msg_sort_brand);
+        Add(msg_sort_group);
+        Add(msg_sort_ctgr  + ', ' + msg_sort_brand);
+        Add(msg_sort_brand + ', ' + msg_sort_ctgr);
+        end;
+      ItemIndex := 3;  
+      end;
+    lkLastTop := lkRG.Height + 20;  
+
+    lkLastTop := lkLastTop + 4;
+    lkCBX := InputIntf_CheckBox_Create  (aOwner,aParent,objname_checkquant,msg_input_quant,4,lkLastTop, 20,360);
+    with lkCBX do
+      begin
+      lkLastTop := lkLastTop + Height;
+      Checked   := False;
+      OnClick   := @TERPFormRpti_cbxCheckQuant_OnClick;
+      end;
+    lkLastTop := lkLastTop + 24;
+    lkLastTop := lkLastTop + InputIntf_DatePeriod_Create(aOwner, aParent, 'gbDatePeriod', 'Сформировать на дату',4, lkLastTop, 44, 360,objname_datefrom,objname_dateto,StartOfTheMonth(Now),EndOfTheMonth(Now)).Height;
+    lkLastTop := lkLastTop + 4;
+    with InputIntf_CheckBox_Create  (aOwner,aParent,objname_checkzero,msg_input_zero,4,lkLastTop, 20,360) do
+      begin
+      lkLastTop := lkLastTop + Height;
+      Checked   := true;
+      end;
+
+    lkLastTop := 4;
+    lkLastTop := lkLastTop + InputIntf_Ref_Create(aOwner,aParent,objname_firms   ,msg_input_firms   ,368,lkLastTop,240,360,'TABL$R_FIRMS' ,TERPForm_Settings(aOwner).Values[ERP_SETTINGS_TABLENAME]).Height;
+    lkLastTop := lkLastTop + 4;
+    lkLastTop := lkLastTop + InputIntf_Ref_Create(aOwner,aParent,objname_places  ,msg_input_places  ,368,lkLastTop,180,360,'TABL$R_PLACES',TERPForm_Settings(aOwner).Values[ERP_SETTINGS_TABLENAME]).Height;
+    lkLastTop := lkLastTop + 4;
+
+    TDateTimePicker(aOwner.FindComponent(objname_dateto  )).Visible := false;
+    TDateTimePicker(aOwner.FindComponent(objname_datefrom)).Date    := Now + 1;
+    TERPFormRpti_cbxCheckQuant_OnClick(lkCBX);
+  end;
+  //============================================================================
+  function TERPFormRpti_OnColumnsCreate(aOwner:TComponent; aDBG:TDBGridEh):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_Columns_OnEditButtonClick(Sender :TObject; var Handled :Boolean);
+  var
+    lkDBG    :TDBGridEh;
+    lkTypes  :string;
+    lkPlace  :string;
+    lkScript :string;
+  begin
+    Handled := true;
+    lkDBG   := TDBGridEh(TComponent(Sender).Owner.Owner);
+    if not lkDBG.DataSource.DataSet.Active then exit;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsCreated(aOwner:TComponent; aDBG:TDBGridEh);
+  var
+    lkToolBar :TxcGradientPanelVista;
+    i :Integer; 
+  begin
+    lkToolBar := TxcGradientPanelVista(aOwner.FindComponent(obj_name_erp_toolbar_nav));
+    TERPForm_CreateAction(aOwner,'actRefEdt'   ,'Редактировать','Редактировать карточку'    ,'',0,468,@TERPFormRpti_actRefEdt_OnExecute   ,@TERPFormRpti_actPrintGrid_OnUpdate,lkToolBar,nil);
+    lkToolBar.Width      := TWinControl_AutoWidth(lkToolBar)+2;
+    aDBG.OnDblClick      := @TERPFormRpti_actRefEdt_OnExecute;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsLoad(aOwner:TComponent; aDBG:TDBGridEh);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  function TERPFormRpti_OnPrint(aOwner:TComponent):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_BeforePreview(aOwner:TComponent; aRpt:TxReport);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+begin
+  TERPFormRpti_Create('{49CC8564-C6C0-4E88-905F-C4B7F120B0B2}');
+end.

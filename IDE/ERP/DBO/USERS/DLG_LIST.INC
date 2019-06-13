@@ -1,0 +1,2 @@
+{$DEFINE PEAKTOP:IDE/ERP/DBO/USERS/DLG_LIST.INC}
+const BufferVariableUserIdsList = 'USERS_IDS_LIST';

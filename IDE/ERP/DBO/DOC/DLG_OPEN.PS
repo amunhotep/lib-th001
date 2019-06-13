@@ -1,0 +1,11 @@
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/DOC/DLG_OPEN.INC}{$I PEAKTOP:IDE/ERP/DBO/DOC/DLG_OPEN.INC}{$ENDIF}
+var
+  lkTypeId, lkJID :string;
+begin
+  lkTypeId := '4';
+  if TERPDialogDocOpen_Execute(true, lkTypeId, lkJID)then
+    begin
+    SetGlobalVariable('J_ID', lkJID);
+    call('DB:CONFIG/DOC/'+lkTypeId+'/EDIT.PS');
+    end;
+end.

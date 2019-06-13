@@ -1,0 +1,43 @@
+{$DEFINE PEAKTOP:IDE/ERP/START/DEFAULT.PS}
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}                     {$I PEAKTOP:GLOBAL_VARIABLES.INC}        {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/USERS/GLOBALVARIABLES.INC}    {$I ../DBO/USERS/GLOBALVARIABLES.INC}    {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/USERS/SET.INC}                {$I ../DBO/USERS/SET.INC}                {$ENDIF}
+  //============================================================================
+  procedure Amunhotep_MainForm_OnCloseQuery(Sender: TObject;var CanClose: Boolean);
+  begin
+    CanClose := true;
+    if FBDataBase.Connected then
+      begin
+      try ExecSQL(FBDataBase, 'EXECUTE PROCEDURE PROC$_USERS_LOG_INS(1000004, NULL, NULL, NULL, NULL);'); except end;
+      end;
+    Amunhotep.Terminate;
+  end;
+  //============================================================================
+var
+  UserName :string;
+  lkStr    :string;  
+begin
+  DontAutoFree;
+  UserName := UpperCase( GetGlobalVariable(ERP_GLOBALVARIABLE_USER_CURRENT) );
+  ERP_User_SetCurrentToDataBase(UserName);
+  lkStr := '';
+  GetField(FBDataBase, 'RDB$DATABASE', 'COALESCE( RDB$GET_CONTEXT(''USER_SESSION'','''+ERP_GLOBALVARIABLE_USER_FILIAL+'''), '''')', '', lkStr);
+  WriteLn(lkStr);
+  if(StrTrimAll(lkStr) = '')then
+    begin
+    lkStr := '';
+    GetField(FBDataBase, 'PROC$R_FILIALS_DEFAULT', 'NAME', '', lkStr);
+    end
+   else
+    begin
+    GetField(FBDataBase, 'TABL$R_FILIALS', 'NAME', 'ID = '''+lkStr+''' ', lkStr);
+    end; 
+  with Amunhotep do
+    begin
+    Title                 := '['+UserName+'@'+lkStr+']  AMUNHOTEP '+IntToStrRoman(Trunc(Amunhotep.Version/1000));
+    MainForm.Caption      := Title;
+    MainForm.OnCloseQuery := @Amunhotep_MainForm_OnCloseQuery;
+    end;
+  call('PEAKTOP:IDE/ERP/DBO/MENU/BUILD_MAIN.PS');
+  ExecSQL(FBDataBase, 'EXECUTE PROCEDURE PROC$_USERS_LOG_INS(1000002, NULL, NULL, NULL, NULL);');
+end.

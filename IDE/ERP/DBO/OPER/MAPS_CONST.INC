@@ -1,0 +1,6 @@
+{$DEFINE PEAKTOP:IDE/ERP/DBO/OPER/MAPS_CONST.INC}
+const //============== PEAKTOP:IDE/ERP/DBO/OPER/MAPS_CONST.INC =================
+  msg_captionmaps        = 'Картографическая система';
+  ERP_FILENAME_ICO_MAPS  = 'PEAKTOP:IMG/CONFIG/ERP/MAPS0016X0016.ICO'; 
+  ERP_FILENAME_BMP_MAPS  = 'PEAKTOP:IMG/CONFIG/ERP/MAPS0032X0032.BMP'; 
+  ERP_OPER_MAPS_TEMP_DIR = 'maps.google.com';

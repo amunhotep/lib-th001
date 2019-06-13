@@ -1,0 +1,9 @@
+{$DEFINE PEAKTOP:IDE/ERP/DBO/DBGRID/PRINT/PRINT_ITEM.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/DBGRID/DLG.INC}  {$I ./DLG.INC}  {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/DBGRID/PROC.INC} {$I ./PROC.INC} {$ENDIF}
+var
+  lkRptId, lkRptName, lkRptPath :string;
+begin
+  if TERPDialogPrint_ExecuteDefaultItem(lkRptId, lkRptName, lkRptPath)then
+    ERP_DataSet_PrintPreview(lkRptId, lkRptName, lkRptPath, false);
+end.

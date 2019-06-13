@@ -1,0 +1,17 @@
+{$IFNDEF PEAKTOP:APPL/MANAGE/STDLIB/DEFAULT.INC}  {$I ./DEFAULT.INC} {$ENDIF}
+var
+  lkForm     :TAmunhotepForm;
+  lkPnl      :TxcPanel;
+  lkStrm     :TMemoryStream;
+  lkFileName :string;
+begin
+  lkForm := TAmunhotepForm.Create(nil);
+  lkFileName := PrepareAbsoleteFileName(MANAGEINTERFACE_ICONNAME_STDLIB);
+  if FileExists(lkFileName)then
+    try
+      lkForm.Icon.LoadFromFile(lkFileName);
+    except
+    end;
+  lkForm.SetCaption(msg_manageinterface_stdlib_caption);
+  lkPnl  := ManageInterface_StdLib_Create(lkForm, lkForm);
+end.

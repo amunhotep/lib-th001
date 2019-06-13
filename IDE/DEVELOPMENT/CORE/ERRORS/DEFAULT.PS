@@ -1,0 +1,12 @@
+{$DEFINE PEAKTOP:IDE/DEVELOPMENT/CORE/ERRORS/DEFAULT.PS}
+{$IFNDEF PEAKTOP:IDE/DEVELOPMENT/CORE/ERRORS/DIALOG.INC} {$I ./DIALOG.INC} {$ENDIF}
+  //============== PEAKTOP:IDE/DEVELOPMENT/CORE/ERRORS/DEFAULT.PS ==============
+  procedure Amunhotep_MainForm_OnPascalRunError(Sender :TObject; const Msg:string);
+  begin
+    PascalErrorDlg(Msg);
+  end;
+  //============================================================================
+begin
+  DontAutoFree;
+  Amunhotep.MainForm.OnPascalRunError := @Amunhotep_MainForm_OnPascalRunError;
+end.

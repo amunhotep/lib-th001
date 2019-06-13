@@ -1,0 +1,224 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG2/RPTI/AC9F3E41-2532-4921-8046-1349DF0060A3/DEFAULT.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$I PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/DATEMONTH/INTF.INC}  {$I PEAKTOP:IDE/ERP/DBO/INPUT/DATEMONTH/INTF.INC}  {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}        {$I PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}        {$ENDIF}
+const
+  objname_datefrom   = 'dtpDateFrom';
+  objname_dateto     = 'dtpDateTo';
+  objname_firms      = 'gbFirms';
+  msg_input_firms    = 'Выберите фирмы учета';
+const
+  FIELD_PREFIX       = 'TMC_AUTO_';   
+  //============================================================================
+  function TERPFormRpti_GetExportFilter(aOwner:TComponent):string;
+  begin
+    Result := 
+      msg_erp_lbldatefrom+' "'+FormatDateTime('dd.mm.yyyy', InputIntf_DateMonth_Date(aOwner, 'gbDateMonth', InputIntf_DateMonth_DateFrom))+'" '+
+      msg_erp_lbldateto  +' "'+FormatDateTime('dd.mm.yyyy', InputIntf_DateMonth_Date(aOwner, 'gbDateMonth', InputIntf_DateMonth_DateTo  ))+'" '+
+      'Фирмы учета: "'+InputIntf_Ref_GetNames(aOwner.FindComponent(objname_firms))+'" ';
+  end;
+  //============================================================================
+  function TERPFormRpti_OnGetSQL(aOwner:TComponent;var aSQL:string):Boolean;
+  begin
+    Result := true;
+    aSQL :=  TxsStringsHolder(aOwner.FindComponent(obj_name_erp_data_settings)).Items[1].Strings.Text;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnGetSQLFileName(aOwner:TComponent;var aFileName:string);
+  begin
+     // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnProcessParams(aOwner:TComponent;aQr :TxFBQuery);
+  begin
+    with aQr do
+      begin
+      ParamByName('FIRM_IDS' ).AsString := InputIntf_Ref_GetIds(aOwner.FindComponent(objname_firms));
+      ParamByName('DATE_FROM').AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DateMonth_Date(aOwner, 'gbDateMonth', InputIntf_DateMonth_DateFrom))+' 00:00:00';
+      ParamByName('DATE_TO'  ).AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DateMonth_Date(aOwner, 'gbDateMonth', InputIntf_DateMonth_DateTo  ))+' 00:00:00';
+      end;  
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnChart(aOwner:TComponent; aParent:TWinControl);
+  var
+    lkPC :TxcPageControlEx;
+    lkTS :TxcTabSheet;
+  begin
+    aParent.Free;
+    exit;
+    lkPC := CreateTxcPageControlEx(aOwner, aParent, 'PCCharts', 0,0,600,600, alClient);
+    lkPC.MultiLine := false;
+    TxcPageControlEx_ActivateDefaultPage(lkPC);
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnTerms(aOwner:TComponent;aParent:TWinControl);
+  var
+    lkLastTop :Integer;
+  begin
+    lkLastTop := 4;
+    lkLastTop := lkLastTop + InputIntf_DateMonth_Create(aOwner, aParent, 'gbDateMonth', 'Укажите период', 4, lkLastTop, 44, 360).Height;
+    lkLastTop := lkLastTop + 4;
+    lkLastTop := lkLastTop + InputIntf_Ref_Create(aOwner,aParent,objname_firms   ,msg_input_firms   ,4,lkLastTop, 0,360,'TABL$R_FIRMS',TERPForm_Settings(aOwner).Values[ERP_SETTINGS_TABLENAME]).Height;
+    lkLastTop := lkLastTop + 4;
+  end;
+  //============================================================================
+  function TERPFormRpti_OnColumnsCreate(aOwner:TComponent; aDBG:TDBGridEh):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_Columns_OnEditButtonClick(Sender :TObject; var Handled :Boolean);
+  var
+    lkDBG    :TDBGridEh;
+    lkTypes  :string;
+    lkPlace  :string;
+    lkScript :string;
+  begin
+    Handled := true;
+    lkDBG   := TDBGridEh(TComponent(Sender).Owner.Owner);
+    if not lkDBG.DataSource.DataSet.Active then exit;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsCreated(aOwner:TComponent; aDBG:TDBGridEh);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsLoad(aOwner:TComponent; aDBG:TDBGridEh);
+  var
+    lkDateFrom:TDateTime;
+    lkDateTo  :TDateTime;
+    lkCol     :TColumnEh;
+    lkFld     :string;
+    lkSQL     :string;
+    lkSQLVars :string;
+    lkSQLBody :string;
+    lkSQLSum  :string;
+  begin
+    lkDateFrom := InputIntf_DateMonth_Date(aOwner, 'gbDateMonth', InputIntf_DateMonth_DateFrom);
+    lkDateTo   := InputIntf_DateMonth_Date(aOwner, 'gbDateMonth', InputIntf_DateMonth_DateTo  );
+
+    aDBG.SumList.Active := False;
+    aDBG.FrozenCols     := 0;
+    aDBG.Columns.Clear;
+    aDBG.OnGetCellParams := @ERP_DBGridEh_OnGetCellParams_Rpti_HideZeroInt;
+    lkCol := CreateTColumnEh(aDBG,'TMC_AUTO_ID','# ### ### ##0','Наёмный автомобиль|Код', 60, taRightJustify);
+    lkCol.Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lkCol.Tag   := 666;
+    lkCol := CreateTColumnEh(aDBG,'TMC_AUTO_NAME','','Наёмный автомобиль|Название', 120, taLeftJustify);
+    lkCol.Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lkCol.Tag   := 666;
+    lkCol := CreateTColumnEh(aDBG,'TMC_AUTO_TOTAL','# ### ### ##0.00','Наёмный автомобиль|ВСЕГО', 60, taRightJustify);
+    lkCol.Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lkCol.Tag   := 666;
+    with lkCol.Footer do
+      begin
+      Color         := lkCol.Color;
+      Alignment     := lkCol.Alignment;
+      Font.Style    := [fsBold];
+      DisplayFormat := lkCol.DisplayFormat;
+      ValueType     := fvtSum;
+      end;
+
+    lkSQLVars := '';
+    lkSQLBody := '';
+    lkSQLSum  := '';
+    while(lkDateFrom <= lkDateTo)do
+      begin
+      lkFLD := FIELD_PREFIX + FormatDateTime('yyyymmdd', lkDateFrom);
+
+      lkCol := CreateTColumnEh(aDBG, lkFLD,'# ### ### ##0.00',FormatDateTime('yyyy|mmmmm|dd|ddd', lkDateFrom), 60, taRightJustify);
+      lkCol.Color := Amunhotep.MainForm.StyleManager.Colors.Window;
+      if(DayOfWeek(lkDateFrom) = 1)then 
+        begin
+        lkCol.Color       := $E8C0FF; 
+        lkCol.Title.Color := Amunhotep.MainForm.StyleManager.Colors.Error;
+        end;
+      with lkCol.Footer do
+        begin
+        Color         := lkCol.Color;
+        Alignment     := lkCol.Alignment;
+        Font.Style    := [fsBold];
+        DisplayFormat := lkCol.DisplayFormat;
+        ValueType     := fvtSum;
+        end;
+
+      lkSQLVars := lkSQLVars + '  ,'+lkFLD+'    TYPE OF COLUMN TABL$J_4.DOCSUM '+SQLCRLF;
+      lkSQLSum  := lkSQLSum  + ' + :'+lkFLD;
+      lkSQLBody := lkSQLBody +
+        '    SELECT COALESCE( SUM(J.DOCSUMVAL), 0) '+SQLCRLF+
+        '    FROM   TABL$J_4 J, TABL$J_1000016 J16 '+SQLCRLF+
+        '    WHERE  (J.DATE_COMMIT BETWEEN '''+FormatDateTime('dd.mm.yyyy',lkDateFrom  )+
+        ' 00:00:00'' AND '''+FormatDateTime('dd.mm.yyyy',lkDateFrom+1)+' 00:00:00'') '+SQLCRLF+
+        '      AND  (:FIRM_IDS CONTAINING ''~''||J.FIRM_ID||''~'') '+SQLCRLF+
+        '      AND  (J.FLAG_COMMIT   = 1) '+SQLCRLF+
+        '      AND  (J16.J_ID        = J.ID) '+SQLCRLF+
+        '      AND  (J16.ACC_ID      = 10000763) '+SQLCRLF+
+        '      AND  (J16.SUBKONTO_ID = :TMC_AUTO_ID) '+SQLCRLF+
+        '    INTO   :'+lkFLD+'; '+SQLCRLF;
+      lkDateFrom := lkDateFrom + 1;
+      end;
+    lkSQL :=   
+      'EXECUTE BLOCK ( '+SQLCRLF+
+      '   Q_DATE_FROM       TYPE OF COLUMN TABL$J_4.DATE_COMMIT = ?DATE_FROM '+SQLCRLF+
+      '  ,Q_DATE_TO         TYPE OF COLUMN TABL$J_4.DATE_COMMIT = ?DATE_TO '+SQLCRLF+
+      '  ,Q_FIRM_IDS        TYPE OF COLUMN TABL$J_4.DOCSTR      = ?FIRM_IDS '+SQLCRLF+
+      ')RETURNS( '+SQLCRLF+
+      '   DATE_FROM         TYPE OF COLUMN TABL$J_4.DATE_COMMIT '+SQLCRLF+
+      '  ,DATE_TO           TYPE OF COLUMN TABL$J_4.DATE_COMMIT '+SQLCRLF+
+      '  ,FIRM_IDS          TYPE OF COLUMN TABL$J_4.DOCSTR '+SQLCRLF+
+      '  ,TMC_AUTO_ID       TYPE OF COLUMN VIEW$R_TMC_AUTO.ID '+SQLCRLF+
+      '  ,TMC_AUTO_NAME     TYPE OF COLUMN VIEW$R_TMC_AUTO.NAME '+SQLCRLF+
+      '  ,TMC_AUTO_TOTAL    TYPE OF COLUMN TABL$J_4.DOCSUMVAL '+SQLCRLF+
+      lkSQLVars+
+      ')AS '+SQLCRLF+
+      'BEGIN '+SQLCRLF+
+      '  DATE_FROM = :Q_DATE_FROM; '+SQLCRLF+
+      '  DATE_TO   = :Q_DATE_TO; '+SQLCRLF+
+      '  FIRM_IDS  = :Q_FIRM_IDS; '+SQLCRLF+
+      '  FOR '+SQLCRLF+
+      '    SELECT DISTINCT J16.SUBKONTO_ID, A.NAME '+SQLCRLF+
+      '    FROM   TABL$J_4 J, TABL$J_1000016 J16 '+SQLCRLF+
+      '             LEFT OUTER JOIN VIEW$R_TMC_AUTO A '+SQLCRLF+
+      '                          ON (A.ID = J16.SUBKONTO_ID) '+SQLCRLF+
+      '    WHERE  (J.DATE_COMMIT BETWEEN :DATE_FROM AND :DATE_TO) '+SQLCRLF+
+      '      AND  (:FIRM_IDS CONTAINING ''~''||J.FIRM_ID||''~'') '+SQLCRLF+
+      '      AND  (J.FLAG_COMMIT = 1) '+SQLCRLF+
+      '      AND  (J16.J_ID = J.ID) '+SQLCRLF+
+      '      AND  (J16.ACC_ID = 10000763) '+SQLCRLF+
+      '    ORDER BY A.NAME '+SQLCRLF+
+      '    INTO   :TMC_AUTO_ID, :TMC_AUTO_NAME '+SQLCRLF+
+      '  DO '+SQLCRLF+
+      '    BEGIN '+SQLCRLF+
+      '    TMC_AUTO_TOTAL = 0; '+SQLCRLF+
+      lkSQLBody+
+      '    TMC_AUTO_TOTAL = :TMC_AUTO_TOTAL '+lkSQLSum+'; '+SQLCRLF+
+      '    SUSPEND; '+SQLCRLF+
+      '    END '+SQLCRLF+
+      'END '+SQLCRLF;
+    with TxsStringsHolder(aOwner.FindComponent(obj_name_erp_data_settings)) do
+      begin
+      while(Items.Count < 2)do
+        Items.Add;
+      Items[1].Strings.Text := lkSQL;
+      end;
+    aDBG.FooterRowCount := 1;
+    aDBG.FrozenCols     := 3;
+    aDBG.SumList.Active := True;
+  end;
+  //============================================================================
+  function TERPFormRpti_OnPrint(aOwner:TComponent):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_BeforePreview(aOwner:TComponent; aRpt:TxReport);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  
+
+begin
+  TERPFormRpti_Create('{AC9F3E41-2532-4921-8046-1349DF0060A3}');
+end.

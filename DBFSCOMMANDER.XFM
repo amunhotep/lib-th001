@@ -1,0 +1,540 @@
+object AmunhotepForm: TAmunhotepForm
+  Left = 1
+  Top = 46
+  Width = 777
+  Height = 462
+  Caption = 'DB:CONFIG/ETC/DBFS.XFM'
+  Color = 13421772
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clBlack
+  Font.Height = -9
+  Font.Name = 'Verdana'
+  Font.Style = []
+  FormStyle = fsMDIChild
+  Icon.Data = {
+    0000010001001010000001001800680300001600000028000000100000002000
+    0000010018000000000040030000000000000000000000000000000000000000
+    00FFFFFF000000000000FFFFFF000000000000FFFFFF000000000000FFFFFF00
+    0000000000FFFFFF000000000000000000000000000000000000000000000000
+    0000000000000000000000000000000000000000000000000000000000000000
+    005353534D4D4D4747474141413B3B3B3535352F2F2F2929292323231D1D1D17
+    17171111110B0B0B050505000000000000585858DFDFDFDADADAD4D4D4CECECE
+    C7C7C7C0C0C02F2F2FE1E1E1DBDBDBD5D5D5CFCFCFC7C7C7C0C0C00505050000
+    005F5F5FE5E5E5DFDFDFDADADAD4D4D4CECECEC7C7C7353535E6E6E6E1E1E1DB
+    DBDBD5D5D5CFCFCFC7C7C70B0B0B000000646464E9E9E9000000000000000000
+    000000CECECE3B3B3BEBEBEBE6E6E6E1E1E1DBDBDBD5D5D5CFCFCF1111110000
+    006B6B6BEDEDEDE9E9E9E5E5E5DFDFDFDADADAD4D4D4414141EFEFEFEBEBEBE6
+    E6E6E1E1E1DBDBDBD5D5D5171717000000707070F1F1F1000000000000000000
+    000000DADADA474747F3F3F3EFEFEFEBEBEBE6E6E6E1E1E1DBDBDB1D1D1D0000
+    00777777FF0000FF0000FF0000FF0000FF0000FF00004D4D4DF6F6F6F3F3F3EF
+    EFEFEBEBEBE6E6E6E1E1E12323230000007C7C7CFF0000FFFFFFFFFFFFFFFFFF
+    FFFFFFFF0000535353F9F9F9000000000000000000000000E6E6E62929290000
+    00838383FF0000FF0000FF0000FF0000FF0000FF0000585858FBFBFBF9F9F9F6
+    F6F6F3F3F3EFEFEFEBEBEB2F2F2F000000888888FCFCFC000000000000000000
+    000000EDEDED5F5F5FFDFDFD000000000000000000000000EFEFEF3535350000
+    008E8E8EFDFDFDFCFCFCFAFAFAF7F7F7F4F4F4F1F1F1646464FEFEFEFDFDFDFB
+    FBFBF9F9F9F6F6F6F3F3F33B3B3B000000949494FEFEFE000000000000000000
+    000000F4F4F46B6B6BFFFFFF000000000000000000000000F6F6F64141410000
+    009A9A9AFFFFFFFEFEFEFDFDFDFCFCFCFAFAFAF7F7F7707070FFFFFFFFFFFFFE
+    FEFEFDFDFDFBFBFBF9F9F9474747000000A0A0A09A9A9A9494948E8E8E888888
+    8383837C7C7C7777777070706B6B6B6464645F5F5F5858585353534D4D4D8000
+    FFFFFFFFFFFF8000FFFF8000FFFF8000FFFF8000FFFF8000FFFF8000FFFF8000
+    FFFF8000FFFF8000FFFF8000FFFF8000FFFF8000FFFF8000FFFF8000FFFF}
+  OldCreateOrder = False
+  Visible = True
+  OnClose = FormClose
+  OnCreate = FormCreate
+  PixelsPerInch = 96
+  TextHeight = 12
+  object BottomPanel: TxcGradientPanel
+    Left = 0
+    Top = 411
+    Width = 769
+    Height = 24
+    Align = alBottom
+    Colors.Background = 4210752
+    Colors.Border = clBlack
+    Colors.Error = 8388863
+    Colors.Foreground = 13421772
+    Colors.Window = 15790320
+    Colors.Highlight = 10526880
+    Colors.HotTrack = 10526880
+    Colors.HotTrackBorder = 2105376
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clBlack
+    Font.Height = -9
+    Font.Name = 'Verdana'
+    Font.Style = [fsBold]
+    ParentFont = False
+    StyleManager = AmunhotepMainForm.StyleManager
+    ViewStyle = vsOFF03
+    Alignment = taLeftJustify
+    ShowCaption = True
+    BorderStyle = xbsRaized
+    GradientDirect = gdBottomToTop
+    object btnF1: TxcToolBarButton
+      Left = 0
+      Top = 0
+      Width = 80
+      Height = 24
+      Align = alLeft
+      Colors.Background = 4210752
+      Colors.Border = clBlack
+      Colors.Error = 8388863
+      Colors.Foreground = 13421772
+      Colors.Window = 15790320
+      Colors.Highlight = 10526880
+      Colors.HotTrack = 10526880
+      Colors.HotTrackBorder = 2105376
+      ParentShowHint = False
+      ShowHint = True
+      StyleManager = AmunhotepMainForm.StyleManager
+      ViewStyle = vsOFF03
+      Caption = 'F1 '#1055#1086#1084#1086#1097#1100
+      Gradient = True
+      Down = False
+      Margin = 2
+      ImageIndex = 137
+      ImagesSmall = AmunhotepMainForm.ImageListMain
+      Style = bstSmall
+    end
+    object btnF8: TxcToolBarButton
+      Left = 560
+      Top = 0
+      Width = 80
+      Height = 24
+      Align = alLeft
+      Colors.Background = 4210752
+      Colors.Border = clBlack
+      Colors.Error = 8388863
+      Colors.Foreground = 13421772
+      Colors.Window = 15790320
+      Colors.Highlight = 10526880
+      Colors.HotTrack = 10526880
+      Colors.HotTrackBorder = 2105376
+      ParentShowHint = False
+      ShowHint = True
+      StyleManager = AmunhotepMainForm.StyleManager
+      ViewStyle = vsOFF03
+      Caption = 'F8 '#1059#1076#1072#1083#1080#1090#1100
+      Gradient = True
+      Down = False
+      Margin = 2
+      ImageIndex = 96
+      ImagesSmall = AmunhotepMainForm.ImageListMain
+      Style = bstSmall
+    end
+    object btnF7: TxcToolBarButton
+      Left = 480
+      Top = 0
+      Width = 80
+      Height = 24
+      Align = alLeft
+      Colors.Background = 4210752
+      Colors.Border = clBlack
+      Colors.Error = 8388863
+      Colors.Foreground = 13421772
+      Colors.Window = 15790320
+      Colors.Highlight = 10526880
+      Colors.HotTrack = 10526880
+      Colors.HotTrackBorder = 2105376
+      ParentShowHint = False
+      ShowHint = True
+      StyleManager = AmunhotepMainForm.StyleManager
+      ViewStyle = vsOFF03
+      Caption = 'F7 '#1050#1072#1090#1072#1083#1086#1075
+      Gradient = True
+      Down = False
+      Margin = 2
+      ImageIndex = 82
+      ImagesSmall = AmunhotepMainForm.ImageListMain
+      Style = bstSmall
+    end
+    object btnF6: TxcToolBarButton
+      Left = 400
+      Top = 0
+      Width = 80
+      Height = 24
+      Align = alLeft
+      Colors.Background = 4210752
+      Colors.Border = clBlack
+      Colors.Error = 8388863
+      Colors.Foreground = 13421772
+      Colors.Window = 15790320
+      Colors.Highlight = 10526880
+      Colors.HotTrack = 10526880
+      Colors.HotTrackBorder = 2105376
+      ParentShowHint = False
+      ShowHint = True
+      StyleManager = AmunhotepMainForm.StyleManager
+      ViewStyle = vsOFF03
+      Caption = 'F6 '#1055#1077#1088#1077#1085#1077#1089#1090#1080
+      Gradient = True
+      Down = False
+      Margin = 2
+      ImageIndex = 81
+      ImagesSmall = AmunhotepMainForm.ImageListMain
+      Style = bstSmall
+    end
+    object btnF5: TxcToolBarButton
+      Left = 320
+      Top = 0
+      Width = 80
+      Height = 24
+      Align = alLeft
+      Colors.Background = 4210752
+      Colors.Border = clBlack
+      Colors.Error = 8388863
+      Colors.Foreground = 13421772
+      Colors.Window = 15790320
+      Colors.Highlight = 10526880
+      Colors.HotTrack = 10526880
+      Colors.HotTrackBorder = 2105376
+      ParentShowHint = False
+      ShowHint = True
+      StyleManager = AmunhotepMainForm.StyleManager
+      ViewStyle = vsOFF03
+      Caption = #1050#1086#1087#1080#1088#1086#1074#1072#1090#1100
+      Gradient = True
+      Down = False
+      Margin = 2
+      ImageIndex = 68
+      ImagesSmall = AmunhotepMainForm.ImageListMain
+      Style = bstSmall
+    end
+    object btnF4: TxcToolBarButton
+      Left = 240
+      Top = 0
+      Width = 80
+      Height = 24
+      Align = alLeft
+      Colors.Background = 4210752
+      Colors.Border = clBlack
+      Colors.Error = 8388863
+      Colors.Foreground = 13421772
+      Colors.Window = 15790320
+      Colors.Highlight = 10526880
+      Colors.HotTrack = 10526880
+      Colors.HotTrackBorder = 2105376
+      ParentShowHint = False
+      ShowHint = True
+      StyleManager = AmunhotepMainForm.StyleManager
+      ViewStyle = vsOFF03
+      Caption = 'F4 '#1048#1079#1084#1077#1085#1080#1090#1100
+      Gradient = True
+      Down = False
+      Margin = 2
+      ImageIndex = 178
+      ImagesSmall = AmunhotepMainForm.ImageListMain
+      Style = bstSmall
+    end
+    object btnF3: TxcToolBarButton
+      Left = 160
+      Top = 0
+      Width = 80
+      Height = 24
+      Align = alLeft
+      Colors.Background = 4210752
+      Colors.Border = clBlack
+      Colors.Error = 8388863
+      Colors.Foreground = 13421772
+      Colors.Window = 15790320
+      Colors.Highlight = 10526880
+      Colors.HotTrack = 10526880
+      Colors.HotTrackBorder = 2105376
+      ParentShowHint = False
+      ShowHint = True
+      StyleManager = AmunhotepMainForm.StyleManager
+      ViewStyle = vsOFF03
+      Caption = 'F3 '#1055#1088#1086#1089#1084#1086#1090#1088
+      Gradient = True
+      Down = False
+      Margin = 2
+      ImageIndex = 105
+      ImagesSmall = AmunhotepMainForm.ImageListMain
+      Style = bstSmall
+    end
+    object btnF2: TxcToolBarButton
+      Left = 80
+      Top = 0
+      Width = 80
+      Height = 24
+      Align = alLeft
+      Colors.Background = 4210752
+      Colors.Border = clBlack
+      Colors.Error = 8388863
+      Colors.Foreground = 13421772
+      Colors.Window = 15790320
+      Colors.Highlight = 10526880
+      Colors.HotTrack = 10526880
+      Colors.HotTrackBorder = 2105376
+      ParentShowHint = False
+      ShowHint = True
+      StyleManager = AmunhotepMainForm.StyleManager
+      ViewStyle = vsOFF03
+      Caption = 'F2 '#1052#1077#1085#1102
+      Gradient = True
+      Down = False
+      Margin = 2
+      ImageIndex = 144
+      ImagesSmall = AmunhotepMainForm.ImageListMain
+      Style = bstSmall
+    end
+  end
+  object CommandPanel: TxcGradientPanel
+    Left = 0
+    Top = 407
+    Width = 769
+    Height = 4
+    Align = alBottom
+    Colors.Background = 4210752
+    Colors.Border = clBlack
+    Colors.Error = 8388863
+    Colors.Foreground = 13421772
+    Colors.Window = 15790320
+    Colors.Highlight = 10526880
+    Colors.HotTrack = 10526880
+    Colors.HotTrackBorder = 2105376
+    StyleManager = AmunhotepMainForm.StyleManager
+    ViewStyle = vsOFF03
+    Alignment = taLeftJustify
+    ShowCaption = True
+    BorderStyle = xbsNone
+    GradientDirect = gdTopToBottom
+  end
+  object PanelLeft: TxcPanel
+    Left = 0
+    Top = 0
+    Width = 372
+    Height = 407
+    Align = alLeft
+    Colors.Background = 4210752
+    Colors.Border = clBlack
+    Colors.Error = 8388863
+    Colors.Foreground = 13421772
+    Colors.Window = 15790320
+    Colors.Highlight = 10526880
+    Colors.HotTrack = 10526880
+    Colors.HotTrackBorder = 2105376
+    StyleManager = AmunhotepMainForm.StyleManager
+    ViewStyle = vsOFF03
+    Alignment = taLeftJustify
+    ShowCaption = False
+    BorderStyle = xbsNone
+    object DBGridLeft: TDBGridEh
+      Left = 0
+      Top = 16
+      Width = 372
+      Height = 391
+      Align = alClient
+      Ctl3D = False
+      DataSource = dsLeft
+      Flat = True
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBlack
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      FooterColor = clWindow
+      FooterFont.Charset = DEFAULT_CHARSET
+      FooterFont.Color = clBlack
+      FooterFont.Height = -9
+      FooterFont.Name = 'Verdana'
+      FooterFont.Style = []
+      Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit]
+      ParentCtl3D = False
+      ParentFont = False
+      TabOrder = 0
+      TitleFont.Charset = DEFAULT_CHARSET
+      TitleFont.Color = clBlack
+      TitleFont.Height = -9
+      TitleFont.Name = 'Verdana'
+      TitleFont.Style = [fsBold]
+      Columns = <
+        item
+          EditButtons = <>
+          FieldName = 'EXT'
+          Footers = <>
+          Title.Caption = #1090#1080#1087
+          Width = 20
+        end
+        item
+          EditButtons = <>
+          FieldName = 'NAME'
+          Footers = <>
+          Title.Caption = #1085#1072#1079#1074#1072#1085#1080#1077
+          Width = 206
+        end
+        item
+          DisplayFormat = 'yyyy.mm.dd hh:nn:ss'
+          EditButtons = <>
+          FieldName = 'DATE_INS'
+          Footers = <>
+          Title.Caption = #1089#1086#1079#1076#1072#1085
+          Width = 128
+        end
+        item
+          DisplayFormat = 'yyyy.mm.dd hh:nn:ss'
+          EditButtons = <>
+          FieldName = 'DATE_UPD'
+          Footers = <>
+          Title.Caption = #1080#1079#1084#1077#1085#1077#1085
+          Width = 128
+        end>
+    end
+    object CaptionPanelLeft: TxcGradientPanel
+      Left = 0
+      Top = 0
+      Width = 372
+      Height = 16
+      Align = alTop
+      Colors.Background = 6710886
+      Colors.Border = clBlack
+      Colors.Error = 8388863
+      Colors.Foreground = 16711808
+      Colors.Window = 15790320
+      Colors.Highlight = 6728447
+      Colors.HotTrack = 16755370
+      Colors.HotTrackBorder = 11149858
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBlack
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      ParentFont = False
+      ViewStyle = vsOFF03
+      Alignment = taLeftJustify
+      ShowCaption = True
+      BorderStyle = xbsRaized
+      GradientDirect = gdLeftToRight
+    end
+  end
+  object PanelRight: TxcPanel
+    Left = 372
+    Top = 0
+    Width = 397
+    Height = 407
+    Align = alClient
+    Colors.Background = 4210752
+    Colors.Border = clBlack
+    Colors.Error = 8388863
+    Colors.Foreground = 13421772
+    Colors.Window = 15790320
+    Colors.Highlight = 10526880
+    Colors.HotTrack = 10526880
+    Colors.HotTrackBorder = 2105376
+    StyleManager = AmunhotepMainForm.StyleManager
+    ViewStyle = vsOFF03
+    Alignment = taLeftJustify
+    ShowCaption = False
+    BorderStyle = xbsNone
+    object DBGridRight: TDBGridEh
+      Left = 0
+      Top = 16
+      Width = 397
+      Height = 391
+      Align = alClient
+      Ctl3D = False
+      DataSource = dsRight
+      Flat = True
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBlack
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      FooterColor = clWindow
+      FooterFont.Charset = DEFAULT_CHARSET
+      FooterFont.Color = clBlack
+      FooterFont.Height = -9
+      FooterFont.Name = 'Verdana'
+      FooterFont.Style = []
+      Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit]
+      ParentCtl3D = False
+      ParentFont = False
+      TabOrder = 0
+      TitleFont.Charset = DEFAULT_CHARSET
+      TitleFont.Color = clBlack
+      TitleFont.Height = -9
+      TitleFont.Name = 'Verdana'
+      TitleFont.Style = [fsBold]
+      Columns = <
+        item
+          EditButtons = <>
+          FieldName = 'EXT'
+          Footers = <>
+          Title.Caption = #1090#1080#1087
+          Width = 20
+        end
+        item
+          EditButtons = <>
+          FieldName = 'NAME'
+          Footers = <>
+          Title.Caption = #1085#1072#1079#1074#1072#1085#1080#1077
+          Width = 235
+        end
+        item
+          DisplayFormat = 'yyyy.mm.dd hh:nn:ss'
+          EditButtons = <>
+          FieldName = 'DATE_INS'
+          Footers = <>
+          Title.Caption = #1089#1086#1079#1076#1072#1085
+          Width = 128
+        end
+        item
+          DisplayFormat = 'yyyy.mm.dd hh:nn:ss'
+          EditButtons = <>
+          FieldName = 'DATE_UPD'
+          Footers = <>
+          Title.Caption = #1080#1079#1084#1077#1085#1077#1085
+          Width = 128
+        end>
+    end
+    object CaptionPanelRight: TxcGradientPanel
+      Left = 0
+      Top = 0
+      Width = 397
+      Height = 16
+      Align = alTop
+      Colors.Background = 6710886
+      Colors.Border = clBlack
+      Colors.Error = 8388863
+      Colors.Foreground = 13421772
+      Colors.Window = 15790320
+      Colors.Highlight = 6728447
+      Colors.HotTrack = 16755370
+      Colors.HotTrackBorder = 11149858
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBlack
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      ParentFont = False
+      ViewStyle = vsOFF03
+      Alignment = taLeftJustify
+      ShowCaption = True
+      BorderStyle = xbsRaized
+      GradientDirect = gdLeftToRight
+    end
+  end
+  object dsLeft: TDataSource
+    DataSet = QueryLeft
+  end
+  object dsRight: TDataSource
+    DataSet = QueryRight
+  end
+  object Trans: TxFBTransaction
+    DefaultDatabase = AmunhotepMainForm.FBDB
+  end
+  object QueryLeft: TxFBQuery
+    Database = AmunhotepMainForm.FBDB
+    Transaction = Trans
+  end
+  object QueryRight: TxFBQuery
+    Database = AmunhotepMainForm.FBDB
+    Transaction = Trans
+  end
+  object QueryPath: TxFBQuery
+    Database = AmunhotepMainForm.FBDB
+    Transaction = Trans
+  end
+end

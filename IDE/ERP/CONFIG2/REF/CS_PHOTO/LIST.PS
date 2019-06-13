@@ -1,0 +1,298 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}  {$I PEAKTOP:GLOBAL_VARIABLES.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TACTION.INC}       {$I PEAKTOP:OBJ/TACTION.INC}      {$ENDIF}
+const
+  msg_invalid_resource     = 'Неверный файл ресурсов'; 
+  msg_caption              = 'Фотографии контрагента'; 
+  msg_actrefresh           = 'Обновить'; 
+  msg_actrefresh_hint      = 'Обновить список изображений'; 
+  msg_actprint             = 'Печать'; 
+  msg_actprint_hint        = 'Печать изображения'; 
+  msg_actrefitemins        = 'Добавить'; 
+  msg_actrefitemins_hint   = 'Добавить изображение'; 
+  msg_actrefitemdel        = 'Удалить'; 
+  msg_actrefitemdel_hint   = 'Удалить изображение'; 
+var
+  CS_ID   :string;
+  CS_NAME :string;
+var 
+  RefForm          :TAmunhotepForm; 
+  TopBar           :TxcGradientPanelVista; 
+  ImgLogo          :TImage; 
+  ToolBar          :TxcGradientPanel; 
+  dbcgRef          :TDBCtrlGrid; 
+  dbtTXT           :TDBText; 
+  dbimgPHOTO       :TxcDBImage; 
+  trRef            :TxFBTransaction; 
+  qrRef            :TxFBQuery; 
+  DSqrRef          :TDataSource; 
+  evRef            :TxFBEvents; 
+  //============================================================================
+  procedure RefreshView;
+  begin 
+    if trRef.InTransaction then 
+      trRef.Commit; 
+    qrRef.SQL.Text := StringsLoadFromFile(StrAbsolutePath('./LIST.SQL', ScriptName));
+    qrRef.Prepare;
+    qrRef.ParamByName('PQ_CS_ID').AsString := CS_ID;   
+    try 
+      qrRef.Open; 
+    except 
+      // Dialogs.MessageDlg(qrRef.SQL.Text, mtError, [mbOk]);
+    end;
+  end;
+  //============================================================================
+  procedure evRef_OnEventAlert(Sender :TObject; EventName: string; EventCount: LongInt; var CancelAlerts: Boolean);
+  begin
+    RefreshView; 
+    CancelAlerts := false;
+  end;
+  //============================================================================
+  procedure actRefresh_OnExecute(Sender :TObject);
+  begin
+    RefreshView;
+  end;
+  //============================================================================
+  procedure InsertPhotoByFileName(const aFileName:string);
+  var
+    lkFileName :string;
+    lkCS_NAME  :string;
+    lkTr       :TxFBTransaction;
+    lkTB       :TxFBTable;
+    lkStream   :TMemoryStream;
+  begin
+    lkFileName := aFileName;
+    lkCS_NAME  := ''; GetField(FBDataBase, 'TABL$R_CS','NAME', 'ID = '''+CS_ID+''' ', lkCS_NAME);
+    lkStream := TMemoryStream.Create;
+    if not StreamLoadFromFile(lkFileName, lkStream)then
+      begin
+      lkStream.Free;
+      exit;
+      end;
+    lkStream.Seek(0, soFromBeginning);
+    DeleteFile(lkFileName);
+
+    lkTr := TxFBTransaction.Create(nil);
+    with lkTr do
+      begin
+      DefaultDatabase := FBDataBase;
+      Params.Clear;
+      Params.Add('isc_tpb_read_committed');
+      Params.Add('isc_tpb_write');
+      Params.Add('isc_tpb_rec_version');
+      Params.Add('isc_tpb_nowait');
+      end;
+    lkTB := TxFBTable.Create(lkTr);
+    with lkTB do
+      begin
+      Database    := lkTr.DefaultDatabase;
+      Transaction := lkTr;
+      TableName   := 'TABL$R_CS_PHOTO';
+      try
+        Open;
+        try
+          Insert;
+          FieldByName('CS_ID').AsString         := CS_ID;
+          FieldByName('ID').AsString            := '-1';
+          FieldByName('NAME').AsString          := lkCS_NAME+'-'+FormatDateTime('yyyy.mm.dd hh:nn:ss',Now);
+          FieldByName('FLAG_DELETE').AsString   := '0';
+          FieldByName('DATE_COMMIT').AsDateTime := Now;
+          TBlobField(FieldByName('PHOTO')).LoadFromStream(lkStream);
+        finally
+          Post;
+        end;
+      finally
+        if Active then Close;
+      end;
+      end;
+    if lkTr.InTransaction then
+      lkTr.Commit;
+    lkTr.Free;
+    lkStream.Free;
+  end;
+  //============================================================================
+  procedure actRefItemIns_OnExecute(Sender :TObject);
+  var
+    lkMr :TModalResult;
+    lkFN :string;
+  begin
+    lkMr := Dialogs.MessageDlg('Добавить фотографию с вэб-камеры или из файла ? '+#13#10#13#10+
+      '[Да ] - Добавить фотографию с вэб-камеры. '+#13#10+
+      '[Нет] - Добавить фотографию из файла', mtConfirmation, [mbYes, mbNo, mbCancel]);
+    if(lkMr = mrCancel)then exit;
+    if(lkMr = mrYes)then
+      begin
+      SetGlobalVariable('CS_ID', CS_ID);
+      call(StrAbsolutePath('./INS_DLG.PS', ScriptName));
+      exit;
+      end;
+    if(lkMr = mrNo)then
+      begin
+      if PromptForFileName(lkFN, 'Файлы изображений (*.jpg;*.jpeg;*.png;*.bmp;*.gif)|*.jpg;*.jpeg;*.png;*.bmp;*.gif|Все файлы (*.*)|*.*', 
+        'jpg', 'Выбрать файл', 'Y:\', false)then InsertPhotoByFileName(lkFN);
+      exit;
+      end;  
+  end;
+  //============================================================================
+  procedure actRefItemDel_OnExecute(Sender :TObject);
+  begin
+    if not qrRef.Active then exit;
+    if not(qrRef.RecordCount > 0)then exit;
+    if(Dialogs.MessageDlg(msg_actrefitemdel_hint+' ?', mtConfirmation, [mbYes, mbNo]) <> mrYes)then exit;
+    ExecSQL(qrRef.DataBase, 'DELETE FROM TABL$R_CS_PHOTO P WHERE (P.ID = '''+qrRef.FieldByName('ID').AsString+''')');
+  end;
+  //============================================================================
+  procedure actRefItemDel_OnUpdate(Sender :TObject);
+  var
+    lkEnabled :Boolean;
+  begin
+    lkEnabled := qrRef.Active;
+    if(lkEnabled)then lkEnabled := (qrRef.RecordCount > 0);
+    TCustomAction(Sender).Enabled := lkEnabled;
+  end;
+  //============================================================================
+  procedure actPrint_OnExecute(Sender :TObject);
+  var
+    lkRes :string;
+    lkRpt :TxReport;
+    lkImg :TxrImage;
+    lkLbl :TxrLabel;
+  begin
+    if not qrRef.Active then exit;
+    if not(qrRef.RecordCount > 0)then exit;
+    lkRes := StringsLoadFromFile(StrAbsolutePath('./LIST_REPORT.XFM',ScriptName));
+    lkRpt := TxReport(StrToComponent(lkRes));
+    lkRpt.DataBase := FBDataBase;
+    while(lkRpt.DataSets.Count < 2)do
+      lkRpt.DataSets.Add;
+    lkRpt.DataSets[0].SQL.Text := StringsLoadFromFile(StrAbsolutePath('./LIST_ITEM.SQL', ScriptName));
+    lkRpt.DataSets[0].SQL.Text := StrReplaceStr(lkRpt.DataSets[0].SQL.Text, '?PQ_ID', ''''+qrRef.FieldByName('ID').AsString+'''');
+    lkRpt.DataSets[1].SQL.Text := 'SELECT PR.* FROM PROC$R_FIRMS_ENT_CONST(''0'') PR ';
+    lkImg := TxrImage(lkRpt.FindComponent('ImgLogo'));
+    lkRes := StrAbsolutePath('../conf/ent/logo.bmp', Amunhotep.ExeName);
+    if FileExists(lkRes)then
+      try
+        lkImg.Picture.LoadFromFile(lkRes);
+      except
+      end;
+    lkLbl := TxrLabel(lkRpt.FindComponent('lblCaption'));
+    lkLbl.Caption := msg_caption+' "'+qrRef.FieldByName('CS_NAME').AsString+'"'+#13#10+
+      'Фотография сделана '+FormatDateTime('dd mmmmm yyyy г. в hh:nn:ss', qrRef.FieldByName('DATE_COMMIT').AsDateTime);
+    lkRpt.Prepare;
+    lkRpt.Preview;
+  end;
+  //============================================================================
+  procedure RefForm_OnClose(Sender :TObject; var Action :TCloseAction);
+  begin
+    Action := caFree;
+    if evRef.Registered then evRef.UnRegisterEvents; 
+    AutoFree; 
+  end; 
+  //============================================================================
+  function RefForm_Create:TAmunhotepForm;
+  var
+    lkFileName :string;
+    lkResBody  :string;
+    lkStrm     :TMemoryStream;
+    lkLbl      :TLabel;
+    lkAct      :TAction;
+    lkTS       :TTabSheet;
+    lkPM       :TPopupMenu;
+    lkMM       :TMainMenu;
+    lkCol      :TColumnEh;
+    i          :Integer;
+  begin
+    DontAutoFree;
+    lkFileName := StrAbsolutePath('./LIST.XFM', ScriptName);
+    lkResBody  := StringsLoadFromFile(lkFileName);
+    if(lkResBody = '')then 
+      begin
+      Dialogs.MessageDlg(msg_invalid_resource+#13#10+lkFileName, mtWarning, [mbOK]);
+      exit;
+      end;
+    Result          := TAmunhotepForm(StrToComponent(lkResBody));
+    Result.HelpKeyWord := CS_ID;
+    Result.OnClose  := @RefForm_OnClose;
+    //Result.FileName := lkFileName;
+    lkFileName := StrAbsolutePath('./IMG/CONFIG/PHOTO.ICO', Amunhotep.SourcePath);
+    if FileExists(lkFileName)then 
+      try
+        lkStrm := TMemoryStream.Create;
+        if StreamLoadFromFile(lkFileName, lkStrm)then
+          Result.Icon.LoadFromStream(lkStrm);
+      finally
+       lkStrm.Free;
+      end;
+    Result.SetCaption(msg_caption+' "'+CS_NAME+'"');
+    TopBar := TxcGradientPanelVista(Result.FindComponent('TopBar')); 
+    with TopBar do 
+      begin 
+      Caption    := #$20#$20#$20#$20#$20#$20+msg_caption+' "'+CS_NAME+'"'; 
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Window; 
+      Font.Name  := 'Verdana'; 
+      Font.Size  := 14; 
+      Font.Style := [fsBold]; 
+      end; 
+    ImgLogo := TImage(Result.FindComponent('ImgLogo'));
+    ImgLogo.Transparent := true; 
+    lkFileName := StrAbsolutePath('./IMG/CONFIG/PHOTO.BMP', Amunhotep.SourcePath);
+    if FileExists(lkFileName)then 
+      try 
+        lkStrm  := TMemoryStream.Create; 
+        if StreamLoadFromFile(lkFileName, lkStrm)then 
+          ImgLogo.Picture.Bitmap.LoadFromStream(lkStrm); 
+      finally 
+        lkStrm.Free; 
+      end; 
+    ToolBar := TxcGradientPanel(Result.FindComponent('ToolBar'));
+    ToolBar.Font.Style := [fsBold];
+    dbcgRef := TDBCtrlGrid(Result.FindComponent('dbcgRef'));
+    with dbcgRef do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      end; 
+    dbtTXT     := TDBText(Result.FindComponent('dbtTXT'));
+    dbimgPHOTO := TxcDBImage(Result.FindComponent('dbimgPHOTO'));
+    trRef := TxFBTransaction(Result.FindComponent('trRef'));
+    with trRef do 
+      begin 
+      DefaultDataBase := FBDataBase; 
+      Params.Clear; 
+      Params.Add('isc_tpb_read_committed'); 
+      Params.Add('isc_tpb_write'); 
+      Params.Add('isc_tpb_rec_version'); 
+      Params.Add('isc_tpb_nowait'); 
+      end; 
+    qrRef := TxFBQuery(Result.FindComponent('qrRef'));
+    DSqrRef := TDataSource(Result.FindComponent('DSqrRef'));
+    evRef   := TxFBEvents(Result.FindComponent('evRef'));
+    with evRef do
+      begin 
+      Events.Clear;
+      Events.Add('TABL$R_CS_PHOTO');
+      OnEventAlert := @evRef_OnEventAlert;
+      end; 
+    if not evRef.Registered then evRef.RegisterEvents; 
+    lkAct := FindTAction(Result,'actRefresh'   ,msg_actrefresh   ,msg_actrefresh_hint   ,'F5'      ,0,170); lkAct.OnExecute:=@actRefresh_OnExecute; 
+    lkAct := FindTAction(Result,'actRefItemIns',msg_actrefitemins,msg_actrefitemins_hint,'Ins'     ,0,176); lkAct.OnExecute:=@actRefItemIns_OnExecute; 
+    lkAct := FindTAction(Result,'actRefItemDel',msg_actrefitemdel,msg_actrefitemdel_hint,'Ctrl+Del',0,177); lkAct.OnExecute:=@actRefItemDel_OnExecute; lkAct.OnUpdate:=@actRefItemDel_OnUpdate; 
+    lkAct := FindTAction(Result,'actPrint'     ,msg_actprint     ,msg_actprint_hint     ,'Ctrl+P'  ,0,105); lkAct.OnExecute:=@actPrint_OnExecute;    ; lkAct.OnUpdate:=@actRefItemDel_OnUpdate;
+    RefreshView;
+    Amunhotep.MainForm.TaskBar.ButtonByForm(Result).Down := true;
+  end;
+  //============================================================================
+var
+  i :Integer;  
+begin
+  CS_ID := GetGlobalVariable('CS_ID');
+  with Amunhotep.MainForm do
+    for i:=0 to MDIChildCount-1 do
+      if(MDIChildren[i].HelpKeyWord = CS_ID)then
+        begin
+        MDIChildren[i].BringToFront;
+        exit;
+        end; 
+  CS_NAME := '';      
+  GetField(FBDataBase, 'TABL$R_CS','COALESCE(NAME,'' '')||'' [''||COALESCE(INN,'' '')||'']'' ', 'ID = '''+CS_ID+'''', CS_NAME);      
+  RefForm := RefForm_Create; 
+end.

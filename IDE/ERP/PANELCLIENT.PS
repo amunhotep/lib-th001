@@ -1,0 +1,36 @@
+{$DEFINE PEAKTOP:IDE/ERP/PANELCLIENT.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/PANELCLIENT.INC} {$I ./PANELCLIENT.INC} {$ENDIF}
+  //============================================================================
+  function CheckAutoConnect:Boolean;
+  var
+    lkFileName :string;
+    lkSL       :TStringList;
+    i          :Integer;
+  begin
+    lkFileName := StrAbsolutePath('../conf/amunhotep-autoconnect.conf', Amunhotep.ExeName);
+    Result := FileExists(lkFileName);
+    if Result then
+      begin
+      lkSL := TStringList.Create;
+      lkSL.Text := StringsLoadfromFile( lkFileName );
+      for i:=0 to lkSL.Count-1 do
+        SetGlobalVariable( lkSL.Names[i], lkSL.Values[lkSL.Names[i]] );
+      lkSL.Free;  
+      end;
+  end;
+
+begin
+  Amunhotep.MainForm.WindowState := wsMaximized;
+  if(Amunhotep.MainForm.FindComponent(obj_name_erp_amunhotepmainform_panelclient) <> nil)then
+    try Amunhotep.MainForm.FindComponent(obj_name_erp_amunhotepmainform_panelclient).Free; except end
+  else if CheckAutoConnect then
+    begin
+    DontAutoFree;
+    Amunhotep_MainForm_PanelClient_CreateLogin;
+    end
+  else if not FBDataBase.Connected then
+    begin
+    DontAutoFree;
+    Amunhotep_MainForm_PanelClient_Create;
+    end;
+end.

@@ -1,0 +1,159 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG/RPTI/4464D24A-C31D-4E3F-A149-F6AF4C2CA8DD/DEFAULT.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}            {$I PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}            {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC}    {$I PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC}    {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}           {$I PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}           {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/CHECKBOX/INTF.INC}      {$I PEAKTOP:IDE/ERP/DBO/INPUT/CHECKBOX/INTF.INC}      {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/DBGRID/GETCELLPARAMS_REG.INC} {$I PEAKTOP:IDE/ERP/DBO/DBGRID/GETCELLPARAMS_REG.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCEDITCOMBO.INC}                     {$I PEAKTOP:OBJ/TXCEDITCOMBO.INC}                     {$ENDIF}
+const
+  objname_edtJ1      = 'edtJ1';
+  objname_edtJ2      = 'edtJ2';
+  objname_check      = 'cbxCheckZero';
+  //============================================================================
+  function TERPFormRpti_GetExportFilter(aOwner:TComponent):string;
+  begin
+    Result := '';
+  end;
+  //============================================================================
+  function TERPFormRpti_OnGetSQL(aOwner:TComponent;var aSQL:string):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnGetSQLFileName(aOwner:TComponent;var aFileName:string);
+  begin
+     // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnProcessParams(aOwner:TComponent;aQr :TxFBQuery);
+  begin
+    with aQr do
+      begin
+      ParamByName('J_ID1').AsString := IntToStr(TxcEditCombo(aOwner.FindComponent(objname_edtJ1)).Tag);
+      ParamByName('J_ID2').AsString := IntToStr(TxcEditCombo(aOwner.FindComponent(objname_edtJ2)).Tag);
+      ParamByName('FLAG' ).AsString := InputIntf_CheckBox_Checked(aOwner, objname_check);;
+      end;  
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnChart(aOwner:TComponent; aParent:TWinControl);
+  var
+    lkPC :TxcPageControlEx;
+    lkTS :TxcTabSheet;
+  begin
+    aParent.Free;
+    exit;
+    lkPC := CreateTxcPageControlEx(aOwner, aParent, 'PCCharts', 0,0,600,600, alClient);
+    lkPC.MultiLine := false;
+    TxcPageControlEx_ActivateDefaultPage(lkPC);
+  end;
+  //============================================================================
+  procedure TERPFormRpti_edtJ1_OnButtonClick(Sender :TObject);
+  var
+    lkStr :string;
+  begin
+    with TxcEditCombo(Sender) do
+      begin
+      SetGlobalVariable('J_ID', IntToStr(Tag));
+      call(StrAbsolutePath('../../DOC/1000014/DEFAULT_DLG.PS', ScriptName));
+      lkStr := GetGlobalVariable('J_ID');
+      if( (UpperCase(lkStr) = 'NULL') or (StrTrimAll(lkStr)='') )then exit;
+      Tag := StrToInt(lkStr);
+      GetField(FBDataBase, 'TABL$J_4', 'DOCSTR', 'ID = '+lkStr, lkStr);
+      Text := lkStr;
+      end;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnTerms(aOwner:TComponent;aParent:TWinControl);
+  var
+    lkLastTop :Integer;
+    lkHeight  :Integer;
+    lkGrb     :TxcGroupBox;
+    lkEdt     :TxcEditCombo;
+    lkStr     :string;
+  begin
+    lkLastTop := 4;
+    lkGrb     := CreateTxcGroupBox(aOwner, aParent, '', 'Выберите Документ расхода',alNone,4,lkLastTop,48,520);
+    lkLastTop := lkLastTop + lkGrb.Height + 4;
+    lkStr     := '1037616';
+    if(StrTrimAll(lkStr) = '')then lkStr := '0'; 
+    lkEdt := CreateTxcEditCombo(aOwner,lkGrb,objname_edtJ1,TERPForm_DefaultControlIndent,20,20,lkGrb.Width-(TERPForm_DefaultControlIndent*2));
+    with lkEdt do
+      begin
+      Color         := Amunhotep.MainForm.StyleManager.Colors.Window;
+      GlyphKind     := gkEllipsis;
+      ReadOnly      := true;
+      AlwaysEnable  := true;
+      Font.Style    := [fsBold];
+      Tag           := StrToInt(lkStr);
+      GetField(FBDataBase, 'TABL$J_4', 'DOCSTR', 'ID = '+lkStr, lkStr);
+      Text          := lkStr;
+      OnButtonClick := @TERPFormRpti_edtJ1_OnButtonClick;
+      end;
+
+    lkGrb     := CreateTxcGroupBox(aOwner, aParent, '', 'Выберите Документ прихода',alNone,4,lkLastTop,48,520);
+    lkLastTop := lkLastTop + lkGrb.Height + 4;
+    lkStr     := '1037617';
+    if(StrTrimAll(lkStr) = '')then lkStr := '0'; 
+    lkEdt := CreateTxcEditCombo(aOwner,lkGrb,objname_edtJ2,TERPForm_DefaultControlIndent,20,20,lkGrb.Width-(TERPForm_DefaultControlIndent*2));
+    with lkEdt do
+      begin
+      Color         := Amunhotep.MainForm.StyleManager.Colors.Window;
+      GlyphKind     := gkEllipsis;
+      ReadOnly      := true;
+      AlwaysEnable  := true;
+      Font.Style    := [fsBold];
+      Tag           := StrToInt(lkStr);
+      GetField(FBDataBase, 'TABL$J_4', 'DOCSTR', 'ID = '+lkStr, lkStr);
+      Text          := lkStr;
+      OnButtonClick := @TERPFormRpti_edtJ1_OnButtonClick;
+      end;
+
+    lkLastTop := lkLastTop + InputIntf_CheckBox_Create(aOwner,aParent,objname_check,'Показывать нулевые расхождения',4,lkLastTop, 20,520).Height;
+    InputIntf_CheckBox_SetCheckedStr(aOwner, objname_check, '0');
+  end;
+  //============================================================================
+  function TERPFormRpti_OnColumnsCreate(aOwner:TComponent; aDBG:TDBGridEh):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_Columns_OnEditButtonClick(Sender :TObject; var Handled :Boolean);
+  var
+    lkDBG    :TDBGridEh;
+    lkTypes  :string;
+    lkPlace  :string;
+    lkScript :string;
+  begin
+    Handled := true;
+    lkDBG   := TDBGridEh(TComponent(Sender).Owner.Owner);
+    if not lkDBG.DataSource.DataSet.Active then exit;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsCreated(aOwner:TComponent; aDBG:TDBGridEh);
+  var
+    i :Integer;
+  begin
+    for i:=0 to 5 do
+      aDBG.Columns[i].HideDuplicates := True;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsLoad(aOwner:TComponent; aDBG:TDBGridEh);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  function TERPFormRpti_OnPrint(aOwner:TComponent):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_BeforePreview(aOwner:TComponent; aRpt:TxReport);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  
+
+begin
+  TERPFormRpti_Create('{4464D24A-C31D-4E3F-A149-F6AF4C2CA8DD}');
+end.

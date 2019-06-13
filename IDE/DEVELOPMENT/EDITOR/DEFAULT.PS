@@ -1,0 +1,192 @@
+{$DEFINE PEAKTOP:IDE/DEVELOPMENT/EDITOR/DEFAULT.PS}
+{$IFDEF MSWINDOWS}
+  {$IFNDEF PEAKTOP:COM/MICROSOFT/WINDOWS/SHELL32.DLL.INC}
+    {$I PEAKTOP:COM/MICROSOFT/WINDOWS/SHELL32.DLL.INC}
+  {$ENDIF}
+{$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}                    {$I PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCPAGECONTROLEX.INC}                         {$I PEAKTOP:OBJ/TXCPAGECONTROLEX.INC}      {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/DEVELOPMENT/EDITOR/ICON.INC}                  {$I ./ICON.INC}                            {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/DEVELOPMENT/EDITOR/OBJNAMES.INC}              {$I ./OBJNAMES.INC}                        {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/DEVELOPMENT/EDITOR/ACTIONS.INC}               {$I ./ACTIONS.INC}                         {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/DEVELOPMENT/EDITOR/LNGPASCAL/CODETREE.INC}    {$I ./LNGPASCAL/CODETREE.INC}              {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/DEVELOPMENT/EDITOR/LNGPASCAL/MESSAGES.INC}    {$I ./LNGPASCAL/MESSAGES.INC}              {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/DEVELOPMENT/EDITOR/LNGPASCAL/PREPROCESSED.INC}{$I ./LNGPASCAL/PREPROCESSED.INC}          {$ENDIF}
+const 
+  LogDateFormat = 'yyyy.mm.dd hh:nn:ss';
+  //============================================================================
+  procedure Amunhotep_MainForm_OnEditorBeforeRunScript(Sender:TObject; const aFileName, aSource:string;const aFileType:TFileType;var Handled:Boolean);
+  var
+    lkSynEdit  :TSynEdit;
+    lkListView :TListView;
+  begin
+    Handled := false;
+    if(aFileType = ftPAS)then
+      begin
+      Handled := false;
+      lkListView := TListView(TComponent(Sender).FindComponent(editor_obj_name_listview_messages));
+      if(lkListView <> nil)then
+        lkListView.Items.Clear;
+      lkSynEdit := TSynEdit(TComponent(Sender).FindComponent(editor_obj_name_synedit_messages));
+      if(lkSynEdit <> nil)then
+        lkSynEdit.Lines.Clear;
+      lkSynEdit := TSynEdit(TComponent(Sender).FindComponent(editor_obj_name_synedit_preprocess));
+      if(lkSynEdit <> nil)then
+        lkSynEdit.Lines.Clear;
+      end;  
+  end;
+  //============================================================================
+  procedure EditorForm_actClose_OnExecute(Sender :TObject);
+  begin
+    TForm(TComponent(Sender).Owner).Close;
+  end;
+  //============================================================================
+  procedure Amunhotep_MainForm_OnNewEditor(Sender :TAmunhotepEditorForm);
+  var
+    lkTopBar      :TxcGradientPanelVista;
+    lkTBB         :TxcToolBarButton;
+    lkAct         :TCustomAction;
+    lkStrm        :TMemoryStream;
+    lkPanelClient :TxcPanel;
+    lkPageControl :TxcPageControlEx;
+  begin
+    lkTopBar := CreateTxcGradientPanelVista(Sender,Sender,'TopBar',#$20#$20#$20#$20#$20+Sender.FileName,alTop, 0,0,34,34,xbsRaized);
+    with lkTopBar do
+      begin
+      StyleManager          := nil;
+      Colors.Border         := $8F8080;
+      Colors.Background     := $BFB0B0;
+      Colors.HotTrack       := $FFFFFF;
+      Colors.HotTrackBorder := $EFE0E0;
+      Font.Color            := $000000;
+      end;  
+    with CreateTxcToolBarButton(lkTopBar,lkTopBar,'tbbImgLogo','','',0,0,0,lkTopBar.Height+8, alLeft,-1,nil) do
+      begin
+      ShowHint    := true;
+      ShowCaption := false;
+      if FileExists(PrepareAbsoleteFileName(ERP_FILENAME_BMP_ACTSOURCECODE))then  
+        Glyph.LoadFromFile(PrepareAbsoleteFileName(ERP_FILENAME_BMP_ACTSOURCECODE));
+      end;
+    lkAct := CreateTAction(Sender,'actClose','','Закрыть окно','Ctrl+F4',0,-1); 
+    lkAct.OnExecute := @EditorForm_actClose_OnExecute;
+    lkTBB := CreateTxcToolBarButton2(lkTopBar,lkTopBar,'tbb'+lkAct.Name,lkTopBar.Width,0,lkTopBar.Height + 2,lkTopBar.Height + 2, alRight, lkAct);
+    with lkTBB do
+      begin
+      ShowHint    := true;
+      ShowCaption := false;
+      if FileExists(PrepareAbsoleteFileName(ERP_FILENAME_BMP_ACTCLOSE))then  
+        try
+          lkStrm  := TMemoryStream.Create;
+          if StreamLoadFromFile(PrepareAbsoleteFileName(ERP_FILENAME_BMP_ACTCLOSE), lkStrm)then
+            Glyph.LoadFromStream(lkStrm);
+        finally    
+          lkStrm.Free;
+        end;
+      end;
+  
+    Editor_ActionsCreate(Sender);
+    if(Sender.FileType = ftPas)then
+      begin
+      lkPanelClient := TxcPanel(Sender.FindComponent('ClientPanel'));
+      lkPageControl := CreateTxcPageControlEx(Sender, lkPanelClient, editor_obj_name_page_control, 0,0,200,200, alBottom);
+      with TSplitter.Create(lkPanelClient) do
+        begin
+        Parent := lkPanelClient;
+        Align  := alBottom;
+        Height := 4;
+        Color  := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+        Top    := lkPageControl.Top - 4;
+        end;
+      Editor_PageMessages_Create  (Sender);
+      Editor_PagePreprocess_Create(Sender);
+      Editor_CodeTree_Create      (Sender);
+      TxcPageControlEx_ActivateDefaultPage(lkPageControl);
+      end;
+    SetEditorIcon(Sender);
+    {$IFDEF CORE_SCRIPTS_SAVEPREPROCESSED}
+    StringsSaveToFile(PrepareAbsoleteFileName('TMP:EDITOR_'+FormatDateTime('yyyymmdd_hhnnss', Now)+'_'+RandomHexStr(16)+'.XFM'), ComponentToStr(Sender));
+    {$ENDIF}
+  end;
+  //============================================================================
+  procedure Amunhotep_MainForm_OnPascalAfterPreprocess(Sender :TObject; const PreProcessedScript :string);
+  var
+    lkSynEdit :TSynEdit;
+  begin
+    {$IFDEF CORE_SCRIPTS_SAVEPREPROCESSED}
+    StringsSaveToFile(PrepareAbsoleteFileName('TMP:Z_'+FormatDateTime('yyyymmdd_hhnnss', Now)+'_'+RandomHexStr(16)+'.PS'), PreProcessedScript);
+    {$ENDIF}
+    lkSynEdit := TSynEdit(TComponent(Sender).Owner.FindComponent(editor_obj_name_synedit_preprocess));
+    if(lkSynEdit <> nil)then
+      lkSynEdit.Lines.Text := PreProcessedScript;
+  end;
+  //============================================================================
+  procedure Amunhotep_MainForm_OnPascalMessage(Sender :TObject; const ErrorType, Msg, ModuleName:string; const Pos, Col, Row:LongInt);
+  var
+    lkSynEdit :TSynEdit;
+  begin 
+    with TListView(TComponent(Sender).Owner.FindComponent(editor_obj_name_listview_messages)) do
+      with Items.Add do
+        begin
+        Caption := ErrorType;
+        with SubItems do
+          begin
+          Clear;
+          Add(Msg);
+          Add(ModuleName);
+          Add(FormatFloat('0000', Row));
+          Add(FormatFloat('0000', Col));
+          end;
+        end;
+    lkSynEdit := TSynEdit(TComponent(Sender).Owner.FindComponent(editor_obj_name_synedit_messages));
+    if(lkSynEdit <> nil)then
+      lkSynEdit.Lines.Add(StrEndSpaces(ErrorType,12)+'|'+FormatFloat('0000', Row)+':'+FormatFloat('0000', Col)+'|'+Msg);
+  end;
+  //============================================================================
+  procedure Editor_FoldRegions_Create;
+  begin
+    {$IFDEF CODEFOLDING}
+    with SynEditHighlighter(ftPas).FoldRegions do
+      begin
+      Add2(rtKeyWord, false, false, true, '{$ifdef' ,'{$endif'    ,nil);
+      Add2(rtKeyWord, false, false, true, '{$ifndef','{$endif'    ,nil);
+      Add2(rtKeyWord, false, false, true, '{$region','{$endregion',nil);
+      Add2(rtKeyWord, false, false, true, 'begin'   ,'end'        ,nil);
+      Add2(rtKeyWord, false, false, true, 'try'     ,'end'        ,nil);
+      Add2(rtKeyWord, false, false, true, 'case'    ,'end'        ,nil);
+      Add2(rtKeyWord, false, false, true, 'repeat'  ,'until'      ,nil);
+      end;
+    with SynEditHighlighter(ftSQL).FoldRegions do
+      begin
+      Add2(rtKeyWord, false, false, true, 'begin'   ,'end'        ,nil);
+      Add2(rtKeyWord, false, false, true, 'as'      ,'begin'      ,nil);
+      end;
+    with SynEditHighlighter(ftPHP).FoldRegions do
+      begin
+      Add2(rtChar   , false, false, false, '{'      ,'}'          ,nil);
+      end;
+    with SynEditHighlighter(ftHTML).FoldRegions do
+      begin
+      Add2(rtKeyWord, false, false, true , '<html'  ,'</html'     ,nil);
+      Add2(rtKeyWord, false, false, true , '<head'  ,'</head'     ,nil);
+      Add2(rtKeyWord, false, false, true , '<script','</script'   ,nil);
+      Add2(rtKeyWord, false, false, true , '<body'  ,'</body'     ,nil);
+      end;
+    with SynEditHighlighter(ftXML).FoldRegions do
+      begin
+      Add2(rtChar   , false, false, false, '<'      ,'</'         ,nil);
+      end;
+    {$ENDIF}
+  end;
+  //============================================================================
+begin
+  DontAutoFree;
+  Editor_FoldRegions_Create;
+  Amunhotep.MainForm.EditorBeforeRunScript   := @Amunhotep_MainForm_OnEditorBeforeRunScript;
+  Amunhotep.MainForm.OnNewEditor             := @Amunhotep_MainForm_OnNewEditor;
+  Amunhotep.MainForm.OnPascalMessage         := @Amunhotep_MainForm_OnPascalMessage;
+  Amunhotep.MainForm.OnPascalAfterPreprocess := @Amunhotep_MainForm_OnPascalAfterPreprocess;
+{$IFDEF CORE_DRAGDROPFILES_ACCEPT}
+  {$IFDEF MSWINDOWS} DragAcceptFiles(Amunhotep.MainForm.Handle, 1); {$ENDIF}
+  {$IFDEF LINUX}     DragAcceptFiles(Amunhotep.MainForm.Handle, 1); {$ENDIF}  
+{$ENDIF}  
+end.

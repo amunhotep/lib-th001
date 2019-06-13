@@ -1,0 +1,11 @@
+{$I PEAKTOP:GLOBAL_VARIABLES.INC}
+{$I ../$PRINT.INC}
+var
+  J_ID      :string;
+  J_TYPE_ID :string;
+begin
+  J_ID := GetGlobalVariable('J_ID');
+  if((StrTrimAll(J_ID)='')or(UpperCase(J_ID)='NULL'))then exit;
+  if GetField(FBDataBase, 'TABL$J_4', 'TYPE_ID', 'ID = '''+J_ID+''' ', J_TYPE_ID)then
+    PreviewReport(J_ID, StrAbsolutePath('../'+J_TYPE_ID+'/RPT.XFM', ScriptName));  
+end.

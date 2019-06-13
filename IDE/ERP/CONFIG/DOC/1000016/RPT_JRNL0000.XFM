@@ -1,0 +1,1892 @@
+object Report8395480890414583E31CEE316E5C7387: TxReport
+  Left = 0
+  Top = 0
+  Width = 1123
+  Height = 794
+  Frame.Color = clBlack
+  Frame.Top = False
+  Frame.Bottom = False
+  Frame.Left = False
+  Frame.Right = False
+  Transparent = False
+  Color = clWhite
+  Font.Charset = RUSSIAN_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -9
+  Font.Name = 'Verdana'
+  Font.Style = []
+  ParentFont = False
+  AutoFree = True
+  DataBase = AmunhotepMainForm.FBDB
+  DataSets.DataBase = AmunhotepMainForm.FBDB
+  DataSets = <
+    item
+      Active = False
+      Name = 'qrMain'
+    end>
+  DataSetIndex = 0
+  Functions.Strings = (
+    'PAGENUMBER'
+    'COLUMNNUMBER'
+    'REPORTTITLE')
+  Functions.DATA = (
+    '0'
+    '0'
+    #39#39)
+  StyleManager = AmunhotepMainForm.StyleManager
+  Options = [FirstPageHeader, LastPageFooter]
+  Page.Columns = 1
+  Page.Orientation = poLandscape
+  Page.PaperSize = A4
+  Page.Values = (
+    50.000000000000000000
+    2100.000000000000000000
+    50.000000000000000000
+    2970.000000000000000000
+    50.000000000000000000
+    50.000000000000000000
+    0.000000000000000000)
+  PrinterSettings.Copies = 1
+  PrinterSettings.OutputBin = Auto
+  PrinterSettings.Duplex = False
+  PrinterSettings.FirstPage = 0
+  PrinterSettings.LastPage = 0
+  PrinterSettings.ExtendedDuplex = 0
+  PrinterSettings.UseStandardPrinter = False
+  PrinterSettings.UseCustomBinCode = False
+  PrinterSettings.CustomBinCode = 0
+  PrinterSettings.UseCustomPaperCode = False
+  PrinterSettings.CustomPaperCode = 0
+  PrinterSettings.PrintMetaFile = False
+  PrintIfEmpty = True
+  SnapToGrid = True
+  Units = MM
+  Zoom = 100
+  PrevFormStyle = fsMDIChild
+  PreviewInitialState = wsNormal
+  object bndPageHeader: TxrBand
+    Left = 19
+    Top = 19
+    Width = 1085
+    Height = 34
+    Frame.Color = clBlack
+    Frame.Top = False
+    Frame.Bottom = False
+    Frame.Left = False
+    Frame.Right = False
+    Transparent = False
+    Color = clWhite
+    AlignToBottom = False
+    ForceNewColumn = False
+    ForceNewPage = False
+    Size.Values = (
+      89.958333333333330000
+      2870.729166666667000000)
+    BandType = rbPageHeader
+    object ImgObj: TxrImage
+      Tag = 2
+      Left = 0
+      Top = 0
+      Width = 33
+      Height = 33
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        87.312500000000000000
+        0.000000000000000000
+        0.000000000000000000
+        87.312500000000000000)
+      Transparent = True
+      Center = True
+      Stretch = True
+    end
+    object lblObjCaption: TxrLabel
+      Left = 36
+      Top = 0
+      Width = 1032
+      Height = 34
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        89.958333333333330000
+        95.250000000000000000
+        0.000000000000000000
+        2730.500000000000000000)
+      Transparent = True
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = ' '
+      Color = clWhite
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -19
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 14
+    end
+    object exprPageNumber: TxrExpression
+      Left = 1002
+      Top = 16
+      Width = 72
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        42.333333333333330000
+        2651.125000000000000000
+        42.333333333333330000
+        190.500000000000000000)
+      Transparent = True
+      Alignment = taRightJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      ResetAfterPrint = False
+      WordWrap = True
+      Expression = #39#1057#1090#1088'. '#8470#39'+PAGENUMBER'
+      FontSize = 7
+    end
+    object sdDateTime: TxrSysData
+      Left = 933
+      Top = 0
+      Width = 144
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        42.333333333333330000
+        2468.562500000000000000
+        0.000000000000000000
+        381.000000000000000000)
+      Transparent = True
+      Alignment = taRightJustify
+      AlignToBand = False
+      AutoSize = False
+      Color = clWhite
+      Data = xrDateTime
+      Layout = tlTop
+      Indent = 0
+      FontSize = 7
+    end
+  end
+  object bndColumnHeader: TxrBand
+    Left = 19
+    Top = 53
+    Width = 1085
+    Height = 48
+    Frame.Color = clBlack
+    Frame.Top = False
+    Frame.Bottom = False
+    Frame.Left = False
+    Frame.Right = False
+    Transparent = False
+    Color = clWhite
+    AlignToBottom = False
+    ForceNewColumn = False
+    ForceNewPage = False
+    Size.Values = (
+      127.000000000000000000
+      2870.729166666667000000)
+    BandType = rbColumnHeader
+    object lblCapID: TxrLabel
+      Left = 48
+      Top = 0
+      Width = 40
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = True
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        42.333333333333330000
+        127.000000000000000000
+        0.000000000000000000
+        105.833333333333300000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1082#1086#1076
+      Color = 15253696
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object lblCapNAME: TxrLabel
+      Left = 88
+      Top = 0
+      Width = 208
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = True
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        42.333333333333330000
+        232.833333333333300000
+        0.000000000000000000
+        550.333333333333300000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1058#1080#1087' '#1076#1086#1082#1091#1084#1077#1085#1090#1072
+      Color = 15253696
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object lblCapFLAG_DELETE: TxrLabel
+      Left = 0
+      Top = 0
+      Width = 16
+      Height = 48
+      Frame.Color = clBlack
+      Frame.Top = True
+      Frame.Bottom = True
+      Frame.Left = True
+      Frame.Right = True
+      Size.Values = (
+        127.000000000000000000
+        0.000000000000000000
+        0.000000000000000000
+        42.333333333333330000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = ' X '
+      Color = 15253696
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object xrLabel1: TxrLabel
+      Left = 16
+      Top = 0
+      Width = 16
+      Height = 48
+      Frame.Color = clBlack
+      Frame.Top = True
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        127.000000000000000000
+        42.333333333333330000
+        0.000000000000000000
+        42.333333333333330000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = '!!!'
+      Color = 15253696
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object xrLabel2: TxrLabel
+      Left = 32
+      Top = 0
+      Width = 16
+      Height = 48
+      Frame.Color = clBlack
+      Frame.Top = True
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        127.000000000000000000
+        84.666666666666670000
+        0.000000000000000000
+        42.333333333333330000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = '[]'
+      Color = 15253696
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object xrLabel3: TxrLabel
+      Left = 296
+      Top = 0
+      Width = 104
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = True
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        42.333333333333330000
+        783.166666666666700000
+        0.000000000000000000
+        275.166666666666700000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1085#1086#1084#1077#1088
+      Color = 15253696
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object xrLabel4: TxrLabel
+      Left = 400
+      Top = 0
+      Width = 64
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = True
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        42.333333333333330000
+        1058.333333333333000000
+        0.000000000000000000
+        169.333333333333300000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1074#1093'.'#1085#1086#1084#1077#1088
+      Color = 15253696
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object xrLabel5: TxrLabel
+      Left = 528
+      Top = 0
+      Width = 24
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = True
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        42.333333333333330000
+        1397.000000000000000000
+        0.000000000000000000
+        63.500000000000000000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1074#1072#1083'.'
+      Color = 15253696
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object xrLabel6: TxrLabel
+      Left = 552
+      Top = 0
+      Width = 72
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = True
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        42.333333333333330000
+        1460.500000000000000000
+        0.000000000000000000
+        190.500000000000000000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1057#1091#1084#1084#1072', '#1075#1088#1085'.'
+      Color = 15253696
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object xrLabel7: TxrLabel
+      Left = 624
+      Top = 0
+      Width = 80
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = True
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        42.333333333333330000
+        1651.000000000000000000
+        0.000000000000000000
+        211.666666666666700000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1044#1072#1090#1072
+      Color = 15253696
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object xrLabel8: TxrLabel
+      Left = 704
+      Top = 0
+      Width = 152
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = True
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        42.333333333333330000
+        1862.666666666667000000
+        0.000000000000000000
+        402.166666666666700000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1060#1080#1088#1084#1072' '#1091#1095#1077#1090#1072
+      Color = 15253696
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object xrLabel9: TxrLabel
+      Left = 856
+      Top = 0
+      Width = 72
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = True
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        42.333333333333330000
+        2264.833333333333000000
+        0.000000000000000000
+        190.500000000000000000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1060#1080#1083#1080#1072#1083
+      Color = 15253696
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object xrLabel10: TxrLabel
+      Left = 928
+      Top = 0
+      Width = 64
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = True
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        42.333333333333330000
+        2455.333333333333000000
+        0.000000000000000000
+        169.333333333333300000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1055#1086#1083#1100#1079#1086#1074'.'
+      Color = 15253696
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object xrLabel11: TxrLabel
+      Left = 992
+      Top = 0
+      Width = 88
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = True
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        42.333333333333330000
+        2624.666666666667000000
+        0.000000000000000000
+        232.833333333333300000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1057#1086#1090#1088#1091#1076#1085#1080#1082
+      Color = 15253696
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object xrLabel12: TxrLabel
+      Left = 464
+      Top = 0
+      Width = 64
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = True
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        42.333333333333330000
+        1227.666666666667000000
+        0.000000000000000000
+        169.333333333333300000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1089#1091#1084#1084#1072
+      Color = 15253696
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object xrLabel13: TxrLabel
+      Left = 88
+      Top = 32
+      Width = 32
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        42.333333333333330000
+        232.833333333333300000
+        84.666666666666670000
+        84.666666666666670000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1057#1095#1077#1090
+      Color = 15253696
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object xrLabel14: TxrLabel
+      Left = 120
+      Top = 32
+      Width = 280
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        42.333333333333330000
+        317.500000000000000000
+        84.666666666666670000
+        740.833333333333300000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1053#1072#1079#1074#1072#1085#1080#1077
+      Color = 15253696
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object xrLabel15: TxrLabel
+      Left = 488
+      Top = 32
+      Width = 216
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        42.333333333333330000
+        1291.166666666667000000
+        84.666666666666670000
+        571.500000000000000000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1053#1072#1079#1074#1072#1085#1080#1077
+      Color = 15253696
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object xrLabel16: TxrLabel
+      Left = 400
+      Top = 32
+      Width = 40
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        42.333333333333330000
+        1058.333333333333000000
+        84.666666666666670000
+        105.833333333333300000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1057#1095#1077#1090
+      Color = 15253696
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object xrLabel17: TxrLabel
+      Left = 440
+      Top = 32
+      Width = 48
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        42.333333333333330000
+        1164.166666666667000000
+        84.666666666666670000
+        127.000000000000000000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1050#1086#1076
+      Color = 15253696
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object xrLabel18: TxrLabel
+      Left = 400
+      Top = 16
+      Width = 304
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        42.333333333333330000
+        1058.333333333333000000
+        42.333333333333330000
+        804.333333333333300000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1057#1091#1073#1082#1086#1085#1090#1086
+      Color = 15253696
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object xrLabel19: TxrLabel
+      Left = 88
+      Top = 16
+      Width = 312
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        42.333333333333330000
+        232.833333333333300000
+        42.333333333333330000
+        825.500000000000000000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1048#1089#1090#1086#1095#1085#1080#1082' '#1076#1077#1085#1077#1078#1085#1099#1093' '#1089#1088#1077#1076#1089#1090#1074
+      Color = 15253696
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object xrLabel20: TxrLabel
+      Left = 856
+      Top = 16
+      Width = 224
+      Height = 32
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        84.666666666666670000
+        2264.833333333333000000
+        42.333333333333330000
+        592.666666666666700000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1053#1072#1079#1085#1072#1095#1077#1085#1080#1077' '#1087#1083#1072#1090#1077#1078#1072
+      Color = 15253696
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object xrLabel21: TxrLabel
+      Left = 48
+      Top = 16
+      Width = 40
+      Height = 32
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        84.666666666666670000
+        127.000000000000000000
+        42.333333333333330000
+        105.833333333333300000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1058#1080#1087' '#1086#1087#1077#1088#1072#1094#1080#1080
+      Color = 15253696
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object xrLabel22: TxrLabel
+      Left = 704
+      Top = 16
+      Width = 152
+      Height = 32
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        84.666666666666670000
+        1862.666666666667000000
+        42.333333333333330000
+        402.166666666666700000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1042#1080#1076' '#1074#1072#1083#1086#1074#1099#1093' '#1076#1086#1093#1086#1076#1086#1074' / '#1074#1072#1083#1086#1074#1099#1093' '#1088#1072#1089#1093#1086#1076#1086#1074
+      Color = 15253696
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+  end
+  object bndDetail: TxrBand
+    Left = 19
+    Top = 101
+    Width = 1085
+    Height = 28
+    Frame.Color = clBlack
+    Frame.Top = False
+    Frame.Bottom = False
+    Frame.Left = False
+    Frame.Right = False
+    Transparent = False
+    Color = clWhite
+    Font.Charset = RUSSIAN_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -8
+    Font.Name = 'Verdana'
+    Font.Style = []
+    ParentFont = False
+    AlignToBottom = False
+    ForceNewColumn = False
+    ForceNewPage = False
+    Size.Values = (
+      74.083333333333330000
+      2870.729166666667000000)
+    BandType = rbDetail
+    object emFLAG_DELETE: TxrExpressionMemo
+      Left = 0
+      Top = 0
+      Width = 16
+      Height = 28
+      ColorDataSetIndex = 0
+      ColorDataSetField = 'COLOR_BGR'
+      ColorFontDataSetIndex = 0
+      ColorFontDataSetField = 'COLOR_FRG'
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = True
+      Frame.Right = True
+      Size.Values = (
+        74.083333333333330000
+        0.000000000000000000
+        0.000000000000000000
+        42.333333333333330000)
+      Transparent = False
+      RemoveBlankLines = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{IF(qrMain.FLAG_DELETE = 1,'#39'X'#39','#39' '#39')}')
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object emID: TxrExpressionMemo
+      Left = 48
+      Top = 0
+      Width = 40
+      Height = 14
+      ColorDataSetIndex = 0
+      ColorDataSetField = 'COLOR_BGR'
+      ColorFontDataSetIndex = 0
+      ColorFontDataSetField = 'COLOR_FRG'
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        127.000000000000000000
+        0.000000000000000000
+        105.833333333333300000)
+      Transparent = False
+      RemoveBlankLines = False
+      Alignment = taRightJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{qrMain.ID} ')
+      WordWrap = True
+      FontSize = 6
+    end
+    object emTYPE_ID_: TxrExpressionMemo
+      Left = 88
+      Top = 0
+      Width = 208
+      Height = 14
+      ColorDataSetIndex = 0
+      ColorDataSetField = 'COLOR_BGR'
+      ColorFontDataSetIndex = 0
+      ColorFontDataSetField = 'COLOR_FRG'
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        232.833333333333300000
+        0.000000000000000000
+        550.333333333333300000)
+      Transparent = False
+      RemoveBlankLines = False
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{qrMain.TYPE_ID_}')
+      WordWrap = True
+      FontSize = 6
+    end
+    object emFLAG_COMMIT: TxrExpressionMemo
+      Left = 16
+      Top = 0
+      Width = 16
+      Height = 28
+      ColorDataSetIndex = 0
+      ColorDataSetField = 'COLOR_BGR'
+      ColorFontDataSetIndex = 0
+      ColorFontDataSetField = 'COLOR_FRG'
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        74.083333333333330000
+        42.333333333333330000
+        0.000000000000000000
+        42.333333333333330000)
+      Transparent = False
+      RemoveBlankLines = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{IF(qrMain.FLAG_COMMIT = 1,'#39'X'#39','#39' '#39')}')
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object emFLAG_LOCK: TxrExpressionMemo
+      Left = 32
+      Top = 0
+      Width = 16
+      Height = 28
+      ColorDataSetIndex = 0
+      ColorDataSetField = 'COLOR_BGR'
+      ColorFontDataSetIndex = 0
+      ColorFontDataSetField = 'COLOR_FRG'
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        74.083333333333330000
+        84.666666666666670000
+        0.000000000000000000
+        42.333333333333330000)
+      Transparent = False
+      RemoveBlankLines = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{IF(qrMain.FLAG_LOCK = 1,'#39'X'#39','#39' '#39')}')
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object emWRK_NAME: TxrExpressionMemo
+      Left = 992
+      Top = 0
+      Width = 88
+      Height = 14
+      ColorDataSetIndex = 0
+      ColorDataSetField = 'COLOR_BGR'
+      ColorFontDataSetIndex = 0
+      ColorFontDataSetField = 'COLOR_FRG'
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        2624.666666666667000000
+        0.000000000000000000
+        232.833333333333300000)
+      Transparent = False
+      RemoveBlankLines = False
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{qrMain.WRK_NAME}')
+      WordWrap = True
+      FontSize = 6
+    end
+    object emUSER_ID: TxrExpressionMemo
+      Left = 928
+      Top = 0
+      Width = 64
+      Height = 14
+      ColorDataSetIndex = 0
+      ColorDataSetField = 'COLOR_BGR'
+      ColorFontDataSetIndex = 0
+      ColorFontDataSetField = 'COLOR_FRG'
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        2455.333333333333000000
+        0.000000000000000000
+        169.333333333333300000)
+      Transparent = False
+      RemoveBlankLines = False
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{qrMain.USER_ID}')
+      WordWrap = True
+      FontSize = 6
+    end
+    object emFILIAL_ID_: TxrExpressionMemo
+      Left = 856
+      Top = 0
+      Width = 72
+      Height = 14
+      ColorDataSetIndex = 0
+      ColorDataSetField = 'COLOR_BGR'
+      ColorFontDataSetIndex = 0
+      ColorFontDataSetField = 'COLOR_FRG'
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        2264.833333333333000000
+        0.000000000000000000
+        190.500000000000000000)
+      Transparent = False
+      RemoveBlankLines = False
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{qrMain.FILIAL_ID_}')
+      WordWrap = True
+      FontSize = 6
+    end
+    object emFIRM_ID_: TxrExpressionMemo
+      Left = 704
+      Top = 0
+      Width = 152
+      Height = 14
+      ColorDataSetIndex = 0
+      ColorDataSetField = 'COLOR_BGR'
+      ColorFontDataSetIndex = 0
+      ColorFontDataSetField = 'COLOR_FRG'
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        1862.666666666667000000
+        0.000000000000000000
+        402.166666666666700000)
+      Transparent = False
+      RemoveBlankLines = False
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{qrMain.FIRM_ID_}')
+      WordWrap = True
+      FontSize = 6
+    end
+    object emDATE_COMMIT: TxrExpressionMemo
+      Left = 624
+      Top = 0
+      Width = 80
+      Height = 14
+      ColorDataSetIndex = 0
+      ColorDataSetField = 'COLOR_BGR'
+      ColorFontDataSetIndex = 0
+      ColorFontDataSetField = 'COLOR_FRG'
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        1651.000000000000000000
+        0.000000000000000000
+        211.666666666666700000)
+      Transparent = False
+      RemoveBlankLines = False
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{FORMATDATETIME('#39'dd.mm.yyyy hh:nn'#39',qrMain.DATE_COMMIT)}')
+      WordWrap = True
+      FontSize = 6
+    end
+    object xrExpressionMemo6: TxrExpressionMemo
+      Left = 552
+      Top = 0
+      Width = 72
+      Height = 14
+      ColorDataSetIndex = 0
+      ColorDataSetField = 'COLOR_BGR'
+      ColorFontDataSetIndex = 0
+      ColorFontDataSetField = 'COLOR_FRG'
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        1460.500000000000000000
+        0.000000000000000000
+        190.500000000000000000)
+      Transparent = False
+      RemoveBlankLines = False
+      Alignment = taRightJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -8
+      Font.Name = 'Verdana'
+      Font.Style = []
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{FORMATNUMERIC('#39'# ### ### ### ##0.00 '#39',qrMain.DOCSUM)}')
+      ParentFont = False
+      WordWrap = True
+      FontSize = 6
+    end
+    object emDOCNUMBERSTR: TxrExpressionMemo
+      Left = 336
+      Top = 0
+      Width = 64
+      Height = 14
+      ColorDataSetIndex = 0
+      ColorDataSetField = 'COLOR_BGR'
+      ColorFontDataSetIndex = 0
+      ColorFontDataSetField = 'COLOR_FRG'
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        889.000000000000000000
+        0.000000000000000000
+        169.333333333333300000)
+      Transparent = False
+      RemoveBlankLines = False
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{qrMain.DOCNUMBERSTR}')
+      WordWrap = True
+      FontSize = 6
+    end
+    object emDOCNUMBERIN: TxrExpressionMemo
+      Left = 400
+      Top = 0
+      Width = 64
+      Height = 14
+      ColorDataSetIndex = 0
+      ColorDataSetField = 'COLOR_BGR'
+      ColorFontDataSetIndex = 0
+      ColorFontDataSetField = 'COLOR_FRG'
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        1058.333333333333000000
+        0.000000000000000000
+        169.333333333333300000)
+      Transparent = False
+      RemoveBlankLines = False
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{qrMain.DOCNUMBERIN}')
+      WordWrap = True
+      FontSize = 6
+    end
+    object emVALUTE_ID_: TxrExpressionMemo
+      Left = 528
+      Top = 0
+      Width = 24
+      Height = 14
+      ColorDataSetIndex = 0
+      ColorDataSetField = 'COLOR_BGR'
+      ColorFontDataSetIndex = 0
+      ColorFontDataSetField = 'COLOR_FRG'
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        1397.000000000000000000
+        0.000000000000000000
+        63.500000000000000000)
+      Transparent = False
+      RemoveBlankLines = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{qrMain.VALUTE_ID_}')
+      WordWrap = True
+      FontSize = 6
+    end
+    object emDOCSUMVAL: TxrExpressionMemo
+      Left = 464
+      Top = 0
+      Width = 64
+      Height = 14
+      ColorDataSetIndex = 0
+      ColorDataSetField = 'COLOR_BGR'
+      ColorFontDataSetIndex = 0
+      ColorFontDataSetField = 'COLOR_FRG'
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        1227.666666666667000000
+        0.000000000000000000
+        169.333333333333300000)
+      Transparent = False
+      RemoveBlankLines = False
+      Alignment = taRightJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{FORMATNUMERIC('#39'# ### ### ### ##0.00 '#39',qrMain.DOCSUMVAL)}')
+      WordWrap = True
+      FontSize = 6
+    end
+    object emDOCNUMBER: TxrExpressionMemo
+      Left = 296
+      Top = 0
+      Width = 40
+      Height = 14
+      ColorDataSetIndex = 0
+      ColorDataSetField = 'COLOR_BGR'
+      ColorFontDataSetIndex = 0
+      ColorFontDataSetField = 'COLOR_FRG'
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        783.166666666666700000
+        0.000000000000000000
+        105.833333333333300000)
+      Transparent = False
+      RemoveBlankLines = False
+      Alignment = taRightJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{qrMain.DOCNUMBER} ')
+      WordWrap = True
+      FontSize = 6
+    end
+    object emPAYSRC_ACC_ID: TxrExpressionMemo
+      Left = 88
+      Top = 14
+      Width = 32
+      Height = 14
+      ColorDataSetIndex = 0
+      ColorDataSetField = 'COLOR_BGR'
+      ColorFontDataSetIndex = 0
+      ColorFontDataSetField = 'COLOR_FRG'
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        232.833333333333300000
+        37.041666666666670000
+        84.666666666666670000)
+      Transparent = False
+      RemoveBlankLines = False
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{qrMain.PAYSRC_ACC_ID}')
+      WordWrap = True
+      FontSize = 6
+    end
+    object emPAYSRC_ID_: TxrExpressionMemo
+      Left = 120
+      Top = 14
+      Width = 280
+      Height = 14
+      ColorDataSetIndex = 0
+      ColorDataSetField = 'COLOR_BGR'
+      ColorFontDataSetIndex = 0
+      ColorFontDataSetField = 'COLOR_FRG'
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        317.500000000000000000
+        37.041666666666670000
+        740.833333333333300000)
+      Transparent = False
+      RemoveBlankLines = False
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{qrMain.PAYSRC_ID_}')
+      WordWrap = True
+      FontSize = 6
+    end
+    object xrExpressionMemo1: TxrExpressionMemo
+      Left = 488
+      Top = 14
+      Width = 216
+      Height = 14
+      ColorDataSetIndex = 0
+      ColorDataSetField = 'COLOR_BGR'
+      ColorFontDataSetIndex = 0
+      ColorFontDataSetField = 'COLOR_FRG'
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        1291.166666666667000000
+        37.041666666666670000
+        571.500000000000000000)
+      Transparent = False
+      RemoveBlankLines = False
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{qrMain.SUBKONTO_NAME}')
+      WordWrap = True
+      FontSize = 6
+    end
+    object emACC_ID: TxrExpressionMemo
+      Left = 400
+      Top = 14
+      Width = 40
+      Height = 14
+      ColorDataSetIndex = 0
+      ColorDataSetField = 'COLOR_BGR'
+      ColorFontDataSetIndex = 0
+      ColorFontDataSetField = 'COLOR_FRG'
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        1058.333333333333000000
+        37.041666666666670000
+        105.833333333333300000)
+      Transparent = False
+      RemoveBlankLines = False
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{qrMain.ACC_ID}')
+      WordWrap = True
+      FontSize = 6
+    end
+    object emSUBKONTO_ID: TxrExpressionMemo
+      Left = 440
+      Top = 14
+      Width = 48
+      Height = 14
+      ColorDataSetIndex = 0
+      ColorDataSetField = 'COLOR_BGR'
+      ColorFontDataSetIndex = 0
+      ColorFontDataSetField = 'COLOR_FRG'
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        1164.166666666667000000
+        37.041666666666670000
+        127.000000000000000000)
+      Transparent = False
+      RemoveBlankLines = False
+      Alignment = taRightJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{qrMain.SUBKONTO_ID} ')
+      WordWrap = True
+      FontSize = 6
+    end
+    object emNAME: TxrExpressionMemo
+      Left = 856
+      Top = 14
+      Width = 224
+      Height = 14
+      ColorDataSetIndex = 0
+      ColorDataSetField = 'COLOR_BGR'
+      ColorFontDataSetIndex = 0
+      ColorFontDataSetField = 'COLOR_FRG'
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        2264.833333333333000000
+        37.041666666666670000
+        592.666666666666700000)
+      Transparent = False
+      RemoveBlankLines = False
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{qrMain.NAME}')
+      WordWrap = True
+      FontSize = 6
+    end
+    object xrExpressionMemo2: TxrExpressionMemo
+      Left = 48
+      Top = 14
+      Width = 40
+      Height = 14
+      ColorDataSetIndex = 0
+      ColorDataSetField = 'COLOR_BGR'
+      ColorFontDataSetIndex = 0
+      ColorFontDataSetField = 'COLOR_FRG'
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        127.000000000000000000
+        37.041666666666670000
+        105.833333333333300000)
+      Transparent = False
+      RemoveBlankLines = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = []
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{IF(qrMain.FLAG_DEBET = 1,'#39#1076#1077#1073#1077#1090#39','#39#1082#1088#1077#1076#1080#1090#39')}')
+      ParentFont = False
+      WordWrap = True
+      FontSize = 7
+    end
+    object emEXPTYPE_ID_: TxrExpressionMemo
+      Left = 704
+      Top = 14
+      Width = 152
+      Height = 14
+      ColorDataSetIndex = 0
+      ColorDataSetField = 'COLOR_BGR'
+      ColorFontDataSetIndex = 0
+      ColorFontDataSetField = 'COLOR_FRG'
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        1862.666666666667000000
+        37.041666666666670000
+        402.166666666666700000)
+      Transparent = False
+      RemoveBlankLines = False
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{qrMain.EXPTYPE_ID_}')
+      WordWrap = True
+      FontSize = 6
+    end
+  end
+end

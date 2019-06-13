@@ -1,0 +1,335 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG/RPTI/28AAF976-2A08-479E-A2EB-BEEF6A274CB5/DEFAULT.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$I PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC} {$I PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}        {$I PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}        {$ENDIF}
+const
+  objname_datefrom   = 'dtpDateFrom';
+  objname_dateto     = 'dtpDateTo';
+  objname_firms      = 'gbFirms';
+  msg_input_firms    = 'Выберите фирмы учета';
+const
+  DefaultColumnWidth = 80;  
+  DefaultPrefix      = 'SALES';
+  //============================================================================
+  procedure ERP_Report_DBGridEh_OnGetCellParams(Sender:TObject; Column:TColumnEh; AFont: TFont; var Background:TColor; State:TGridDrawState);
+  begin
+    if(Column.Tag = 666)then exit;
+    if(not(Column.Field.DataSet.Active))then exit;
+    if(Column.Field.DataSet.RecordCount = 0)then exit;
+    if(Pos(DefaultPrefix, Column.FieldName) = 1)then
+      begin
+      if(Column.Field.AsFloat = 0)then
+        aFont.Color := Background;
+      end;
+  end;
+  //============================================================================
+  function TERPFormRpti_GetExportFilter(aOwner:TComponent):string;
+  begin
+    Result := 
+      msg_erp_lbldatefrom+' "'+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+'" '+
+      msg_erp_lbldateto  +' "'+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto))+'" '+
+      'Фирмы учета: "'+InputIntf_Ref_GetNames(aOwner.FindComponent(objname_firms))+'" ';
+  end;
+  //============================================================================
+  function TERPFormRpti_OnGetSQL(aOwner:TComponent;var aSQL:string):Boolean;
+  var
+    lkFldCnt  :string;
+    lkFldSum  :string;
+    lkSQLNull :string;
+    lkSQLSum  :string;
+    lkSQLSumC :string;
+    lkSQLFlds :string;
+    lkSQLBody :string;
+    lkDBG     :TDBGridEh;
+    lkCol     :TColumnEh;
+    lkTr      :TxFBTransaction;
+    lkQr      :TxFBQuery;
+  begin
+    Result := true;
+    lkDBG  := TERPForm_DBGridMain(aOwner);
+    lkDBG.FrozenCols := 0;
+    lkDBG.Columns.Clear;
+{
+    lkCol       := CreateTColumnEh(lkDBG,'ACC_ID','','Счет'     , 48,taLeftJustify);
+    lkCol.Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lkCol.Tag   := 666;
+}
+    lkCol := CreateTColumnEh(lkDBG,'CS_ID','# ### ##0','Контрагент|Код',72,taRightJustify );
+    with lkCol do
+      begin
+      Tag                  := 666;
+      Color                := clWhite;
+      Footer.Color         := clWhite;
+      Footer.Alignment     := Alignment;
+      Footer.Color         := Color;
+      Footer.Alignment     := Alignment;
+      Footer.DisplayFormat := DisplayFormat;
+      Footer.ValueType     := fvtCount;
+      end;
+    lkCol := CreateTColumnEh(lkDBG,'CS_NAME','','Контрагент|Название',DefaultColumnWidth*2,taLeftJustify );
+    with lkCol do
+      begin
+      Tag                  := 666;
+      Color                := clWhite;
+      Footer.Color         := clWhite;
+      Footer.Alignment     := Alignment;
+      Footer.DisplayFormat := DisplayFormat;
+      Footer.ValueType     := fvtStaticText;
+      Footer.Value         := 'ИТОГО';  
+      end;
+    lkCol := CreateTColumnEh(lkDBG,'CS_NAME2','','Контрагент|Полное наименование',DefaultColumnWidth*2,taLeftJustify );
+    with lkCol do
+      begin
+      Tag                  := 666;
+      Color                := clWhite;
+      Footer.Color         := clWhite;
+      Footer.Alignment     := Alignment;
+      Footer.DisplayFormat := DisplayFormat;
+      Footer.ValueType     := fvtStaticText;
+      Footer.Value         := '';  
+      end;
+    lkCol := CreateTColumnEh(lkDBG,'CS_AMOUNT','# ### ##0.00','Контрагент|скидка',48,taRightJustify );
+    with lkCol do
+      begin
+      Tag                  := 666;
+      Color                := clWhite;
+      Footer.Color         := clWhite;
+      Footer.Alignment     := Alignment;
+      Footer.Color         := Color;
+      Footer.Alignment     := Alignment;
+      Footer.ValueType     := fvtStaticText;
+      Footer.Value         := '';  
+      end;
+    lkSQLFlds  := '';
+    lkSQLBody  := '';
+    lkSQLSum   := '';
+    lkSQLSumC  := '';
+    lkSQLNull  := '';
+    lkTr := TxFBTransaction.Create(nil);
+    with lkTr do 
+      begin 
+      DefaultDataBase := FBDataBase; 
+      Params.Clear; 
+      Params.Add('isc_tpb_read_committed'); 
+      Params.Add('isc_tpb_read'); 
+      Params.Add('isc_tpb_rec_version'); 
+      Params.Add('isc_tpb_nowait'); 
+      end; 
+    lkQr := TxFBQuery.Create(lkTr);
+    lkQr.Transaction := lkTr;
+    lkQr.SQL.Text := 
+      'SELECT DISTINCT F.ID, F.NAME '+SQLCRLF+
+      'FROM   TABL$R_FILIALS F '+SQLCRLF+
+      'WHERE  (F.ID <> 0) '+SQLCRLF+
+      'ORDER BY 1';
+    lkQr.Open;
+    lkQr.First;
+    while not lkQr.EOF do
+      begin
+      lkFldCnt  := DefaultPrefix+'C_'+FormatFloat('00000000', lkQr.FieldByName('ID').AsInteger);
+      lkSQLFlds := lkSQLFlds + '  ,'+lkFldCnt+' TYPE OF COLUMN TABL$J_4.ID '+SQLCRLF;
+      lkSQLNull := lkSQLNull + '    '+lkFldCnt+' = 0; '+SQLCRLF;
+      lkCol := CreateTColumnEh(lkDBG,lkFldCnt,'# ### ### ##0','Продажи|'+lkQr.FieldByName('NAME').AsString+'|счетов',(DefaultColumnWidth/2),taRightJustify );
+      with lkCol do
+        begin
+        Color                := $B0FFC0;
+        Footer.Color         := Color;
+        Footer.Alignment     := Alignment;
+        Footer.DisplayFormat := DisplayFormat;
+        Footer.FieldName     := FieldName;
+        Footer.ValueType     := fvtSum;
+        end;
+      lkFldSum  := DefaultPrefix+'S_'+FormatFloat('00000000', lkQr.FieldByName('ID').AsInteger);
+      lkSQLFlds := lkSQLFlds + '  ,'+lkFldSum+' TYPE OF COLUMN TABL$J_4.DOCSUM '+SQLCRLF;
+      lkSQLNull := lkSQLNull + '    '+lkFldSum+' = 0; '+SQLCRLF;
+      lkCol := CreateTColumnEh(lkDBG,lkFldSum,'# ### ### ##0.00','Продажи|'+lkQr.FieldByName('NAME').AsString+'|Сумма', DefaultColumnWidth, taRightJustify );
+      with lkCol do
+        begin
+        Color                := $B0FFFF;
+        Footer.Color         := Color;
+        Footer.Alignment     := Alignment;
+        Footer.DisplayFormat := DisplayFormat;
+        Footer.FieldName     := FieldName;
+        Footer.ValueType     := fvtSum;
+        end;
+      lkSQLSum  := lkSQLSum  + ' + :'+lkFldSum;
+      lkSQLSumC := lkSQLSumC + ' + :'+lkFldCnt;
+      lkSQLBody := lkSQLBody +
+      '    ---- "'+lkQr.FieldByName('NAME').AsString+'" '+SQLCRLF+
+      '    SELECT COALESCE(COUNT(J.ID),0), COALESCE(SUM(J.DOCSUM),0) '+SQLCRLF+
+      '    FROM   TABL$J_4 J, TABL$J_1000014 J14 '+SQLCRLF+
+      '    WHERE  (J.DATE_COMMIT BETWEEN :DATE_FROM AND :DATE_TO ) '+SQLCRLF+
+      '      AND  (J.TYPE_ID = 1000075) '+SQLCRLF+
+      '      AND  (J.FLAG_COMMIT = 1) '+SQLCRLF+
+      '      AND  ((J.FILIAL_ID+0) = '+lkQr.FieldByName('ID').AsString+') '+SQLCRLF+
+      '      AND  (:FIRM_IDS CONTAINING ''~''||J.FIRM_ID||''~'') '+SQLCRLF+
+      '      AND  (J14.J_ID = J.ID) '+SQLCRLF+
+      '      AND  (J14.CS_ID = :CS_ID) '+SQLCRLF+
+      '    INTO   :'+lkFldCnt+', :'+lkFldSum+'; '+SQLCRLF;
+      lkQr.Next;
+      end;
+    if lkTr.InTransaction then
+      lkTr.Commit;
+    lkTr.Free;  
+    lkFldCnt  := DefaultPrefix+'C_TOTAL';
+    lkSQLFlds := lkSQLFlds + '  ,'+lkFldCnt+'    TYPE OF COLUMN TABL$J_4.ID '+SQLCRLF;
+    lkSQLNull := lkSQLNull + '    '+lkFldCnt+' = 0; '+SQLCRLF;
+    lkCol := CreateTColumnEh(lkDBG,lkFldCnt,'# ### ### ##0','Продажи|ВСЕГО|счетов',(DefaultColumnWidth/2),taRightJustify );
+    with lkCol do
+      begin
+      Color                := $B0FFC0;
+      Footer.Color         := Color;
+      Footer.Alignment     := Alignment;
+      Footer.DisplayFormat := DisplayFormat;
+      Footer.FieldName     := FieldName;
+      Footer.ValueType     := fvtSum;
+      end;
+    lkFldSum  := DefaultPrefix+'S_TOTAL';
+    lkSQLFlds := lkSQLFlds + '  ,'+lkFldSum+'    TYPE OF COLUMN TABL$J_4.DOCSUM '+SQLCRLF;
+    lkSQLNull := lkSQLNull + '    '+lkFldSum+' = 0; '+SQLCRLF;
+    lkCol := CreateTColumnEh(lkDBG,lkFldSum,'# ### ### ##0.00','Продажи|ВСЕГО|Сумма', DefaultColumnWidth, taRightJustify );
+    with lkCol do
+      begin
+      Color                := $B0FFFF;
+      Footer.Color         := Color;
+      Footer.Alignment     := Alignment;
+      Footer.DisplayFormat := DisplayFormat;
+      Footer.FieldName     := FieldName;
+      Footer.ValueType     := fvtSum;
+      end;
+
+    lkDBG.FrozenCols     := 4;
+    lkDBG.SumList.Active := true;
+    lkDBG.FooterRowCount := 1;  
+    lkDBG.OnGetCellParams:= @ERP_Report_DBGridEh_OnGetCellParams;
+    lkSQLSumC := '    '+lkFldCnt+' = :'+lkFldCnt + lkSQLSumC + '; '+SQLCRLF;
+    lkSQLSum  := '    '+lkFldSum+' = :'+lkFldSum + lkSQLSum  + '; '+SQLCRLF;
+    aSQL := 
+      'EXECUTE BLOCK( '+SQLCRLF+
+      '   Q_DATE_FROM     TYPE OF COLUMN TABL$J_4.DATE_COMMIT = ?DATE_FROM '+SQLCRLF+
+      '  ,Q_DATE_TO       TYPE OF COLUMN TABL$J_4.DATE_COMMIT = ?DATE_TO '+SQLCRLF+
+      '  ,Q_FIRM_IDS      TYPE OF COLUMN TABL$J_4.DOCSTR      = ?FIRM_IDS '+SQLCRLF+
+      ')RETURNS( '+SQLCRLF+
+      '   DATE_FROM       TYPE OF COLUMN TABL$J_4.DATE_COMMIT '+SQLCRLF+
+      '  ,DATE_TO         TYPE OF COLUMN TABL$J_4.DATE_COMMIT '+SQLCRLF+
+      '  ,FIRM_IDS        TYPE OF COLUMN TABL$J_4.DOCSTR '+SQLCRLF+
+      '  ,CS_ID           TYPE OF COLUMN TABL$R_CS.ID '+SQLCRLF+
+      '  ,CS_NAME         TYPE OF COLUMN TABL$R_CS.NAME '+SQLCRLF+
+      '  ,CS_NAME2        TYPE OF COLUMN TABL$R_CS.NAME2 '+SQLCRLF+
+      '  ,CS_AMOUNT       TYPE OF COLUMN TABL$R_CS_P.AMOUNT '+SQLCRLF+
+      lkSQLFlds+
+      ')AS '+SQLCRLF+
+      'BEGIN '+SQLCRLF+
+      '  DATE_FROM = :Q_DATE_FROM; '+SQLCRLF+
+      '  DATE_TO   = :Q_DATE_TO; '+SQLCRLF+
+      '  FIRM_IDS  = :Q_FIRM_IDS; '+SQLCRLF+
+      '  FOR '+SQLCRLF+
+      '    SELECT J14.CS_ID '+SQLCRLF+
+      '          ,(SELECT FIRST 1 COALESCE(C1.NAME ,'''') FROM TABL$R_CS C1 WHERE (C1.ID = J14.CS_ID)) AS CS_NAME '+SQLCRLF+
+      '          ,(SELECT FIRST 1 COALESCE(C2.NAME2,'''') FROM TABL$R_CS C2 WHERE (C2.ID = J14.CS_ID)) AS CS_NAME2 '+SQLCRLF+
+      '    FROM   TABL$J_4 J, TABL$J_1000014 J14 '+SQLCRLF+
+      '    WHERE  (J.DATE_COMMIT BETWEEN :DATE_FROM AND :DATE_TO ) '+SQLCRLF+
+      '      AND  (J.TYPE_ID = 1000075) '+SQLCRLF+
+      '      AND  (J.FLAG_COMMIT = 1) '+SQLCRLF+
+      '      AND  (:FIRM_IDS CONTAINING ''~''||J.FIRM_ID||''~'') '+SQLCRLF+
+      '      AND  (J14.J_ID = J.ID) '+SQLCRLF+
+      '    GROUP BY 1 '+SQLCRLF+
+      '    INTO   :CS_ID, :CS_NAME, :CS_NAME2 '+SQLCRLF+ 
+      '  DO '+SQLCRLF+
+      '    BEGIN '+SQLCRLF+
+      '    CS_AMOUNT = 0; '+SQLCRLF+
+      '    SELECT FIRST 1 COALESCE(P.AMOUNT, 0) '+SQLCRLF+
+      '    FROM   TABL$R_CS C, TABL$R_CS_P P '+SQLCRLF+
+      '    WHERE  (C.ID = :CS_ID) '+SQLCRLF+
+      '      AND  (P.CS_ID = C.ID) '+SQLCRLF+
+      '      AND  (P.VALUE_DATE = C.VALUE_DATE) '+SQLCRLF+
+      '    INTO   :CS_AMOUNT; '+SQLCRLF+
+      lkSQLNull+
+      lkSQLBody+
+      lkSQLSumC+
+      lkSQLSum+
+      '    SUSPEND; '+SQLCRLF+
+      '    END '+SQLCRLF+
+      'END';
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnGetSQLFileName(aOwner:TComponent;var aFileName:string);
+  begin
+     // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnProcessParams(aOwner:TComponent;aQr :TxFBQuery);
+  begin
+    with aQr do
+      begin
+      ParamByName('FIRM_IDS' ).AsString := InputIntf_Ref_GetIds(aOwner.FindComponent(objname_firms));
+      ParamByName('DATE_FROM').AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+' 00:00:00';
+      ParamByName('DATE_TO'  ).AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto)+1)+' 00:00:00';
+      end;  
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnChart(aOwner:TComponent; aParent:TWinControl);
+  var
+    lkPC :TxcPageControlEx;
+    lkTS :TxcTabSheet;
+  begin
+    aParent.Free;
+    exit;
+    lkPC := CreateTxcPageControlEx(aOwner, aParent, 'PCCharts', 0,0,600,600, alClient);
+    lkPC.MultiLine := false;
+    TxcPageControlEx_ActivateDefaultPage(lkPC);
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnTerms(aOwner:TComponent;aParent:TWinControl);
+  var
+    lkLastTop :Integer;
+  begin
+    lkLastTop := 4;
+    lkLastTop := lkLastTop + InputIntf_DatePeriod_Create(aOwner, aParent, 'gbDatePeriod', 'Укажите период', 4, lkLastTop, 44, 360,objname_datefrom,objname_dateto,StartOfTheMonth(Now),EndOfTheMonth(Now)).Height;
+    lkLastTop := lkLastTop + 4;
+    lkLastTop := lkLastTop + InputIntf_Ref_Create(aOwner,aParent,objname_firms   ,msg_input_firms   ,4,lkLastTop, 0,360,'TABL$R_FIRMS',TERPForm_Settings(aOwner).Values[ERP_SETTINGS_TABLENAME]).Height;
+    lkLastTop := lkLastTop + 4;
+  end;
+  //============================================================================
+  function TERPFormRpti_OnColumnsCreate(aOwner:TComponent; aDBG:TDBGridEh):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_Columns_OnEditButtonClick(Sender :TObject; var Handled :Boolean);
+  var
+    lkDBG    :TDBGridEh;
+    lkTypes  :string;
+    lkPlace  :string;
+    lkScript :string;
+  begin
+    Handled := true;
+    lkDBG   := TDBGridEh(TComponent(Sender).Owner.Owner);
+    if not lkDBG.DataSource.DataSet.Active then exit;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsCreated(aOwner:TComponent; aDBG:TDBGridEh);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsLoad(aOwner:TComponent; aDBG:TDBGridEh);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  function TERPFormRpti_OnPrint(aOwner:TComponent):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_BeforePreview(aOwner:TComponent; aRpt:TxReport);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  
+
+begin
+  TERPFormRpti_Create('{28AAF976-2A08-479E-A2EB-BEEF6A274CB5}');
+end.

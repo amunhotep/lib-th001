@@ -1,0 +1,528 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG/REF/CS/LIST_POS_002.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/$COMMON/DIALOG_CASELISTTEM.INC}{$I PEAKTOP:IDE/ERP/DBO/$COMMON/DIALOG_CASELISTTEM.INC}{$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/$COMMON/FORMERPGRID.INC}       {$I PEAKTOP:IDE/ERP/DBO/$COMMON/FORMERPGRID.INC}       {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/$COMMON/STDTREEACTNS.INC}      {$I PEAKTOP:IDE/ERP/DBO/$COMMON/STDTREEACTNS.INC}      {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/DBGRID/GETCELLPARAMS_REF.INC}  {$I PEAKTOP:IDE/ERP/DBO/DBGRID/GETCELLPARAMS_REF.INC}  {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/REF/FORMREF_LOADATTRS.INC}     {$I PEAKTOP:IDE/ERP/DBO/REF/FORMREF_LOADATTRS.INC}     {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/REF/FORMREF_LOADCOLUMNS.INC}   {$I PEAKTOP:IDE/ERP/DBO/REF/FORMREF_LOADCOLUMNS.INC}   {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/REF/FORMREF_LOADCHILDS.INC}    {$I PEAKTOP:IDE/ERP/DBO/REF/FORMREF_LOADCHILDS.INC}    {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/REF/FORMREF_ACTIONS.INC}       {$I PEAKTOP:IDE/ERP/DBO/REF/FORMREF_ACTIONS.INC}       {$ENDIF}
+  //===================== DB:CONFIG/REF/CS/LIST_POS.PS =========================
+const
+  ERP_REFERENCE_ABCGROUPINDEX   = 22;
+  msg_actcsnew          = 'Новый'; 
+  msg_actcsnew_hint     = 'Создать запись о новом контрагенте'; 
+  msg_actcsedt          = 'Изменить'; 
+  msg_actcsedt_hint     = 'Изменить данные о контрагенте'; 
+  msg_actcspoll         = 'Соцопрос'; 
+  msg_actcspoll_hint    = 'Создать запись об опросе контрагента'; 
+  msg_actcsphoto        = 'Фото'; 
+  msg_actcsphoto_hint   = 'Фотографии контрагента'; 
+  //============================================================================
+  procedure TERPFormGridRefCSPosPS_RunScriptName(aOwner :TComponent; const aScriptName:string);
+  begin
+    with TERPForm_DBGridMain(aOwner).DataSource.DataSet do
+      begin
+      if not Active then exit;
+      if not(RecordCount > 0)then exit; 
+      SetGlobalVariable(TERPForm_Settings(aOwner).Values[ERP_SETTINGS_BUFFERVAR], FieldByName(ERP_DATASET_DBKEY).AsString);
+      call(aScriptName);
+      end;
+  end;
+  //============================================================================
+  function TERPForm_DataSetMain_Create(aOwner :TComponent):Boolean;
+  begin
+    Result := false; // default handler  
+  end;
+  //============================================================================
+  function TERPForm_DataSetMain_Insert(aOwner :TComponent):Boolean;
+  begin
+    Result := false; // default handler  
+  end;
+  //============================================================================
+  function TERPForm_DataSetMain_Update(aOwner :TComponent):Boolean;
+  begin
+    Result := false; // default handler  
+  end;
+  //============================================================================
+  function TERPForm_DataSetMain_Edit(aOwner :TComponent):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  function TERPForm_DataSetMain_Delete(aOwner :TComponent):Boolean;
+  begin
+    Result := false; // default handler  
+  end;
+  //============================================================================
+  function TERPFormGrid_PrintGrid(aOwner :TComponent):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  function TERPFormGrid_PrintItem(aOwner :TComponent):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormGrid_RefreshView(aOwner :TComponent);
+  var
+    i     :Integer;
+    lkLit :string;
+  begin 
+    TERPFormGrid_CloseDataSets(aOwner);
+    lkLit := '';
+    if(aOwner.FindComponent(obj_name_erp_toolbarabc) <> nil)then    
+      with TxcGradientPanel(aOwner.FindComponent(obj_name_erp_toolbarabc)) do
+        for i:=0 to ControlCount-1 do
+          if(ObjectInheritsFrom(Controls[i],'TxcToolBarButton'))then
+            if( (TxcToolBarButton(Controls[i]).Down) and (Controls[i].Tag <> -1) )then
+              begin
+              lkLit := Chr(Controls[i].Tag);
+              break;
+              end;
+    with TERPForm_DataSetMain(aOwner) do
+      begin
+      SelectSQL.Text := StrReplaceStr(StringsLoadFromFile(StrAbsolutePath('./LIST_POS.SQL', ScriptName)), 'ERP_DATASET_DBKEY', ERP_DATASET_DBKEY);
+      Prepare;
+      ParamByName('CS_GROUP_ID').AsString := '1000002'; 
+      ParamByName('LITERA'     ).AsString := lkLit; 
+      Open;
+      end;
+    with TERPForm_Settings(aOwner) do  
+      if( (Values[ERP_SETTINGS_DATAMEMORY] = '1') and (Values[ERP_SETTINGS_BOOKMARK] = '1') )then
+        begin
+        if TERPForm_DBGridMain(aOwner).DataSource.DataSet.Active then   
+          TERPForm_DBGridMain(aOwner).DataSource.DataSet.RecNo := StrToInt(Values[ERP_SETTINGS_SAVERECNO]);
+        Values[ERP_SETTINGS_SAVERECNO] := '0';
+        Values[ERP_SETTINGS_BOOKMARK ] := '0';
+        end; 
+  end;
+  //============================================================================
+  procedure TERPFormGrid_PanelLeft_OnShowHide(aOwner :TComponent);
+  begin
+    // default handler
+  end;
+  //============================================================================
+  procedure TERPForm_DataSetMain_AfterScroll(DataSet :TDataSet);
+  var
+    lkCmp :TComponent;
+  begin
+    lkCmp := DataSet.Owner.Owner.FindComponent(obj_name_erp_pagecontroldetail);
+    if(lkCmp <> nil)then
+      TERPFormGrid_PCDetail_OnChange(TxcPageControlEx(lkCmp));
+  end;
+  //============================================================================
+  procedure TERPForm_DataSetMain_OnNewRecord(DataSet :TDataSet);
+  begin
+    // default handler
+  end;
+  //============================================================================
+  function TERPFormGrid_ExportGetCaption(aOwner :TComponent):string;
+  begin
+    Result := ERP_ObjectCaption(2)+#$20+TERPForm_Settings(aOwner).Values[ERP_SETTINGS_TABLECAPTION];
+  end;
+  //============================================================================
+  function TERPFormGrid_ExportGetFilter(aOwner :TComponent):string;
+  begin
+    Result := '';
+  end;
+  //============================================================================
+  function TERPFormGrid_ExportGetFileName(aOwner :TComponent):string;
+  begin
+    Result := ERP_ObjectCaption(2)+#$20+TERPForm_Settings(aOwner).Values[ERP_SETTINGS_TABLECAPTION];
+  end;   
+  //============================================================================
+  procedure TERPForm_StandardTree_AfterBuildData(aFBTreeView:TxFBTreeView);
+  begin
+    TERPFormGrid_RefreshView(aFBTreeView.Owner);
+  end;                
+  //============================================================================
+  procedure TERPFormGridRefCSPosPS_DBGridEhMain_OnGetCellParams(Sender: TObject; Column: TColumnEh; 
+              AFont: TFont; var Background: TColor; State: TGridDrawState);
+  begin
+   if(Column.Tag=666)then exit;
+   if(not(Column.Field.DataSet.Active))then exit;
+   if(not(Column.Field.DataSet.RecordCount > 0))then exit;
+   if(Column.Field.DataSet.FieldByName('FLAG_BAD').AsInteger = 1)then
+     begin 
+     Background  := Amunhotep_MainForm_StyleManager.Colors.Error;
+     aFont.Color := Amunhotep_MainForm_StyleManager.Colors.Window;
+     aFont.Style := [fsBold];
+     end;
+  end;
+  //============================================================================
+  procedure TERPFormGridRefCSPosPS_actCSNew_OnExecute(Sender :TObject);
+  var
+    lkID :string;
+  begin
+    if not GetFieldCommit(FBDataBase, 'PROC$R_CS_INS_DEFAULT(''Фамилия Имя Отчество'')', 'CS_ID', '', lkID)then exit;
+    SetGlobalVariable(TERPForm_Settings(TComponent(Sender).Owner).Values[ERP_SETTINGS_BUFFERVAR], lkID);
+    call(StrAbsolutePath('./DEFAULT_ITEM_DLG_POS.PS',ScriptName));
+  end;
+  //============================================================================
+  procedure TERPFormGridRefCSPosPS_actCSEdt_OnExecute(Sender :TObject);
+  begin
+    TERPFormGridRefCSPosPS_RunScriptName(TComponent(Sender).Owner, StrAbsolutePath('./DEFAULT_ITEM_DLG_POS.PS',ScriptName));
+  end;
+  //============================================================================
+  procedure TERPFormGridRefCSPosPS_actCSPoll_OnExecute(Sender :TObject);
+  begin
+    TERPFormGridRefCSPosPS_RunScriptName(TComponent(Sender).Owner, StrAbsolutePath('./EXITPOLL_DLG.PS',ScriptName));
+  end;
+  //============================================================================
+  procedure TERPFormGridRefCSPosPS_actCSPhoto_OnExecute(Sender :TObject);
+  begin
+    TERPFormGridRefCSPosPS_RunScriptName(TComponent(Sender).Owner, StrAbsolutePath('../../REF/CS_PHOTO/LIST.PS', ScriptName));
+  end;
+  //============================================================================
+  procedure TERPFormGridRefCSPosPS_actDoc1000062New_OnExecute(Sender :TObject);
+  begin
+    // из-за Круглый Р.В. используем вызов из базы, т.к. у него - "персонализированные" параметры создания ДФК
+    TERPFormGridRefCSPosPS_RunScriptName(TComponent(Sender).Owner, 'DB:CONFIG/DOC/1000062/NEW_CS.PS');
+  end;
+  //============================================================================
+  procedure TERPFormGridRefCSPosPS_actJrnl1000062_OnExecute(Sender :TObject);
+  begin
+    TERPFormGridRefCSPosPS_RunScriptName(TComponent(Sender).Owner, StrAbsolutePath('../../DOC/1000062/DEFAULT.CS001.PS',ScriptName));
+  end;
+  //============================================================================
+  procedure TERPFormGridRefCSPosPS_actJrnl1000062NV_OnExecute(Sender :TObject);
+  begin
+    TERPFormGridRefCSPosPS_RunScriptName(TComponent(Sender).Owner, StrAbsolutePath('../../DOC/1000062/DEFAULT.CS002.PS',ScriptName));
+  end;
+  //============================================================================
+  procedure TERPFormGridRefCSPosPS_actRptAnketa_OnExecute(Sender :TObject);
+  var
+    lkCS_ID      :string;
+    lkStr        :string;
+    lkRes        :string;
+    lkSQL        :string;
+    lkIndex      :Integer;
+    lkRpt        :TxReport;
+    lkImg        :TxrImage;
+    lkLbl        :TxrLabel;
+  begin
+    lkCS_ID := '0';
+    with TERPForm_DBGridMain(TComponent(Sender).Owner).DataSource.DataSet do
+      begin
+      if not Active then exit;
+      if not(RecordCount > 0)then exit; 
+      lkCS_ID := FieldByName(ERP_DATASET_DBKEY).AsString;
+      end;
+    lkStr := 
+      'Анкета физического лица резидента'+#13#10+
+      'Анкета физического лица нерезидента'+#13#10+
+      'Доверенности контрагента';
+    lkIndex := 0;
+    if not ERPDialogCaseListItemInteger_Execute('Выберите шаблон печати', 'Доступные шаблоны', ERP_ObjectBitmap(ERP_OBJECTTYPE_RPT), lkStr, lkIndex) then exit;
+    case lkIndex of
+      0: lkRes := StringsLoadFromFile('DB:CONFIG/RPTI/CS/FORMS/PS/DEFAULT_0001.XFM');
+      1: lkRes := StringsLoadFromFile('DB:CONFIG/RPTI/CS/FORMS/PS/DEFAULT_0001R.XFM');
+      2: lkRes := StringsLoadFromFile('DB:CONFIG/RPTI/CS/FORMS/PS/DEFAULT_0002.XFM');
+    end;
+    lkRpt := TxReport(StrToComponent(lkRes));
+    if(lkIndex <> 2)then
+      begin
+      lkSQL := StringsLoadFromFile('DB:CONFIG/RPTI/CS/FORMS/PS/DEFAULT_0001.SQL');
+      lkSQL := StrReplaceStr(lkSQL, '?CS_ID', ' '''+lkCS_ID+''' ');
+      end
+     else 
+      lkSQL := 'SELECT P.* FROM PROC$R_CS_DOVER('''+lkCS_ID+''') P ';
+    lkRpt.DataBase := FBDataBase;
+    while(lkRpt.DataSets.Count < 2)do
+      lkRpt.DataSets.Add;
+    lkRpt.DataSets[0].SQL.Text := lkSQL;
+    lkRpt.DataSets[1].SQL.Text := 'SELECT PR.* FROM PROC$R_FIRMS_ENT_CONST(3) PR ';
+    if(lkIndex <> 2)then
+      begin
+      while(lkRpt.DataSets.Count < 3)do
+        lkRpt.DataSets.Add;
+      lkRpt.DataSets[2].SQL.Text := 'SELECT P.* FROM PROC$R_CS_DOVER(?CS_ID) P ';
+      end;
+    lkImg := TxrImage(lkRpt.FindComponent('ImgLogo'));
+    lkRes := StrAbsolutePath('../conf/ent/logo.bmp', Amunhotep.ExeName);
+    if FileExists(lkRes)then
+      try
+        lkImg.Picture.LoadFromFile(lkRes);
+      except
+      end;
+    lkRpt.Prepare;
+    lkRpt.Preview;
+  end;
+  //============================================================================
+  function TERPFormGridRefCSPosPS_Create:TAmunhotepForm;
+  var
+    aTableName     :string;
+    i, c           :Integer;
+    lkStr          :string;
+    lkSettings     :TStrings;
+    lkCreateParams :TFormERPParams;
+    lkTr           :TxFBTransaction;
+    lkQr           :TxFBQuery;
+    lkDS           :TDataSource;
+    lkAct          :TCustomAction;
+    lkMainMenu     :TMainMenu;
+    lkMIMenuMain   :TMenuItem;
+    lkMIView       :TMenuItem;
+    lkMIObj        :TMenuItem;
+    lkMIItem       :TMenuItem;
+    lkMIItemGroup  :TMenuItem;
+    lkPanelLeft    :TxcPanel;
+    lkToolBarLeft  :TxcGradientPanelVista;
+    lkPanelClient  :TxcPanel;
+    lkToolBar      :TxcGradientPanelVista;
+    lkToolBarABC   :TxcGradientPanel;
+    lkToolBarCS    :TxcGradientPanelVista;
+    lkEvents       :TxFBEvents; 
+    lkCol          :TColumnEh;
+    lkAct          :TCustomAction;
+  begin
+    aTableName := 'TABL$R_CS';
+    CreateTxFBTransQuery(nil, '', '', '', ['isc_tpb_read_committed', 'isc_tpb_read', 'isc_tpb_rec_version', 'isc_tpb_nowait'], lkTr, lkQR, lkDS)  
+    lkCreateParams := [erpGrid, erpGridGroup, erpGridNavigation, erpEvents];
+    lkQr.SQL.Text := StringsLoadFromFile(PrepareAbsoleteFileName(ERP_FILENAME_SQL_GETTABLE_REF));
+    lkQr.Prepare;
+    lkQr.ParamByName('PQ_TB_ID'   ).AsString := aTableName;
+    lkQr.ParamByName('PQ_USER_VAR').AsString := ERP_GLOBALVARIABLE_USER_CURRENT;
+    try
+      lkQr.Open;
+    except
+    end;
+    if not(lkQr.Active)then
+      begin
+      if lkTr.InTransaction then
+        lkTr.Commit;
+      lkTr.Free;
+      Dialogs.MessageDlg(msg_error_erpsql+' "'+aTableName+'" !',mtWarning,[mbOk]);
+      exit;
+      end;  
+    lkQr.First;
+    if(lkQr.FieldByName('TB_EXISTS').AsInteger <> 1)then
+      begin
+      if lkTr.InTransaction then
+        lkTr.Commit;
+      lkTr.Free;
+      Dialogs.MessageDlg(msg_error_erpobject_not_defined+' "'+aTableName+'"', mtError, [mbOk]);
+      exit;
+      end;
+    if(lkQr.FieldByName('TB_REL_EXISTS').AsInteger <> 1)then
+      begin
+      if lkTr.InTransaction then
+        lkTr.Commit;
+      lkTr.Free;
+      Dialogs.MessageDlg(msg_error_erpobject_not_exists+' "'+aTableName+'"', mtError, [mbOk]);
+      exit;
+      end;
+    if(not(lkQr.FieldByName('TB_ACCS_SEL_CNT').AsInteger > 0))then
+      begin
+      lkStr := lkQr.FieldByName('TB_NAME').AsString;
+      if lkTr.InTransaction then
+        lkTr.Commit;
+      lkTr.Free;
+      Dialogs.MessageDlg(msg_error_erpobject_acces_denied+' "'+lkStr+'" !',mtWarning,[mbOk]);
+      exit;
+      end;
+    if(lkQr.FieldByName('TB_ACCS_PRN_CNT').AsInteger > 0 )then
+      lkCreateParams := lkCreateParams + [erpGridExport{, erpGridPrint, erpGridPrintItem}];
+    {  
+    if((lkQr.FieldByName('TB_CHILD_COUNT').AsInteger > 0) or (lkQr.FieldByName('TB_BLOB_COUNT').AsInteger > 0) or (lkQr.FieldByName('TB_FLAG_EXTERNAL').AsInteger <> 0))then
+      begin
+      lkCreateParams := lkCreateParams + [erpDetail];
+      if(lkQr.FieldByName('TB_FLAG_EXTERNAL').AsInteger <> 0)then
+        lkCreateParams := lkCreateParams + [erpDetailExternal];
+      end;
+    }
+    Result := TAmunhotepForm(TERPFormGrid_Create(lkQr.FieldByName('TB_NAME').AsString, ERP_ObjectCaption(ERP_OBJECTTYPE_REF), ERP_ObjectIcon(ERP_OBJECTTYPE_REF), ERP_ObjectBitmap(ERP_OBJECTTYPE_REF), false, lkCreateParams));
+    with Result do
+      begin
+      HelpKeyWord := aTableName;
+         // users recent menu
+      ExecSQL(FBDataBase,'EXECUTE BLOCK AS '+SQLCRLF+'BEGIN '+SQLCRLF+
+        '  IF(NOT(EXISTS(SELECT R.RDB$RELATION_ID FROM RDB$RELATIONS R WHERE(TRIM(R.RDB$RELATION_NAME)=''TABL$_USERS_RCNT''))))THEN EXIT; '+SQLCRLF+
+        '  EXECUTE STATEMENT ''UPDATE OR INSERT INTO TABL$_USERS_RCNT(NAME, USER_ID, SUBTYPE, TYPE_ID, SCRIPT_NAME)VALUES('''''+Result.Caption+''''', '''''+
+         GetGlobalVariable(ERP_GLOBALVARIABLE_USER_CURRENT)+''''', 0, '''''+IntToStr(ERP_OBJECTTYPE_REF)+''''', '''''+ScriptName+
+         ''''')MATCHING(USER_ID, SUBTYPE, TYPE_ID, SCRIPT_NAME);''; '+SQLCRLF+'END');    
+      end;  
+    with TERPForm_DataSetMain(Result) do
+      begin
+      with GeneratorField do
+        begin 
+        ApplyEvent := gamOnServer;
+        Field      := lkQr.FieldByName('TB_GENR_FLD').AsString;
+        Generator  := lkQr.FieldByName('TB_GENR').AsString;
+        IncrementBy:= 1;
+        end;
+      end; 
+    lkSettings := TERPForm_Settings(Result);
+    with lkSettings do
+      begin
+      Values[ERP_SETTINGS_BUFFERVAR      ] := lkQr.FieldByName('TB_BUFFER_VAR').AsString;
+      Values[ERP_SETTINGS_TABLENAME      ] := aTableName;
+      Values[ERP_SETTINGS_TABLECAPTION   ] := lkQr.FieldByName('TB_NAME').AsString;
+      Values[ERP_SETTINGS_REF_TREE       ] := '0';
+      Values[ERP_SETTINGS_REF_TREEORGROUP] := '0';
+      Values[ERP_SETTINGS_REF_TREEFIELD  ] := '';
+      Values[ERP_SETTINGS_ITEM_SCRIPT    ] := lkQr.FieldByName('TB_SC_ITEM').AsString;
+      Values[ERP_SETTINGS_ITEM_SCRIPTDLG ] := lkQr.FieldByName('TB_SC_ITEM_DLG').AsString;
+      Values[ERP_SETTINGS_BASETYPE       ] := '2';
+      Values[ERP_SETTINGS_TEMPFILENAME   ] := 'TMP:'+ERP_FILENAME_CFG_DIALOG_REF+aTableName+'_POS_002.CFG';
+      end;
+    lkMainMenu   := TMainMenu(Result.FindComponent(obj_name_erp_mainmenu)); 
+    lkMIMenuMain := TMenuItem(lkMainMenu.Items.FindComponent(obj_name_erp_mimainmenu)); lkMIMenuMain.Caption := StrTrimAll(lkQr.FieldByName('TB_NAME').AsString);
+    lkMIItem     := TMenuItem(lkMIMenuMain.FindComponent(obj_name_erp_mimainitem));
+    lkMIObj      := TMenuItem(lkMIMenuMain.FindComponent(obj_name_erp_mimainobj)); lkMIObj.ImageIndex := ERP_ObjectImageIndex(ERP_OBJECTTYPE_REF); lkMIObj.Caption := ERP_ObjectCaption(2);
+    lkMIView     := TMenuItem(lkMIMenuMain.FindComponent(obj_name_erp_mimainview));
+
+//      lkAct := TCustomAction(Result.FindComponent(obj_name_erp_actprintitem));lkAct.ImageIndex := 178;
+//      lkAct := TCustomAction(Result.FindComponent(obj_name_erp_actprintgrid));lkAct.ImageIndex := 234;
+      CreateTMenuItem(lkMIMenuMain,obj_name_erp_mimaindb,msg_erp_mimaindb,'','',ERP_ObjectImageIndex(ERP_OBJECTTYPE_REFS),  0);
+      ERP_DBMenuItems_Build(lkMIMenuMain, aTableName, '0', @TERPFormGrid_DatabaseMenuItem_OnClick);
+
+    lkPanelClient:= TxcPanel(Result.FindComponent(obj_name_erp_panelclient));
+    lkToolBar    := TxcGradientPanelVista(Result.FindComponent(obj_name_erp_toolbar));
+    lkToolBarCS  := CreateTxcGradientPanelVistaToolBar(Result,lkToolBar,obj_name_erp_toolbar+'CS','',alLeft, TERPForm_DefaultToolButtonWidth,1,TERPForm_DefaultToolButtonWidth,TERPForm_DefaultToolButtonWidth,TERPForm_DefaultToolBarBorderStyle);
+    lkEvents     := TxFBEvents(Result.FindComponent(obj_name_erp_data_evmain));
+    with lkEvents do
+      begin
+      Events.Add(aTableName);
+      Events.Add('TABL$R_CS_ADDR');
+      Events.Add('TABL$R_CS_PHONES');
+      Events.Add('TABL$R_CS_DOCS');
+      end;
+    if(lkQr.FieldByName('TB_FLAG_SHOWGROUPBAR').AsInteger = 1)then
+      begin
+      lkToolBarABC := CreateTxcGradientPanelVistaToolBar(Result,lkPanelClient,obj_name_erp_toolbarabc, '', alTop, 0,lkToolBar.Top+lkToolBar.Height+1,20, 200, xbsRaized);
+      with lkToolBarABC do
+        begin
+        Font.Style := [fsBold];
+        Font.Size  := 8;
+        Visible    := false;
+        ShowHint   := true;
+        with CreateTxcToolBarButton(lkToolBarABC,lkToolBarABC,'',' ВСЕ',msg_erp_show_on_litera+' "ВСЕ" ',1,1,32,32,alLeft,-1,nil) do
+          begin
+          ShowCaption:= true;
+          GroupIndex := ERP_REFERENCE_ABCGROUPINDEX;
+          Tag        := -1;
+          Down       := true;
+          OnClick    := @TERPFormGridRef_tbbABC_OnClick;
+          end;
+        c := 0;  
+        for i:=Ord('А') to Ord('Я') do
+          with CreateTxcToolBarButton(lkToolBarABC,lkToolBarABC,'',Chr(i),msg_erp_show_on_litera+' "'+Chr(i)+'" ',33+(c*16),1,32,16,alLeft,-1,nil) do
+            begin
+            c := c + 1;
+            ShowCaption:= true;
+            GroupIndex := ERP_REFERENCE_ABCGROUPINDEX;
+            Down       := false;
+            Tag        := i;
+            OnClick    := @TERPFormGridRef_tbbABC_OnClick;
+            end;
+        for i:=Ord('A') to Ord('Z') do
+          with CreateTxcToolBarButton(lkToolBarABC,lkToolBarABC,'',Chr(i),msg_erp_show_on_litera+' "'+Chr(i)+'" ',33+(c*16),1,32,16,alLeft,-1,nil) do
+            begin
+            c := c + 1;
+            ShowCaption:= true;
+            GroupIndex := ERP_REFERENCE_ABCGROUPINDEX;
+            Down       := false;
+            Tag        := i;
+            OnClick    := @TERPFormGridRef_tbbABC_OnClick;
+            end;
+        Visible := true;
+        end;
+      end;    
+    with TERPForm_DBGridMain(Result) do
+      begin
+      AllowedOperations := [];
+      FooterRowCount  := 0;
+      HelpKeyWord     := '1';
+      OnDblClick      := @TERPFormGridRefCSPosPS_actCSEdt_OnExecute;
+      OnGetCellParams := @TERPFormGridRefCSPosPS_DBGridEhMain_OnGetCellParams;
+      end;   
+    lkCol := CreateTColumnEh(TERPForm_DBGridMain(Result),'ID'             ,'# ### ##0'          ,'Контрагент|Код'         , 72,taRightJustify);
+    with lkCol do
+      begin
+      with Footer do
+        begin
+        FieldName     := lkCol.FieldName;
+        DisplayFormat := lkCol.DisplayFormat;
+        ValueType     := fvtCount;
+        end;
+      end;
+    lkCol := CreateTColumnEh(TERPForm_DBGridMain(Result),'FLAG_PHOTO'     ,''                  ,'Контрагент|фото'        , 20,taLeftJustify);
+    with lkCol do
+      begin
+      KeyList.Text := '1'+#13#10+'0'; 
+      PickList.Text := 'есть фото'+#13#10+' ';
+      ImageList := CreateTImageList(TERPForm_DBGridMain(Result), 'ilPhoto', [488, Amunhotep.MainForm.ImageListMain.Count-1]);
+      Title.Orientation := tohVertical;
+      end;
+    lkCol := CreateTColumnEh(TERPForm_DBGridMain(Result),'FLAG_PUBLIC'   ,''                  ,'Контрагент|публ'        , 20,taLeftJustify);
+    with lkCol do
+      begin
+      KeyList.Text := '1'+#13#10+'0'; 
+      PickList.Text := 'публичн.'+#13#10+' ';
+      ImageList := CreateTImageList(TERPForm_DBGridMain(Result), 'ilPublic', [275, Amunhotep.MainForm.ImageListMain.Count-1]);
+      Title.Orientation := tohVertical;
+      end;
+    lkCol := CreateTColumnEh(TERPForm_DBGridMain(Result),'FLAG_BAD'      ,''                   ,'Контрагент|блок.'        , 20,taLeftJustify);
+    with lkCol do
+      begin
+      KeyList.Text := '1'+#13#10+'0'; 
+      PickList.Text := 'блокирован'+#13#10+' ';
+      ImageList := CreateTImageList(TERPForm_DBGridMain(Result), 'ilBad', [224, Amunhotep.MainForm.ImageListMain.Count-1]);
+      Title.Orientation := tohVertical;
+      end;
+    lkCol := CreateTColumnEh(TERPForm_DBGridMain(Result),'FLAG_DOVER'   ,''                   ,'Контрагент|довер.'        , 20,taLeftJustify);
+    with lkCol do
+      begin
+      KeyList.Text := '2'+#13#10+'1'+#13#10+'0'; 
+      PickList.Text := 'давал доверенность'+#13#10+'для доверенности'+#13#10+' ';
+      ImageList := CreateTImageList(TERPForm_DBGridMain(Result), 'ilDover', [37, Amunhotep.MainForm.ImageListMain.Count-1]);
+      Title.Orientation := tohVertical;
+      end;
+    lkCol := CreateTColumnEh(TERPForm_DBGridMain(Result),'J_1000062_CNT'  ,'# ### ##0'           ,'Контрагент|Д.Ф.К.'      , 24,taRightJustify);
+    with lkCol do
+      begin
+      Title.Orientation := tohVertical;
+      Title.Hint := 'Количество "Договоров финансового кредита" по данному контрагенту';
+      end;
+//    lkCol := CreateTColumnEh(TERPForm_DBGridMain(Result),'KIND_SHORT_NAME',''                   ,'Контрагент|Тип'         , 48,taLeftJustify );
+    lkCol := CreateTColumnEh(TERPForm_DBGridMain(Result),'NAME'           ,''                   ,'Контрагент|Фамилия И.О.',160,taLeftJustify );
+    lkCol.Title.SortMarker := smUpEh;
+    lkCol := CreateTColumnEh(TERPForm_DBGridMain(Result),'AMOUNT'         ,'# ### ##0.00'       ,'Контрагент|Скидка %'    , 60,taRightJustify);
+    lkCol := CreateTColumnEh(TERPForm_DBGridMain(Result),'INN'            ,''                   ,'Контрагент|И.Н.Н.'      , 80,taLeftJustify );
+    lkCol := CreateTColumnEh(TERPForm_DBGridMain(Result),'BIRTHDAY'       ,'dd.mm.yyyy'         ,'Контрагент|Дата рожд'   , 72,taLeftJustify );
+    lkCol := CreateTColumnEh(TERPForm_DBGridMain(Result),'BIRTHYEAR'      ,''                   ,'Контрагент|год рожд.'   , 40,taLeftJustify );
+    lkCol := CreateTColumnEh(TERPForm_DBGridMain(Result),'ADDRLIST'       ,''                   ,'Адрес'                  ,200,taLeftJustify );
+    lkCol := CreateTColumnEh(TERPForm_DBGridMain(Result),'PHONELIST'      ,''                   ,'телефоны'               , 96,taLeftJustify );
+    lkCol := CreateTColumnEh(TERPForm_DBGridMain(Result),'DOCLIST'        ,''                   ,'Документы'              ,200,taLeftJustify );
+    lkCol := CreateTColumnEh(TERPForm_DBGridMain(Result),'CODECARD'       ,''                   ,'Дисконт|Номер карты'    , 60,taLeftJustify );
+    lkCol := CreateTColumnEh(TERPForm_DBGridMain(Result),'CODEFLAYER'     ,''                   ,'Дисконт|Номер флайера'  , 60,taLeftJustify );
+    lkCol := CreateTColumnEh(TERPForm_DBGridMain(Result),'FILIAL_NAME'    ,''                   ,'Филиал'                 , 80,taLeftJustify );
+    lkCol := CreateTColumnEh(TERPForm_DBGridMain(Result),'DATE_LAST'      ,'dd.mm.yyyy hh:nn:ss','Дата последней операции', 72,taLeftJustify );
+    lkCol := CreateTColumnEh(TERPForm_DBGridMain(Result),'COMENT_EX'      ,''                   ,'Примечания'             ,120,taLeftJustify );
+//    TERPForm_BlobInterface_Create(TERPForm_DBGridMain(Result).DataSource, TxcPageControlEx(Result.FindComponent(obj_name_erp_pagecontroldetail)), 'Примечания', 'COMENT', 'DOMN$BLOB_TEXT', true);
+    TERPForm_GridSettingsLoad(TERPForm_DBGridMain(Result), lkSettings.Values[ERP_SETTINGS_TEMPFILENAME]);
+
+    lkAct := TERPForm_CreateAction2(Result,'actCSNew'        ,msg_actcsnew  ,msg_actcsnew_hint  ,SHORTCUT_DATA_INSERT,0,176,@TERPFormGridRefCSPosPS_actCSNew_OnExecute  ,nil,lkToolBarCS,60,lkMIItem);
+    lkAct := TERPForm_CreateAction2(Result,'actCSEdt'        ,msg_actcsedt  ,msg_actcsedt_hint  ,SHORTCUT_DATA_UPDATE,0,175,@TERPFormGridRefCSPosPS_actCSEdt_OnExecute  ,nil,lkToolBarCS,72,lkMIItem);
+    lkAct := TERPForm_CreateAction2(Result,'actCSPoll'       ,msg_actcspoll ,msg_actcspoll_hint ,'Ctrl+D'            ,0,495,@TERPFormGridRefCSPosPS_actCSPoll_OnExecute ,nil,lkToolBarCS,72,lkMIItem);
+    lkAct := TERPForm_CreateAction2(Result,'actCSPhoto'      ,msg_actcsphoto,msg_actcsphoto_hint,'Ctrl+F8'           ,0,488,@TERPFormGridRefCSPosPS_actCSPhoto_OnExecute,nil,lkToolBarCS,56,lkMIItem);
+    lkAct := TERPForm_CreateAction2(Result,'actDoc1000062New','Д.Ф.К.'  ,'Создать новый "Договор финансового кредита" на этого контрагента'              ,'Ctrl+N',0,307,@TERPFormGridRefCSPosPS_actDoc1000062New_OnExecute,nil,lkToolBarCS,56,lkMIItem);
+    lkAct := TERPForm_CreateAction2(Result,'actJrnl1000062'  ,'Д.Ф.К.'  ,'Показать все "Договоры финансового кредита" по этому контрагенту'              ,''      ,0, 42,@TERPFormGridRefCSPosPS_actJrnl1000062_OnExecute  ,nil,lkToolBarCS,56,lkMIItem);
+    lkAct := TERPForm_CreateAction2(Result,'actJrnl1000062NV','Невыкупы','Показать все невыкупленные "Договоры финансового кредита" по этому контрагенту',''      ,0, 42,@TERPFormGridRefCSPosPS_actJrnl1000062NV_OnExecute,nil,lkToolBarCS,72,lkMIItem);
+    lkAct := TERPForm_CreateAction2(Result,'actRptAnketa'    ,'Анкета'  ,'Анкета физического лица'                                                       ,''      ,0, 48,@TERPFormGridRefCSPosPS_actRptAnketa_OnExecute    ,nil,lkToolBarCS,64,lkMIItem);
+    lkToolBarCS.Width  := TWinControl_AutoWidth(lkToolBarCS)+2; lkToolBarCS.Visible := (lkToolBarCS.ControlCount  > 0);  
+    if lkTr.InTransaction then
+      lkTr.Commit;
+    lkTr.Free;
+    Result.ActiveControl := TERPForm_DBGridMain(Result);
+    TERPFormGrid_RefreshView(Result);  
+    if not lkEvents.Registered then
+      lkEvents.RegisterEvents;
+  end;
+  
+begin
+  TERPFormGridRefCSPosPS_Create;
+end.

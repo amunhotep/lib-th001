@@ -1,0 +1,210 @@
+{"MESSAGES":[
+   {"NAME":"MSG_ACTFILE_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Файл"}
+     ,{"LANG":"1000056","TXT":"File"}
+     ,{"LANG":"1000204","TXT":"Fichier"}
+     ,{"LANG":"1000123","TXT":"Datei"}
+     ,{"LANG":"1000071","TXT":"Файл"}
+     ,{"LANG":"1000008","TXT":"Файл"}
+   ]}
+  ,{"NAME":"MSG_ACTFILE_HINT","CAPTION":[
+      {"LANG":"1000054","TXT":""}
+     ,{"LANG":"1000056","TXT":""}
+     ,{"LANG":"1000204","TXT":""}
+     ,{"LANG":"1000123","TXT":""}
+     ,{"LANG":"1000071","TXT":""}
+     ,{"LANG":"1000008","TXT":""}
+   ]}
+  ,{"NAME":"MSG_ACTFILENEW_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Новый"}
+     ,{"LANG":"1000056","TXT":"New"}
+     ,{"LANG":"1000204","TXT":"Nouveau"}
+     ,{"LANG":"1000123","TXT":"Neu"}
+     ,{"LANG":"1000071","TXT":"Новий"}
+     ,{"LANG":"1000008","TXT":"Новы"}
+   ]}
+  ,{"NAME":"MSG_ACTFILENEW_HINT","CAPTION":[
+      {"LANG":"1000054","TXT":""}
+     ,{"LANG":"1000056","TXT":""}
+     ,{"LANG":"1000204","TXT":""}
+     ,{"LANG":"1000123","TXT":""}
+     ,{"LANG":"1000071","TXT":""}
+     ,{"LANG":"1000008","TXT":""}
+   ]}
+  ,{"NAME":"MSG_ACTFILEOPEN_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Открыть"}
+     ,{"LANG":"1000056","TXT":"Open"}
+     ,{"LANG":"1000204","TXT":"Ouvrir"}
+     ,{"LANG":"1000123","TXT":"Öffnen"}
+     ,{"LANG":"1000071","TXT":"Відкрити"}
+     ,{"LANG":"1000008","TXT":"Адкрыць"}
+   ]}
+  ,{"NAME":"MSG_ACTFILEOPEN_HINT","CAPTION":[
+      {"LANG":"1000054","TXT":""}
+     ,{"LANG":"1000056","TXT":""}
+     ,{"LANG":"1000204","TXT":""}
+     ,{"LANG":"1000123","TXT":""}
+     ,{"LANG":"1000071","TXT":""}
+     ,{"LANG":"1000008","TXT":""}
+   ]}
+  ,{"NAME":"MSG_ACTFILEREOPEN_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Недавние"}
+     ,{"LANG":"1000056","TXT":"Reopen"}
+     ,{"LANG":"1000204","TXT":"Rouvrir"}
+     ,{"LANG":"1000123","TXT":"Wieder öffnen"}
+     ,{"LANG":"1000071","TXT":"Недавні"}
+     ,{"LANG":"1000008","TXT":"Нядаўнія"}
+   ]}
+  ,{"NAME":"MSG_ACTFILEREOPEN_HINT","CAPTION":[
+      {"LANG":"1000054","TXT":""}
+     ,{"LANG":"1000056","TXT":""}
+     ,{"LANG":"1000204","TXT":""}
+     ,{"LANG":"1000123","TXT":""}
+     ,{"LANG":"1000071","TXT":""}
+     ,{"LANG":"1000008","TXT":""}
+   ]}
+  ,{"NAME":"MSG_ACTFILELOAD_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Загрузить"}
+     ,{"LANG":"1000056","TXT":"Load"}
+     ,{"LANG":"1000204","TXT":"Charge"}
+     ,{"LANG":"1000123","TXT":"Belastung"}
+     ,{"LANG":"1000071","TXT":"Завантажити"}
+     ,{"LANG":"1000008","TXT":"Загрузіць"}
+   ]}
+  ,{"NAME":"MSG_ACTFILELOAD_HINT","CAPTION":[
+      {"LANG":"1000054","TXT":""}
+     ,{"LANG":"1000056","TXT":""}
+     ,{"LANG":"1000204","TXT":""}
+     ,{"LANG":"1000123","TXT":""}
+     ,{"LANG":"1000071","TXT":""}
+     ,{"LANG":"1000008","TXT":""}
+   ]}
+  ,{"NAME":"MSG_ACTFILESAVE_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Сохранить"}
+     ,{"LANG":"1000056","TXT":"Save"}
+     ,{"LANG":"1000204","TXT":"Enregistrer"}
+     ,{"LANG":"1000123","TXT":"Speichern"}
+     ,{"LANG":"1000071","TXT":"Зберегти"}
+     ,{"LANG":"1000008","TXT":"Захаваць"}
+   ]}
+  ,{"NAME":"MSG_ACTFILESAVE_HINT","CAPTION":[
+      {"LANG":"1000054","TXT":""}
+     ,{"LANG":"1000056","TXT":""}
+     ,{"LANG":"1000204","TXT":""}
+     ,{"LANG":"1000123","TXT":""}
+     ,{"LANG":"1000071","TXT":""}
+     ,{"LANG":"1000008","TXT":""}
+   ]}
+  ,{"NAME":"MSG_ACTFILESAVEAS_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Сохранить как..."}
+     ,{"LANG":"1000056","TXT":"Save As..."}
+     ,{"LANG":"1000204","TXT":"Enregistrer sous..."}
+     ,{"LANG":"1000123","TXT":"Speichern unter..."}
+     ,{"LANG":"1000071","TXT":"Зберегти як..."}
+     ,{"LANG":"1000008","TXT":"Захаваць як..."}
+   ]}
+  ,{"NAME":"MSG_ACTFILESAVEAS_HINT","CAPTION":[
+      {"LANG":"1000054","TXT":""}
+     ,{"LANG":"1000056","TXT":""}
+     ,{"LANG":"1000204","TXT":""}
+     ,{"LANG":"1000123","TXT":""}
+     ,{"LANG":"1000071","TXT":""}
+     ,{"LANG":"1000008","TXT":""}
+   ]}
+  ,{"NAME":"MSG_ACTFILESAVEALL_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Сохранить все"}
+     ,{"LANG":"1000056","TXT":"Save All"}
+     ,{"LANG":"1000204","TXT":"Enregistrer tout"}
+     ,{"LANG":"1000123","TXT":"Alle speichern"}
+     ,{"LANG":"1000071","TXT":"Зберегти всі"}
+     ,{"LANG":"1000008","TXT":"Захаваць усе"}
+   ]}
+  ,{"NAME":"MSG_ACTFILESAVEALL_HINT","CAPTION":[
+      {"LANG":"1000054","TXT":""}
+     ,{"LANG":"1000056","TXT":""}
+     ,{"LANG":"1000204","TXT":""}
+     ,{"LANG":"1000123","TXT":""}
+     ,{"LANG":"1000071","TXT":""}
+     ,{"LANG":"1000008","TXT":""}
+   ]}
+  ,{"NAME":"MSG_ACTFILECLOSE_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Закрыть"}
+     ,{"LANG":"1000056","TXT":"Close"}
+     ,{"LANG":"1000204","TXT":"Fermer"}
+     ,{"LANG":"1000123","TXT":"Schließen"}
+     ,{"LANG":"1000071","TXT":"Закрити"}
+     ,{"LANG":"1000008","TXT":"Зачыніць"}
+   ]}
+  ,{"NAME":"MSG_ACTFILECLOSE_HINT","CAPTION":[
+      {"LANG":"1000054","TXT":""}
+     ,{"LANG":"1000056","TXT":""}
+     ,{"LANG":"1000204","TXT":""}
+     ,{"LANG":"1000123","TXT":""}
+     ,{"LANG":"1000071","TXT":""}
+     ,{"LANG":"1000008","TXT":""}
+   ]}
+  ,{"NAME":"MSG_ACTFILECLOSEALL_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Закрыть все"}
+     ,{"LANG":"1000056","TXT":"Close All"}
+     ,{"LANG":"1000204","TXT":"Fermer tout"}
+     ,{"LANG":"1000123","TXT":"Alle schließen"}
+     ,{"LANG":"1000071","TXT":"Закрити всі"}
+     ,{"LANG":"1000008","TXT":"Закрыць усе"}
+   ]}
+  ,{"NAME":"MSG_ACTFILECLOSEALL_HINT","CAPTION":[
+      {"LANG":"1000054","TXT":""}
+     ,{"LANG":"1000056","TXT":""}
+     ,{"LANG":"1000204","TXT":""}
+     ,{"LANG":"1000123","TXT":""}
+     ,{"LANG":"1000071","TXT":""}
+     ,{"LANG":"1000008","TXT":""}
+   ]}
+  ,{"NAME":"MSG_ACTFILEPREVIEW_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Просмотр"}
+     ,{"LANG":"1000056","TXT":"Preview"}
+     ,{"LANG":"1000204","TXT":"Aperçu"}
+     ,{"LANG":"1000123","TXT":"Vorschau"}
+     ,{"LANG":"1000071","TXT":"Перегляд"}
+     ,{"LANG":"1000008","TXT":"Прагляд"}
+   ]}
+  ,{"NAME":"MSG_ACTFILEPREVIEW_HINT","CAPTION":[
+      {"LANG":"1000054","TXT":""}
+     ,{"LANG":"1000056","TXT":""}
+     ,{"LANG":"1000204","TXT":""}
+     ,{"LANG":"1000123","TXT":""}
+     ,{"LANG":"1000071","TXT":""}
+     ,{"LANG":"1000008","TXT":""}
+   ]}
+  ,{"NAME":"MSG_ACTFILEPRINT_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Печать"}
+     ,{"LANG":"1000056","TXT":"Print"}
+     ,{"LANG":"1000204","TXT":"Imprimer"}
+     ,{"LANG":"1000123","TXT":"Druken"}
+     ,{"LANG":"1000071","TXT":"Друкувати"}
+     ,{"LANG":"1000008","TXT":"Друк"}
+   ]}
+  ,{"NAME":"MSG_ACTFILEPRINT_HINT","CAPTION":[
+      {"LANG":"1000054","TXT":""}
+     ,{"LANG":"1000056","TXT":""}
+     ,{"LANG":"1000204","TXT":""}
+     ,{"LANG":"1000123","TXT":""}
+     ,{"LANG":"1000071","TXT":""}
+     ,{"LANG":"1000008","TXT":""}
+   ]}
+  ,{"NAME":"MSG_ACTFILEEXIT_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Выход"}
+     ,{"LANG":"1000056","TXT":"Exit"}
+     ,{"LANG":"1000204","TXT":"Quitter"}
+     ,{"LANG":"1000123","TXT":"Beenden"}
+     ,{"LANG":"1000071","TXT":"Вихід"}
+     ,{"LANG":"1000008","TXT":"Выхад"}
+   ]}
+  ,{"NAME":"MSG_ACTFILEEXIT_HINT","CAPTION":[
+      {"LANG":"1000054","TXT":""}
+     ,{"LANG":"1000056","TXT":""}
+     ,{"LANG":"1000204","TXT":""}
+     ,{"LANG":"1000123","TXT":""}
+     ,{"LANG":"1000071","TXT":""}
+     ,{"LANG":"1000008","TXT":""}
+   ]}
+]}

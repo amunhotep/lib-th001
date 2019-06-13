@@ -1,0 +1,8 @@
+{$I ../$COMMON.INC}
+begin
+  JrnlDateInit   := true;
+  JrnlDateFrom   := StrToDate('01.01.2010'); 
+  JrnlDateTo     := Now; 
+  Jrnl_HardFilter_Add('FIRM_ID'   , '(FIRM_ID = 0)');
+  JrnlForm := JtnlForm_Create('1000068');
+end.

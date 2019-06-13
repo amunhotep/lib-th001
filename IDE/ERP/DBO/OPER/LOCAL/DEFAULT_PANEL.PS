@@ -1,0 +1,33 @@
+{$DEFINE PEAKTOP:IDE/ERP/DBO/OPER/LOCAL/DEFAULT_PANEL.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/OPER/LOCAL/DEFAULT_PANEL.INC} {$I ./DEFAULT_PANEL.INC} {$ENDIF}
+var
+  lkObj    :TObject;                             
+  lkOwner  :TComponent;
+  lkParent :TWinControl;
+  lkDS     :TDataSource;
+  lkObjId  :string;
+begin
+  lkObj := GlobalObjects_Find(ERP_GLOBALVARIABLE_LOCALIZATION_OBJOWNER);
+  if(lkObj = nil)then exit;
+  if not ObjectInheritsFrom(lkObj, 'TComponent')then exit;
+  lkOwner := TComponent(lkObj);
+  
+  lkObj := GlobalObjects_Find(ERP_GLOBALVARIABLE_LOCALIZATION_OBJPARENT);
+  if(lkObj = nil)then exit;
+  if not ObjectInheritsFrom(lkObj, 'TWinControl')then exit;
+  lkParent := TWinControl(lkObj);
+
+  lkObj := GlobalObjects_Find(ERP_GLOBALVARIABLE_LOCALIZATION_OBJDATASOURCE);
+  if(lkObj = nil)then exit;
+  if not ObjectInheritsFrom(lkObj, 'TDataSource')then exit;
+  lkDS := TDataSource(lkObj);
+  
+  lkObjId := GetGlobalVariable(ERP_GLOBALVARIABLE_LOCALIZATION_OBJTABLE);
+
+  GlobalObjects_Delete(ERP_GLOBALVARIABLE_LOCALIZATION_OBJOWNER);
+  GlobalObjects_Delete(ERP_GLOBALVARIABLE_LOCALIZATION_OBJPARENT);
+  GlobalObjects_Delete(ERP_GLOBALVARIABLE_LOCALIZATION_OBJDATASOURCE);
+  SetGlobalVariable(ERP_GLOBALVARIABLE_LOCALIZATION_OBJTABLE, '');
+  
+  LocalizationIntf_Create(lkOwner, lkParent, lkDS, lkObjId);
+end.

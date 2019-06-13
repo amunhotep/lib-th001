@@ -1,0 +1,15 @@
+{$DEFINE PEAKTOP:IDE/DEVELOPMENT/DESIGNER/DEFAULT.PS}
+{$IFNDEF PEAKTOP:IDE/DEVELOPMENT/DESIGNER/POPUPMENU.INC} {$I ./POPUPMENU.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/DEVELOPMENT/DESIGNER/REPORT.INC}    {$I ./REPORT.INC}    {$ENDIF}
+  //============================================================================
+  procedure AmunhotepMainForm_OnBeginDesign(Sender:TAmunhotepForm);
+  begin
+    Sender.Designer.PopupMenu := DesignerPopupMenu_Get(Sender.Designer);
+    if(Sender.IsReport)then
+      DesignerReportInit(Sender);
+  end;
+  //============================================================================
+begin
+  DontAutoFree;
+  Amunhotep.MainForm.OnBeginDesign := @AmunhotepMainForm_OnBeginDesign;
+end.

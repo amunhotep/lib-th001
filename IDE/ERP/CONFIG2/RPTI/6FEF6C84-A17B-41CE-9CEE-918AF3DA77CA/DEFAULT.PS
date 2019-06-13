@@ -1,0 +1,215 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG/RPTI/6FEF6C84-A17B-41CE-9CEE-918AF3DA77CA/DEFAULT.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$I PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC} {$I PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}        {$I PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}        {$ENDIF}
+const
+  objname_datefrom   = 'dtpDateFrom';
+  objname_dateto     = 'dtpDateTo';
+  objname_firms      = 'gbFirms';
+  msg_input_firms    = 'Выберите фирмы учета';
+  objname_filials    = 'gbFilials';
+  msg_input_filials  = 'Выберите филиалы';
+const
+  FIELD_FORMAT       = '# ### ### ##0.00';
+  FIELD_FORMATINT    = '# ### ### ##0';
+  COLOR_FIXED        = $FFC0C0;
+  COLOR_FULL         = $C0FFC0; 
+  COLOR_ITEM         = $FFF0F0; 
+  //============================================================================
+  function TERPFormRpti_GetExportFilter(aOwner:TComponent):string;
+  begin
+    Result := 
+      msg_erp_lbldatefrom+' "'+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+'" '+
+      msg_erp_lbldateto  +' "'+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto))+'" '+
+      'Фирмы учета: "'+InputIntf_Ref_GetNames(aOwner.FindComponent(objname_firms))+'"  '+
+      'Филиалы: "'+InputIntf_Ref_GetNames(aOwner.FindComponent(objname_filials))+'" ';
+  end;
+  //============================================================================
+  function TERPFormRpti_OnGetSQL(aOwner:TComponent;var aSQL:string):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnGetSQLFileName(aOwner:TComponent;var aFileName:string);
+  begin
+     // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnProcessParams(aOwner:TComponent;aQr :TxFBQuery);
+  begin
+    with aQr do
+      begin
+      ParamByName('FIRM_IDS'  ).AsString := InputIntf_Ref_GetIds(aOwner.FindComponent(objname_firms));
+      ParamByName('FILIAL_IDS').AsString := InputIntf_Ref_GetIds(aOwner.FindComponent(objname_filials));
+      ParamByName('DATE_FROM' ).AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+' 05:00:00';
+      ParamByName('DATE_TO'   ).AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto)+1)+' 04:59:59';
+      end;  
+  end;
+  //============================================================================
+  function CreateChartTabSheet(aOwner:TComponent; aPC:TxcPageControlEx; const aFieldName, aCaption, aChartTitle:string):TxcTabSheet;
+  var
+    lkChart :TDBChart;
+    lkSer   :TPieSeries;
+  begin
+    Result := CreateTxcTabSheet(aPC,'ts'+aFieldName,aCaption, 371,Amunhotep.MainForm.StyleManager.Colors.Highlight);
+    {$IFDEF AMUNHOTEP4512}
+    lkChart := Interface_TeeChart_Create(aOwner, Result, 'DBChartPie_'+aFieldName);
+    with lkChart do
+      begin
+      Title.Text.Text := aChartTitle;
+      end;
+    {$ELSE}
+    lkChart := CreateTDBChart(aOwner, Result, 'DBChartPie_'+aFieldName, aChartTitle, 0,0,600,600,alClient);
+    {$ENDIF}  
+    lkSer              := TPieSeries.Create(aOwner);
+    lkSer.Name         := lkSer.ClassName+aFieldName;
+    lkSer.ParentChart  := lkChart;
+    lkSer.ShowInLegend := true;
+    lkSer.Visible      := true;
+    lkSer.Circled      := true;
+    lkSer.DataSource   := TERPForm_DBGridMain(aOwner).DataSource.DataSet;
+    lkSer.PieValues.Order       := loDescending;
+    lkSer.PieValues.DateTime    := false;
+    lkSer.PieValues.ValueSource := aFieldName;
+    lkSer.XLabelsSource         := 'FILIAL_NAMEPL';
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnChart(aOwner:TComponent; aParent:TWinControl);
+  var
+    lkPC :TxcPageControlEx;
+    lkTS :TxcTabSheet;
+  begin
+    lkPC := CreateTxcPageControlEx(aOwner, aParent, 'PCCharts', 0,0,600,600, alClient);
+    lkPC.MultiLine := True;
+    lkTS := CreateChartTabSheet(aOwner, lkPC, 'DOCSUM'       ,'По количеству продаж', 'Долевое участие столика в продажах');
+    lkTS := CreateChartTabSheet(aOwner, lkPC, 'DOCCNT'       ,'По количеству счетов', 'Долевое участие по количеству счетов в продажах');
+    lkTS := CreateChartTabSheet(aOwner, lkPC, 'GEUSTQUANT'   ,'По количеству гостей', 'Долевое участие по количеству гостей');
+    lkTS := CreateChartTabSheet(aOwner, lkPC, 'DOCSUMAVG'    ,'Средний чек'         , 'Средний чек на столик');
+    lkTS := CreateChartTabSheet(aOwner, lkPC, 'GEUSTQUANTAVG','Среднее гостей'      , 'В среднем гостей на 1 счёт');
+    TxcPageControlEx_ActivateDefaultPage(lkPC);
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnTerms(aOwner:TComponent;aParent:TWinControl);
+  var
+    lkLastTop :Integer;
+  begin
+    lkLastTop := 4;
+    lkLastTop := lkLastTop + InputIntf_DatePeriod_Create(aOwner, aParent, 'gbDatePeriod', 'Укажите период', 4, lkLastTop, 44, 360,objname_datefrom,objname_dateto,StartOfTheMonth(Now),EndOfTheMonth(Now)).Height;
+    lkLastTop := lkLastTop + 4;
+    lkLastTop := lkLastTop + InputIntf_Ref_Create(aOwner,aParent,objname_firms   ,msg_input_firms   ,4,lkLastTop, 0,360,'TABL$R_FIRMS'  ,TERPForm_Settings(aOwner).Values[ERP_SETTINGS_TABLENAME]).Height;
+    lkLastTop := lkLastTop + 4;
+    lkLastTop := lkLastTop + InputIntf_Ref_Create(aOwner,aParent,objname_filials ,msg_input_filials ,4,lkLastTop, 0,360,'TABL$R_FILIALS',TERPForm_Settings(aOwner).Values[ERP_SETTINGS_TABLENAME]).Height;
+    lkLastTop := lkLastTop + 4;
+  end;
+  //============================================================================
+  function TERPFormRpti_OnColumnsCreate(aOwner:TComponent; aDBG:TDBGridEh):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsCreated(aOwner:TComponent; aDBG:TDBGridEh);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsLoad(aOwner:TComponent; aDBG:TDBGridEh);
+  var
+    lkCol      :TColumnEh;
+  begin
+    aDBG.Visible    := false; 
+    aDBG.FrozenCols := 0;
+    aDBG.Columns.Clear;
+    lkCol := CreateTColumnEh(aDBG,'FILIAL_NAME','','Филиал', 200, taLeftJustify);
+    with lkCol do
+      begin
+      Color                := COLOR_FIXED;
+      HideDuplicates       := True;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'PLATENO', FIELD_FORMATINT, 'Столик', 48, taRightJustify );
+    with lkCol do
+      begin
+      Color                := COLOR_FIXED;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'DOCCNT', FIELD_FORMATINT, 'Счетов', 48, taRightJustify );
+    with lkCol do
+      begin
+      Color                := COLOR_ITEM;
+      Footer.Color         := Color;
+      Footer.Alignment     := Alignment;
+      Footer.DisplayFormat := DisplayFormat;
+      Footer.FieldName     := FieldName;
+      Footer.ValueType     := fvtSum;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'GEUSTQUANT', FIELD_FORMATINT, 'Гостей|Всего', 48, taRightJustify );
+    with lkCol do
+      begin
+      Color                := COLOR_ITEM;
+      Footer.Color         := Color;
+      Footer.Alignment     := Alignment;
+      Footer.DisplayFormat := DisplayFormat;
+      Footer.FieldName     := FieldName;
+      Footer.ValueType     := fvtSum;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'GEUSTQUANTAVG', FIELD_FORMAT, 'Гостей|среднее|на 1 счёт', 48, taRightJustify );
+    with lkCol do
+      begin
+      Color                := COLOR_FULL;
+      Footer.Color         := Color;
+      Footer.Alignment     := Alignment;
+      Footer.DisplayFormat := DisplayFormat;
+      Footer.FieldName     := FieldName;
+      Footer.ValueType     := fvtAvg;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'DOCSUM', FIELD_FORMAT, 'Сумма|Продаж', 96, taRightJustify );
+    with lkCol do
+      begin
+      Color                := COLOR_ITEM;
+      Footer.Color         := Color;
+      Footer.Alignment     := Alignment;
+      Footer.DisplayFormat := DisplayFormat;
+      Footer.FieldName     := FieldName;
+      Footer.ValueType     := fvtSum;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'DOCSUMAVG', FIELD_FORMAT, 'Сумма|среднее|на 1 счёт', 96, taRightJustify );
+    with lkCol do
+      begin
+      Color                := COLOR_FULL;
+      Footer.Color         := Color;
+      Footer.Alignment     := Alignment;
+      Footer.DisplayFormat := DisplayFormat;
+      Footer.FieldName     := FieldName + '_';
+      Footer.ValueType     := fvtFieldValue;
+      end;
+    lkCol := CreateTColumnEh(aDBG, 'DOCSUMAVGGUEST', FIELD_FORMAT, 'Сумма|среднее|на 1 гостя', 96, taRightJustify );
+    with lkCol do
+      begin
+      Color                := COLOR_FULL;
+      Footer.Color         := Color;
+      Footer.Alignment     := Alignment;
+      Footer.DisplayFormat := DisplayFormat;
+      Footer.FieldName     := FieldName + '_';
+      Footer.ValueType     := fvtFieldValue;
+      end;
+
+    aDBG.FrozenCols       := 2;  
+    aDBG.FooterRowCount   := 1;
+    aDBG.SumList.Active   := True;
+//    aDBG.OnGetCellParams  := @ERP_Report_DBGridEh_OnGetCellParams;
+    aDBG.Visible          := true;
+  end;
+  //============================================================================
+  function TERPFormRpti_OnPrint(aOwner:TComponent):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_BeforePreview(aOwner:TComponent; aRpt:TxReport);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  
+
+begin
+  TERPFormRpti_Create('{6FEF6C84-A17B-41CE-9CEE-918AF3DA77CA}');
+end.

@@ -1,0 +1,2039 @@
+{$DEFINE DB:CONFIG/DOC/1000062/EDIT.PS}
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}               {$I PEAKTOP:GLOBAL_VARIABLES.INC}             {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TCOLUMNEH.INC}                  {$I PEAKTOP:OBJ/TCOLUMNEH.INC}                {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TCOLUMNEH_KEYLST.INC}           {$I PEAKTOP:OBJ/TCOLUMNEH_KEYLST.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TIMAGELIST.INC}                 {$I PEAKTOP:OBJ/TIMAGELIST.INC}               {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TACTION.INC}                    {$I PEAKTOP:OBJ/TACTION.INC}                  {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCEDITCOMBO.INC}               {$I PEAKTOP:OBJ/TXCEDITCOMBO.INC}             {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCBUTTON.INC}                  {$I PEAKTOP:OBJ/TXCBUTTON.INC}                {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANEL.INC}           {$I PEAKTOP:OBJ/TXCGRADIENTPANEL.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}      {$I PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}    {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/DBINTERFACE/TEXT.INC}           {$I PEAKTOP:OBJ/DBINTERFACE/TEXT.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/DBINTERFACE/IMAGE.INC}          {$I PEAKTOP:OBJ/DBINTERFACE/IMAGE.INC}        {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/OBJECTNAMES.INC}        {$I PEAKTOP:IDE/ERP/DBO/OBJECTNAMES.INC}      {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/DOC/INTF_COMENTS.INC}   {$I PEAKTOP:IDE/ERP/DBO/DOC/INTF_COMENTS.INC} {$ENDIF}
+{$IFNDEF DB:CONFIG/OPER/GET_PIN.INC}
+  {$I DB:CONFIG/OPER/GET_PIN.INC}
+{$ENDIF} 
+  //============================================================================
+  function CreateTLabel1000062(a_Owner :TComponent; a_Parent:TWinControl; 
+    const a_Name, a_Caption:string;
+    const a_Left, a_Top, a_Height, a_Width:Integer):TLabel;
+  var
+    lkCmp :TComponent;
+  begin
+    lkCmp := a_Owner.FindComponent(a_Name);
+    if(lkCmp <> nil)then
+      Result := TLabel(lkCmp)
+     else 
+      Result := TLabel.Create(a_Owner);
+    with Result do
+      begin
+      Name       := a_Name;
+      Parent     := a_Parent;
+      Caption    := a_Caption;
+      AutoSize   := false;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      Transparent:= true;
+      Left       := a_Left;
+      Top        := a_Top;
+      Height     := a_Height;
+      Width      := a_Width;
+      Align      := alNone;
+      Alignment  := taLeftJustify;
+      Layout     := taMiddle;
+      end; 
+  end;
+  //============================================================================
+  function CreateTxcEditCalc1000062(a_Owner :TComponent; a_Parent:TWinControl; 
+    const a_Name:string;
+    const a_Left, a_Top, a_Height, a_Width:Integer;
+    const a_Enabled:Boolean;
+    const a_Value :Extended):TxcEditCalc;
+  var
+    lkCmp :TComponent;
+  begin
+    lkCmp := a_Owner.FindComponent(a_Name);
+    if(lkCmp <> nil)then
+      Result := TxcEditCalc(lkCmp)
+     else 
+      Result := TxcEditCalc.Create(a_Owner);
+    with Result do
+      begin
+      Name         := a_Name;
+      Parent       := a_Parent;
+      Ctl3d        := false;
+      DisplayFormat:= '# ### ### ##0.00';
+      Color        := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color   := Amunhotep.MainForm.StyleManager.Colors.Border;
+      Font.Style   := [fsBold];
+      Font.Name    := 'Verdana';
+      Font.Size    := 8;
+      Left         := a_Left;
+      Top          := a_Top;
+      Height       := a_Height;
+      Width        := a_Width;
+      Enabled      := a_Enabled;
+      Value        := a_Value;
+      end; 
+  end;
+  //============================================================================
+  function CreateTDateTimePicker1000062(a_Owner :TComponent; a_Parent:TWinControl; 
+    const a_Name:string;
+    const a_Left, a_Top, a_Height, a_Width:Integer;
+    const a_Enabled:Boolean;
+    const a_Date :TDateTime):TDateTimePicker;
+  var
+    lkCmp :TComponent;
+  begin
+    lkCmp := a_Owner.FindComponent(a_Name);
+    if(lkCmp <> nil)then
+      Result := TDateTimePicker(lkCmp)
+     else 
+      Result := TDateTimePicker.Create(a_Owner);
+    with Result do
+      begin
+      Name         := a_Name;
+      Parent       := a_Parent;
+      Color        := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color   := Amunhotep.MainForm.StyleManager.Colors.Border;
+      Font.Style   := [fsBold];
+      Font.Name    := 'Verdana';
+      Font.Size    := 8;
+      Left         := a_Left;
+      Top          := a_Top;
+      Height       := a_Height;
+      Width        := a_Width;
+      Enabled      := a_Enabled;
+      Date         := a_Date;
+      end; 
+  end;
+  //============================================================================
+var
+  DocId                   :string;
+  TMC_GROUP_ID            :string;
+  DialogZalog_ConstPC     :string;
+  DialogZalog_ConstPCPEN  :string;
+  DialogZalog_ConstMinDays:string;
+  DialogZalog_ConstDaysCnt:string;
+  DialogZalog_ConstMinSum :string;
+  DialogZalog_ConstMinSum2:string;
+  //============================================================================
+  function DialogZalog_DaysCount(const aDate1, aDate2:TDateTime):Integer;
+  var
+    lkStr :string;
+  begin
+    lkStr := '0';
+    GetField(FBDataBase, 'PROC$O_ENT_PS_DAYSCOUNT('''+FormatDateTime('dd.mm.yyyy',aDate2)+
+      ' 00:00:00'','''+FormatDateTime('dd.mm.yyyy',aDate1)+' 00:00:00'')','VAL','',lkStr);
+    try
+      Result := StrToInt(lkStr);
+    except
+      Result := Trunc(aDate1 - aDate2);
+    end;
+  end;
+  //============================================================================
+  procedure DialogZalogExecute_RecalcValues(aOwner :TComponent);
+  var
+    lkDaysLeft :Integer;
+    lkDaysPen  :Integer;
+    lkPCSumMin :Extended;
+    lkStr      :string;
+  begin
+    DialogZalog_ConstPC := '100';
+    DialogZalog_ConstPCPEN := '500';
+    GetField(FBDataBase,'PROC$D_1000062_GET_PC('''+DocId+''', '''+FormatDateTime('dd.mm.yyyy', 
+      TDateTimePicker(aOwner.FindComponent('DTPDATELAST')).Date)+' 23:59:59'')'   ,'PC' ,'',DialogZalog_ConstPC);
+    GetField(FBDataBase,'PROC$D_1000062_GET_PC('''+DocId+''', '''+FormatDateTime('dd.mm.yyyy', 
+      TDateTimePicker(aOwner.FindComponent('DTPDATELAST')).Date)+' 23:59:59'')'   ,'PCPEN' ,'',DialogZalog_ConstPCPEN);
+    if(StrTrimAll(DialogZalog_ConstPCPEN) = '')then DialogZalog_ConstPCPEN := '0';  
+
+    TxcEditCalc(aOwner.FindComponent('EDTPC1DAY')).Value := StrToInt(DialogZalog_ConstPC) / 1000; 
+    lkDaysLeft := DialogZalog_DaysCount(TDateTimePicker(aOwner.FindComponent('DTPDATELAST')).Date, TDateTimePicker(aOwner.FindComponent('DTPDOCDATE')).Date);
+    lkDaysPen  := MaxInteger(0, lkDaysLeft - StrToInt(DialogZalog_ConstDaysCnt));
+    TxcEditCalc(aOwner.FindComponent('EDTDAYSCNT' )).Value := lkDaysLeft; 
+    TxcEditCalc(aOwner.FindComponent('EDTDAYSLEFT')).Value := MaxInteger(StrToInt(DialogZalog_ConstMinDays), lkDaysLeft);
+    if(Now < StrToDateTime('01.10.2012 00:00:00'))then
+      begin
+      TxcEditCalc(aOwner.FindComponent('EDTDAYSPEN' )).Value := lkDaysPen; 
+      TxcEditCalc(aOwner.FindComponent('EDTPCPEN'   )).Value := 0; 
+      TxcEditCalc(aOwner.FindComponent('EDTSUMPCPEN')).Value := 0;
+      end
+     else 
+      begin
+      TxcEditCalc(aOwner.FindComponent('EDTDAYSPEN' )).Value := lkDaysPen; 
+      TxcEditCalc(aOwner.FindComponent('EDTPCPEN'   )).Value := lkDaysPen * StrToInt(DialogZalog_ConstPCPEN) / 1000; 
+      TxcEditCalc(aOwner.FindComponent('EDTSUMPCPEN')).Value := lkDaysPen * StrToInt(DialogZalog_ConstPCPEN) * TxcEditCalc(aOwner.FindComponent('EDTDOCSUM')).Value / 100000;
+      if(TMC_GROUP_ID <> '150000')then
+        try lkPCSumMin := StrToFloat(PrepareFloatStr(DialogZalog_ConstMinSum2)) * lkDaysPen; except lkPCSumMin := 0; end
+       else
+        try lkPCSumMin := StrToFloat(PrepareFloatStr(DialogZalog_ConstMinSum )) * lkDaysPen; except lkPCSumMin := 0; end;
+      with TxcEditCalc(aOwner.FindComponent('EDTSUMPCPEN')) do  
+        if(lkPCSumMin > Value)then Value :=lkPCSumMin;
+      end;  
+    TxcEditCalc(aOwner.FindComponent('EDTPC')).Value := StrToInt(DialogZalog_ConstPC) * MaxInteger(StrToInt(DialogZalog_ConstMinDays), lkDaysLeft) * 
+        (10000 - TxcEditCalc(aOwner.FindComponent('EDTCSAMOUNT')).Value * 100) / 10000 / 1000;
+    TxcEditCalc(aOwner.FindComponent('EDTSUMPC')).Value := (TxcEditCalc(aOwner.FindComponent('EDTDOCSUM')).Value *
+      StrToInt(DialogZalog_ConstPC) * MaxInteger(StrToInt(DialogZalog_ConstMinDays), lkDaysLeft) * (10000 - TxcEditCalc(aOwner.FindComponent('EDTCSAMOUNT')).Value * 100) / 10000 / 100000);    
+    lkPCSumMin  := 0;
+    if(TMC_GROUP_ID <> '150000')then
+      try lkPCSumMin := StrToFloat(PrepareFloatStr(DialogZalog_ConstMinSum2)) * lkDaysLeft; except lkPCSumMin := 0; end
+     else
+      try lkPCSumMin := StrToFloat(PrepareFloatStr(DialogZalog_ConstMinSum )) * lkDaysLeft; except lkPCSumMin := 0; end;
+    with TxcEditCalc(aOwner.FindComponent('EDTSUMPC')) do
+      if(lkPCSumMin > Value)then Value :=lkPCSumMin;
+    TxcEditCalc(aOwner.FindComponent('EDTSUMBODY')).Value := 
+       TxcEditCalc(aOwner.FindComponent('EDTCALCSUM')).Value - TxcEditCalc(aOwner.FindComponent('EDTSUMPC')).Value  - TxcEditCalc(aOwner.FindComponent('EDTSUMPCPEN')).Value;
+  end;
+  //============================================================================
+  procedure DialogZalogExecute_DTP_OnCloseUp(Sender :TObject);
+  begin
+    DialogZalogExecute_RecalcValues(TComponent(Sender).Owner);
+  end;
+  //============================================================================
+  procedure DialogZalogExecute_edtCardNumber_OnButtonClick(Sender :TObject);
+  var
+    lkCardNum :string;
+    lkStr     :string;
+    lkAmount  :Extended;
+  begin
+    lkCardNum := TxcEditCombo(Sender).Text;
+    lkCardNum := StrCiphersOnlyInt(lkCardNum);
+    TxcEditCombo(Sender).Text := '2401090';
+    if(Length(lkCardNum) < 12)then
+      begin
+      Dialogs.MessageDlg('Неверный номер карты.'+#13#10+'Номер карты необходимо вводить в формате 2401090XXXXX, где XXXXX номер на карте.', mtWarning, [mbOk]);
+      exit;
+      end;
+    if(Length(lkCardNum) > 12)then Delete(lkCardNum, 12, Length(lkCardNum) - 12);
+    lkStr := '0';
+    GetField(FBDataBase, 'TABL$R_CSCARD', 'COALESCE(COUNT(ID),0)', 'TRIM(CARDNUM) = '''+lkCardNum+''' ', lkStr);
+    if(StrToInt(lkStr) = 0)then
+      begin
+      Dialogs.MessageDlg('Такой дисконтной карты не существует.'+#13#10+'Номер карты необходимо вводить в формате 2401090XXXXX, где XXXXX номер на карте.', mtWarning, [mbOk]);
+      exit;
+      end;
+    lkStr := '0';
+    GetField(FBDataBase, 'TABL$R_CSCARD', 'FIRST 1 COALESCE((AMOUNT * 1000) , 0)', 'TRIM(CARDNUM) = '''+lkCardNum+''' ', lkStr);
+    WriteLn(lkStr);
+    lkStr := StrCiphersOnlyInt(lkStr);
+    WriteLn(lkStr);
+    try
+      lkAmount := StrToInt(lkStr) / 1000;
+    except
+      exit;
+    end;
+    TxcEditCalc(TComponent(Sender).Owner.FindComponent('EDTCSAMOUNT')).Value := lkAmount;
+    TLABEL(TComponent(Sender).Owner.FindComponent('lblCSAMOUNT')).Tag := Trunc(lkAmount * 100);
+    TxcEditCombo(Sender).Text     := lkCardNum;
+    TxcEditCombo(Sender).ReadOnly := true;
+    TxcEditCombo(Sender).Enabled  := false;
+    DialogZalogExecute_RecalcValues(TComponent(Sender).Owner);
+  end;
+  //============================================================================
+  function DialogZalogExecute(const aDocDate:TDateTime; const aKursType, aFirmId:string; 
+    const aDocSum, aCsAmount:Extended; 
+    var aSumPay, aSumPayAny, aSumPC, aSumPCPEN, aPC, aPCPEN, aAmount:Extended;
+    var aDaysLeft:Integer; var aCardNumber, aPaySrcId:string):Boolean ;
+  var
+    lkDaysLeft    :Integer;
+    lkForm        :TForm;
+    lkPanelClient :TxcGradientPanel;
+    lkTopBar      :TxcGradientPanelVista;
+    lkPanelBottom :TxcStdPanel;
+    lkBtnOk       :TxcButton; 
+    lkBtnCancel   :TxcButton;
+    lkLabel       :TLabel;
+    lkDTP         :TDateTimePicker;
+    lkEdtDaysCnt  :TxcEditCalc;
+    lkEdtMinDays  :TxcEditCalc;
+    lkEdtPC1Day   :TxcEditCalc;
+    lkEdtDaysLeft :TxcEditCalc;
+    lkEdtAmount   :TxcEditCalc;
+    lkEdtDocSum   :TxcEditCalc;
+    lkEdtCalcSum  :TxcEditCalc;
+    lkEdtPC       :TxcEditCalc;
+    lkEdtSumPC    :TxcEditCalc;
+    lkEdtSumBody  :TxcEditCalc;
+    lkEdtSumAny   :TxcEditCalc;
+    lkEdtDaysPEN  :TxcEditCalc;
+    lkEdtPCPEN    :TxcEditCalc;
+    lkEdtSumPCPEN :TxcEditCalc;
+    lkEdtCardNum  :TxcEditCombo;
+    lkDocDate     :TDateTime;
+    lkNow         :TDateTime;
+    lkPCSum       :Extended;
+    lkrbPayCash   :TxcRadioButton;
+    lkrbPayAcc    :TxcRadioButton;
+    lkEdtPayCash  :TxcEditCombo;
+    lkEdtPayAcc   :TComboBox;
+    lkStr         :string;
+    lkTr          :TxFBTransaction;
+    lkQr          :TxFBQuery;
+  label
+    lbl_correct_date;  
+  begin
+    lkNow      := StrToDateTime(FormatDateTime('dd.mm.yyyy', Now)+' 23:59:59');
+    lkDocDate  := StrToDateTime(FormatDateTime('dd.mm.yyyy', aDocDate)+' 00:00:00');
+    GetField(FBDataBase,'PROC$D_1000062_GET_PC('''+DocId+''', '''+FormatDateTime('dd.mm.yyyy', lkNow)+' 23:59:59'') ','PC' ,'',DialogZalog_ConstPC);
+    GetField(FBDataBase,'PROC$D_1000062_GET_PC('''+DocId+''', '''+FormatDateTime('dd.mm.yyyy', lkNow)+' 23:59:59'') ','PCPEN' ,'',DialogZalog_ConstPCPEN);
+    GetField(FBDataBase,'TABL$R_COUNTRIESTP','MINDAYSCNT','ID = '''+aKursType+''' ',DialogZalog_ConstMinDays);
+    GetField(FBDataBase,'PROC$C_ENT_PS_DEFAULTDAYSCOUNT','VAL','',DialogZalog_ConstDaysCnt);
+    GetField(FBDataBase,'PROC$C_ENT_PS_MINSUMINDAY','VAL','',DialogZalog_ConstMinSum);
+    GetField(FBDataBase,'PROC$C_ENT_PS_MINSUMINDAY2','VAL','',DialogZalog_ConstMinSum2);
+
+    aDaysLeft  := DialogZalog_DaysCount(lkNow, lkDocDate);
+    
+    lkForm := TForm.Create(nil);
+    with lkForm do
+      begin
+      Caption         := Amunhotep.Title;
+      Color           := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      BorderStyle     := bsDialog;
+      BorderIcons     := [biSystemMenu];
+      Position        := poDesktopCenter;
+      Width           := 580;
+      Height          := 320;
+      Font.Size       := 8;
+      end;
+    lkTopBar      := CreateTxcGradientPanelVista(lkForm, lkForm,'PanelTop', #$20+'Расчет погашения процентов и пени',alTop,0,0,34,98,xbsRaized);  
+    lkPanelClient := CreateTxcGradientPanel(lkForm, lkForm,'PanelClient','',alClient,0,0,200,98,xbsNone  ,gdTopToBottom);  
+    lkPanelBottom := TxcStdPanel.Create(lkForm);
+    with lkPanelBottom do
+      begin
+      Name         := 'PanelBottom';
+      Parent       := lkForm;
+      Height       := 24;
+      Width        := lkForm.ClientWidth;
+      Align        := alBottom;
+      BorderStyle  := xbsNone;
+      StyleManager := Amunhotep.MainForm.StyleManager;
+      Color        := Amunhotep.MainForm.StyleManager.Colors.Window;
+      end;
+    lkBtnCancel := CreateTxcButton(lkForm,lkPanelBottom,'btnCancel','Отмена',lkPanelBottom.Width - 100,2,lkPanelBottom.Height-4,96,mrCancel,false,true );
+    lkBtnCancel.Font.Style := [fsBold];
+    lkBtnCancel.TabOrder   := 2;
+    lkBtnCancel.Anchors    := [akRight, akBottom]  
+    lkBtnOk     := CreateTxcButton(lkForm,lkPanelBottom,'btnOk'    ,'OK'    ,lkBtnCancel.Left - 100   ,2,lkPanelBottom.Height-4,96,mrOk    ,true ,false);
+    lkBtnOk.Font.Style     := [fsBold];
+    lkBtnOk.TabOrder       := 1;
+    lkBtnOk.Anchors        := [akRight, akBottom]
+    // amount
+    lkLabel      := CreateTLabel1000062(lkForm,lkPanelBottom,'', 'Карта:', 4, 2, 16, 48);
+    lkLabel.Font.Color := $008000FF;
+    lkEdtCardNum := CreateTxcEditCombo(lkForm, lkPanelBottom, 'EDTCARDNUMB', lkLabel.Left+lkLabel.Width+2, 2, 16, 180);
+    lkEdtCardNum.Font.Style := [fsBold];
+    lkEdtCardNum.Text := '2401090';
+    lkEdtCardNum.OnButtonClick := @DialogZalogExecute_edtCardNumber_OnButtonClick;
+    // 1row
+    lkLabel      := CreateTLabel1000062(lkForm, lkPanelClient,'lblSumBody', 'Остаток по телу кредита:', 4, 4, 20, 160);
+    lkEdtDocSum  := CreateTxcEditCalc1000062(lkForm, lkPanelClient, 'EDTDOCSUM', lkLabel.Left+lkLabel.Width+4, lkLabel.Top, 20,128, false, aDocSum);
+    lkLabel      := CreateTLabel1000062(lkForm, lkPanelClient,'lblLastDate','Дата последней операции: ', lkEdtDocSum.Left+lkEdtDocSum.Width+4, lkEdtDocSum.Top, 20,160);
+    lkDTP        := CreateTDateTimePicker1000062(lkForm, lkPanelClient, 'DTPDOCDATE', lkLabel.Left+lkLabel.Width+4, lkLabel.Top, 20, 108, false, lkDocDate);
+    // 2row
+    lkLabel      := CreateTLabel1000062(lkForm, lkPanelClient,'lblDocDate','Погасить на дату', 4, lkDTP.Top + lkDTP.Height+4, 20,104);
+    lkLabel.Font.Color := $008000FF;
+    lkDTP        := CreateTDateTimePicker1000062(lkForm, lkPanelClient, 'DTPDATELAST', lkLabel.Left+lkLabel.Width+4, lkLabel.Top, 20, 100, true, lkNow);
+    lkDTP.OnCloseUp := @DialogZalogExecute_DTP_OnCloseUp;
+    lkLabel      := CreateTLabel1000062(lkForm, lkPanelClient,'lblDaysCount','Прошло дней :',lkDTP.Left+lkDTP.Width+4,lkDTP.Top, 20,80);
+    lkEdtDaysCnt := CreateTxcEditCalc1000062(lkForm, lkPanelClient, 'EDTDAYSCNT', lkLabel.Left+lkLabel.Width+4, lkLabel.Top, 20, 72, false, aDaysLeft);
+    lkEdtDaysCnt.DisplayFormat := '# ### ### ##0';
+    lkLabel     := CreateTLabel1000062(lkForm, lkPanelClient,'lblPCPERDAY','Ставка в день', lkEdtDaysCnt.Left+lkEdtDaysCnt.Width+4, lkEdtDaysCnt.Top, 20, 96);
+    lkLabel.Tag := StrToInt(DialogZalog_ConstPC);
+    lkEdtPC1Day := CreateTxcEditCalc1000062(lkForm, lkPanelClient, 'EDTPC1DAY', lkLabel.Left+lkLabel.Width+4, lkLabel.Top, 20, 96, false, StrToInt(DialogZalog_ConstPC) / 1000);
+    lkEdtPC1Day.DisplayFormat := '# ### ### ##0.00 %';
+    // 3row
+    lkLabel      := CreateTLabel1000062(lkForm, lkPanelClient,'lblMINDAYS', 'Минимально дней', 4, lkEdtPC1Day.Top + lkEdtPC1Day.Height + 4, 20,104);
+    lkLabel.Tag  := StrToInt(DialogZalog_ConstMinDays);
+    lkEdtMinDays := CreateTxcEditCalc1000062(lkForm, lkPanelClient, 'EDTMINDAYS', lkLabel.Left+lkLabel.Width+4, lkLabel.Top, 20, 72, false, StrToInt(DialogZalog_ConstMinDays));
+    lkEdtMinDays.DisplayFormat := '# ### ### ##0';
+    lkLabel      := CreateTLabel1000062(lkForm, lkPanelClient,'lblDAYSCNT1', 'Дней в рассчете', lkEdtMinDays.Left+lkEdtMinDays.Width+4, lkEdtMinDays.Top, 20,108);
+    lkLabel.Tag  := StrToInt(DialogZalog_ConstMinDays);
+    lkEdtDaysLeft := CreateTxcEditCalc1000062(lkForm, lkPanelClient, 'EDTDAYSLEFT', lkLabel.Left+lkLabel.Width+4, lkLabel.Top, 20, 72, false, MaxInteger(StrToInt(DialogZalog_ConstMinDays), aDaysLeft));
+    lkEdtDaysLeft.DisplayFormat := '# ### ### ##0';
+    lkLabel     := CreateTLabel1000062(lkForm, lkPanelClient,'lblCSAMOUNT','Скидка контрагента', lkEdtDaysLeft.Left+lkEdtDaysLeft.Width+4, lkEdtDaysLeft.Top, 20, 96);
+    lkLabel.Tag := Trunc(aCsAmount * 100);
+    lkEdtAmount := CreateTxcEditCalc1000062(lkForm, lkPanelClient, 'EDTCSAMOUNT', lkLabel.Left+lkLabel.Width+4, lkLabel.Top, 20, 96, false, aCsAmount);
+    lkEdtAmount.DisplayFormat := '# ### ### ##0.00 %';
+    // 4 row
+    lkLabel      := CreateTLabel1000062(lkForm, lkPanelClient,'lblDAYSCNT', 'Начислено за пользование кредитом', 4, lkEdtAmount.Top + lkEdtAmount.Height+4, 20,280);
+    lkEdtPC := CreateTxcEditCalc1000062(lkForm, lkPanelClient, 'EDTPC', lkLabel.Left+lkLabel.Width+4, lkLabel.Top, 20, 120, false, 0);
+    lkEdtPC.DisplayFormat := '# ### ### ##0.00%';
+    lkLabel      := CreateTLabel1000062(lkForm, lkPanelClient,'',' = ', lkEdtPC.Left+lkEdtPC.Width+4, lkEdtPC.Top, 20, 16);
+    lkEdtSumPC   := CreateTxcEditCalc1000062(lkForm, lkPanelClient, 'EDTSUMPC', lkLabel.Left+lkLabel.Width+4, lkLabel.Top, 20, 140, false, 0);
+    // 5 row
+    lkLabel      := CreateTLabel1000062(lkForm, lkPanelClient,'lblDAYSLEFTPEN', 'Просрочено дней', 4, lkEdtSumPC.Top + lkEdtSumPC.Height+4, 20,104);
+    lkEdtDaysPEN := CreateTxcEditCalc1000062(lkForm, lkPanelClient, 'EDTDAYSPEN', lkLabel.Left+lkLabel.Width+4, lkLabel.Top, 20, 100, false, 0);
+    lkEdtDaysPEN.DisplayFormat := '# ### ### ##0 ';
+    lkLabel      := CreateTLabel1000062(lkForm, lkPanelClient,'','начислено', lkEdtDaysPEN.Left+lkEdtDaysPEN.Width+4, lkEdtDaysPEN.Top, 20, 68);
+    lkEdtPCPEN   := CreateTxcEditCalc1000062(lkForm, lkPanelClient, 'EDTPCPEN', lkLabel.Left+lkLabel.Width+4, lkLabel.Top, 20, 120, false, 0);
+    lkEdtPCPEN.DisplayFormat := '# ### ### ##0.00 %';
+    lkLabel      := CreateTLabel1000062(lkForm, lkPanelClient,'',' = ', lkEdtPCPEN.Left+lkEdtPCPEN.Width+4, lkEdtPCPEN.Top, 20, 16);
+    lkEdtSumPCPEN:= CreateTxcEditCalc1000062(lkForm, lkPanelClient, 'EDTSUMPCPEN', lkLabel.Left+lkLabel.Width+4, lkLabel.Top, 20, 140, false, 0);
+    // 6 row
+    lkLabel      := CreateTLabel1000062(lkForm, lkPanelClient,'','Обязательная сумма погашения тела кредита (перебор, уценка)', 4, lkEdtSumPCPEN.Top + lkEdtSumPCPEN.Height+4, 20,424);
+    lkEdtSumAny  := CreateTxcEditCalc1000062(lkForm, lkPanelClient, 'EDTSUMBODYANY', lkLabel.Left+lkLabel.Width+4, lkLabel.Top, 20, 140, false, aSumPayAny);
+    // 7 row
+    lkLabel      := CreateTLabel1000062(lkForm, lkPanelClient,'', 'Вносимая сумма', 4, lkEdtSumAny.Top + lkEdtSumAny.Height+4, 20, 96);
+    lkLabel.Font.Color := $008000FF;
+    lkEdtCalcSum := CreateTxcEditCalc1000062(lkForm, lkPanelClient, 'EDTCALCSUM', lkLabel.Left+lkLabel.Width+4, lkLabel.Top, 20, 140, true, lkEdtSumPC.Value);
+    lkEdtCalcSum.OnChange := @DialogZalogExecute_DTP_OnCloseUp;
+    lkLabel      := CreateTLabel1000062(lkForm, lkPanelClient,'','Будет погашено тела кредита', lkEdtCalcSum.Left+lkEdtCalcSum.Width+4, lkEdtCalcSum.Top, 20, 180);
+    lkEdtSumBody := CreateTxcEditCalc1000062(lkForm, lkPanelClient, 'EDTSUMBODY', lkLabel.Left+lkLabel.Width+4, lkLabel.Top, 20, 140, false, 0);
+    // 8 row
+    lkrbPayCash := TxcRadioButton.Create(lkForm);
+    with lkrbPayCash do
+      begin
+      Parent  := lkPanelClient;
+      Left    := 4;
+      Top     := lkEdtSumBody.Top + lkEdtSumBody.Height + 16;
+      Width   := 140;
+      Height  := 20;
+      Caption := 'Оплата наличными';
+      Checked := true;
+      Font.Style   := [fsBold];
+      StyleManager := Amunhotep.MainForm.StyleManager;
+      end;
+    lkStr := '';
+    GetField(FBDataBase, 'TABL$R_PAYSRC', 'NAME', 'ID = '''+aPaySrcId+''' ', lkStr);
+    lkEdtPayCash := CreateTxcEditCombo(lkForm, lkPanelClient, 'edtPayCash', lkrbPayCash.Left+lkrbPayCash.Width+4, lkrbPayCash.Top, 20, 420);
+    lkEdtPayCash.Font.Style := [fsBold];
+    lkEdtPayCash.Text       := lkStr;
+    lkEdtPayCash.Tag        := StrToInt(aPaySrcId);
+    lkEdtPayCash.ReadOnly   := true;
+    // 9 row
+    lkrbPayAcc := TxcRadioButton.Create(lkForm);
+    with lkrbPayAcc do
+      begin
+      Parent  := lkPanelClient;
+      Left    := lkrbPayCash.Left;
+      Top     := lkrbPayCash.Top + lkrbPayCash.Height + 4;
+      Width   := lkrbPayCash.Width;
+      Height  := lkrbPayCash.Height;
+      Caption := 'Оплата терминал';
+      Checked := false;
+      Font.Style   := [fsBold];
+      StyleManager := Amunhotep.MainForm.StyleManager;
+      end;
+    lkEdtPayAcc := TComboBox.Create(lkForm);
+    with lkEdtPayAcc do
+      begin
+      Parent  := lkPanelClient;
+      Left    := lkEdtPayCash.Left;
+      Top     := lkEdtPayCash.Top + lkEdtPayCash.Height + 4;
+      Width   := lkEdtPayCash.Width;
+      Height  := lkEdtPayCash.Height;
+      Font.Style := [fsBold];
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Style      := csDropDownList;
+      Items.Clear;
+      end;
+                  lkTr := TxFBTransaction.Create(nil);
+                  with lkTr do
+                    begin
+                    DefaultDataBase := FBDataBase;
+                    with Params do
+                      begin
+                      Clear;
+                      Add('isc_tpb_read_committed');
+                      Add('isc_tpb_read');
+                      Add('isc_tpb_rec_version');
+                      Add('isc_tpb_nowait');
+                      end;
+                    end;
+                  lkQr := TxFBQuery.Create(lkTr);
+                  with lkQr do
+                    begin
+                    Transaction := lkTr;
+                    SQL.Text := 
+                      'SELECT PS.ID AS ID, PS.NAME AS NAME '+#13#10+
+                      'FROM   TABL$R_PAYSRC PS '+#13#10+
+                      'WHERE  (PS.FIRM_ID = '''+aFirmId+''') '+#13#10+
+                      '  AND  (PS.ACC_ID IN (313)) '+#13#10+
+                      '  AND  (  (PS.FILIAL_ID = (SELECT FIRST 1 FL.ID FROM TABL$R_FILIALS FL WHERE(FL.GUID = (SELECT FIRST 1 P1.GUID FROM PROC$_DB_GUID P1)))) '+#13#10+
+                      '        OR(PS.FILIAL_ID = 0) ) ';
+                    try
+                      Open;
+                    finally
+                    end;  
+                    if Active then
+                      begin
+                      First;
+                      while not EOF do
+                        begin
+                        lkEdtPayAcc.Items.Add(FieldByName('ID').AsString+'.'+FieldByName('NAME').AsString);
+                        Next;
+                        end;
+                      end
+                    end;
+                  if lkTr.InTransaction then
+                    lkTr.Commit;
+                  lkTr.Free;
+    if(lkEdtPayAcc.Items.Count = 0)then
+      begin
+      lkEdtPayAcc.Items.Add('НЕТ ДОСТУПНЫХ СЧЕТОВ ДЛЯ ОПЛАТЫ ПО ТЕРМИНАЛУ');
+      lkEdtPayAcc.Color := Amunhotep.MainForm.StyleManager.Colors.Error;
+      lkrbPayAcc.Enabled:= False;
+      lkrbPayCash.Enabled:= False;
+      end
+    lkEdtPayAcc.ItemIndex := 0; 
+    
+    DialogZalogExecute_RecalcValues(lkForm);
+    lkEdtCalcSum.Value := lkEdtSumPC.Value + lkEdtSumPCPEN.Value;
+  lbl_correct_date:
+    Result := (lkForm.ShowModal = mrOk);
+    if Result then
+      begin
+      if(FormatDateTime('dd.mm.yyyy', TDateTimePicker(lkForm.FindComponent('DTPDATELAST')).Date) <> 
+         FormatDateTime('dd.mm.yyyy', lkNow))then
+        begin
+        Dialogs.MessageDlg('Дата погашения процентов не может отличаться от текущей !'+#13#10+#13#10+
+          '  Справка: Возможность выбора даты отличной от текущей оставлена для расчета '+
+          'процентов по телу кредита на произвольную дату, но при фактическом внесении '+
+          'платежа не может отличаться от текущей даты.', mtWarning, [mbOk]);
+        goto lbl_correct_date;
+        end;
+      if(lkEdtSumBody.Value < 0)then
+        begin
+        Dialogs.MessageDlg(' Вносимая сумма недостаточна для погашения обязательных платежей: '+#13#10+
+          '  - обязательного погашения тела кредита '+#13#10+
+          '  - погашения процентов за пользование кредитом '+#13#10+
+          '  - погашения процентов за просрочку платежа в случае просрочки.', mtWarning, [mbOk]);
+        goto lbl_correct_date;
+        end;  
+      aSumPay  := lkEdtSumBody.Value;
+      aSumPC   := lkEdtSumPC.Value;
+      aSumPCPEN:= lkEdtSumPCPEN.Value;
+      aPC      := lkEdtPC.Value;
+      aPCPEN   := lkEdtPCPEN.Value;
+      aAmount  := lkEdtAmount.Value;
+      if lkEdtCardNum.Enabled then
+        aCardNumber := ''
+       else   
+        aCardNumber := lkEdtCardNum.Text;
+      if(lkrbPayCash.Checked)then
+        aPaySrcId := IntToStr(lkEdtPayCash.Tag)
+       else
+        begin
+        lkStr := lkEdtPayAcc.Items[lkEdtPayAcc.ItemIndex];
+        lkStr := Copy(lkStr, 1, Pos('.',lkStr)-1);
+        WriteLn(lkStr);
+        aPaySrcId := lkStr;
+        end;   
+      end;
+    lkForm.Free;  
+  end;
+  //============================================================================
+const
+  msg_invalid_resource  = 'Неверный файл ресурсов'; 
+  msg_caption           = 'Залог'; 
+  msg_need_recalc       = 'Требуется переоценка кредита! ';
+  msg_actsave           = 'Сохранить'; 
+  msg_actsave_hint      = 'Сохранить изменения в документе'; 
+  msg_actprint          = 'Печать договора'; 
+  msg_actprint_hint     = 'Послать договор на печать'; 
+  msg_actcommit         = 'Провести'; 
+  msg_actcommit_hint    = 'Провести документ'; 
+  msg_actuncommit       = 'Отменить'; 
+  msg_actuncommit_hint  = 'Отменить проведение документа'; 
+  msg_actpodbor         = 'Добавить'; 
+  msg_actpodbor_hint    = 'Добавить предмет залога'; 
+  msg_actcsphoto        = 'Фотографии'; 
+  msg_actcsphoto_hint   = 'Фотографии контрагента'; 
+  msg_actcsdlg          = 'Контрагент'; 
+  msg_actcsdlg_hint     = 'Открыть учетную карточку контрагента'; 
+var 
+  AmunhotepForm         :TAmunhotepForm; 
+  TopBar                :TxcGradientPanelVista; 
+  ToolBar               :TxcGradientPanel; 
+  PanelClient           :TxcGradientPanel;
+  PCDetail              :TxcPageControlEx;
+  dbeNAME               :TDBEditEh; 
+  dbeFIRM_NAME          :TDBEditEh; 
+  dbeFILIAL_NAME        :TDBEditEh; 
+  dbeUSER_NAME          :TDBEditEh;
+  dbeTMC_GROUP_NAME     :TDBEditEh;
+  dbeCS_NAME            :TDBEditEh;
+  dbeCOUNTRIESTP_NAME   :TDBEditEh;
+  dbeSTATE_NAME         :TDBEditEh;
+  dbdtpDATE_COMMIT      :TDBDateTimeEditEh;
+  dbdtpDATE_LAST        :TDBDateTimeEditEh;
+  dbneDOCSUMCALC        :TDBNumberEditEh; 
+  dbneDOCSUM            :TDBNumberEditEh;
+  dbneDOCSUMLEFT        :TDBNumberEditEh;
+  PCDoc                 :TxcPageControlEx;
+  dbgDoc                :TDBGridEh; 
+  dbgDoc1000064         :TDBGridEh; 
+  dbgJrnlChilds         :TDBGridEh; 
+  trJournal             :TxFBTransaction; 
+  dtsJournal            :TxFBDataSet;
+  dtsDoc                :TxFBDataSet; 
+  qrJrnlChilds          :TxFBQuery;
+  qrDoc1000064          :TxFBQuery;
+  DSdtsJournal          :TDataSource; 
+  DSdtsDoc              :TDataSource;
+  DSdtsDoc1000064       :TDataSource;
+  lblNeedRecalc         :TLabel; 
+var 
+  dtsDoc_SaveRecNo      :Integer;  
+  //============================================================================
+  procedure CloseDataSets;
+  begin
+    if(dtsJournal.State = dsEdit)then
+      try
+        dtsJournal.Post;
+      except
+        dtsJournal.Cancel;
+      end;
+    if trJournal.InTransaction then 
+      trJournal.Commit; 
+  end;
+  //============================================================================
+  procedure RefreshView;
+  begin
+    CloseDataSets;
+    dtsJournal.SelectSQL.Text  := 'SELECT P.ID AS '+ERP_DATASET_DBKEY+', P.* FROM PROC$D_1000062('''+DocId+''') P ';
+    dtsJournal.RefreshSQL.Text := 'SELECT P.ID AS '+ERP_DATASET_DBKEY+', P.* FROM PROC$D_1000062(?'+ERP_DATASET_DBKEY+') P ';
+    dtsJournal.ModifySQL.Text := 
+      'EXECUTE BLOCK ( '+#13#10+
+      '  QID           TYPE OF COLUMN TABL$J_4.ID          = ?ID '+#13#10+
+      ' ,QNAME         TYPE OF COLUMN TABL$J_4.NAME        = ?NAME '+#13#10+
+      ' ,QDATE_COMMIT  TYPE OF COLUMN TABL$J_4.DATE_COMMIT = ?DATE_COMMIT '+#13#10+
+      ' ,QDOCSUM       TYPE OF COLUMN TABL$J_4.DOCSUM      = ?DOCSUM '+#13#10+
+      ' ,QCS_ID        TYPE OF COLUMN TABL$R_CS.ID         = ?CS_ID '+#13#10+
+      ')AS'+#13#10+
+      'BEGIN '+#13#10+
+      '  UPDATE TABL$J_4 J SET '+#13#10+
+      '     J.NAME        = :QNAME '+#13#10+
+      '    ,J.DATE_COMMIT = :QDATE_COMMIT '+#13#10+
+      '    ,J.DOCSUMVAL   = :QDOCSUM '+#13#10+
+      '  WHERE (J.ID = :QID); '+#13#10+
+      'END ';
+    dtsDoc.DataSource      := DSdtsJournal; 
+    dtsDoc.SelectSQL.Text  :=     
+      'SELECT  D.J_ID, D.ID, D.NAME, D.FLAG_DELETE, D.TMC_GROUP_ID, D.COUNTRY_ID '+#13#10+
+      '       ,D.PROBE, D.MASSA_BRUTTO, D.MASSA_INS, D.MASSA_NETTO, D.PRICE '+#13#10+
+      '       ,D.QUANT, D.TOTAL, D.DEV_COUNTRY_ID, D.BRAND_ID, D.YEAR_ID '+#13#10+
+      '       ,D.STATEFINE, D.COMENT, D.MODELNAME, D.SERIAL, D.IMG, D.LGTH, D.DIAM '+#13#10+
+      '       ,D.AUTOTYPE,D.AUTONUMBER,D.AUTOPASSPORT,D.AUTOWHEELS,D.AUTOENGINE,D.AUTOCOLOR '+#13#10+
+      '       ,(SELECT FIRST 1 COALESCE(C.VALUTE,'''') FROM TABL$R_COUNTRIES  C  WHERE (C.ID  = D.COUNTRY_ID)) AS VALUTE_NAME '+#13#10+
+      '       ,(SELECT FIRST 1 COALESCE(CD.NAME ,'''') FROM TABL$R_COUNTRIES  CD WHERE (CD.ID = D.DEV_COUNTRY_ID)) AS DEV_COUNTRY_NAME '+#13#10+
+      '       ,(SELECT FIRST 1 COALESCE(TG.NAME ,'''') FROM TABL$R_TMC_GROUP  TG WHERE (TG.ID = D.TMC_GROUP_ID)) AS TMC_GROUP_NAME '+#13#10+
+      '       ,(SELECT FIRST 1 COALESCE(TB.NAME ,'''') FROM TABL$R_TMC_BRANDS TB WHERE (TB.ID = D.BRAND_ID)) AS BRAND_NAME '+#13#10+
+      'FROM   TABL$D_1000062 D '+#13#10+
+      'WHERE  (D.J_ID = ?ID) '+#13#10+
+      'ORDER BY D.ID ';
+    dtsDoc.RefreshSQL.Text := 
+      'SELECT FIRST 1 D.J_ID, D.ID, D.NAME, D.FLAG_DELETE, D.TMC_GROUP_ID, D.COUNTRY_ID '+#13#10+
+      '       ,D.PROBE, D.MASSA_BRUTTO, D.MASSA_INS, D.MASSA_NETTO, D.PRICE '+#13#10+
+      '       ,D.QUANT, D.TOTAL, D.DEV_COUNTRY_ID, D.BRAND_ID, D.YEAR_ID '+#13#10+
+      '       ,D.STATEFINE, D.COMENT, D.MODELNAME, D.SERIAL, D.IMG, D.LGTH, D.DIAM '+#13#10+
+      '       ,D.AUTOTYPE,D.AUTONUMBER,D.AUTOPASSPORT,D.AUTOWHEELS,D.AUTOENGINE,D.AUTOCOLOR '+#13#10+
+      '       ,(SELECT FIRST 1 COALESCE(C.VALUTE,'''') FROM TABL$R_COUNTRIES  C  WHERE (C.ID  = D.COUNTRY_ID)) AS VALUTE_NAME '+#13#10+
+      '       ,(SELECT FIRST 1 COALESCE(CD.NAME ,'''') FROM TABL$R_COUNTRIES  CD WHERE (CD.ID = D.DEV_COUNTRY_ID)) AS DEV_COUNTRY_NAME '+#13#10+
+      '       ,(SELECT FIRST 1 COALESCE(TG.NAME ,'''') FROM TABL$R_TMC_GROUP  TG WHERE (TG.ID = D.TMC_GROUP_ID)) AS TMC_GROUP_NAME '+#13#10+
+      '       ,(SELECT FIRST 1 COALESCE(TB.NAME ,'''') FROM TABL$R_TMC_BRANDS TB WHERE (TB.ID = D.BRAND_ID)) AS BRAND_NAME '+#13#10+
+      'FROM   TABL$D_1000062 D '+#13#10+
+      'WHERE  (D.J_ID = ?ID) '+#13#10+
+      'ORDER BY D.ID ';
+    dtsDoc.InsertSQL.Text  := 
+      'INSERT INTO TABL$D_1000062 (J_ID, ID, NAME, FLAG_DELETE, TMC_GROUP_ID, COUNTRY_ID, '+#13#10+
+      '  PROBE, MASSA_BRUTTO, PRICE, QUANT, LGTH, DIAM, AUTOTYPE, AUTONUMBER, AUTOPASSPORT, AUTOWHEELS, AUTOENGINE, AUTOCOLOR) '+#13#10+
+      'VALUES (?J_ID, ?ID, ?NAME, ?FLAG_DELETE, ?TMC_GROUP_ID, ?COUNTRY_ID, '+#13#10+
+      '  ?PROBE, ?MASSA_BRUTTO, ?PRICE, ?QUANT, ?LGTH, ?DIAM, ?AUTOTYPE, ?AUTONUMBER, ?AUTOPASSPORT, ?AUTOWHEELS, ?AUTOENGINE, ?AUTOCOLOR); ';
+    dtsDoc.ModifySQL.Text  := 
+      'UPDATE TABL$D_1000062 SET '+#13#10+ 
+      '   J_ID         = ?J_ID '+#13#10+
+      '  ,NAME         = ?NAME '+#13#10+
+      '  ,FLAG_DELETE  = ?FLAG_DELETE '+#13#10+
+      '  ,TMC_GROUP_ID = ?TMC_GROUP_ID '+#13#10+
+      '  ,COUNTRY_ID   = ?COUNTRY_ID '+#13#10+
+      '  ,PROBE        = ?PROBE '+#13#10+
+      '  ,MASSA_BRUTTO = ?MASSA_BRUTTO '+#13#10+
+      '  ,MASSA_INS    = ?MASSA_INS '+#13#10+
+      '  ,PRICE        = ?PRICE '+#13#10+
+      '  ,YEAR_ID      = ?YEAR_ID '+#13#10+
+      '  ,STATEFINE    = ?STATEFINE '+#13#10+
+      '  ,COMENT       = ?COMENT '+#13#10+
+      '  ,IMG          = ?IMG '+#13#10+
+      '  ,MODELNAME    = ?MODELNAME '+#13#10+
+      '  ,SERIAL       = ?SERIAL '+#13#10+
+      '  ,LGTH         = ?LGTH '+#13#10+
+      '  ,DIAM         = ?DIAM '+#13#10+
+      '  ,AUTOTYPE     = ?AUTOTYPE '+#13#10+
+      '  ,AUTONUMBER   = ?AUTONUMBER '+#13#10+
+      '  ,AUTOPASSPORT = ?AUTOPASSPORT '+#13#10+
+      '  ,AUTOWHEELS   = ?AUTOWHEELS '+#13#10+
+      '  ,AUTOENGINE   = ?AUTOENGINE '+#13#10+
+      '  ,AUTOCOLOR    = ?AUTOCOLOR '+#13#10+
+      'WHERE (ID = ?ID); ';
+    dtsDoc.DeleteSQL.Text := 'DELETE FROM TABL$D_1000062 B WHERE (B.ID = ?ID) '; 
+    try 
+      dtsJournal.Open; 
+    except 
+      // Dialogs.MessageDlg(dtsJournal.SelectSQL.Text, mtError, [mbOk]);
+    end; 
+  end;
+  //============================================================================
+  procedure dbgDoc_MASSA_INS_OnClick(Sender :TObject; var Handled : Boolean);
+  begin
+    RefreshView;
+    SetGlobalVariable('D_ID', dtsDoc.FieldByName('ID').AsString);
+    call(StrAbsolutePath('./EDITSTONES.PS', ScriptName));
+    RefreshView;
+  end;
+  //============================================================================
+  procedure dbgDoc_TMC_GROUP_ID_OnClick(Sender :TObject; var Handled : Boolean);
+  var
+    lkTMC_GROUP_ID :string;
+    lkSQL, lkID    :string;
+  begin
+    RefreshView;
+    lkID           := dtsDoc.FieldByName('ID').AsString;
+    lkTMC_GROUP_ID := dtsDoc.FieldByName('TMC_GROUP_ID').AsString;
+    SetGlobalVariable('TMC_GROUP_ID', lkTMC_GROUP_ID);
+    call(StrAbsolutePath('../../REF/TMC_GROUP/DLG_PS_'+TMC_GROUP_ID+'.PS', ScriptName));
+    lkTMC_GROUP_ID := GetGlobalVariable('TMC_GROUP_ID');
+    if( (UpperCase(lkTMC_GROUP_ID)<>'NULL') and (lkTMC_GROUP_ID <> '0') )then
+      begin
+      lkSQL := 'UPDATE TABL$D_1000062 B SET B.TMC_GROUP_ID = '''+lkTMC_GROUP_ID+''' WHERE (B.ID = '''+lkID+''')';
+      CloseDataSets;
+      ExecSQL(dtsJournal.DataBase, lkSQL);
+      RefreshView;
+      end;
+  end;
+  //============================================================================
+  procedure dbgDoc_BRAND_ID_OnClick(Sender :TObject; var Handled : Boolean);
+  var
+    lkBRAND_ID :string;
+    lkSQL, lkID:string;
+  begin
+    RefreshView;
+    lkID       := dtsDoc.FieldByName('ID').AsString;
+    lkBRAND_ID := dtsDoc.FieldByName('BRAND_ID').AsString;
+    SetGlobalVariable('TMC_BRAND_ID', lkBRAND_ID);
+    call(StrAbsolutePath('../../REF/TMC_BRANDS/DLG_PS_'+TMC_GROUP_ID+'.PS', ScriptName));
+    lkBRAND_ID := GetGlobalVariable('TMC_BRAND_ID');
+    lkSQL := 'UPDATE TABL$D_1000062 B SET B.BRAND_ID = '''+lkBRAND_ID+''' WHERE (B.ID = '''+lkID+''')';
+    CloseDataSets;
+    ExecSQL(dtsJournal.DataBase, lkSQL);
+    RefreshView;
+  end;
+  //============================================================================
+  procedure dbgDoc_DEV_COUNTRY_ID_OnClick(Sender :TObject; var Handled : Boolean);
+  var
+    lkDEV_COUNTRY_ID :string;
+    lkSQL, lkID    :string;
+  begin
+    RefreshView;
+    lkID             := dtsDoc.FieldByName('ID').AsString;
+    lkDEV_COUNTRY_ID := dtsDoc.FieldByName('DEV_COUNTRY_ID').AsString;
+    SetGlobalVariable('COUNTRY_ID', lkDEV_COUNTRY_ID);
+    call(StrAbsolutePath('../../REF/COUNTRIES/DLG_PS.PS', ScriptName));
+    lkDEV_COUNTRY_ID := GetGlobalVariable('COUNTRY_ID');
+    lkSQL := 'UPDATE TABL$D_1000062 B SET B.DEV_COUNTRY_ID = '''+lkDEV_COUNTRY_ID+''' WHERE (B.ID = '''+lkID+''')';
+    CloseDataSets;
+    ExecSQL(dtsJournal.DataBase, lkSQL);
+    RefreshView;
+  end;
+  //============================================================================
+  procedure dtsJournal_AfterOpen(DataSet :TDataSet);
+  var
+    i :Integer;
+  begin
+    if not dtsDoc.Active then try dtsDoc.Open; except end;
+    if not qrDoc1000064.Active then try qrDoc1000064.Open; except end; 
+    for i:=0 to DataSet.ComponentCount-1 do
+      if ObjectInheritsFrom(DataSet.Components[i], 'TDataSet')then
+        with TDataSet(DataSet.Components[i]) do
+          if not Active then try Open; except end;
+  end;
+  //============================================================================
+  procedure dtsJournal_BeforeClose(DataSet :TDataSet);
+  var
+    i :Integer;
+  begin
+    if qrDoc1000064.Active then qrDoc1000064.Close; 
+    if dtsDoc.Active then begin if(dtsDoc.State <> dsBrowse)then try dtsDoc.Post; except dtsDoc.Cancel; end; dtsDoc.Close; end;
+    if qrJrnlChilds.Active then qrJrnlChilds.Close;  
+    for i:=0 to DataSet.ComponentCount-1 do
+      if ObjectInheritsFrom(DataSet.Components[i], 'TDataSet')then
+        with TDataSet(DataSet.Components[i]) do
+          if Active then Close;
+  end;
+  //============================================================================
+  procedure dtsJournal_AfterScroll(DataSet :TDataSet);
+  var
+    i :Integer;
+  begin
+    TAmunhotepForm(DataSet.Owner).SetCaption('ДФК '+DataSet.FieldByName('DOCNUMBERSTR').AsString);
+    lblNeedRecalc.Visible := (DataSet.FieldByName('FLAG_RECALC').AsInteger = 1);
+    if(DataSet.FieldByName('FLAG_COMMIT').AsInteger = 1)then
+      begin
+      PanelClient.Enabled := false;
+      TopBar.Caption := '     '+AmunhotepForm.Caption;
+      TopBar.Colors.HotTrack       := Amunhotep.MainForm.StyleManager.Colors.Error;
+      TopBar.Colors.HotTrackBorder := Amunhotep.MainForm.StyleManager.Colors.Error;
+      dbgDoc.Options := [dgTitles,dgIndicator,dgColLines,dgRowLines,dgTabs,dgAlwaysShowSelection,dgRowSelect, dgCancelOnExit];
+      dbgDoc.AllowedOperations := [];
+      PCDetail.TabIndex := 1;
+      for i:=0 to PCDoc.ComponentCount-1 do
+        begin
+        if(ObjectInheritsFrom(PCDoc.Components[i],'TDBMemo'))then
+          begin
+          TDBMemo(PCDoc.Components[i]).ReadOnly := true;
+          TDBMemo(PCDoc.Components[i]).Color    := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+          end
+        if(ObjectInheritsFrom(PCDoc.Components[i],'TxcDBImage'))then
+          TxcDBImage(PCDoc.Components[i]).ReadOnly := true;
+        end;
+      end
+     else
+      begin
+      PanelClient.Enabled := true;
+      TopBar.Caption := '     '+AmunhotepForm.Caption;
+      TopBar.Colors.HotTrack       := Amunhotep.MainForm.StyleManager.Colors.HotTrack;
+      TopBar.Colors.HotTrackBorder := Amunhotep.MainForm.StyleManager.Colors.HotTrackBorder;
+      dbgDoc.Options := [dgEditing,dgTitles,dgIndicator,dgColLines,dgRowLines,dgTabs,dgAlwaysShowSelection,dgConfirmDelete,dgCancelOnExit];
+      dbgDoc.AllowedOperations := [{alopInsertEh, alopAppendEh,} alopUpdateEh, alopDeleteEh];
+      PCDetail.TabIndex := 0;
+      for i:=0 to PCDoc.ComponentCount-1 do
+        begin
+        if(ObjectInheritsFrom(PCDoc.Components[i],'TDBMemo'))then
+          begin
+          TDBMemo(PCDoc.Components[i]).ReadOnly := false;
+          TDBMemo(PCDoc.Components[i]).Color    := Amunhotep.MainForm.StyleManager.Colors.Window;
+          end
+        if(ObjectInheritsFrom(PCDoc.Components[i],'TxcDBImage'))then
+          TxcDBImage(PCDoc.Components[i]).ReadOnly := false;
+        end;
+      end;
+    TopBar.Invalidate; 
+    if qrJrnlChilds.Active then
+      qrJrnlChilds.Close;
+    qrJrnlChilds.SQL.Text := 'SELECT P.* FROM PROC$J_CHILDS('''+DataSet.FieldByname('ID').AsString+''') P ';
+    try
+      qrJrnlChilds.Open;
+    except
+    end;    
+  end;
+  //============================================================================
+  procedure dtsDoc_OnFieldChange(Sender: TField);
+  begin
+    if(Sender.DataSet.State <> dsInsert)then
+      RefreshView;  
+  end;
+  //============================================================================
+  procedure dtsDoc_OnNewRecord(DataSet :TDataSet);
+  var
+    lkStr :string; 
+  begin
+    if GetField(FBDataBase, 'RDB$DATABASE', 'GEN_ID(GENR$D_1000062_ID,0)', '', lkStr)then
+      DataSet.FieldByName('ID').AsInteger := StrToInt(lkStr) + 1
+     else 
+      DataSet.FieldByName('ID').AsString  := '-1';
+    DataSet.FieldByName('J_ID').AsString  := dtsJournal.FieldByName('ID').AsString;
+    DataSet.FieldByName('NAME').AsString  := '';
+    DataSet.FieldByName('COUNTRY_ID').AsString := '1000086';
+    DataSet.FieldByName('QUANT').AsString      := '1';
+  end;
+  //============================================================================
+  procedure dtsDoc_AfterOpen(DataSet :TDataSet);
+  var
+    i:Integer;
+  begin
+    for i:=1 to DataSet.Fields.Count-1 do
+      if((DataSet.Fields[i].FieldName = 'COUNTRY_ID')or
+         (DataSet.Fields[i].FieldName = 'PROBE')or
+         (DataSet.Fields[i].FieldName = 'MASSA_BRUTTO')or
+         (DataSet.Fields[i].FieldName = 'PRICE')or
+         (DataSet.Fields[i].FieldName = 'QUANT'))then
+        DataSet.Fields[i].OnChange := @dtsDoc_OnFieldChange;
+    if(dtsDoc_SaveRecNo > 0)then
+      DataSet.RecNo := dtsDoc_SaveRecNo;
+  end;
+  //============================================================================
+  procedure dtsDoc_BeforeClose(DataSet :TDataSet);
+  begin
+    if(DataSet.RecordCount > 0)then  
+      dtsDoc_SaveRecNo := DataSet.RecNo
+     else
+      dtsDoc_SaveRecNo := 0;   
+  end;
+  //============================================================================
+  procedure dbgJrnlChilds_OnGetCellParams(Sender: TObject; Column: TColumnEh; 
+              AFont: TFont; var Background: TColor; State: TGridDrawState);
+  begin
+   if(Column.Tag=666)then exit;
+   if(not(Column.Field.DataSet.Active))then exit;
+   if(Column.Field.DataSet.RecordCount = 0)then exit;
+   if(Column.Field.DataSet.FieldByName('FLAG_COMMIT').AsInteger = 0)then 
+     aFont.Style:= aFont.Style + [fsBold];
+   Background := Column.Field.DataSet.FieldByName('COLOR_BGR').AsInteger;
+   aFont.Color:= Column.Field.DataSet.FieldByName('COLOR_FRG').AsInteger;
+   if(Background  = clWhite   )then 
+     Background  := Amunhotep.MainForm.StyleManager.Colors.Window;
+   if(aFont.Color = Background)then 
+     aFont.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+  end;
+  //============================================================================
+  procedure dbgDoc1000064_OnGetCellParams(Sender: TObject; Column: TColumnEh; AFont: TFont; var Background: TColor; State: TGridDrawState);
+  begin
+   if(Column.Tag=666)then exit;
+   if(not(Column.Field.DataSet.Active)or(Column.Field.DataSet.RecordCount=0))then exit;
+   if(Column.Field.DataSet.FieldByName('FLAG_DELETE').AsInteger = 1)then 
+     begin
+     aFont.Style:= aFont.Style - [fsBold];
+     aFont.Color:= Amunhotep.MainForm.StyleManager.Colors.Background;
+     end
+    else
+     begin
+     aFont.Style:= aFont.Style + [fsBold];
+     aFont.Color:= Amunhotep.MainForm.StyleManager.Colors.Border;
+     end; 
+  end;
+  //============================================================================
+  procedure actSave_OnExecute(Sender :TObject);
+  begin
+    RefreshView;
+  end;
+  //============================================================================
+  procedure actEditName_OnExecute(Sender :TObject);
+  var
+    lkStr:string;
+    lkID  :string;
+  begin
+    lkStr := dtsJournal.FieldByName('NAME').AsString;
+    lkID  := dtsJournal.FieldByName('ID').AsString;
+    if Dialogs.InputQueryString('Изменить примечание','Введите примечание к документу',lkStr)then
+      begin
+      CloseDataSets;
+      ExecSQL(FBDataBase, 'UPDATE TABL$J_4 J SET J.NAME = '''+
+        StrReplaceStr(lkStr, '''', '''''')+''' WHERE (J.ID = '''+lkID+''');');
+      RefreshView;
+      end;
+  end;
+  //============================================================================
+  procedure actPrint_OnExecute(Sender :TObject);
+  var
+    lkScName:string;
+  begin
+    if not dtsJournal.Active then exit;
+    if(not(dtsJournal.RecordCount>0))then exit;
+    lkScName := StrAbsolutePath('../'+dtsJournal.FieldByName('TYPE_ID').AsString+'/PRINT.PS', ScriptName);
+    SetGlobalVariable('J_ID', dtsJournal.FieldByName('ID').AsString);
+    if not call(lkScName)then
+      Dialogs.MessageDlg('Ошибка в вызове скрипта '+#13#10+lkScName, mtError, [mbOk]);
+  end;
+  //============================================================================
+  procedure actCommit_OnExecute(Sender :TObject);
+  var
+    lkSQL :string;
+  begin
+   {
+    if(FormatDateTime('dd.mm.yyyy', dtsJournal.FieldByName('DATE_COMMIT').AsDateTime) <> 
+       FormatDateTime('dd.mm.yyyy', Now))then
+      begin
+      Dialogs.MessageDlg('Дата проведения залога не может отличаться от текущей !'+#13#10+#13#10+
+        'Справка: Возможно, Вы открыли залоговый документ, который был создан ранее, '+
+        'а проводить залоги можно только день-в-день. '+
+        'Создайте документ заново и внесите в него все реквииты.', mtWarning, [mbOk]);
+      exit;
+      end;
+    }
+    RefreshView;
+    if not(Dialogs.MessageDlg('Провести документ ?', mtConfirmation, [mbYes, mbNo])=mrYes)then exit;
+    if not(dtsJournal.FieldByName('DOCSUM').AsFloat > 0)then
+      begin
+      Dialogs.MessageDlg('  Неправильно введена сумма кредита !', mtError, [mbOk]);
+      exit;
+      end;
+    if(dtsJournal.FieldByName('DOCSUM').AsFloat > dtsJournal.FieldByName('DOCSUMCALC').AsFloat)then
+      begin
+      lkSQL := 'Вы дейсвительно хотите выдать кредит на большую сумму, чем сумма залога?';
+      if(Dialogs.MessageDlg(lkSQL, mtWarning, [mbYes, mbNo]) = mrNo)then 
+        exit;
+      lkSQL := 'INSERT INTO TABL$J_COMENTS(J_ID, USER_ID, NAME)VALUES('''+DocId+''', ''PEAKTOP'', '''+lkSQL+' - Пользователь '+
+        GetGlobalVariable('DATABASE_USER')+' ответил(а) да'')';  
+      ExecSQL(FBDataBase, lkSQL);  
+      end;
+    if(dtsJournal.FieldByName('FIRM_ID').AsInteger = 0)then
+      if(dtsJournal.FieldByName('DOCSUM').AsFloat > dtsJournal.FieldByName('CASHSUM').AsFloat)then
+        begin
+        Dialogs.MessageDlg('  Недостаточно денег в текущем источнике денежных средств '+
+          'для осуществления операции.'+#13#10+#13#10+'  Возможно, при создании документа была '+
+          'выбрана неправильно фирма учета.', mtError, [mbOk]);
+        exit;
+        end;
+    CloseDataSets;
+    try
+      ExecSQL(FBDataBase, 'EXECUTE PROCEDURE PROC$FILIAL_J_COMMIT_1000062('''+DocId+''')');
+    except
+    end;
+    RefreshView;
+  end;
+  //============================================================================
+  procedure actCommit_OnUpdate(Sender :TObject);
+  var
+    lk_Enabled :Boolean;
+  begin
+    lk_Enabled := dtsJournal.Active;
+    if(lk_Enabled)then lk_Enabled := (dtsJournal.RecordCount>0);
+    if(lk_Enabled)then lk_Enabled := (dtsJournal.FieldByName('FLAG_COMMIT').AsInteger = 0);
+    TCustomAction(Sender).Enabled := lk_Enabled;
+  end;
+  //============================================================================
+  procedure actUnCommit_OnExecute(Sender :TObject);
+  var
+    lkPIN :string;
+    lkPIN2:string;
+    lkPUK :string;
+  begin
+    if not System_UserHasAdminRights then
+      begin
+      lkPIN := FormatFloat('0000', Trunc(Random() * 9999));
+      lkPUK := System_GetPinCode(lkPIN);
+      lkPIN2:= '';
+      if Dialogs.InputQuery('Отмена проведения документа', 'Введите PIN код для числа "'+lkPIN+'"', lkPIN2)then
+        begin
+        if(lkPIN2 <> lkPUK)then
+          begin
+          Dialogs.MessageDlg('Неверно введен PIN-код !', mtWarning, [mbOk]);
+          exit;
+          end;
+        end
+       else
+        exit;   
+      end; 
+    if not(Dialogs.MessageDlg('Отменить проводку документа ?', mtConfirmation, [mbYes, mbNo])=mrYes)then exit;
+    CloseDataSets;
+    ExecSQL(FBDataBase, 'UPDATE TABL$J_4 J SET J.FLAG_COMMIT = 0 WHERE (J.ID = '''+DocId+''')');
+    RefreshView;
+  end;
+  //============================================================================
+  procedure actUnCommit_OnUpdate(Sender :TObject);
+  var
+    lk_Enabled :Boolean;
+  begin
+    lk_Enabled := dtsJournal.Active;
+    if(lk_Enabled)then lk_Enabled := (dtsJournal.RecordCount>0);
+    if(lk_Enabled)then lk_Enabled := (dtsJournal.FieldByName('FLAG_COMMIT').AsInteger = 1);
+    TCustomAction(Sender).Enabled := lk_Enabled;
+  end;
+  //============================================================================
+  procedure actPodbor_OnExecute(Sender :TObject);
+  var
+    lkTMC_GROUP_ID :string;
+    lkSQL   :string;
+  begin
+    lkTMC_GROUP_ID := '0';
+    SetGlobalVariable('TMC_GROUP_ID', lkTMC_GROUP_ID);
+    call(StrAbsolutePath('../../REF/TMC_GROUP/DLG_PS_'+TMC_GROUP_ID+'.PS', ScriptName));
+    lkTMC_GROUP_ID := GetGlobalVariable('TMC_GROUP_ID');
+    if((UpperCase(lkTMC_GROUP_ID)<>'NULL')and(lkTMC_GROUP_ID <> '0'))then
+      begin
+      lkSQL := 'INSERT INTO TABL$D_1000062(J_ID, TMC_GROUP_ID, COUNTRY_ID, PROBE, QUANT)VALUES('''+
+        DocId+''', '''+lkTMC_GROUP_ID+''', ''0'', '''', 1)';
+      CloseDataSets;
+      ExecSQL(dtsJournal.DataBase, lkSQL);
+      RefreshView;
+      end;
+  end;
+  //============================================================================
+  procedure actDoc_OnUpdate(Sender :TObject);
+  var
+    lkEnabled :Boolean;
+  begin
+    lkEnabled := qrJrnlChilds.Active;
+    if lkEnabled then
+      lkEnabled := (qrJrnlChilds.RecordCount > 0);
+    TCustomAction(Sender).Enabled := lkEnabled;  
+  end;
+  //============================================================================
+  procedure actDocPrintChild_OnExecute(Sender :TObject);
+  var
+    lkScName:string;
+  begin
+    if not qrJrnlChilds.Active then exit;
+    if(not(qrJrnlChilds.RecordCount>0))then exit;
+    lkScName := StrAbsolutePath('../'+qrJrnlChilds.FieldByName('TYPE_ID').AsString+'/PRINT.PS', ScriptName);
+    SetGlobalVariable('J_ID', qrJrnlChilds.FieldByName('ID').AsString);
+    call(lkScName);
+  end;
+  //============================================================================
+  procedure actDocChildVozvrat_OnUpdate(Sender :TObject);
+  var
+    lkEnabled :Boolean;
+  begin
+    lkEnabled := dtsJournal.Active;
+    if lkEnabled then
+      lkEnabled := (dtsJournal.RecordCount > 0);
+    if lkEnabled then
+      lkEnabled := (dtsJournal.FieldByName('FLAG_COMMIT').AsInteger = 1);
+    if lkEnabled then
+      lkEnabled := (dtsJournal.FieldByName('STATE_ID').AsInteger <> 1) and
+        (dtsJournal.FieldByName('STATE_ID').AsInteger <> 2);
+    TCustomAction(Sender).Enabled := lkEnabled;  
+  end;
+  //============================================================================
+  procedure actDocChildEnd_OnUpdate(Sender :TObject);
+  var
+    lkEnabled :Boolean;
+  begin
+    lkEnabled := dtsJournal.Active;
+    if lkEnabled then
+      lkEnabled := (dtsJournal.RecordCount > 0);
+    if lkEnabled then
+      lkEnabled := (dtsJournal.FieldByName('FLAG_COMMIT').AsInteger = 1);
+    if lkEnabled then
+      lkEnabled := (dtsJournal.FieldByName('STATE_ID').AsInteger <> 1) and
+        (dtsJournal.FieldByName('STATE_ID').AsInteger <> 2);
+    TCustomAction(Sender).Enabled := lkEnabled;  
+  end;
+  //============================================================================
+  procedure actDocInsZayavleniye_OnExecute(Sender :TObject);
+  var
+    lkID   :string;
+    lkDate :TDateTime;
+  begin
+    lkDate := Now;
+    if(Dialogs.InputQueryDate('Заявление об отсрочке реализации', 'Введите дату, когда вернуть залог', lkDate))then
+      begin
+      lkID := '';
+      if GetFieldCommit(FBdataBase, 'PROC$J_INS_1000069_1000062('''+
+        dtsJournal.FieldByName('ID').AsString+''', '''+FormatDateTime('dd.mm.yyyy',lkDate)+' 23:59:59'')', 'J_ID', '', lkID)then
+        begin
+        RefreshView;
+        end;
+      end;  
+  end;
+  //============================================================================
+  procedure actDocInsNevozvrat_OnExecute(Sender :TObject);
+  var
+    lkID :string;
+  begin
+    if(Dialogs.MessageDlg('Создать Акт невыкупа залога ?', mtConfirmation, [mbYes,mbNo]) <> mrYes)then exit;
+    lkID := '';
+    if GetFieldCommit(FBdataBase, 'PROC$J_INS_1000066_1000062('''+
+      dtsJournal.FieldByName('ID').AsString+''')', 'J_ID', '', lkID)then
+      begin
+      RefreshView;
+      end;
+  end;
+  //============================================================================
+  procedure actDocInsNevikup2_OnExecute(Sender :TObject);
+  var
+    lkNow        :TDateTime;
+    lkDateReturn :TDateTime;
+    lkDocDate    :TDateTime;
+    lkDaysLeft   :Integer;
+
+    lkSumBody    :Extended; 
+    lkSumPC      :Extended; 
+    lkSUMAny     :Extended;
+    lkPC         :Extended;
+    lkID         :string;
+    lkFirmId     :string;
+    lkSQL        :string;
+    lkTr         :TxFBTransaction;
+    lkQr         :TxFBQuery;
+  begin
+    if not dtsJournal.Active then exit;
+    if not(dtsJournal.RecordCount>0)then exit;
+    lkFirmId := dtsJournal.FieldByName('FIRM_ID').AsString;
+    if(lkFirmId <> '0')then
+      begin
+      Dialogs.MessageDlg('Неверное действие.'+#13#10+'Данная функция рассчитана для работы с другой фирмой учета !', mtWarning, [mbOk]);
+      exit;
+      end;
+    lkFirmId := '1';
+    SetGlobalVariable('FIRM_ID', lkFirmId);
+    call('DB:CONFIG/REF/FIRMS/DEFAULT_DLG.PS');
+    lkFirmId := GetGlobalVariable('FIRM_ID');
+    if( (StrTrimAll(lkFirmId) = '') or (UpperCase(lkFirmId) = 'NULL') )then exit;
+    //-------------------------- рассчет процентов -----------------------------
+    lkNow      := StrToDateTime(FormatDateTime('dd.mm.yyyy', Now)+' 23:59:59');
+    lkDocDate  := StrToDateTime(FormatDateTime('dd.mm.yyyy', dtsJournal.FieldByName('DATE_LAST').AsDateTime)+' 00:00:00');
+    WriteLn('PROC$D_1000062_GET_PC('''+dtsJournal.FieldByName('ID').AsString+''', '''+FormatDateTime('dd.mm.yyyy', lkNow)+' 23:59:59'') ');
+    GetField(FBDataBase,'PROC$D_1000062_GET_PC('''+DocId+''', '''+FormatDateTime('dd.mm.yyyy', lkNow)+' 23:59:59'') ','PC' ,'',DialogZalog_ConstPC);
+    GetField(FBDataBase,'TABL$R_COUNTRIESTP','MINDAYSCNT','ID = '''+dtsJournal.FieldByName('COUNTRIESTP_ID').AsString+''' ',DialogZalog_ConstMinDays);
+    GetField(FBDataBase,'PROC$C_ENT_PS_DEFAULTDAYSCOUNT','VAL','',DialogZalog_ConstDaysCnt);
+    lkDaysLeft := DialogZalog_DaysCount(lkNow, lkDocDate);
+
+    lkPC := StrToInt(DialogZalog_ConstPC) * MaxInteger(StrToInt(DialogZalog_ConstMinDays), lkDaysLeft) * 
+                 (10000 - (dtsJournal.FieldByName('CS_AMOUNT').AsFloat * 100)) / 10000 / 1000
+
+    lkSumPC := (dtsJournal.FieldByName('DOCSUMLEFT').AsFloat * StrToInt(DialogZalog_ConstPC) * MaxInteger(StrToInt(DialogZalog_ConstMinDays), lkDaysLeft) * 
+      (10000 - (dtsJournal.FieldByName('CS_AMOUNT').AsFloat * 100)) / 10000 / 100000); 
+    lkSumBody := dtsJournal.FieldByName('DOCSUMLEFT').AsFloat;
+
+    lkSQL := 'PROC$J_INS_1000063_1000062_2('+
+      StrReplaceStr(FormatFloat('0.00',lkSUMBody + lkSumPC ),',','.')+'0, '+
+      StrReplaceStr(FormatFloat('0.00',lkSumPC),',','.')+'0, '+
+      StrReplaceStr(FormatFloat('0.00',lkPC),',','.')+'0, '+
+      IntToStr(lkDaysLeft)+', '''+
+      FormatDateTime('dd.mm.yyyy hh:nn:ss',  Now + StrToInt(DialogZalog_ConstDaysCnt))+''', '+
+      dtsJournal.FieldByName('ID').AsString+')';
+    WriteLn(lkSQL);
+    //-----------------------
+    lkTr := TxFBTransaction.Create(nil);
+    with lkTr do
+      begin
+      DefaultDataBase := FBdataBase;
+      with Params do
+        begin
+        Clear;
+        Add('isc_tpb_read_committed');
+        Add('isc_tpb_write');
+        Add('isc_tpb_rec_version');
+        Add('isc_tpb_nowait');
+        end;
+      end;
+    lkQr := TxFBQuery.Create(lkTr);
+    with lkQr do
+      begin
+      Transaction := lkTr;
+      SQL.Text := StringsLoadFromFile(StrAbsolutePath('./EDIT_INSNEVIKUP2.SQL', ScriptName));
+      Prepare;
+      ParamByName('J_1000062_ID').AsString := dtsJournal.FieldByName('ID').AsString; 
+      ParamByName('FIRM_ID_NEW' ).AsString := lkFirmId; 
+      ParamByName('DOCSUM'      ).AsString := StrReplaceStr(FormatFloat('0.00',lkSUMBody + lkSumPC ),',','.')+'0'; 
+      ParamByName('SUMPC'       ).AsString := StrReplaceStr(FormatFloat('0.00',lkSumPC),',','.')+'0'; 
+      ParamByName('PC'          ).AsString := StrReplaceStr(FormatFloat('0.00',lkPC),',','.')+'0'; 
+      ParamByName('DAYS_CNT'    ).AsString := IntToStr(lkDaysLeft); 
+      ParamByName('DATE_RETURN' ).AsString := FormatDateTime('dd.mm.yyyy hh:nn:ss',  Now + StrToInt(DialogZalog_ConstDaysCnt)); 
+      end;
+    try
+      lkQr.ExecSQL;
+    finally
+      lkTr.Commit;
+    end;
+    if lkTr.InTransaction then 
+      lkTr.Rollback;
+    lkTr.Free;
+    //------------------------------
+    RefreshView;    
+  end;
+  //============================================================================
+  procedure actDocInsVozvrat_OnExecute(Sender :TObject);
+  var
+    lkID :string;
+  begin
+    if(Dialogs.MessageDlg('Создать "Доп.Соглашение к ДЗИ" ?', mtConfirmation, [mbYes,mbNo]) <> mrYes)then exit;
+    lkID := '';
+    if GetFieldCommit(FBdataBase, 'PROC$J_INS_1000065_1000062('''+dtsJournal.FieldByName('ID').AsString+''')', 'J_ID', '', lkID)then
+      begin
+      if(lkID = '0')then 
+        begin
+        Dialogs.MessageDlg('Все залоговые ТМЦ возвращены.', mtInformation, [mbOk]);
+        exit;
+        end;
+      SetGlobalVariable('J_ID', lkID);
+      call(StrAbsolutePath('../1000065/EDIT_DLG.PS', ScriptName));
+      RefreshView;
+      end;
+  end;
+  //============================================================================
+  procedure actDocInsViemka_OnExecute(Sender :TObject);
+  var
+    lkID :string;
+  begin
+    if(Dialogs.MessageDlg('Создать Акт выемки залога ?', mtConfirmation, [mbYes,mbNo]) <> mrYes)then exit;
+    lkID := '';
+    if GetFieldCommit(FBdataBase, 'PROC$J_INS_1000072_1000062('''+
+      dtsJournal.FieldByName('ID').AsString+''')', 'J_ID', '', lkID)then
+      begin
+      if(lkID = '0')then 
+        begin
+        Dialogs.MessageDlg('Все залоговые ТМЦ возвращены.', mtInformation, [mbOk]);
+        exit;
+        end;
+      SetGlobalVariable('J_ID', lkID);
+      call(StrAbsolutePath('../1000072/EDIT_DLG.PS', ScriptName));
+      RefreshView;
+      end;
+  end;
+  //============================================================================
+  procedure actDocInsMore_OnUpdate(Sender :TObject);
+  var
+    lkEnabled :Boolean;
+  begin
+    lkEnabled := dtsJournal.Active;
+    if lkEnabled then
+      lkEnabled := (dtsJournal.RecordCount > 0);
+    if lkEnabled then
+      lkEnabled := (dtsJournal.FieldByName('FLAG_COMMIT').AsInteger = 1);
+    if lkEnabled then
+      lkEnabled := (dtsJournal.FieldByName('STATE_ID').AsInteger <> 1) and
+        (dtsJournal.FieldByName('STATE_ID').AsInteger <> 2);
+    if lkEnabled then
+      lkEnabled := (dtsJournal.FieldByName('DOCSUMLEFT').AsFloat > 0);  
+    TCustomAction(Sender).Enabled := lkEnabled;  
+  end;
+  //============================================================================
+  procedure actDocInsMore_OnExecute(Sender :TObject);
+  var
+    lkSumBody    :Extended; 
+    lkSumPC      :Extended; 
+    lkSumPCPEN   :Extended; 
+    lkSUMAny     :Extended;
+    lkDaysLeft   :Integer;
+    lkDateReturn :TDateTime;
+    lkPC         :Extended;
+    lkPCPEN      :Extended;
+    lkAmount     :Extended;
+    lkCardNumber :string;
+    lkID         :string;
+    lkPayScrId   :string;
+    lkSQL        :string;
+    lkTr         :TxFBTransaction;
+    lkQr         :TxFBQuery;
+  begin
+    lkPayScrId := '';
+    lkTr := TxFBTransaction.Create(nil);
+    with lkTr do
+      begin
+      DefaultDataBase := FBDataBase;
+      with Params do
+        begin
+        Clear;
+        Add('isc_tpb_read_committed');
+        Add('isc_tpb_read');
+        Add('isc_tpb_rec_version');
+        Add('isc_tpb_nowait');
+        end;
+      end;
+    lkQr := TxFBQuery.Create(lkTr);
+    with lkQr do
+      begin
+      Transaction := lkTr;
+      SQL.Text := 
+        'SELECT COALESCE(MIN(PS.ID),0) AS ID'+#13#10+
+        'FROM   TABL$R_PAYSRC PS, TABL$R_FILIALS FL '+#13#10+
+        'WHERE  (PS.FIRM_ID = '''+dtsJournal.FieldByName('FIRM_ID').AsString+''') '+#13#10+
+        '  AND  (PS.ACC_ID IN (30,301,302,303)) '+#13#10+
+        '  AND  (FL.ID = PS.FILIAL_ID) '+#13#10+
+        '  AND  (FL.GUID = (SELECT FIRST 1 P1.GUID FROM PROC$_DB_GUID P1)) ';
+      try
+        Open;
+      finally
+        if Active then
+          lkPayScrId := FieldByName('ID').AsString;
+      end;  
+      end;
+    if lkTr.InTransaction then
+      lkTr.Commit;
+    lkTr.Free;
+    if( (StrTrimAll(lkPayScrId) = '') or (StrTrimAll(lkPayScrId) = '0') )then
+      begin
+      Dialogs.MessageDlg('Нет ни одного источника денежных средств, связанных с текущим филиалом!', mtWarning, [mbOk]);
+      exit;
+      end;  
+    WriteLn(lkPayScrId);
+    
+    lkSUMAny   := 0;
+    lkSumPCPEN := 0;
+    lkPCPEN    := 0;
+    if not DialogZalogExecute(dtsJournal.FieldByName('DATE_LAST').AsDateTime,
+      dtsJournal.FieldByName('COUNTRIESTP_ID').AsString, dtsJournal.FieldByName('FIRM_ID').AsString,
+      dtsJournal.FieldByName('DOCSUMLEFT').AsFloat, 
+      dtsJournal.FieldByName('CS_AMOUNT').AsFloat,
+      lkSUMBody, lkSUMAny, lkSUMPC, lkSumPCPEN, lkPC, lkPCPEN, lkAmount, lkDaysLeft, lkCardNumber, lkPayScrId)then exit;
+    lkSQL := StringsLoadFromFile(StrAbsolutePath('./EDIT_INS_1000063.SQL', ScriptName));
+    if(StrTrimAll(lkSQL) = '')then
+      begin
+      Dialogs.MessageDlg('Ошибка загрузки SQL.', mtError, [mbOk]);
+      exit;
+      end;  
+    lkTr := TxFBTransaction.Create(nil);
+    with lkTr do
+      begin
+      DefaultDataBase := FBDataBase;
+      with Params do
+        begin
+        Clear;
+        Add('isc_tpb_read_committed');
+        Add('isc_tpb_write');
+        Add('isc_tpb_rec_version');
+        Add('isc_tpb_nowait');
+        end;
+      end;
+    lkQr := TxFBQuery.Create(lkTr);
+    with lkQr do
+      begin
+      Transaction := lkTr;
+      SQL.Text := lkSQL;
+      Prepare;
+      ParamByName('DOCSUM'       ).AsString   := StrReplaceStr(FormatFloat('#0.00' ,lkSUMBody + lkSumPC + lkSumPCPEN)+'0', ',', '.');
+      ParamByName('SUMPC'        ).AsString   := StrReplaceStr(FormatFloat('#0.00' ,lkSumPC)+'0', ',', '.');
+      ParamByName('SUMPCPEN'     ).AsString   := StrReplaceStr(FormatFloat('#0.00' ,lkSumPCPEN)+'0', ',', '.');
+      ParamByName('PC'           ).AsString   := StrReplaceStr(FormatFloat('#0.000',lkPC), ',', '.');
+      ParamByName('PCPEN'        ).AsString   := StrReplaceStr(FormatFloat('#0.000',lkPCPEN), ',', '.');
+      ParamByName('DAYSCNT'      ).AsInteger  := lkDaysLeft;
+      ParamByName('DATE_RETURN'  ).AsDateTime := Now + StrToInt(DialogZalog_ConstDaysCnt);
+      ParamByName('CARDNUM'      ).AsString   := lkCardNumber;
+      ParamByName('CARDAMOUNT'   ).AsString   := StrReplaceStr(FormatFloat('#0.000',lkAmount), ',', '.');
+      ParamByName('PARENT_DOC_ID').AsInteger  := dtsJournal.FieldByName('ID').AsInteger;
+      ParamByName('PAYSRC_ID'    ).AsString   := lkPayScrId;
+      try
+        Open;
+      finally
+        if Active then
+          begin
+          if lkTr.InTransaction then
+            lkTr.Commit;
+          end;
+      end;  
+      end;
+    if lkTr.InTransaction then
+      lkTr.Rollback;
+    lkTr.Free;  
+    RefreshView;
+  end;
+  //============================================================================
+  procedure actDocInsKredit_OnExecute(Sender :TObject);
+  var
+    lkID  :string;
+    lkSUM :Extended;
+  begin
+    if(dtsJournal.FieldByName('DOCSUMCALC').AsFloat <= dtsJournal.FieldByName('DOCSUMLEFT').AsFloat)then
+      begin
+      Dialogs.MessageDlg('Нельзя выполнить дозалог !'+#13#10+'Недостаточно средств.', mtWarning, [mbOK]);
+      exit;
+      end;
+    if(Abs(Trunc(dtsJournal.FieldByName('DATE_LAST').AsDateTime - Now)) > 0)then
+      begin
+      Dialogs.MessageDlg('Нельзя выполнить дозалог без погашения процентов !', mtWarning, [mbOK]);
+      exit;
+      end;
+    lkSUM := dtsJournal.FieldByName('DOCSUMCALC').AsFloat - dtsJournal.FieldByName('DOCSUMLEFT').AsFloat;
+    if(not Dialogs.InputQueryExtended('Дозалог','Введите сумму дозалога', lkSUM))then exit;
+    if((dtsJournal.FieldByName('DOCSUMLEFT').AsFloat + lkSUM) > dtsJournal.FieldByName('DOCSUMCALC').AsFloat)then
+      begin
+      Dialogs.MessageDlg('Нельзя выполнить дозалог на сумму "'+FormatFloat('#0.00',lkSUM)+'" !'+#13#10+
+        'Сумма кредита будет больше суммы оценки залога.'+#13#10+#13#10+#13#10+
+        'Максимальная доступная сумма дозалога "'+FormatFloat('#0.00',dtsJournal.FieldByName('DOCSUMCALC').AsFloat - 
+          dtsJournal.FieldByName('DOCSUMLEFT').AsFloat)+'"', mtWarning, [mbOK]);
+      exit;
+      end;
+
+    lkID := '';
+    if GetFieldCommit(FBdataBase, 'PROC$J_INS_1000021_1000062_A('''+
+      dtsJournal.FieldByName('ID').AsString+''', '+
+      StrReplaceStr(FormatFloat('0.00',lkSUM),',','.')+')', 'J_ID', '', lkID)then
+      begin
+      RefreshView;
+      end;
+  end;
+  //============================================================================
+  procedure actDocInsRecalc_OnExecute(Sender :TObject);
+  var
+    lkID :string;
+  begin
+    if(TMC_GROUP_ID <> '150000')then
+      begin
+      Dialogs.MessageDlg('"Акт переоценки залога" создается только для драгоценных металлов !', mtWarning, [mbOk]);
+      exit;
+      end;
+    if(dtsJournal.FieldByName('FLAG_RECALC').AsInteger <> 1)then
+      begin
+      Dialogs.MessageDlg('"Акт переоценки залога" для текущего курса не требуется !', mtWarning, [mbOk]);
+      exit;
+      end;
+    if(Dialogs.MessageDlg('Создать Акт переоценки залога ?', mtConfirmation, [mbYes,mbNo]) <> mrYes)then exit;
+    lkID := '';
+    if GetFieldCommit(FBdataBase, 'PROC$J_INS_1000067_1000062('''+
+      dtsJournal.FieldByName('ID').AsString+''')', 'J_ID', '', lkID)then
+      begin
+      RefreshView;
+      end;
+  end;
+  //============================================================================
+  procedure actCsPhoto_OnExecute(Sender :TObject);
+  begin
+    SetGlobalVariable('CS_ID', dtsJournal.FieldByName('CS_ID').AsString);
+    call(StrAbsolutePath('../../REF/CS_PHOTO/LIST.PS', ScriptName));
+  end;
+  //============================================================================
+  procedure actCsDlg_OnExecute(Sender :TObject);
+  begin
+    SetGlobalVariable('CS_ID', dtsJournal.FieldByName('CS_ID').AsString);
+    call(StrAbsolutePath('../../REF/CS/DEFAULT_ITEM_DLG_POS.PS', ScriptName));
+    RefreshView;
+  end;
+  //============================================================================
+  procedure dbeCS_NAME_OnEditButtonClick(Sender :TObject; var Handled : Boolean);
+  begin
+    SetGlobalVariable('CS_ID', dtsJournal.FieldByName('CS_ID').AsString);
+    call(StrAbsolutePath('../../REF/CS/DEFAULT_ITEM_DLG_POS.PS', ScriptName));
+    RefreshView;
+  end;
+  //============================================================================
+  procedure dbeCOUNTRIESTP_NAME_OnEditButtonClick(Sender :TObject; var Handled : Boolean);
+  var
+    lkID  :string;
+    lkSQL :string;
+  begin
+    lkID := dtsJournal.FieldByName('COUNTRIESTP_ID').AsString;
+    SetGlobalVariable('COUNTRIESTP_ID', lkID);
+    call(StrAbsolutePath('../../REF/COUNTRIESTP/DEFAULT_DLG.PS', ScriptName));
+    lkID := GetGlobalVariable('COUNTRIESTP_ID');
+    if(UpperCase(lkID)<>'NULL')then
+      begin
+      lkSQL := 'UPDATE TABL$J_1000062 J SET J.COUNTRIESTP_ID = '''+lkID+''' WHERE(J.J_ID = '''+DocId+''')';
+      CloseDataSets;
+      ExecSQL(dtsJournal.DataBase, lkSQL);
+      RefreshView;
+      end;
+  end;
+  //============================================================================
+  procedure dbeFIRM_NAME_OnEditButtonClick(Sender :TObject; var Handled : Boolean);
+  var
+    lkFIRM_ID :string;
+    lkSQL   :string;
+  begin
+    lkFIRM_ID := dtsJournal.FieldByName('FIRM_ID').AsString;
+    SetGlobalVariable('FIRM_ID', lkFIRM_ID);
+    call(StrAbsolutePath('../../REF/FIRMS/DEFAULT_DLG.PS', ScriptName));
+    lkFIRM_ID := GetGlobalVariable('FIRM_ID');
+    if(UpperCase(lkFIRM_ID)<>'NULL')then
+      begin
+      lkSQL := 'UPDATE TABL$J_4 J SET J.FIRM_ID = '''+lkFIRM_ID+''' WHERE(J.ID = '''+DocId+''')';
+      CloseDataSets;
+      ExecSQL(dtsJournal.DataBase, lkSQL);
+      RefreshView;
+      end;
+  end;
+  //============================================================================
+  function AmunhotepForm_Create:TAmunhotepForm;
+  var
+    lk_FileName :string;
+    lk_ResBody  :string;
+    lkAct       :TAction;
+    lkTS        :TxcTabSheet;
+    lk_Col      :TColumnEh;
+    i           :Integer;
+  begin
+    lk_FileName := StrAbsolutePath('./EDIT.XFM', ScriptName);
+    lk_ResBody := StringsLoadFromFile(lk_FileName);
+    if(lk_ResBody='')then 
+      begin
+      Dialogs.MessageDlg(msg_invalid_resource+#13#10+lk_FileName, mtWarning, [mbOK]);
+      exit;
+      end;
+    Result := TAmunhotepForm(StrToComponent(lk_ResBody));
+    Result.HelpKeyWord := '1000062_'+DocId; 
+    DontAutoFree;
+    Result.SetCaption(msg_caption);
+    TopBar                                    := TxcGradientPanelVista(Result.FindComponent('TopBar'));
+    ToolBar                                   := TxcGradientPanel(Result.FindComponent('ToolBar'));
+    ToolBar.StyleManager := nil;
+    PanelClient                               := TxcGradientPanel(Result.FindComponent('PanelClient'));
+    PCDetail                                  := TxcPageControlEx(Result.FindComponent('PCDetail'));
+    lblNeedRecalc         := TLabel(Result.FindComponent('lblNeedRecalc'));
+    lblNeedRecalc.Caption := msg_need_recalc;
+    lblNeedRecalc.Visible := false;
+    lblNeedRecalc.Font.Color := Amunhotep.MainForm.StyleManager.Colors.Window; 
+    dbeNAME                                   := TDBEditEh(Result.FindComponent('dbeNAME'));
+    dbeNAME.Color                             := Amunhotep.MainForm.StyleManager.Colors.Window;
+    dbeNAME.Font.Color                        := Amunhotep.MainForm.StyleManager.Colors.Border;
+    dbdtpDATE_COMMIT := TDBDateTimeEditEh(Result.FindComponent('dbdtpDATE_COMMIT'));
+    with dbdtpDATE_COMMIT do
+      begin
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      ReadOnly   := true;
+      end;
+    dbdtpDATE_LAST := TDBDateTimeEditEh(Result.FindComponent('dbdtpDATE_LAST'));
+    with dbdtpDATE_LAST do
+      begin
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      ReadOnly   := true;
+      end;
+    dbeFIRM_NAME                              := TDBEditEh(Result.FindComponent('dbeFIRM_NAME'));
+    dbeFIRM_NAME.Color                        := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    dbeFIRM_NAME.Font.Color                   := Amunhotep.MainForm.StyleManager.Colors.Border;
+    dbeFILIAL_NAME                            := TDBEditEh(Result.FindComponent('dbeFILIAL_NAME'));
+    dbeFILIAL_NAME.Color                      := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    dbeFILIAL_NAME.Font.Color                 := Amunhotep.MainForm.StyleManager.Colors.Border;
+    dbeUSER_NAME                              := TDBEditEh(Result.FindComponent('dbeUSER_NAME'));
+    dbeUSER_NAME.Color                        := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    dbeUSER_NAME.Font.Color                   := Amunhotep.MainForm.StyleManager.Colors.Border;
+    dbeTMC_GROUP_NAME                         := TDBEditEh(Result.FindComponent('dbeTMC_GROUP_NAME'));
+    dbeTMC_GROUP_NAME.Color                   := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    dbeTMC_GROUP_NAME.Font.Color              := Amunhotep.MainForm.StyleManager.Colors.Border;
+    dbeSTATE_NAME := TDBEditEh(Result.FindComponent('dbeSTATE_NAME'));
+    with dbeSTATE_NAME do
+      begin
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      end;
+    dbneDOCSUMCALC := TDBNumberEditEh(Result.FindComponent('dbneDOCSUMCALC'));
+    with dbneDOCSUMCALC do
+      begin
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      ReadOnly   := true;
+      end;
+    dbneDOCSUM := TDBNumberEditEh(Result.FindComponent('dbneDOCSUM'));
+    with dbneDOCSUM do
+      begin
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      end;
+    dbneDOCSUMLEFT := TDBNumberEditEh(Result.FindComponent('dbneDOCSUMLEFT'));
+    with dbneDOCSUMLEFT do
+      begin
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      ReadOnly   := true;
+      end;
+
+    dbeCS_NAME                                := TDBEditEh(Result.FindComponent('dbeCS_NAME'));
+    dbeCS_NAME.Color                          := Amunhotep.MainForm.StyleManager.Colors.Window;
+    dbeCS_NAME.Font.Color                     := Amunhotep.MainForm.StyleManager.Colors.Border;
+    with dbeCS_NAME.EditButtons.Add do
+      begin
+      OnClick := @dbeCS_NAME_OnEditButtonClick;
+      Style   := ebsEllipsisEh;
+      Visible := true;
+      Width   := 16;
+      end;
+    dbeCOUNTRIESTP_NAME                       := TDBEditEh(Result.FindComponent('dbeCOUNTRIESTP_NAME'));
+    dbeCOUNTRIESTP_NAME.Color                 := Amunhotep.MainForm.StyleManager.Colors.Window;
+    dbeCOUNTRIESTP_NAME.Font.Color            := Amunhotep.MainForm.StyleManager.Colors.Border;
+    with dbeCOUNTRIESTP_NAME.EditButtons.Add do
+      begin
+      OnClick := @dbeCOUNTRIESTP_NAME_OnEditButtonClick;
+      Style   := ebsEllipsisEh;
+      Visible := true;
+      Width   := 16;
+      end;
+    dbgDoc := TDBGridEh(Result.FindComponent('dbgDoc'));
+    with dbgDoc do
+      begin
+      Color             := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color        := Amunhotep.MainForm.StyleManager.Colors.Border;
+      FixedColor        := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      TitleFont.Color   := Amunhotep.MainForm.StyleManager.Colors.Border;
+      TitleFont.Style   := [fsBold];
+      FooterFont.Style  := [fsBold];
+      UseMultiTitle     := true;
+      VTitleMargin      := 2;
+      AllowedOperations := [alopUpdateEh, alopDeleteEh];
+      Columns.Clear;
+      end;
+    {
+    lk_Col := CreateTColumnEh(dbgDoc, 'ID'  , '#0 ', 'Код записи', 60, taRightJustify);
+    lk_Col.Color                := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lk_Col.ReadOnly             := true;
+    lk_Col.Footer.Color         := lk_Col.Color;
+    }
+    lk_Col := CreateTColumnEh(dbgDoc, 'TMC_GROUP_NAME', '', 'Вид', 104, taLeftJustify);
+    with lk_Col do
+      begin
+      AlwaysShowEditButton := true;
+      with Footer do
+        begin
+        Color     := lk_Col.Color;
+        Alignment := taLeftJustify;
+        Value     := 'ИТОГО';
+        ValueType := fvtStaticText;
+        end;
+      with EditButtons.Add do
+        begin
+        Visible := true;
+        Style   := ebsEllipsisEh;
+        OnClick := @dbgDoc_TMC_GROUP_ID_OnClick;
+        end;
+      end;
+    lk_Col := CreateTColumnEh(dbgDoc, 'NAME'        , '', 'Примечания', 104, taLeftJustify);
+    with lk_Col.Footer do
+      begin
+      Color         := lk_Col.Color;
+      Alignment     := taRightJustify;
+      DisplayFormat := '# ### ##0';
+      ValueType     := fvtCount;
+      end;
+    if(TMC_GROUP_ID = '150000')then
+      begin
+      lk_Col := CreateTColumnEh(dbgDoc, 'COUNTRY_ID' , '', 'Материал',  60, taLeftJustify);
+      TColumnEh_FillKeyList('TABL$R_COUNTRIES', 'ID', 'VALUTE', 'ID >= 1000086 ', lk_Col.KeyList, lk_Col.PickList);
+      lk_Col.Footer.Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      lk_Col.AlwaysShowEditButton := true;
+      lk_Col := CreateTColumnEh(dbgDoc, 'PROBE'       , '', 'Проба' ,  40, taLeftJustify);
+      TColumnEh_FillKeyList('VIEW$R_PS_PROBE', 'PROBE', 'PROBE', '', lk_Col.KeyList, lk_Col.PickList);
+      lk_Col.Footer.Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      lk_Col.AlwaysShowEditButton := true;
+      lk_Col := CreateTColumnEh(dbgDoc, 'LGTH', '# ### ##0.00', 'Длина|см'  , 56, taRightJustify);
+      with lk_Col do
+        begin
+        AlwaysShowEditButton := true;
+        ButtonStyle          := cbsDropDown;
+        AutoDropDown         := true;
+        end;
+      lk_Col := CreateTColumnEh(dbgDoc, 'DIAM', '# ### ##0.0', 'Размер|мм'  , 56, taRightJustify);
+      with lk_Col do
+        begin
+        AlwaysShowEditButton := true;
+        ButtonStyle          := cbsDropDown;
+        AutoDropDown         := true;
+        end;
+      lk_Col := CreateTColumnEh(dbgDoc, 'MASSA_BRUTTO', '# ### ##0.000', 'Масса (грамм)|Общая'  , 60, taRightJustify);
+      with lk_Col do
+        begin
+        AlwaysShowEditButton := true;
+        ButtonStyle          := cbsDropDown;
+        AutoDropDown         := true;
+        with Footer do
+          begin
+          Color         := lk_Col.Color;
+          Alignment     := taRightJustify;
+          DisplayFormat := lk_Col.DisplayFormat;
+          ValueType     := fvtSum;
+          end;
+        end;
+      lk_Col := CreateTColumnEh(dbgDoc, 'MASSA_INS'   , '# ### ##0.000', 'Масса (грамм)|Вставки', 60, taRightJustify);
+      with lk_Col do
+        begin
+        Color    := Amunhotep.MainForm.StyleManager.Colors.Window;
+        ReadOnly := true;
+        with EditButtons.Add do
+          begin
+          Visible := true;
+          Style   := ebsEllipsisEh;
+          OnClick := @dbgDoc_MASSA_INS_OnClick;
+          end;
+        AlwaysShowEditButton := true;
+        with Footer do
+          begin
+          Color         := lk_Col.Color;
+          Alignment     := taRightJustify;
+          DisplayFormat := lk_Col.DisplayFormat;
+          ValueType     := fvtSum;
+          end;
+        end;
+      lk_Col := CreateTColumnEh(dbgDoc, 'MASSA_NETTO' , '# ### ##0.000', 'Масса (грамм)|Чистая' , 60, taRightJustify);
+      with lk_Col do
+        begin
+        Color    := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+        ReadOnly := true;
+        with Footer do
+          begin
+          Color         := lk_Col.Color;
+          Alignment     := taRightJustify;
+          DisplayFormat := lk_Col.DisplayFormat;
+          ValueType     := fvtSum;
+          end;
+        end;
+      end;
+    if(TMC_GROUP_ID = '160001')then
+      begin
+      lk_Col := CreateTColumnEh(dbgDoc, 'BRAND_NAME', '', 'Автомобиль|Марка', 80, taLeftJustify);
+      with lk_Col do
+        begin
+        AlwaysShowEditButton := true;
+        with EditButtons.Add do
+          begin
+          Visible := true;
+          Style   := ebsEllipsisEh;
+          OnClick := @dbgDoc_BRAND_ID_OnClick;
+          end;
+        end;
+      lk_Col := CreateTColumnEh(dbgDoc, 'MODELNAME'    , '', 'Автомобиль|Модель'            ,  96, taLeftJustify);
+      lk_Col := CreateTColumnEh(dbgDoc, 'AUTOTYPE'     , '', 'Автомобиль|Тип кузова'        ,  60, taLeftJustify);
+      lk_ResBody := '';
+      GetField(FBDataBase, 'TABL$_TB_COLS', 'KEY_LIST', '(TB_ID=''TABL$D_1000062'') AND (ID = ''AUTOTYPE'')', lk_ResBody);
+      lk_Col.KeyList.Text  := lk_ResBody;
+      lk_Col.PickList.Text := lk_ResBody;
+      lk_Col := CreateTColumnEh(dbgDoc, 'AUTONUMBER'   , '', 'Автомобиль|Номер|ГАИ'         ,  60, taLeftJustify);
+      lk_Col := CreateTColumnEh(dbgDoc, 'AUTOPASSPORT' , '', 'Автомобиль|Номер|тех.паспорта',  60, taLeftJustify);
+      lk_Col := CreateTColumnEh(dbgDoc, 'SERIAL'       , '', 'Автомобиль|Номер|кузова'      ,  72, taLeftJustify);
+      lk_Col := CreateTColumnEh(dbgDoc, 'AUTOWHEELS'   , '', 'Автомобиль|Номер|шасси'       ,  60, taLeftJustify);
+      lk_Col := CreateTColumnEh(dbgDoc, 'AUTOENGINE'   , '', 'Автомобиль|Номер|двигателя'   ,  60, taLeftJustify);
+      lk_Col := CreateTColumnEh(dbgDoc, 'AUTOCOLOR'    , '', 'Автомобиль|Цвет'              ,  60, taLeftJustify);
+      lk_Col := CreateTColumnEh(dbgDoc, 'YEAR_ID'      , '', 'Автомобиль|год вып.'           , 48, taRightJustify);
+      with lk_Col do
+        begin
+        KeyList.Clear;
+        PickList.Clear;
+        for i:=1930 to StrToInt(FormatDateTime('yyyy',Now)) do
+          begin
+          KeyList.Add(IntToStr(i));
+          PickList.Add(IntToStr(i));
+          end;
+        end;
+      end;
+    lk_Col := CreateTColumnEh(dbgDoc, 'PRICE'       , '# ### ##0.00', 'Цена'      , 72, taRightJustify);
+    lk_Col.ReadOnly := (TMC_GROUP_ID = '150000');
+    if lk_Col.ReadOnly then
+      lk_Col.Color  := Amunhotep.MainForm.StyleManager.Colors.Foreground
+     else
+      with lk_Col do
+        begin
+        AlwaysShowEditButton := true;
+        ButtonStyle          := cbsDropDown;
+        AutoDropDown         := true;
+        end;  
+    lk_Col.Footer.Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lk_Col.Footer.Alignment     := taLeftJustify;
+    lk_Col := CreateTColumnEh(dbgDoc, 'QUANT'       , '# ### ##0'   , 'Кол'       , 32, taRightJustify);
+    lk_Col.ReadOnly             := not System_UserHasAdminRights;
+    if lk_Col.ReadOnly then
+      lk_Col.Color              := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lk_Col.Footer.Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lk_Col.Footer.Alignment     := taLeftJustify;
+    lk_Col.AlwaysShowEditButton := true;
+    lk_Col.ButtonStyle  := cbsDropDown;
+    lk_Col.AutoDropDown := true;
+    lk_Col := CreateTColumnEh(dbgDoc, 'TOTAL'       , '# ### ##0.00', 'Сумма'     , 60, taRightJustify);
+    lk_Col.Color                := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lk_Col.ReadOnly             := false;
+    lk_Col.Footer.Color         := lk_Col.Color;
+    lk_Col.Footer.Alignment     := taRightJustify;
+    lk_Col.Footer.DisplayFormat := lk_Col.DisplayFormat;
+    lk_Col.Footer.ValueType     := fvtSum;
+
+    lk_Col := CreateTColumnEh(dbgDoc, 'DEV_COUNTRY_NAME', '', 'Страна изготовитель', 104, taLeftJustify);
+    with lk_Col do
+      begin
+      AlwaysShowEditButton := true;
+      with EditButtons.Add do
+        begin
+        Visible := true;
+        Style   := ebsEllipsisEh;
+        OnClick := @dbgDoc_DEV_COUNTRY_ID_OnClick;
+        end;
+      end;
+    if(TMC_GROUP_ID <> '160001')then
+      begin
+      lk_Col := CreateTColumnEh(dbgDoc, 'BRAND_NAME', '', 'Торговая марка', 80, taLeftJustify);
+      with lk_Col do
+        begin
+        AlwaysShowEditButton := true;
+        with EditButtons.Add do
+          begin
+          Visible := true;
+          Style   := ebsEllipsisEh;
+          OnClick := @dbgDoc_BRAND_ID_OnClick;
+          end;
+        end;
+      lk_Col := CreateTColumnEh(dbgDoc, 'MODELNAME', '', 'Модель', 96, taLeftJustify);
+      lk_Col := CreateTColumnEh(dbgDoc, 'SERIAL', '', 'Серийный номер или номер кузова', 72, taLeftJustify);
+      lk_Col := CreateTColumnEh(dbgDoc, 'YEAR_ID', '', 'год вып.', 48, taRightJustify);
+      with lk_Col do
+        begin
+        KeyList.Clear;
+        PickList.Clear;
+        for i:=1930 to StrToInt(FormatDateTime('yyyy',Now)) do
+          begin
+          KeyList.Add(IntToStr(i));
+          PickList.Add(IntToStr(i));
+          end;
+        end;
+      end;
+    lk_Col := CreateTColumnEh(dbgDoc, 'STATEFINE', '# ### ##0', 'состо- яние', 40, taRightJustify);
+    with lk_Col do
+      begin
+      KeyList.Clear;
+      PickList.Clear;
+      for i:=0 to 10 do
+        begin
+        KeyList.Add(IntToStr(i));
+        PickList.Add(IntToStr(i));
+        end;
+      end;
+      
+      
+    dbgDoc.SumList.Active := true;
+    PCDoc := TxcPageControlEx(Result.FindComponent('PCDoc'));
+    dbgJrnlChilds := TDBGridEh(Result.FindComponent('dbgJrnlChilds'));
+    with dbgJrnlChilds do
+      begin
+      Color            := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color       := Amunhotep.MainForm.StyleManager.Colors.Border;
+      FixedColor       := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      TitleFont.Color  := Amunhotep.MainForm.StyleManager.Colors.Border;
+      TitleFont.Style  := [fsBold];
+      FooterFont.Style := [fsBold];
+      UseMultiTitle    := true;
+      VTitleMargin     := 4;
+      OnGetCellParams  := @dbgJrnlChilds_OnGetCellParams;
+      end;
+    dbgJrnlChilds.Columns[0].Font.Name := 'Courier New';
+    dbgJrnlChilds.Columns[0].Font.Style:= [fsBold];
+    dbgJrnlChilds.Columns[0].Font.Size := 8;  
+    dbgDoc1000064 := TDBGridEh(Result.FindComponent('dbgDoc1000064'));
+    with dbgDoc1000064 do
+      begin
+      Color             := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color        := Amunhotep.MainForm.StyleManager.Colors.Border;
+      FixedColor        := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      TitleFont.Color   := Amunhotep.MainForm.StyleManager.Colors.Border;
+      TitleFont.Style   := [fsBold];
+      FooterFont.Style  := [fsBold];
+      UseMultiTitle     := true;
+      VTitleMargin      := 4;
+      FooterRowCount    := 1;
+      SumList.Active    := true;
+      OnGetCellParams   := @dbgDoc1000064_OnGetCellParams;
+      Options           := [dgTitles,dgIndicator,dgColLines,dgRowLines,dgTabs,dgAlwaysShowSelection,dgRowSelect, dgCancelOnExit];
+      AllowedOperations := [];
+      Columns.Clear;
+      end;
+    lk_Col := CreateTColumnEh(dbgDoc1000064,'TMC_ID'          ,'# ### ##0'    ,'Т.М.Ц.|Код'           , 60,taRightJustify);
+    lk_Col.Footer.Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lk_Col := CreateTColumnEh(dbgDoc1000064,'TMC_NAME'        ,''             ,'Т.М.Ц.|Наименование'  ,240,taLeftJustify );
+    lk_Col.Footer.Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lk_Col := CreateTColumnEh(dbgDoc1000064,'TMC_COUNTRY_NAME',''             ,'Т.М.Ц.|Материал'      , 60,taLeftJustify );
+    lk_Col.Footer.Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lk_Col := CreateTColumnEh(dbgDoc1000064,'TMC_PROBE'       ,''             ,'Т.М.Ц.|Проба'         , 32,taLeftJustify );
+    lk_Col.Footer.Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lk_Col := CreateTColumnEh(dbgDoc1000064,'TMC_MASSA'       ,'# ### ##0.000','Масса (грамм)|общая'  , 48,taRightJustify);
+    with lk_Col.Footer do
+      begin
+      Alignment     := taRightJustify;
+      DisplayFormat := lk_Col.DisplayFormat;
+      ValueType     := fvtSum;
+      end;
+    lk_Col := CreateTColumnEh(dbgDoc1000064,'TMC_MASSA_INS'   ,'# ### ##0.000','Масса (грамм)|вставок', 48,taRightJustify);
+    with lk_Col.Footer do
+      begin
+      Alignment     := taRightJustify;
+      DisplayFormat := lk_Col.DisplayFormat;
+      ValueType     := fvtSum;
+      end;
+    lk_Col := CreateTColumnEh(dbgDoc1000064,'TMC_MASSA_NETTO' ,'# ### ##0.000','Масса (грамм)|чистая' , 48,taRightJustify);
+    with lk_Col.Footer do
+      begin
+      Alignment     := taRightJustify;
+      DisplayFormat := lk_Col.DisplayFormat;
+      ValueType     := fvtSum;
+      end;
+    lk_Col := CreateTColumnEh(dbgDoc1000064,'PRICE'           ,'# ### ##0.00' ,'Заложено|Цена'        , 72,taRightJustify);
+    lk_Col.Footer.Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lk_Col := CreateTColumnEh(dbgDoc1000064,'QUANT'           ,'# ### ##0'    ,'Заложено|кол.'        , 24,taRightJustify);
+    lk_Col.Footer.Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lk_Col := CreateTColumnEh(dbgDoc1000064,'TOTAL'           ,'# ### ##0.00' ,'Заложено|Сумма'       , 72,taRightJustify);
+    with lk_Col.Footer do
+      begin
+      Alignment     := taRightJustify;
+      DisplayFormat := lk_Col.DisplayFormat;
+      ValueType     := fvtSum;
+      end;
+    lk_Col := CreateTColumnEh(dbgDoc1000064,'PRICEPL'         ,'# ### ##0.00' ,'Текущий остаток|Цена' , 72,taRightJustify);
+    lk_Col.Footer.Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lk_Col := CreateTColumnEh(dbgDoc1000064,'QUANTPL'         ,'# ### ##0'    ,'Текущий остаток|кол.' , 24,taRightJustify);
+    lk_Col.Footer.Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lk_Col := CreateTColumnEh(dbgDoc1000064,'TOTALPL'         ,'# ### ##0.00' ,'Текущий остаток|Сумма', 72,taRightJustify);
+    with lk_Col.Footer do
+      begin
+      Alignment     := taRightJustify;
+      DisplayFormat := lk_Col.DisplayFormat;
+      ValueType     := fvtSum;
+      end;
+    trJournal := TxFBTransaction(Result.FindComponent('trJournal'));
+    with trJournal do
+      begin
+      DefaultDataBase := FBDataBase;
+      Params.Clear;
+      Params.Add('isc_tpb_read_committed'); 
+      Params.Add('isc_tpb_write'); 
+      Params.Add('isc_tpb_rec_version'); 
+      Params.Add('isc_tpb_nowait');
+      end; 
+    dtsJournal := TxFBDataSet(Result.FindComponent('dtsJournal'));
+    with dtsJournal do
+      begin
+      AfterOpen   := @dtsJournal_AfterOpen;
+      AfterScroll := @dtsJournal_AfterScroll;
+      BeforeClose := @dtsJournal_BeforeClose;
+      end;
+    dtsDoc := TxFBDataSet(Result.FindComponent('dtsDoc'));
+    with dtsDoc do
+      begin
+      OnNewRecord := @dtsDoc_OnNewRecord;
+      AfterOpen   := @dtsDoc_AfterOpen;
+      BeforeClose := @dtsDoc_BeforeClose;
+      end;
+    qrJrnlChilds := TxFBQuery(Result.FindComponent('qrJrnlChilds'));
+    DSdtsJournal := TDataSource(Result.FindComponent('DSdtsJournal'));
+    DSdtsDoc     := TDataSource(Result.FindComponent('DSdtsDoc'));
+    qrDoc1000064    := TxFBQuery(Result.FindComponent('qrDoc1000064'));
+    with qrDoc1000064 do
+      begin
+      DataSource := DSdtsJournal;
+      SQL.Text   := StringsLoadFromFile(StrAbsolutePath('./EDIT_1000064.SQL',ScriptName)); 
+      end;  
+    lkTS  := TxcTabSheet.Create(PCDoc);
+    with lkTS do
+      begin
+      Parent      := PCDoc;
+      PageControl := PCDoc;
+      Caption     := 'Коментарии';
+      Color       := Amunhotep.MainForm.StyleManager.Colors.Background;
+      ImageIndex  := 420;
+      end;
+    DocComentsIntf_Create(Result, lkTS, DSdtsJournal);
+    lkTS  := TxcTabSheet.Create(PCDoc);
+    with lkTS do
+      begin
+      Parent      := PCDoc;
+      PageControl := PCDoc;
+      Caption     := 'Описание предмета залога';
+      ImageIndex  := 291;
+      Color       := Amunhotep.MainForm.StyleManager.Colors.Window;
+      end;
+    DBInterfaceCreateText(PCDoc, lkTS, DSdtsDoc, 'COMENT', false);
+    lkTS  := TxcTabSheet.Create(PCDoc);
+    with lkTS do
+      begin
+      Parent      := PCDoc;
+      PageControl := PCDoc;
+      Caption     := 'Изображение предмета залога';
+      ImageIndex  := 283;
+      Color       := Amunhotep.MainForm.StyleManager.Colors.Window;
+      end;
+    DBInterfaceCreateImage(PCDoc, lkTS, DSdtsDoc, 'IMG', false);
+    lkAct := FindTAction(Result,'actSave'    ,msg_actsave    ,msg_actsave_hint    ,'Ctrl+S' ,0,107); lkAct.OnExecute:=@actSave_OnExecute; 
+    lkAct := FindTAction(Result,'actPrint'   ,msg_actprint   ,msg_actprint_hint   ,'Ctrl+P' ,0,105); lkAct.OnExecute:=@actPrint_OnExecute; //lkAct.OnUpdate:=@actUnCommit_OnUpdate; 
+    lkAct := FindTAction(Result,'actCommit'  ,msg_actcommit  ,msg_actcommit_hint  ,'Ctrl+C' ,0,298); lkAct.OnExecute:=@actCommit_OnExecute; lkAct.OnUpdate:=@actCommit_OnUpdate; 
+    lkAct := FindTAction(Result,'actUnCommit',msg_actuncommit,msg_actuncommit_hint,'Ctrl+U' ,0,297); lkAct.OnExecute:=@actUnCommit_OnExecute; lkAct.OnUpdate:=@actUnCommit_OnUpdate; 
+    lkAct := FindTAction(Result,'actPodbor'  ,msg_actpodbor  ,msg_actPodbor_hint  ,'Ins'    ,0,301); lkAct.OnExecute:=@actPodbor_OnExecute; lkAct.OnUpdate:=@actCommit_OnUpdate;
+    lkAct := FindTAction(Result,'actCsPhoto' ,msg_actcsphoto ,msg_actcsphoto_hint ,'Ctrl+F8',0,350); lkAct.OnExecute:=@actCsPhoto_OnExecute; 
+    lkAct := FindTAction(Result,'actCsDlg'   ,msg_actcsdlg   ,msg_actcsdlg_hint   ,'Ctrl+F2',0,175); lkAct.OnExecute:=@actCsDlg_OnExecute; 
+    lkAct := FindTAction(Result,'actEditName'       ,'Примечание','Изменить примечание','F5', 0,420); lkAct.OnExecute:=@actEditName_OnExecute;
+    lkAct := FindTAction(Result,'actDocPrintChild'  ,'Печать'   ,'Печать документа'  ,'Alt+P' , 0,105); lkAct.OnExecute:=@actDocPrintChild_OnExecute;  lkAct.OnUpdate:=@actDoc_OnUpdate; 
+    lkAct := FindTAction(Result,'actDocInsRecalc'   ,'Переоценка','Переоценка залога','Ctrl+G', 0,345); lkAct.OnExecute:=@actDocInsRecalc_OnExecute;   lkAct.OnUpdate:= @actDocChildEnd_OnUpdate;
+    lkAct := FindTAction(Result,'actDocInsMore'     ,'Погашение','Погасить залог'    ,'Ctrl+M', 0,344); lkAct.OnExecute:=@actDocInsMore_OnExecute;     lkAct.OnUpdate:= @actDocInsMore_OnUpdate;
+    lkAct := FindTAction(Result,'actDocInsVozvrat'  ,'Возврат'  ,'Возврат залога'    ,'Ctrl+V', 0,301); lkAct.OnExecute:=@actDocInsVozvrat_OnExecute;  lkAct.OnUpdate:= @actDocChildVozvrat_OnUpdate;
+    lkAct := FindTAction(Result,'actDocInsViemka'   ,'Выемка'   ,'Выемка залога'     ,'Ctrl+B', 0,307); lkAct.OnExecute:=@actDocInsViemka_OnExecute;   lkAct.OnUpdate:= @actDocChildVozvrat_OnUpdate;
+    lkAct := FindTAction(Result,'actDocInsNevozvrat','Невыкуп'  ,'Невыкуп залога'    ,'Ctrl+X', 0,303); lkAct.OnExecute:=@actDocInsNevozvrat_OnExecute;lkAct.OnUpdate:= @actDocChildEnd_OnUpdate;
+    lkAct := FindTAction(Result,'actDocInsKredit'   ,'Дозалог'  ,'Дозалог залога'    ,'Ctrl+L', 0,343); lkAct.OnExecute:=@actDocInsKredit_OnExecute;   lkAct.OnUpdate:= @actDocChildEnd_OnUpdate;
+    lkAct := FindTAction(Result,'actDocInsZayavleniye','Заявление об отсрочке'  ,'Заявление об отсрочке','Ctrl+T', 0, 50); lkAct.OnExecute:=@actDocInsZayavleniye_OnExecute;   lkAct.OnUpdate:= @actDocChildEnd_OnUpdate;
+    lkAct := FindTAction(Result,'actDocInsNevikup2','Закрыть залог','Закрыть залог','Ctrl+Y', 0,303); lkAct.OnExecute:=@actDocInsNevikup2_OnExecute;      lkAct.OnUpdate:= @actDocChildEnd_OnUpdate;
+    RefreshView;
+    Amunhotep_MainForm_TaskBar.ButtonByForm(Result).Down := true;
+  end;
+  //============================================================================
+var
+  i:Integer;
+begin
+  dtsDoc_SaveRecNo := 0;
+
+  DocId := GetGlobalVariable('J_ID');
+  if(StrTrimAll(DocId)='')then exit;
+  
+  with Amunhotep.MainForm do
+    for i:=0 to MDIChildCount-1 do
+      if(MDIChildren[i].HelpKeyWord = '1000062_'+DocId)then
+        begin
+        MDIChildren[i].BringToFront;
+        exit;
+        end;
+  
+  GetField(FBdataBase, 'TABL$J_1000062', 'TMC_GROUP_ID', 'J_ID = '''+DocId+'''', TMC_GROUP_ID);
+  AmunhotepForm := AmunhotepForm_Create;
+end.

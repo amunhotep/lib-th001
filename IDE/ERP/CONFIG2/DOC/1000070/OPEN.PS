@@ -1,0 +1,5 @@
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/DOC/OPEN.INC}{$I PEAKTOP:IDE/ERP/DBO/DOC/OPEN.INC}{$ENDIF} 
+begin 
+  if ERP_DialogDocOpen_Execute('1000070', erp_temporary_document_id) then 
+    ERP_OpenDocument('1000070', erp_temporary_document_id); 
+end.

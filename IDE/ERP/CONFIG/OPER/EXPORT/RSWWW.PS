@@ -1,0 +1,143 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG/OPER/EXPORT/RSWWW.PS}
+{$IFNDEF PEAKTOP:SYSUTILS/FILES/SEARCH_UTILS.INC}        {$I PEAKTOP:SYSUTILS/FILES/SEARCH_UTILS.INC}  {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TLABEL.INC}                         {$I PEAKTOP:OBJ/TLABEL.INC}                   {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCEDITCOMBO.INC}                   {$I PEAKTOP:OBJ/TXCEDITCOMBO.INC}             {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}          {$I PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}    {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCPANEL.INC}                       {$I PEAKTOP:OBJ/TXCPANEL.INC}                 {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TMEMO.INC}                          {$I PEAKTOP:OBJ/TMEMO.INC}                    {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCTOOLBARBUTTON.INC}               {$I PEAKTOP:OBJ/TXCTOOLBARBUTTON.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/INTERFACE/SYNEDIT/DEFAULT.INC}      {$I PEAKTOP:OBJ/INTERFACE/SYNEDIT/DEFAULT.INC}{$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/OPER/FORMOPER.INC}          {$I PEAKTOP:IDE/ERP/DBO/OPER/FORMOPER.INC}   {$ENDIF}
+  //============================================================================
+  function  TERPFormOperExport_ExportReference(const aTableName:string; const aTruncateTable, aReplaceValues:Boolean):string;
+  var
+    lkTr    :TxFBTransaction;
+    lkQr    :TxFBQuery;
+    lkFileds:string;
+    i       :Integer;
+  begin
+    Result   := ' '+SQLCRLF;
+    if aTruncateTable then
+      Result   := Result + 'TRUNCATE TABLE '+aTableName+'; '+SQLCRLF;
+    lkFileds := '';
+    lkTr := TxFBTransaction.Create(nil);
+    with lkTr do
+      begin
+      DefaultDataBase := FBDataBase;
+      with Params do
+        begin
+        Clear;
+        Add('isc_tpb_read_committed');
+        Add('isc_tpb_read');
+        Add('isc_tpb_rec_version');
+        Add('isc_tpb_nowait');
+        end;
+      end;
+    lkQr := TxFBQuery.Create(lkTr);
+    lkQr.SQL.Text := 'SELECT T.* FROM '+aTableName+' T ORDER BY T.ID ';
+    lkQr.Open;
+    for i:=0 to lkQr.Fields.Count-1 do
+      begin
+      if(Length(lkFileds) >0)then
+        lkFileds := lkFileds + ', ';
+      lkFileds := lkFileds + lkQr.Fields[i].FieldName;  
+      end;
+    
+    lkQr.First;
+    while not lkQr.EOF do
+      begin
+      if aReplaceValues then
+        Result := Result + 'REPLACE '
+       else 
+        Result := Result + 'INSERT ';
+      Result := Result + 'INTO '+aTableName+'('+lkFileds+')VALUES('''+StrReplaceStr(lkQr.Fields[0].AsString, '''', '''''')+'''';
+      for i:=1 to lkQr.Fields.Count-1 do
+        Result := Result + ', '''+StrReplaceStr(lkQr.Fields[i].AsString, '''', '`')+'''';
+      Result := Result + '); '+SQLCRLF;  
+      lkQr.Next;
+      end;
+    if lkTr.InTransaction then 
+      lkTr.Commit;
+    Result := Result + 
+      '/****************************************************************************************************************************************/'+SQLCRLF;  
+  end;
+  //================== PEAKTOP:IDE/ERP/DBO/OPER/IMPORT/SS001001.PS =============
+  procedure TERPFormOperExportRSWWW_DoImport(aSynEdit:TSynEdit; const aFileName:string);
+  var
+    lkStr :string;
+  begin
+    aSynEdit.Lines.Clear;
+
+    lkStr := '';
+    lkStr := lkStr + TERPFormOperExport_ExportReference('TABL$R_ENTZZ_IZM'     , True , True);
+    lkStr := lkStr + TERPFormOperExport_ExportReference('TABL$R_FIRMS'         , False, True);
+    lkStr := lkStr + TERPFormOperExport_ExportReference('TABL$R_FILIALS'       , False, True);
+    lkStr := lkStr + TERPFormOperExport_ExportReference('TABL$R_EDIZM'         , False, True);
+    lkStr := lkStr + TERPFormOperExport_ExportReference('TABL$R_PLACES'        , False, True);
+    lkStr := lkStr + TERPFormOperExport_ExportReference('TABL$R_TMC_BRANDS'    , False, True);
+    lkStr := lkStr + TERPFormOperExport_ExportReference('TABL$R_TMC_GROUP'     , False, True);
+    lkStr := lkStr + TERPFormOperExport_ExportReference('TABL$R_TMC_CTGR'      , False, True);
+    lkStr := lkStr + TERPFormOperExport_ExportReference('TABL$R_TMC_GROUPSHARE', False, True);
+    lkStr := lkStr + TERPFormOperExport_ExportReference('TABL$R_ENTRS_PLATES'  , False, True);
+
+    lkStr := lkStr + 'UPDATE TABL$C_CONST SET FINT = FINT + 1 WHERE (ID = ''DBVERSION''); '+#13#10;
+
+    aSynEdit.Lines.Text := lkStr;  
+//    StringsSaveToFile(StrReplaceStr(aFileName, '.sql', '_01.sql'), lkStr);
+  end;
+  //============================================================================
+  procedure TERPFormOperExportRSWWW_actImport_OnExecute(Sender :TObject);
+  begin
+    TERPFormOperExportRSWWW_DoImport(
+      TSynEdit(TComponent(Sender).Owner.FindComponent('SynEdit')),
+      TxcEditCombo(TComponent(Sender).Owner.FindComponent('edtFileName')).Text
+    );  
+  end;
+  //============================================================================
+  procedure TERPFormOperExportRSWWW_edtFileName_OnButtonClick(Sender :TObject);
+  var
+    lkFileName :string;
+  begin
+    with TxcEditCombo(Sender) do
+      begin
+      lkFileName := Text; 
+      if not PromptForFileName(lkFileName, '*.sql;*.sql|*.*', 'sql', 'Выберите файл', ExtractFilePath(lkFileName), true)then exit;
+      Text := lkFileName;
+      end;
+  end;
+  //============================================================================
+  function TERPFormOperExportRSWWW_Create:TAmunhotepForm;
+  var
+    lkToolBar  :TxcGradientPanelVista;
+    lkAct      :TCustomAction;
+    lkPnl      :TxcPanel;
+    lkLbl      :TLabel;
+    lkEdt      :TxcEditCombo;
+    lkEdtPrefix:TxcEditCombo;
+    lkEdtRoot  :TxcEditCombo;
+    lkSE       :TSynEdit;
+    lkStr      :string;
+  begin
+    Result := TAmunhotepForm(TERPFormOper_Create('Экспорт ТМЦ на сайт','',false, []));
+    lkToolBar := CreateTxcGradientPanelVistaToolBar(Result,Result,obj_name_erp_toolbar,'',alTop, 0,38,TERPForm_DefaultToolButtonWidth, 200,xbsNone);
+    lkPnl  := CreateTxcPanel(Result, Result, obj_name_erp_paneltop, '', alTop, 0,lkToolBar.Top+lkToolBar.Height,48,200,xbsNone);
+    lkLbl  := CreateTLabel(lkPnl,lkPnl,'Укажите путь к файлу экспорта',TERPForm_DefaultControlIndent,TERPForm_DefaultControlIndent,TERPForm_DefaultControlHeight,220,alNone,taLeftJustify);
+    lkEdt  := CreateTxcEditCombo(Result, lkPnl, 'edtFileName', TERPForm_DefaultControlIndent, lkLbl.Top+lkLbl.Height+TERPForm_DefaultControlIndent, TERPForm_DefaultControlHeight, 420);
+    with lkEdt do
+      begin
+      AlwaysEnable  := true;
+      ReadOnly      := false;
+      Text          := 'D:\export_to_www_'+FormatDateTime('yyyymmdd_hhnnss', Now)+'.sql';
+      OnButtonClick := @TERPFormOperExportRSWWW_edtFileName_OnButtonClick;
+      end;
+    lkPnl  := CreateTxcPanel(Result, Result, obj_name_erp_panelclient, '', alClient, 0,lkPnl.Top+lkPnl.Height,200,200,xbsNone);
+    lkSE := Interface_SynEdit_Create(Result, lkPnl, 'SynEdit');
+    RegisterSynEdit(lkSE, ftSQL);
+    lkAct := TERPForm_CreateAction2(Result,'actImport','Экспорт данных','Выполнить экспорт данных в файл','F9',0,24,@TERPFormOperExportRSWWW_actImport_OnExecute,nil,lkToolBar,120,nil);
+  end; 
+  //============================================================================
+var
+  lkID :string;
+begin
+  TERPFormOperExportRSWWW_Create;
+end.

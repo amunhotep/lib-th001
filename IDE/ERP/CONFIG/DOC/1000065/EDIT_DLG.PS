@@ -1,0 +1,226 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}               {$I PEAKTOP:GLOBAL_VARIABLES.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TCOLUMNEH.INC}                  {$I PEAKTOP:OBJ/TCOLUMNEH.INC}            {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCBUTTON.INC}                  {$I PEAKTOP:OBJ/TXCBUTTON.INC}            {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANEL.INC}           {$I PEAKTOP:OBJ/TXCGRADIENTPANEL.INC}     {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}      {$I PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}{$ENDIF}
+  //============================================================================
+  procedure DocDlg_DataSet_OnFieldChange(Sender: TField);
+  var
+    lkDTS :TxFBDataSet;
+  begin
+    lkDTS := TxFBDataSet(Sender.DataSet);
+    if lkDTS.Active then
+      begin
+      if(lkDTS.State = dsEdit)then
+        try
+          lkDTS.Post;
+        except
+          lkDTS.Cancel;
+        end;
+      lkDTS.Close;  
+      end;
+    if lkDTS.Transaction.InTransaction then
+      lkDTS.Transaction.Commit;
+    lkDTS.Open;          
+  end;
+  //============================================================================
+  procedure DocDlg_DataSet_AfterOpen(DataSet :TDataSet);
+  var
+    i:Integer;
+  begin
+    for i:=1 to DataSet.Fields.Count-1 do
+      if((DataSet.Fields[i].FieldName = 'FLAG_DELETE')or(DataSet.Fields[i].FieldName = 'QUANT'))then
+        DataSet.Fields[i].OnChange := @DocDlg_DataSet_OnFieldChange;
+  end;
+  //============================================================================
+  procedure DocDlg_DBGridEh_OnGetCellParams(Sender: TObject; Column: TColumnEh; 
+              AFont: TFont; var Background: TColor; State: TGridDrawState);
+  begin
+   if(Column.Tag=666)then exit;
+   if(not(Column.Field.DataSet.Active))then exit;
+   if(Column.Field.DataSet.RecordCount = 0)then exit;
+   if(Column.Field.DataSet.FieldByName('FLAG_DELETE').AsInteger = 1)then 
+     aFont.Style:= aFont.Style + [fsBold];
+  end;
+  //============================================================================
+  function DocDlgExecute(const J_ID:string):Boolean;
+  var
+    lkForm        :TForm;
+    lkPanelClient :TxcGradientPanel;
+    lkTopBar      :TxcGradientPanelVista;
+    lkPanelBottom :TxcStdPanel;
+    lkBtnOk       :TxcButton; 
+    lkBtnCancel   :TxcButton;
+    lkTr          :TxFBTransaction;
+    lkDTS         :TxFBDataSet;
+    lkDS          :TDataSource;
+    lkDBG         :TDBGridEh;
+    lkCol         :TColumnEh;
+    lkFooter      :TColumnFooterEh;
+  label
+    infinity_loop;  
+  begin
+    Result := false;
+    lkForm := TForm.Create(nil);
+    with lkForm do
+      begin
+      Caption         := Amunhotep.Title;
+      Color           := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      BorderStyle     := bsDialog;
+      BorderIcons     := [biSystemMenu];
+      Position        := poDesktopCenter;
+      Width           := MaxInteger(Trunc(Screen.Width * 2 / 3), 720);
+      Height          := 320;
+      Font.Size       := 7;
+      end;
+    lkTopBar      := CreateTxcGradientPanelVista(lkForm, lkForm,'PanelTop', #$20+'Возврат с хранения',alTop,0,0,34,98,xbsRaized);  
+    lkPanelClient := CreateTxcGradientPanel(lkForm, lkForm,'PanelClient','',alClient,0,0,200,98,xbsNone  ,gdTopToBottom);  
+    lkPanelBottom := TxcStdPanel.Create(lkForm);
+    with lkPanelBottom do
+      begin
+      Name         := 'PanelBottom';
+      Parent       := lkForm;
+      Height       := 24;
+      Width        := lkForm.ClientWidth;
+      Align        := alBottom;
+      BorderStyle  := xbsNone;
+      StyleManager := Amunhotep.MainForm.StyleManager;
+      Color        := Amunhotep.MainForm.StyleManager.Colors.Window;
+      end;
+    lkBtnCancel := CreateTxcButton(lkForm,lkPanelBottom,'btnCancel','Отмена',lkPanelBottom.Width - 74,2,lkPanelBottom.Height-4,72,mrCancel,false,true );
+    lkBtnCancel.Font.Style := [fsBold];
+    lkBtnCancel.TabOrder   := 2;
+    lkBtnCancel.Anchors    := [akRight, akBottom]  
+    lkBtnOk     := CreateTxcButton(lkForm,lkPanelBottom,'btnOk'    ,'OK'    ,lkBtnCancel.Left - 74   ,2,lkPanelBottom.Height-4,72,mrOk    ,true ,false);
+    lkBtnOk.Font.Style     := [fsBold];
+    lkBtnOk.TabOrder       := 1;
+    lkBtnOk.Anchors        := [akRight, akBottom]  
+
+    lkTr := TxFBTransaction.Create(lkForm);
+    with lkTr do
+      begin
+      DefaultDataBase := FBDataBase;
+      Params.Clear;
+      Params.Add('isc_tpb_read_committed'); 
+      Params.Add('isc_tpb_write'); 
+      Params.Add('isc_tpb_rec_version'); 
+      Params.Add('isc_tpb_nowait'); 
+      end;
+    lkDTS := TxFBDataSet.Create(lkTr);
+    lkDTS.Transaction := lkTr;
+    lkDTS.SelectSQL.Text  := 'SELECT * FROM  PROC$D_GET_1000065('''+J_ID+''') ORDER BY ID ';
+    lkDTS.RefreshSQL.Text := 'SELECT P.* FROM  PROC$D_GET_1000065('''+J_ID+''') P WHERE (P.ID = ?ID) ';
+    lkDTS.ModifySQL.Text  := 'UPDATE TABL$D_1000014 D SET D.FLAG_DELETE = ?FLAG_DELETE, D.QUANT = ?QUANT WHERE (D.ID = ?ID)';
+    lkDTS.AfterOpen := @DocDlg_DataSet_AfterOpen;
+    lkDS := TDataSource.Create(lkDTS);
+    lkDS.DataSet := lkDTS;
+    lkDBG := TDBGridEh.Create(lkForm);
+    with lkDBG do
+      begin
+      Parent            := lkPanelClient;
+      Align             := alClient;
+      DataSource        := lkDS;
+      Color             := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color        := Amunhotep.MainForm.StyleManager.Colors.Border;
+      FixedColor        := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      TitleFont.Color   := Amunhotep.MainForm.StyleManager.Colors.Border;
+      TitleFont.Style   := [fsBold];
+      UseMultiTitle     := true;
+      AllowedOperations := [alopUpdateEh];
+      FooterRowCount    := 2;
+      Flat              := true;
+      Ctl3D             := false;
+      SumList.Active    := true;
+      OptionsEh         := OptionsEh + [dghFixed3D, dghFooter3D, dghHighlightFocus, dghRowHighlight];
+      OnGetCellParams   := @DocDlg_DBGridEh_OnGetCellParams;
+      Columns.Clear;
+      end;
+    lkCol := CreateTColumnEh(lkDBG,'TMC_NAME'   ,''            ,'ТМЦ'         ,320,taLeftJustify);
+    lkCol.Footer.Color         := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lkCol.ReadOnly := true;
+    lkCol.Footer.Color         := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lkCol.Footer.Alignment     := taLeftJustify;
+    lkCol.Footer.ValueType     := fvtStaticText;
+    lkCol.Footer.Value         := 'Минимальная стоимость залоговых ТМЦ ';
+    lkCol.Footer.Font.Style    := [fsBold];
+      lkFooter := lkCol.Footers.Add;
+      lkFooter.Color         := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      lkFooter.Alignment     := taLeftJustify;
+      lkFooter.ValueType     := fvtStaticText;
+      lkFooter.Value         := 'ВСЕГО';
+      lkFooter.Font.Style    := [fsBold];
+    lkCol := CreateTColumnEh(lkDBG,'TMC_COUNTRY_NAME',''           ,'Металл'  , 60,taLeftJustify);
+    lkCol.Footer.Color         := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lkCol.ReadOnly := true;
+    lkCol := CreateTColumnEh(lkDBG,'TMC_PROBE'  ,''           ,'Проба'       , 40,taLeftJustify);
+    lkCol.Footer.Color         := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lkCol.ReadOnly := true;
+    lkCol := CreateTColumnEh(lkDBG,'PRICE'      ,'# ### ##0.00','Оценка (грн)', 60,taRightJustify);
+    lkCol.Footer.Color         := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lkCol.ReadOnly := true;
+    lkCol := CreateTColumnEh(lkDBG,'QUANT'      ,'# ### ##0'   ,'Кол-во (шт)' , 60,taRightJustify);
+    lkCol.Footer.Color         := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lkCol.ReadOnly := true;
+    lkCol := CreateTColumnEh(lkDBG,'TOTAL'      ,'# ### ##0.00','Всего (грн)' , 60,taRightJustify);
+    lkCol.ReadOnly := true;
+    lkCol.Footer.Color         := lkCol.Color;
+    lkCol.Footer.Alignment     := taRightJustify;
+    lkCol.Footer.DisplayFormat := lkCol.DisplayFormat;
+    lkCol.Footer.FieldName     := 'DOCSUMLEFT';
+    lkCol.Footer.ValueType     := fvtFieldValue;
+    lkCol.Footer.Font.Style    := [fsBold];
+      lkFooter := lkCol.Footers.Add;
+      lkFooter.Color         := lkCol.Color;
+      lkFooter.Alignment     := taRightJustify;
+      lkFooter.DisplayFormat := lkCol.DisplayFormat;
+      lkFooter.FieldName     := lkCol.FieldName;
+      lkFooter.ValueType     := fvtSum;
+      lkFooter.Font.Style    := [fsBold];
+    lkCol := CreateTColumnEh(lkDBG,'FLAG_DELETE',''            ,'Вовзрат'     , 60,taLeftJustify);
+    lkCol.KeyList.Text  := '1'+#13#10+'0';
+    lkCol.PickList.Text := 'Вернуть'+#13#10+' ';
+    lkCol.Footer.Color         := lkCol.Color;
+    lkCol.Footer.Alignment     := taRightJustify;
+    lkCol.Footer.DisplayFormat := lkCol.DisplayFormat;
+    lkCol.Footer.FieldName     := 'TOTALLEFT';
+    lkCol.Footer.ValueType     := fvtFieldValue;
+    lkCol.Footer.Font.Style    := [fsBold];
+      lkFooter := lkCol.Footers.Add;
+      lkFooter.Color         := lkCol.Color;
+      lkFooter.Alignment     := taRightJustify;
+      lkFooter.DisplayFormat := lkCol.DisplayFormat;
+      lkFooter.FieldName     := 'TOTALRETURN';
+      lkFooter.ValueType     := fvtFieldValue;
+      lkFooter.Font.Style    := [fsBold];
+
+    lkDTS.Open;
+  infinity_loop:    
+    Result := (lkForm.ShowModal = mrOk);
+    if Result then
+      begin
+      if(( (lkDTS.FieldByName('TOTALLEFT').AsFloat+0.02) < lkDTS.FieldByName('DOCSUMLEFT').AsFloat)and
+         (lkDTS.FieldByName('DOCSUMLEFT').AsFloat > 0.02))then
+        begin
+        Dialogs.MessageDlg('Сумма оценки оставшихся в залоге ТМЦ должна быть больше '+
+          FormatFloat('# ### ##0.00',lkDTS.FieldByName('DOCSUMLEFT').AsFloat)+' грн.', mtWarning, [mbOk]);
+        Result := false;
+        goto infinity_loop;  
+        end;
+      end;
+    lkForm.Free;
+  end;
+  //============================================================================
+var
+  lkID :string;
+begin
+  lkID := GetGlobalVariable('J_ID');
+  writeLn(lkID);
+  if DocDlgExecute(lkID)then 
+    begin
+    if ExecSQL(FBdataBase, 'DELETE FROM TABL$D_1000014 D WHERE (D.J_ID = '''+lkID+''')AND(D.FLAG_DELETE = 0)')then
+      if ExecSQL(FBdataBase, 'UPDATE TABL$D_1000014 D SET D.FLAG_DELETE = 0 WHERE (D.J_ID = '''+lkID+''')')then
+        ExecSQL(FBdataBase, 'UPDATE TABL$J_4 J SET J.FLAG_COMMIT = 1 WHERE (J.ID = '''+lkID+''')');
+    end
+   else
+    ExecSQL(FBdataBase, 'DELETE FROM TABL$J_4 J WHERE (J.ID = '''+lkID+''')');
+end.

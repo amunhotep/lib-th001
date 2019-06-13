@@ -1,0 +1,35 @@
+{$DEFINE PEAKTOP:IDE/ERP/MAINMENU.PS}
+{$IFNDEF PEAKTOP:IDE/MAINMENU_HEADER.INC}       {$I ../MAINMENU_HEADER.INC}       {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/MAINMENU_OBJNAMES.INC} {$I ./MAINMENU_OBJNAMES.INC}      {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/MAINMENU_LANG.INC}     {$I ./MAINMENU_LANG.INC}          {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/MAINMENU_ACTIONS.INC}  {$I ./MAINMENU_ACTIONS.INC}       {$ENDIF}
+  //=================== PEAKTOP:IDE/ERP/MAINMENU.PS ============================
+  procedure Amunhotep_MainMenu_Create_ERP;
+  var
+    lkAct    :TCustomAction;
+    lkMIBase :TMenuItem;
+    lkMI     :TMenuItem;           
+  begin
+    DontAutoFree;
+    lkMIBase := CreateTMenuItemIns(Amunhotep.MainForm.Menu.Items,obj_name_erpide_mimainbase  ,msg_erpide_mimainbase  ,msg_erpide_mimainbase  ,'',-1, AMUNHOTEP_MAINMENU_INDEX_START,0);
+    lkAct := CreateComplexAction(Amunhotep.MainForm,obj_name_erpide_actbasenew    ,msg_erpide_actbasenew    ,msg_erpide_actbasenew_hint    ,''             ,0,216,@actBaseNew_OnExecute    ,@actBaseOpen_OnUpdate  ,lkMIBase);
+    lkAct := CreateComplexAction(Amunhotep.MainForm,obj_name_erpide_actbaseopen   ,msg_erpide_actbaseopen   ,msg_erpide_actbaseopen_hint   ,''             ,0,167,@actBaseOpen_OnExecute   ,@actBaseOpen_OnUpdate  ,lkMIBase);
+    lkMI  := CreateTMenuItemLine(lkMIBase, 'miBaseN001');
+    lkAct := CreateComplexAction(Amunhotep.MainForm,obj_name_erpide_actbaseclose  ,msg_erpide_actbaseclose  ,msg_erpide_actbaseclose_hint  ,''             ,0,232,@actBaseClose_OnExecute  ,@actBaseClose_OnUpdate ,lkMIBase);
+    lkAct := CreateComplexAction(Amunhotep.MainForm,obj_name_erpide_actbaseatchs  ,msg_erpide_actbaseatchs  ,msg_erpide_actbaseatchs_hint  ,''             ,0,185,@actBaseAtchs_OnExecute  ,@actBaseClose_OnUpdate ,lkMIBase);
+    lkAct := CreateComplexAction(Amunhotep.MainForm,obj_name_erpide_actbasefs     ,msg_erpide_actbasefs     ,msg_erpide_actbasefs_hint     ,'Alt+Ctrl+F'   ,0, 30,@actBaseFS_OnExecute     ,@actBaseClose_OnUpdate ,lkMIBase);
+    lkAct := CreateComplexAction(Amunhotep.MainForm,obj_name_erpide_actbaseconfig ,msg_erpide_actbaseconfig ,msg_erpide_actbaseconfig_hint ,''             ,0, 53,@actBaseConfig_OnExecute ,@actBaseClose_OnUpdate ,lkMIBase);
+    lkAct := CreateComplexAction(Amunhotep.MainForm,obj_name_erpide_actbasebuffer ,msg_erpide_actbasebuffer ,msg_erpide_actbasebuffer_hint ,''             ,0, 73,@actBaseBuffer_OnExecute ,@actBaseClose_OnUpdate ,lkMIBase);
+    lkAct := CreateComplexAction(Amunhotep.MainForm,obj_name_erpide_actbaserecent ,msg_erpide_actbaserecent ,msg_erpide_actbaserecent_hint ,''             ,0, 40,@actBaseRecent_OnExecute ,@actBaseClose_OnUpdate ,lkMIBase);
+    lkAct := CreateComplexAction(Amunhotep.MainForm,obj_name_erpide_actbasemenu   ,msg_erpide_actbasemenu   ,msg_erpide_actbasemenu_hint   ,''             ,0,435,@actBaseMenu_OnExecute   ,@actBaseClose_OnUpdate ,lkMIBase);
+    lkMI  := CreateTMenuItemLine(lkMIBase, 'miBaseN254');
+    lkAct := CreateComplexAction(Amunhotep.MainForm,obj_name_erpide_actbasestdlib ,msg_erpide_actbasestdlib ,msg_erpide_actbasestdlib_hint ,'Alt+Ctrl+L'   ,0,483,@actBaseStdLib_OnExecute ,nil                    ,lkMIBase);
+    lkAct := CreateComplexAction(Amunhotep.MainForm,obj_name_erpide_actbasegv     ,msg_erpide_actbasegv     ,msg_erpide_actbasegv_hint     ,'Alt+Ctrl+G'   ,0, 40,@actBaseGV_OnExecute     ,nil                    ,lkMIBase);
+    lkAct := CreateComplexAction(Amunhotep.MainForm,obj_name_erpide_actbasepanel  ,msg_erpide_actbasepanel  ,msg_erpide_actbasepanel_hint  ,''             ,0, 13,@actBasePanel_OnExecute  ,nil                    ,lkMIBase);
+    lkMI  := CreateTMenuItemLine(lkMIBase, 'miBaseN255');
+    lkAct := CreateComplexAction(Amunhotep.MainForm,obj_name_erpide_actbaseexit   ,msg_erpide_actbaseexit   ,msg_erpide_actbaseexit_hint   ,'Alt+F4'       ,0,102,@actBaseExit_OnExecute   ,nil                    ,lkMIBase);
+  end;
+
+begin
+  Amunhotep_MainMenu_Create_ERP;  
+end.

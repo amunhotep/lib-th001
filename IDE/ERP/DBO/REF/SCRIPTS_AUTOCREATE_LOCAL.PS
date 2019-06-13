@@ -1,0 +1,125 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}        {$I PEAKTOP:GLOBAL_VARIABLES.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/OBJECTNAMES.INC} {$I ../OBJECTNAMES.INC}           {$ENDIF}
+{.$DEFINE SAVETOLOCAL}
+var
+  lkDBFolderName :string;
+  lkFolderName   :string;
+  lkFileName     :string;
+  lkSourceItem   :string;
+  lkTrans        :TxFBTransaction;
+  lkQuery        :TxFBQuery;
+  lkQueryFS      :TxFBQuery;
+begin
+  // prepare root folder
+  ChDir(ExtractFilePath(PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/CONFIG/DUMMY.FILE')));
+  lkFolderName := ERP_ObjectDir(ERP_OBJECTTYPE_REF);
+  lkFolderName := Copy(lkFolderName, 1, Length(lkFolderName)-1);
+  if not DirectoryExists(lkFolderName)then
+    CreateDir(lkFolderName);
+  ChDir(ExtractFilePath(PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/CONFIG/'+lkFolderName+'/DUMMY.FILE')));
+  // creating folders
+  lkTrans   := TxFBTransaction.Create(nil);
+  lkTrans.DefaultDataBase := FBDataBase;
+  {$IFDEF SAVETOLOCAL}
+  lkQueryFS   := TxFBQuery.Create(lkTrans);
+  lkQueryFS.SQL.Text :=     
+    'WITH RECURSIVE FS AS( '+SQLCRLF+
+    '  SELECT F1.ID, F1.PARENT_ID, F1.NAME, F1.EXT, F1.SRC '+SQLCRLF+
+    '        ,CASE F1.EXT WHEN ''..'' THEN F1.NAME||''/'' ELSE F1.NAME||''.''||F1.EXT END AS PATH '+SQLCRLF+
+    '  FROM   TABL$_FS F1 WHERE (F1.PARENT_ID = 0) '+SQLCRLF+
+    '  UNION ALL '+SQLCRLF+
+    '  SELECT F2.ID, F2.PARENT_ID, F2.NAME, F2.EXT, F2.SRC '+SQLCRLF+
+    '        ,CASE F2.EXT WHEN ''..'' THEN F3.PATH||F2.NAME||''/'' ELSE F3.PATH||F2.NAME||''.''||F2.EXT END AS PATH '+SQLCRLF+
+    '  FROM   TABL$_FS F2, FS F3 WHERE (F2.PARENT_ID = F3.ID) '+SQLCRLF+
+    ')SELECT F.PATH, F.SRC FROM FS F WHERE (F.PATH LIKE ?PATH) AND (F.EXT <> ''..'')';
+  {$ENDIF}     
+  lkQuery   := TxFBQuery.Create(lkTrans);
+  lkQuery.SQL.Text := 'SELECT T.* FROM TABL$_TB T WHERE (T.BASE_TYPE_ID = 2) ORDER BY T.ID ';    
+  lkQuery.Open;
+  lkQuery.First;
+  while not lkQuery.EOF do
+    begin
+    WriteLn(lkQuery.FieldByName('ID').AsString+' - '+lkQuery.FieldByName('NAME').AsString);
+
+    lkFolderName := lkQuery.FieldByName('ID').AsString;
+    if(  (Pos('TABL$',UpperCase(lkFolderName)) = 1)
+       or(Pos('PROC$',UpperCase(lkFolderName)) = 1)
+       or(Pos('VIEW$',UpperCase(lkFolderName)) = 1)
+    )then Delete(lkFolderName, 1, 5);
+    if(  (Pos('R_',UpperCase(lkFolderName)) = 1)
+       or(Pos('O_',UpperCase(lkFolderName)) = 1)
+       or(Pos('P_',UpperCase(lkFolderName)) = 1)
+       or(Pos('D_',UpperCase(lkFolderName)) = 1)
+       or(Pos('J_',UpperCase(lkFolderName)) = 1)
+    )then Delete(lkFolderName, 1, 2);
+
+    if not DirectoryExists(lkFolderName)then
+      CreateDir(lkFolderName);
+
+    lkSourceItem := StringsLoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/DBO/REF/TEMPLATE.PS'));
+    lkSourceItem := StrReplaceStr(lkSourceItem, '<%OBJECT_ID%>', lkQuery.FieldByName('ID').AsString);
+    lkFileName   := PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/CONFIG/'+ERP_ObjectDir(ERP_OBJECTTYPE_REF)+lkFolderName+'/DEFAULT.PS');
+    if not FileExists(lkFileName) then StringsSaveToFile(lkFileName, lkSourceItem);
+
+    lkSourceItem := StringsLoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/DBO/REF/TEMPLATE_ITEM.PS'));
+    lkSourceItem := StrReplaceStr(lkSourceItem, '<%OBJECT_ID%>', lkQuery.FieldByName('ID').AsString);
+    lkFileName   := PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/CONFIG/'+ERP_ObjectDir(ERP_OBJECTTYPE_REF)+lkFolderName+'/DEFAULT_ITEM.PS');
+    if not FileExists(lkFileName) then StringsSaveToFile(lkFileName, lkSourceItem);
+
+    lkSourceItem := StringsLoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/DBO/REF/TEMPLATE_DLG.PS'));
+    lkSourceItem := StrReplaceStr(lkSourceItem, '<%OBJECT_ID%>', lkQuery.FieldByName('ID').AsString);
+    lkFileName   := PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/CONFIG/'+ERP_ObjectDir(ERP_OBJECTTYPE_REF)+lkFolderName+'/DEFAULT_DLG.PS');
+    if not FileExists(lkFileName) then StringsSaveToFile(lkFileName, lkSourceItem);
+
+    lkSourceItem := StringsLoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/DBO/REF/TEMPLATE_ITEM_DLG.PS'));
+    lkSourceItem := StrReplaceStr(lkSourceItem, '<%OBJECT_ID%>', lkQuery.FieldByName('ID').AsString);
+    lkFileName   := PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/CONFIG/'+ERP_ObjectDir(ERP_OBJECTTYPE_REF)+lkFolderName+'/DEFAULT_ITEM_DLG.PS');
+    if not FileExists(lkFileName) then StringsSaveToFile(lkFileName, lkSourceItem);
+
+    lkSourceItem := StringsLoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/DBO/REF/TEMPLATE.HTML'));
+    lkSourceItem := StrReplaceStr(lkSourceItem, '<%OBJECT_ID%>', lkQuery.FieldByName('ID').AsString);
+    lkFileName   := PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/CONFIG/'+ERP_ObjectDir(ERP_OBJECTTYPE_REF)+lkFolderName+'/DEFAULT.HTML');
+    if not FileExists(lkFileName) then StringsSaveToFile(lkFileName, lkSourceItem);
+
+    lkSourceItem := StringsLoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/CONFIG/'+ERP_ObjectDir(ERP_OBJECTTYPE_REF)+'RPT_0000.XFM'));
+    lkFileName   := PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/CONFIG/'+ERP_ObjectDir(ERP_OBJECTTYPE_REF)+lkFolderName+'/RPT_0000.XFM');
+    if not FileExists(lkFileName) then StringsSaveToFile(lkFileName, lkSourceItem);
+
+    if not FileExists(PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/CONFIG/'+ERP_ObjectDir(ERP_OBJECTTYPE_REF)+lkFolderName+'/NAME.TXT'))then
+      StringsSaveToFile( PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/CONFIG/'+ERP_ObjectDir(ERP_OBJECTTYPE_REF)+lkFolderName+'/NAME.TXT'),
+        lkQuery.FieldByName('NAME').AsString      
+      );
+    if not FileExists(PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/CONFIG/'+ERP_ObjectDir(ERP_OBJECTTYPE_REF)+lkFolderName+'/DESKTOP.INI')) then 
+      StringsSaveToFile(PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/CONFIG/'+ERP_ObjectDir(ERP_OBJECTTYPE_REF)+lkFolderName+'/DESKTOP.INI'), 
+        '[.ShellClassInfo]'+#13#10+
+        'InfoTip='+ERP_ObjectCaption(ERP_OBJECTTYPE_REF)+': '+lkQuery.FieldByName('NAME').AsString
+      );
+    FileSetAttr(ExtractFilePath(PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/CONFIG/'+ERP_ObjectDir(ERP_OBJECTTYPE_REF)+lkFolderName+'/DESKTOP.INI')), {faSysFile} 4 or {faDirectory} 16);
+
+    {$IFDEF SAVETOLOCAL}
+    if lkQueryFS.Active then lkQueryFS.Close;
+    lkQueryFS.Prepare;
+    lkQueryFS.ParamByName('PATH').AsString := 'CONFIG/'+ERP_ObjectDir(ERP_OBJECTTYPE_REF)+lkFolderName+'/%';
+    lkQueryFS.Open;
+    lkQueryFS.First;
+    while not lkQueryFS.EOF do
+      begin
+      lkDBFolderName := lkQueryFS.FieldByName('PATH').AsString;
+      if(Pos('CONFIG/'+ERP_ObjectDir(ERP_OBJECTTYPE_REF)+lkFolderName+'/', lkDBFolderName) = 1)then
+        Delete(lkDBFolderName, 1, Length('CONFIG/'+ERP_ObjectDir(ERP_OBJECTTYPE_REF)+lkFolderName));
+      WriteLn('  ->'+lkDBFolderName);  
+      lkFileName   := PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/CONFIG/'+ERP_ObjectDir(ERP_OBJECTTYPE_REF)+lkFolderName+lkDBFolderName);
+      WriteLn('      >>'+lkFileName);  
+      if not FileExists(lkFileName) then 
+        StringsSaveToFile(lkFileName, lkQueryFS.FieldByName('SRC').AsString); 
+      lkQueryFS.Next;
+      end; 
+    if lkQueryFS.Active then lkQueryFS.Close;
+    {$ENDIF}
+    Amunhotep.ProcessMessages;
+    lkQuery.Next;
+    end;
+  if lkTrans.InTransaction then
+    lkTrans.Commit;
+  lkTrans.Free;
+end.

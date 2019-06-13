@@ -1,0 +1,51 @@
+{$IFNDEF PEAKTOP:IDE/ERP/CONFIG/REF/FIRMS/DIALOGCASEITEM.INC}
+  {$I PEAKTOP:IDE/ERP/CONFIG/REF/FIRMS/DIALOGCASEITEM.INC}
+{$ENDIF}  
+var
+  lkFirmId :string;
+  lkDocIds :array of string;
+  lkSQL    :string;
+begin
+  if not ERPDialogCaseReferenceItem_Firm_Execute(lkFirmId) then exit;
+
+  lkSQL := 
+    'EXECUTE BLOCK RETURNS ( '+SQLCRLF+
+    '   J_ID       TYPE OF COLUMN TABL$J_4.ID '+SQLCRLF+
+    '  ,DOCTYPE_ID TYPE OF COLUMN TABL$J_4.TYPE_ID '+SQLCRLF+
+    ')AS '+SQLCRLF+
+    '  DECLARE VARIABLE P_FIRM_ID     TYPE OF COLUMN TABL$J_4.FIRM_ID; '+SQLCRLF+
+    '  DECLARE VARIABLE P_PARENT_J_ID TYPE OF COLUMN TABL$J_4.ID; '+SQLCRLF+
+    '  DECLARE VARIABLE P_DATE1       TYPE OF COLUMN TABL$J_4.DATE_COMMIT; '+SQLCRLF+
+    '  DECLARE VARIABLE P_DATE2       TYPE OF COLUMN TABL$J_4.DATE_COMMIT; '+SQLCRLF+
+    'BEGIN '+SQLCRLF+
+    '  P_FIRM_ID     = '+lkFirmId+'; '+SQLCRLF+
+    '  P_PARENT_J_ID = NULL; '+SQLCRLF+
+    '  DOCTYPE_ID    = 1000152; '+SQLCRLF+
+    ' '+SQLCRLF+
+    '  SELECT FIRST 1 P.J_ID '+SQLCRLF+
+    '  FROM   PROC$J_INS(:P_PARENT_J_ID, :P_FIRM_ID, :DOCTYPE_ID) P '+SQLCRLF+
+    '  INTO   :J_ID; '+SQLCRLF+
+    ' '+SQLCRLF+
+    '  SELECT FIRST 1 J.DATE_COMMIT '+SQLCRLF+
+    '  FROM   TABL$J_4 J '+SQLCRLF+
+    '  WHERE  (J.ID = :J_ID) '+SQLCRLF+
+    '  INTO   :P_DATE1; '+SQLCRLF+
+    '  P_DATE2 = CAST( '+SQLCRLF+
+    '      LPAD(EXTRACT(DAY   FROM :P_DATE1),2,''0'')||''.''|| '+SQLCRLF+
+    '      LPAD(EXTRACT(MONTH FROM :P_DATE1),2,''0'')||''.''|| '+SQLCRLF+
+    '      LPAD(EXTRACT(YEAR  FROM :P_DATE1),4,''0'')||'' 00:20:00'' '+SQLCRLF+
+    '  AS TIMESTAMP); '+SQLCRLF+
+    ' '+SQLCRLF+
+    '  UPDATE TABL$J_4 J1 SET J1.DATE_COMMIT = :P_DATE2 WHERE (J1.ID = :J_ID); '+SQLCRLF+
+    ' '+SQLCRLF+
+    '  UPDATE OR INSERT INTO TABL$J_1000087 (J_ID, WRK_ID, TMC_ID, DATE_VALUE, DATE_END) '+SQLCRLF+
+    '    VALUES (:J_ID, 0, 0, CURRENT_TIMESTAMP, DATEADD(1 YEAR TO :P_DATE2) ) '+SQLCRLF+
+    '    MATCHING (J_ID); '+SQLCRLF+
+    '  SUSPEND; '+SQLCRLF+
+    'END';
+
+  SetLength(lkDocIds, 1)
+  if not TERPForm_SelectSQLParams([], lkSQL, [],[], ['J_ID'], lkDocIds)then exit;
+  SetGlobalVariable('J_ID', lkDocIds[0]);
+  call(StrAbsolutePath('./EDIT.PS', ScriptName));  
+end.

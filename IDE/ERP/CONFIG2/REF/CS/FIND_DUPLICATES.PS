@@ -1,0 +1,8 @@
+{DB:CONFIG/REF/CS/FIND_DUPLICATES.PS}
+var
+  lkSQL :string;
+begin
+  lkSQL := StringsLoadFromFile(StrAbsolutePath('./FIND_DUPLICATES.SQL', ScriptName));
+  if ExecSQL(FBDataBase, lkSQL) then
+    Dialogs.MessageDlg('Обработка справочника произведена.', mtInformation, [mbOK]);
+end.

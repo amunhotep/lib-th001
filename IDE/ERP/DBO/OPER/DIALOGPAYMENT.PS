@@ -1,0 +1,8 @@
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/OPER/DIALOGPAYMENT.INC}{$I PEAKTOP:IDE/ERP/DBO/OPER/DIALOGPAYMENT.INC}{$ENDIF}
+var
+  lkSum, lkPaySum, lkReturn :Extended;
+begin
+  lkSum := 1000.00;
+  lkPaySum := lkSum;
+  ERPDialogPayment_Execute(true, lkSum, lkPaySum, lkReturn);  
+end.

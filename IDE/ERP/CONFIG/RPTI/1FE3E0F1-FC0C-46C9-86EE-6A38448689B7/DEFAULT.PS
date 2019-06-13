@@ -1,0 +1,175 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG/RPTI/1FE3E0F1-FC0C-46C9-86EE-6A38448689B7/DEFAULT.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$I PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC} {$I PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}        {$I PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}        {$ENDIF}
+const
+  objname_datefrom   = 'dtpDateFrom';
+  objname_dateto     = 'dtpDateTo';
+  objname_firms      = 'gbFirms';
+  msg_input_firms    = 'Выберите фирмы учета';
+  //============================================================================
+  procedure TERPFormRpti_actRefEdt_OnExecute(Sender :TObject);
+  begin
+    with TERPForm_ActiveDataSet(TComponent(Sender).Owner) do
+      begin
+      if not Active then exit;
+      if not(RecordCount>0)then exit;
+      if(FieldByName('D14_TMC_ID').AsInteger = 0)then exit;
+      SetGlobalVariable('TMC_ID', FieldByName('D14_TMC_ID').AsString);
+      call(StrAbsolutePath('../../REF/TMC/DEFAULT_ITEM.PS', ScriptName));
+      end;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_actDocEdt1000075_OnExecute(Sender :TObject);
+  begin
+    with TERPForm_ActiveDataSet(TComponent(Sender).Owner) do
+      begin
+      if not Active then exit;
+      if not(RecordCount>0)then exit;
+      if(FieldByName('J_1000075_ID').AsInteger = 0)then exit;
+      SetGlobalVariable('J_ID', FieldByName('J_1000075_ID').AsString);
+      call('DB:CONFIG/DOC/1000075/EDIT.PS');
+      end;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_actDocEdt1000017_OnExecute(Sender :TObject);
+  begin
+    with TERPForm_ActiveDataSet(TComponent(Sender).Owner) do
+      begin
+      if not Active then exit;
+      if not(RecordCount>0)then exit;
+      if(FieldByName('J_1000017_ID').AsInteger = 0)then exit;
+      SetGlobalVariable('J_ID', FieldByName('J_1000017_ID').AsString);
+      call('DB:CONFIG/DOC/1000017/EDIT.PS');
+      end;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_actDocEdtReason_OnExecute(Sender :TObject);
+  begin
+    with TERPForm_ActiveDataSet(TComponent(Sender).Owner) do
+      begin
+      if not Active then exit;
+      if not(RecordCount>0)then exit;
+      if(FieldByName('J_REASON_ID').AsInteger = 0)then exit;
+      SetGlobalVariable('J_ID', FieldByName('J_REASON_ID').AsString);
+      call('DB:CONFIG/DOC/1000014/EDIT.PS');
+      end;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_actJrnlGoTo_OnExecute(Sender :TObject);
+  var
+    lkScript :string;
+  begin
+    with TERPForm_ActiveDataSet(TComponent(Sender).Owner) do
+      begin
+      if not Active then exit;
+      if not(RecordCount>0)then exit;
+      if(FieldByName('J_ID').AsInteger = 0)then exit;
+      SetGlobalVariable('J_ID'+ERP_SETTINGS_GOTOVAR, FieldByName('J_ID').AsString);
+      call('DB:CONFIG/DOC/'+FieldByName('J_TYPE_ID').AsString+'/DEFAULT.PS');
+      end;
+  end;
+  //============================================================================
+  function TERPFormRpti_GetExportFilter(aOwner:TComponent):string;
+  begin
+    Result := 
+      msg_erp_lbldatefrom+' "'+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+'" '+
+      msg_erp_lbldateto  +' "'+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto))+'" '+
+      'Фирмы учета: "'+InputIntf_Ref_GetNames(aOwner.FindComponent(objname_firms))+'" ';
+  end;
+  //============================================================================
+  function TERPFormRpti_OnGetSQL(aOwner:TComponent;var aSQL:string):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnGetSQLFileName(aOwner:TComponent;var aFileName:string);
+  begin
+     // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnProcessParams(aOwner:TComponent;aQr :TxFBQuery);
+  begin
+    with aQr do
+      begin
+      ParamByName('FIRM_IDS' ).AsString := InputIntf_Ref_GetIds(aOwner.FindComponent(objname_firms));
+      ParamByName('DATE_FROM').AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+' 00:00:00';
+      ParamByName('DATE_TO'  ).AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto)+1)+' 00:00:00';
+      end;  
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnChart(aOwner:TComponent; aParent:TWinControl);
+  var
+    lkPC :TxcPageControlEx;
+    lkTS :TxcTabSheet;
+  begin
+    aParent.Free;
+    exit;
+    lkPC := CreateTxcPageControlEx(aOwner, aParent, 'PCCharts', 0,0,600,600, alClient);
+    lkPC.MultiLine := false;
+    TxcPageControlEx_ActivateDefaultPage(lkPC);
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnTerms(aOwner:TComponent;aParent:TWinControl);
+  var
+    lkLastTop :Integer;
+  begin
+    lkLastTop := 4;
+    lkLastTop := lkLastTop + InputIntf_DatePeriod_Create(aOwner, aParent, 'gbDatePeriod', 'Укажите период', 4, lkLastTop, 44, 360,objname_datefrom,objname_dateto,StartOfTheMonth(Now),EndOfTheMonth(Now)).Height;
+    lkLastTop := lkLastTop + 4;
+    lkLastTop := lkLastTop + InputIntf_Ref_Create(aOwner,aParent,objname_firms   ,msg_input_firms   ,4,lkLastTop, 0,360,'TABL$R_FIRMS',TERPForm_Settings(aOwner).Values[ERP_SETTINGS_TABLENAME]).Height;
+    lkLastTop := lkLastTop + 4;
+  end;
+  //============================================================================
+  function TERPFormRpti_OnColumnsCreate(aOwner:TComponent; aDBG:TDBGridEh):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_Columns_OnEditButtonClick(Sender :TObject; var Handled :Boolean);
+  var
+    lkDBG    :TDBGridEh;
+    lkTypes  :string;
+    lkPlace  :string;
+    lkScript :string;
+  begin
+    Handled := true;
+    lkDBG   := TDBGridEh(TComponent(Sender).Owner.Owner);
+    if not lkDBG.DataSource.DataSet.Active then exit;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsCreated(aOwner:TComponent; aDBG:TDBGridEh);
+  var
+    lkToolBar :TxcGradientPanelVista;
+    i:Integer;
+  begin
+    for i:=0 to 3 do
+      aDBG.Columns[i].HideDuplicates := True;
+    lkToolBar := TxcGradientPanelVista(aOwner.FindComponent(obj_name_erp_toolbar_nav));
+    TERPForm_CreateAction(aOwner,'actRefEdt'       ,'Редактировать','Редактировать карточку'                 ,'',0,468,@TERPFormRpti_actRefEdt_OnExecute        ,@TERPFormRpti_actPrintGrid_OnUpdate,lkToolBar,nil);
+    TERPForm_CreateAction(aOwner,'actDocEdt1000017','Открыть БВ'   ,'Открыть документ Банковскую вписку'     ,'',0,378,@TERPFormRpti_actDocEdt1000017_OnExecute ,@TERPFormRpti_actPrintGrid_OnUpdate,lkToolBar,nil);
+    TERPForm_CreateAction(aOwner,'actDocEdtReason' ,'Открыть ПН'   ,'Открыть документ Приходная накладная'   ,'',0,307,@TERPFormRpti_actDocEdtReason_OnExecute  ,@TERPFormRpti_actPrintGrid_OnUpdate,lkToolBar,nil);
+    TERPForm_CreateAction(aOwner,'actDocEdt1000075','Открыть СФ'   ,'Открыть документ Исходящий счёт-фактуру','',0,374,@TERPFormRpti_actDocEdt1000075_OnExecute ,@TERPFormRpti_actPrintGrid_OnUpdate,lkToolBar,nil);
+    lkToolBar.Width := TWinControl_AutoWidth(lkToolBar) + 2;
+    aDBG.OnDblClick := @TERPFormRpti_actDocEdt1000075_OnExecute;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsLoad(aOwner:TComponent; aDBG:TDBGridEh);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  function TERPFormRpti_OnPrint(aOwner:TComponent):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_BeforePreview(aOwner:TComponent; aRpt:TxReport);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+
+begin
+  TERPFormRpti_Create('{1FE3E0F1-FC0C-46C9-86EE-6A38448689B7}');
+end.

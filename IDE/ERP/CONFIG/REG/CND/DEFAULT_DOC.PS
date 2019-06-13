@@ -1,0 +1,19 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG/REG/CND/DEFAULT_DOC.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/REG/FORMREG.INC} {$I PEAKTOP:IDE/ERP/DBO/REG/FORMREG.INC} {$ENDIF}
+var
+  lkJ_ID     :string;
+  lkJ_DOCSTR :string;
+  lkFrm      :TForm;
+begin
+  lkJ_ID     := GetGlobalVariable('J_ID');
+  lkJ_DOCSTR := '';
+  if(StrTrimAll(lkJ_ID) = '')then exit;
+  GetField(FBDataBase, 'TABL$J_4', 'DOCSTR', 'ID = '''+lkJ_ID+''' ', lkJ_DOCSTR);
+//  TERPFormGrid_DataSetFilter_Add('DATE_', '(J_ID = '''+lkJ_ID+''')');
+  TERPFormGrid_DataSetFilter_DateInit := true;
+  TERPFormGrid_DataSetFilter_DateFrom := StrToDate('01.01.2013'); 
+  TERPFormGrid_DataSetFilter_DateTo   := EndOfTheYear(Now); 
+  TERPFormGrid_DataSetFilter_Add('J_ID', '(J_ID = '''+lkJ_ID+''')');
+  lkFrm := Registry_Create('TABL$P_CND');
+  TERPForm_SetCaption(lkFrm, lkFrm.Caption+' '+lkJ_DOCSTR); 
+end.

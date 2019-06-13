@@ -1,0 +1,3 @@
+{$DEFINE PEAKTOP:IDE/ERP/DBO/RPTI/WIZARD_LANG.INC}
+const //================ PEAKTOP:IDE/ERP/DBO/RPTI/WIZARD_LANG.INC ==============
+  

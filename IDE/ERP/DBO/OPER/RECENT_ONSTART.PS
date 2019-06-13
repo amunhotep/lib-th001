@@ -1,0 +1,20 @@
+{$DEFINE PEAKTOP:IDE/ERP/DBO/OPER/RECENT_ONSTART.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/OPER/RECENT.INC}  {$I ./RECENT.INC}   {$ENDIF}
+var
+  lkFN :string;
+  lkSL :TStringList;
+begin
+  lkFN := PrepareAbsoleteFileName(ERP_ObjectTempFileName(ERP_OBJECTTYPE_OPER,ERP_OBJECTTYPE_OPER, ERP_OBJNAME_OPER_RECENT,GetGlobalVariable(ERP_GLOBALVARIABLE_USER_CURRENT)));
+  if not FileExists(lkFN)then
+    with TStringList.Create do
+      begin
+      Values[erp_opers_recent_show_onstart] := '1';
+      SaveToFile(lkFN);
+      Free;
+      end;
+  lkSL := TStringList.Create;
+  lkSL.Text := StringsLoadFromFile(lkFN);
+  if(lkSL.Values[erp_opers_recent_show_onstart] <> '0')then
+    TERPFormOperRecent_Create(false);
+  lkSL.Free;  
+end.

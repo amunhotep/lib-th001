@@ -1,0 +1,11 @@
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/DOC/FORMJRNL.INC}{$I PEAKTOP:IDE/ERP/DBO/DOC/FORMJRNL.INC}{$ENDIF}
+var
+  JrnlForm :TAmunhotepForm;
+begin
+  TERPFormGrid_DataSetFilter_DateInit := true;
+  TERPFormGrid_DataSetFilter_DateFrom := StrToDate('01.01.2012'); 
+  TERPFormGrid_DataSetFilter_DateTo   := Now; 
+  TERPFormGrid_DataSetFilter_Add('FIRM_ID'    ,'(FIRM_ID IN (2,3))');
+
+  Journal_Create('1000020');
+end.

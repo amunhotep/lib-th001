@@ -1,0 +1,35 @@
+{$I PEAKTOP:GLOBAL_VARIABLES.INC}
+var
+  J_ID      :string;
+  J_TYPE_ID :string;
+  lkXFM     :string;
+  lkRpt     :TxReport;
+  lkImgLogo :TxrImage;
+  lkStrm    :TMemoryStream;
+begin
+  J_ID := GetGlobalVariable('J_ID');
+  if((StrTrimAll(J_ID)='')or(UpperCase(J_ID)='NULL'))then exit;
+  if GetField(FBDataBase, 'TABL$J_4', 'TYPE_ID', 'ID = '''+J_ID+''' ', J_TYPE_ID)then
+    begin
+      lkXFM := StringsLoadFromFile(StrAbsolutePath('../'+J_TYPE_ID+'/RPT_DEFAULT.XFM', ScriptName));
+      if(StrTrimAll(lkXFM) = '')then exit;
+      lkRpt := TxReport(StrToComponent(lkXFM));
+      lkImgLogo := TxrImage(lkRpt.FindComponent('ImgLogo'));
+      try
+        lkStrm  := TMemoryStream.Create;
+        if StreamLoadFromFile(StrAbsolutePath('../conf/ent/logo.bmp', Amunhotep.ExeName),lkStrm)then
+          lkImgLogo.Picture.Bitmap.LoadFromStream(lkStrm);
+      finally    
+        lkStrm.Free;
+      end;  
+      lkRpt.DataBase := FBDataBase;
+      while(lkRpt.DataSets.Count < 2)do
+        lkRpt.DataSets.Add;
+      lkRpt.DataSets[0].SQL.Text := 'SELECT * FROM PROC$D_1000016('''+J_ID+''') ';
+      lkRpt.DataSets[1].SQL.Text := StringsLoadFromFile('DB:CONFIG/DOC/4/RPT_DEFAULT02.SQL');
+      lkRpt.DataSets[1].Query.Prepare;
+      lkRpt.DataSets[1].Query.ParamByName('J_ID').AsString := J_ID;
+      lkRpt.Prepare;
+      lkRpt.Preview;
+    end;  
+end.

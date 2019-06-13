@@ -1,0 +1,25 @@
+{$IFNDEF PEAKTOP:SYSUTILS/IMG/CONVERT/BMP2JPEG.INC}
+  {$I PEAKTOP:SYSUTILS/IMG/CONVERT/BMP2JPEG.INC}
+{$ENDIF}
+var
+  i    :Integer;
+  il   :TImageList;
+  Btmp :TBitmap;
+  lkPath :string;
+begin
+  lkPath := 'd:\img\$AMUNHOTEP\';
+  il := Amunhotep.MainForm.ImageListMain;
+  for i:=0 to il.Count-1 do
+    begin
+    Btmp        := TBitmap.Create;
+    Btmp.Height := il.Height;
+    Btmp.Width  := il.Width;
+    if il.GetBitmap(i, Btmp) then
+      begin
+      Btmp.SaveToFile(lkPath+FormatFloat('0000', i)+'.BMP');
+      Image_BmpToJpeg_SaveToFile(Btmp, lkPath+FormatFloat('0000', i)+'.JPG');
+      end;
+    Btmp.Free;
+    Amunhotep.ProcessMessages;
+    end;
+end.

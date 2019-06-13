@@ -1,0 +1,130 @@
+{$DEFINE PEAKTOP:IDE/ERP/DBO/OPER/IMPORT/SS001001.PS}
+{$IFNDEF PEAKTOP:SYSUTILS/FILES/SEARCH_UTILS.INC}        {$I PEAKTOP:SYSUTILS/FILES/SEARCH_UTILS.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TLABEL.INC}                         {$I PEAKTOP:OBJ/TLABEL.INC}                  {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCEDITCOMBO.INC}                   {$I PEAKTOP:OBJ/TXCEDITCOMBO.INC}            {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}          {$I PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}   {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCPANEL.INC}                       {$I PEAKTOP:OBJ/TXCPANEL.INC}                {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TMEMO.INC}                          {$I PEAKTOP:OBJ/TMEMO.INC}                   {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCTOOLBARBUTTON.INC}               {$I PEAKTOP:OBJ/TXCTOOLBARBUTTON.INC}        {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/OPER/FORMOPER.INC}          {$I ../FORMOPER.INC}                         {$ENDIF}
+  //================== PEAKTOP:IDE/ERP/DBO/OPER/IMPORT/SS001001.PS =============
+  procedure TERPFormOperImport_DoImport(aMemo:TMemo; const aFileName:string);
+  var
+    lkSQL          :string;
+    lkExcel        :Variant;
+    lkWorkSheet    :Variant;
+    lkCols, lkRows :Integer;
+    i, j, lkDelta  :Integer;
+    lkFilesCntr    :Integer;
+    lkFilesList    :TStringList;
+    lkID           :string;
+    lkNAME         :string;
+  begin
+    if not FileExists(aFileName) then
+      begin
+      Dialogs.MessageDlg('Указанный Вами файл не существует!'+#13#10+aFileName, mtWarning, [mbOk]);
+      exit;
+      end;
+    lkFilesList := Files_FindFiles(ExtractFilePath(aFileName), '*.xls', false);
+    if(not(lkFilesList.Count>0))then
+      begin
+      lkFilesList.Free;
+      exit;
+      end;
+    lkExcel := CreateOleObject('Excel.Application');
+    lkExcel.DisplayAlerts := true;
+    lkExcel.Visible := true;
+    lkExcel.Application.EnableEvents := false;
+    aMemo.Lines.Clear;
+    for lkFilesCntr:=0 to lkFilesList.Count-1 do
+      begin
+      aMemo.Lines.Add('Обработка файла: '+lkFilesList[lkFilesCntr]);
+      lkExcel.Workbooks.Open(lkFilesList[lkFilesCntr]);
+      //получаем активный лист
+      lkWorkSheet := lkExcel.ActiveWorkbook.ActiveSheet;
+      lkRows := lkWorkSheet.UsedRange.Rows.Count;
+      lkCols := lkWorkSheet.UsedRange.Columns.Count;
+  
+      Dialogs.ProgressDlgShow('Обработка: '+lkFilesList[lkFilesCntr]);
+      Dialogs.ProgressDlgSetProgress(0);
+      if(lkRows > 100)then
+        lkDelta := Trunc(lkRows / 100)
+       else
+        lkDelta := Trunc(100 / lkRows);
+      j := 0;
+      for i:=1 to lkRows do
+        begin
+        lkID   := StrCiphersOnlyInt(StrTrimAll(lkWorkSheet.Cells[i, 1].Value));
+        lkNAME := lkWorkSheet.Cells[i, 2].Value;
+        lkNAME := Copy(lkNAME, 1, 254);
+        lkNAME := StrReplaceStr(lkNAME, '''', '''''');
+        lkNAME := StrReplaceStr(lkNAME, '- ', '');
+        if(Length(lkID) > 1)then
+          begin
+          lkSQL  := 'UPDATE OR INSERT INTO TABL$R_TMC_VEDCODES (ID, NAME) VALUES ('''+lkID+''', '''+lkNAME+''') MATCHING (ID);';
+      	  if ExecSQL(FBDataBase, lkSQL)then
+            aMemo.Lines.Add('    '+lkID+':"'+lkNAME+'"')
+           else 
+            aMemo.Lines.Add('    ОШИБКА В СТРОКЕ:'+FormatFloat('0000',i)+'  '+lkID+':"'+lkNAME+'"');
+          end
+         else
+          aMemo.Lines.Add('    НЕВЕРНЫЙ УКТВЭД:'+FormatFloat('0000',i)+'  '+lkID+':"'+lkNAME+'"');
+        j := j + 1;
+        if((j mod lkDelta) = 0)then
+          Dialogs.ProgressDlgSetProgress(Trunc(j * 100 / lkRows));
+        Amunhotep.ProcessMessages;
+        end;  
+      lkExcel.Workbooks.Close;
+      end;
+    Dialogs.ProgressDlgHide;
+  end;
+  //============================================================================
+  procedure TERPFormOperImport_actImport_OnExecute(Sender :TObject);
+  begin
+    TERPFormOperImport_DoImport(TMemo(TComponent(Sender).Owner.FindComponent('MemoLog')), TxcEditCombo(TComponent(Sender).Owner.FindComponent('edtFileName')).Text);  
+  end;
+  //============================================================================
+  procedure TERPFormOperImport_edtFileName_OnButtonClick(Sender :TObject);
+  var
+    lkFileName :string;
+  begin
+    with TxcEditCombo(Sender) do
+      begin
+      lkFileName := Text; 
+      if not PromptForFileName(lkFileName, '*.xls;*.xlsx|*.*', 'xls', 'Выберите файл', ExtractFilePath(lkFileName), false)then exit;
+      Text := lkFileName;
+      end;
+  end;
+  //============================================================================
+  function TERPFormOperImport_Create:TAmunhotepForm;
+  var
+    lkToolBar :TxcGradientPanelVista;
+    lkAct     :TCustomAction;
+    lkPnl     :TxcPanel;
+    lkLbl     :TLabel;
+    lkEdt     :TxcEditCombo;
+    lkMem     :TMemo;
+  begin
+    Result := TAmunhotepForm(TERPFormOper_Create('Импорт из Microsoft Excel','',false, []));
+    lkToolBar := CreateTxcGradientPanelVistaToolBar(Result,Result,obj_name_erp_toolbar,'',alTop, 0,38,TERPForm_DefaultToolButtonWidth, 200,xbsNone);
+    lkPnl  := CreateTxcPanel(Result, Result, obj_name_erp_paneltop, '', alTop, 0,lkToolBar.Top+lkToolBar.Height,48,200,xbsNone);
+    lkLbl  := CreateTLabel(lkPnl,lkPnl,'  Укажите путь к файлу импорта',0,0,16,200,alTop,taLeftJustify);
+    lkEdt  := CreateTxcEditCombo(Result, lkPnl, 'edtFileName', TERPForm_DefaultControlIndent, lkLbl.Top+lkLbl.Height+TERPForm_DefaultControlIndent, TERPForm_DefaultControlHeight, 480);
+    with lkEdt do
+      begin
+      AlwaysEnable  := true;
+      ReadOnly      := false;
+      Text          := 'D:\home\comoffer\COMMON\TN_ZED\01.xls';
+      OnButtonClick := @TERPFormOperImport_edtFileName_OnButtonClick;
+      end;
+    lkMem  := CreateTMemo(Result,Result,'MemoLog',0,lkPnl.Top+lkPnl.Height+1,200,200,alClient);
+    lkMem.ReadOnly := true;
+    lkMem.Lines.Text := 
+      'Колонка 1 - Код УТКВЭД'+#13#10+
+      'Колонка 2 - Название УТКВЭД, не более 255 символов';
+    lkAct := TERPForm_CreateAction2(Result,'actImport','Импорт данных','Выполнить импорт данных из файла','F9',0,24,@TERPFormOperImport_actImport_OnExecute,nil,lkToolBar,120,nil);
+  end; 
+  //============================================================================
+begin
+  TERPFormOperImport_Create;
+end.

@@ -1,0 +1,28 @@
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/DOC/COMENTS.INC}{$I ./COMENTS.INC}{$ENDIF}
+var
+  lkObj    :TObject;
+  lkOwner  :TComponent;
+  lkParent :TWinControl;
+  lkDS     :TDataSource;
+begin
+  lkObj := GlobalObjects_Find(ERP_GLOBALVARIABLE_DOC_COMENTS_OBJOWNER);
+  if(lkObj = nil)then exit;
+  if not ObjectInheritsFrom(lkObj, 'TComponent')then exit;
+  lkOwner := TComponent(lkObj);
+  
+  lkObj := GlobalObjects_Find(ERP_GLOBALVARIABLE_DOC_COMENTS_OBJPARENT);
+  if(lkObj = nil)then exit;
+  if not ObjectInheritsFrom(lkObj, 'TWinControl')then exit;
+  lkParent := TWinControl(lkObj);
+
+  lkObj := GlobalObjects_Find(ERP_GLOBALVARIABLE_DOC_COMENTS_OBJDATASOURCE);
+  if(lkObj = nil)then exit;
+  if not ObjectInheritsFrom(lkObj, 'TDataSource')then exit;
+  lkDS := TDataSource(lkObj);
+
+  GlobalObjects_Delete(ERP_GLOBALVARIABLE_DOC_COMENTS_OBJOWNER);
+  GlobalObjects_Delete(ERP_GLOBALVARIABLE_DOC_COMENTS_OBJPARENT);
+  GlobalObjects_Delete(ERP_GLOBALVARIABLE_DOC_COMENTS_OBJDATASOURCE);
+  
+  DocComentsIntf_Create(lkOwner, lkParent, lkDS);
+end.

@@ -1,0 +1,23 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC} {$I PEAKTOP:GLOBAL_VARIABLES.INC} {$ENDIF}
+var
+  DocNumBerStr :string;
+  J_ID         :string;
+begin
+  if not Dialogs.InputQueryString('Открыть залог по номеру','Введите номер залога', DocNumberStr) then exit;
+  
+  if(Length(DocNumberStr) > 9)then
+    while(Length(DocNumberStr) > 9)do
+      Delete(DocNumberStr, 1, 1);
+  
+  J_ID := '';
+  GetField(FBDataBase, 'TABL$J_4', 'ID', '(DOCNUMBERSTR='''+DocNumberStr+''')AND(TYPE_ID=1000062)', J_ID);
+  WriteLn(DocNumberStr);
+  if(StrTrimAll(J_ID) = '')then
+    begin
+    Dialogs.MessageDlg('Залоговый билет с номером "'+DocNumberStr+'" не найден !', mtInformation, [mbOk]);
+    exit;
+    end;
+  WriteLn(J_ID);  
+  SetGlobalVariable('J_ID', J_ID);
+  call(StrAbsolutePath('./EDIT.PS', ScriptName));  
+end.

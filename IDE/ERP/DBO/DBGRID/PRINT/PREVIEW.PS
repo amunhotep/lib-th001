@@ -1,0 +1,14 @@
+{$DEFINE PEAKTOP:IDE/ERP/DBO/DBGRID/PRINT/PREVIEW.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/DBGRID/DLG.INC}  {$I ./DLG.INC}  {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/DBGRID/PROC.INC} {$I ./PROC.INC} {$ENDIF}
+var
+  lkRptId, lkRptName, lkRptPath :string;
+begin
+  if TERPDialogPrint_ExecuteDefault(lkRptId, lkRptName, lkRptPath)then
+    begin
+    if( (UpperCase(ExtractFileExt(lkRptPath)) = '.PS') or (UpperCase(ExtractFileExt(lkRptPath)) = '.PAS') )then
+      call(lkRptPath)
+     else 
+      ERP_DataSet_PrintPreview(lkRptId, lkRptName, lkRptPath, true);
+    end;  
+end.

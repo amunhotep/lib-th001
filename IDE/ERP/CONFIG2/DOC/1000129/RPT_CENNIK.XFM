@@ -1,0 +1,240 @@
+object ReportB5C95CA751D0CB437B8032E717147777: TxReport
+  Left = 0
+  Top = 0
+  Width = 794
+  Height = 1123
+  Frame.Color = clBlack
+  Frame.Top = False
+  Frame.Bottom = False
+  Frame.Left = False
+  Frame.Right = False
+  Transparent = False
+  Color = clWhite
+  Font.Charset = RUSSIAN_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -9
+  Font.Name = 'Verdana'
+  Font.Style = []
+  ParentFont = False
+  AutoFree = True
+  DataBase = AmunhotepMainForm.FBDB
+  DataSets.DataBase = AmunhotepMainForm.FBDB
+  DataSets = <
+    item
+      Active = False
+      Name = 'qrDoc'
+    end
+    item
+      Active = False
+      Name = 'qrJrnl'
+      MasterDataSet = 'qrDoc'
+    end
+    item
+      Active = False
+      Name = 'qrEnt'
+      MasterDataSet = 'qrDoc'
+    end
+    item
+      Active = False
+      Name = 'qrCS'
+      MasterDataSet = 'qrJrnl'
+    end>
+  DataSetIndex = 0
+  Functions.Strings = (
+    'PAGENUMBER'
+    'COLUMNNUMBER'
+    'REPORTTITLE')
+  Functions.DATA = (
+    '0'
+    '0'
+    #39#39)
+  StyleManager = AmunhotepMainForm.StyleManager
+  Options = [FirstPageHeader, LastPageFooter]
+  Page.Columns = 2
+  Page.Orientation = poPortrait
+  Page.PaperSize = A4
+  Page.Values = (
+    50.000000000000000000
+    2970.000000000000000000
+    50.000000000000000000
+    2100.000000000000000000
+    50.000000000000000000
+    50.000000000000000000
+    0.000000000000000000)
+  PrinterSettings.Copies = 1
+  PrinterSettings.OutputBin = Auto
+  PrinterSettings.Duplex = False
+  PrinterSettings.FirstPage = 0
+  PrinterSettings.LastPage = 0
+  PrinterSettings.ExtendedDuplex = 0
+  PrinterSettings.UseStandardPrinter = False
+  PrinterSettings.UseCustomBinCode = False
+  PrinterSettings.CustomBinCode = 0
+  PrinterSettings.UseCustomPaperCode = False
+  PrinterSettings.CustomPaperCode = 0
+  PrinterSettings.PrintMetaFile = False
+  PrintIfEmpty = True
+  SnapToGrid = True
+  Units = MM
+  Zoom = 100
+  PrevFormStyle = fsMDIChild
+  PreviewInitialState = wsNormal
+  object bndDetail: TxrBand
+    Left = 19
+    Top = 19
+    Width = 378
+    Height = 166
+    Frame.Color = clBlack
+    Frame.Top = True
+    Frame.Bottom = True
+    Frame.Left = True
+    Frame.Right = True
+    Transparent = False
+    Color = clWhite
+    AlignToBottom = False
+    ForceNewColumn = False
+    ForceNewPage = False
+    Size.Values = (
+      439.208333333333300000
+      1000.125000000000000000)
+    BandType = rbDetail
+    object xrExpression4: TxrExpression
+      Left = 1
+      Top = -1
+      Width = 376
+      Height = 27
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        71.437500000000000000
+        2.645833333333333000
+        -2.645833333333333000
+        994.833333333333300000)
+      Transparent = True
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -24
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      ResetAfterPrint = False
+      WordWrap = True
+      Expression = 'qrJrnl.J_1000141_DOCNUMBERSTR'
+      FontSize = 18
+    end
+    object xrExpressionMemo2: TxrExpressionMemo
+      Left = 1
+      Top = 24
+      Width = 376
+      Height = 50
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        132.291666666666700000
+        2.645833333333333000
+        63.500000000000000000
+        994.833333333333300000)
+      Transparent = True
+      RemoveBlankLines = False
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        
+          '{qrDoc.TMC_NAME}, c'#1077#1088#1080#1081#1085#1099#1081' '#1085#1086#1084#1077#1088':{qrDoc.TMC_NUMSHOW}, '#1084#1072#1088#1082#1072':{qrD' +
+          'oc.TMC_BRAND_NAME}, '#1084#1086#1076#1077#1083#1100':{qrDoc.TMC_MODELNAME}')
+      ParentFont = False
+      WordWrap = True
+      FontSize = 8
+    end
+    object xrDBBarcode1: TxrDBBarcode
+      Left = 6
+      Top = 77
+      Width = 104
+      Height = 80
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        211.666666666666700000
+        15.875000000000000000
+        203.729166666666700000
+        275.166666666666700000)
+      Transparent = False
+      BarType = xbcCodeEAN13
+      BarHeight = 0
+      Modul = 1
+      Ratio = 2.000000000000000000
+      CheckSum = xbccsModulo10
+      ColorSpc = clWhite
+      ColorBar = clBlack
+      Orientation = gdLeftToRight
+      TextShow = xbctsBarCode
+      TextPosition = xbctpBottomCenter
+      TextColor = clWhite
+      AutoWidth = False
+      HMargin = 0
+      DataField = 'TMC_BARCODE'
+      DataSetIndex = 0
+    end
+    object xrExpressionMemo1: TxrExpressionMemo
+      Left = 113
+      Top = 76
+      Width = 264
+      Height = 88
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        232.833333333333300000
+        298.979166666666700000
+        201.083333333333300000
+        698.500000000000000000)
+      Transparent = True
+      RemoveBlankLines = False
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -8
+      Font.Name = 'Verdana'
+      Font.Style = []
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{qrDoc.TMC_COMENT}')
+      ParentFont = False
+      WordWrap = True
+      FontSize = 6
+    end
+  end
+end

@@ -1,0 +1,6 @@
+{$DEFINE DB:CONFIG/REF/TMC/ATTRCLEAR_TMC_LIST_ID.PS}
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC} {$I PEAKTOP:GLOBAL_VARIABLES.INC} {$ENDIF}
+begin
+  if(Dialogs.MessageDlg('Преобразовать ТМЦ из "ТехнологичесокйКарты" в простую ТМЦ ?', mtConfirmation, [mbYes, mbNo]) <> mrYes)then exit;
+  ExecSQL(FBDataBase, 'UPDATE TABL$R_TMC T SET T.TMC_LIST_ID = 0 WHERE (T.ID = '''+GetGlobalVariable('TMC_ID')+''')');
+end.

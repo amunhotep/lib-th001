@@ -1,0 +1,163 @@
+{$DEFINE PEAKTOP:IDE/ERP/DBO/OPER/IMPORT/SS001001.PS}
+{$IFNDEF PEAKTOP:SYSUTILS/FILES/SEARCH_UTILS.INC}        {$I PEAKTOP:SYSUTILS/FILES/SEARCH_UTILS.INC}  {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TLABEL.INC}                         {$I PEAKTOP:OBJ/TLABEL.INC}                   {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCEDITCOMBO.INC}                   {$I PEAKTOP:OBJ/TXCEDITCOMBO.INC}             {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}          {$I PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}    {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCPANEL.INC}                       {$I PEAKTOP:OBJ/TXCPANEL.INC}                 {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TMEMO.INC}                          {$I PEAKTOP:OBJ/TMEMO.INC}                    {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCTOOLBARBUTTON.INC}               {$I PEAKTOP:OBJ/TXCTOOLBARBUTTON.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/INTERFACE/SYNEDIT/DEFAULT.INC}      {$I PEAKTOP:OBJ/INTERFACE/SYNEDIT/DEFAULT.INC}{$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/OPER/FORMOPER.INC}          {$I PEAKTOP:IDE/ERP/DBO/OPER/FORMOPER.INC}   {$ENDIF}
+  //================== PEAKTOP:IDE/ERP/DBO/OPER/IMPORT/SS001001.PS =============
+  procedure TERPFormOperExportOpenCart_DoImport(aSynEdit:TSynEdit; const aTablePrefix, aRootId, aFileName:string);
+  var
+    lkTr :TxFBTransaction;
+    lkQr :TxFBQuery;
+    lkStr:string;
+  begin
+    aSynEdit.Lines.Clear;
+    lkTr := TxFBTransaction.Create(nil);
+    with lkTr do
+      begin
+      DefaultDataBase := FBDataBase;
+      with Params do
+        begin
+        Clear;
+        Add('isc_tpb_read_committed');
+        Add('isc_tpb_read');
+        Add('isc_tpb_rec_version');
+        Add('isc_tpb_nowait');
+        end;
+      end;
+    lkQr := TxFBQuery.Create(lkTr);
+    lkStr := '';
+
+    lkQr.SQL.Text := StringsLoadFromFile(StrAbsolutePath('./OPENCART001_CATEGORY.SQL', ScriptName));
+    lkQr.Prepare;
+    lkQr.ParamByName('PREFIX' ).AsString := aTablePrefix;
+    lkQr.ParamByName('ROOT_ID').AsString := aRootId;
+    lkQr.Open;
+    lkQr.First;
+    while not lkQr.EOF do
+      begin
+      lkStr := lkStr + lkQr.FieldByName('ASQL001').AsString+SQLCRLF+lkQr.FieldByName('ASQL002').AsString;
+      lkQr.Next;
+      end;
+    if lkTr.InTransaction then 
+      lkTr.Commit;
+
+    lkQr.SQL.Text := StringsLoadFromFile(StrAbsolutePath('./OPENCART001_TMC.SQL', ScriptName));
+    lkQr.Prepare;
+    lkQr.ParamByName('PREFIX'    ).AsString   := aTablePrefix;
+    lkQr.ParamByName('ROOT_ID'   ).AsString   := aRootId;
+    lkQr.ParamByName('FIRM_IDS'  ).AsString   := '~0~1~2~3~4~5~';
+    lkQr.ParamByName('PLACES_IDS').AsString   := '~1000004~';
+    lkQr.ParamByName('DATE_FROM' ).AsDateTime := Now;
+    lkQr.Open;
+    lkQr.First;
+    while not lkQr.EOF do
+      begin
+      lkStr := lkStr + lkQr.FieldByName('ASQL001').AsString+SQLCRLF+lkQr.FieldByName('ASQL002').AsString;
+      lkQr.Next;
+      end;
+    if lkTr.InTransaction then 
+      lkTr.Commit;
+
+    lkTr.Free;    
+    aSynEdit.Lines.Text := lkStr;  
+    StringsSaveToFile(aFileName, lkStr);
+  end;
+  //============================================================================
+  procedure TERPFormOperExportOpenCart_actImport_OnExecute(Sender :TObject);
+  begin
+    TERPFormOperExportOpenCart_DoImport(
+      TSynEdit(TComponent(Sender).Owner.FindComponent('SynEdit')), 
+      TxcEditCombo(TComponent(Sender).Owner.FindComponent('edtTablePrefix')).Text,
+      IntToStr(TxcEditCombo(TComponent(Sender).Owner.FindComponent('edtCategoryRoot')).Tag),
+      TxcEditCombo(TComponent(Sender).Owner.FindComponent('edtFileName')).Text
+    );  
+  end;
+  //============================================================================
+  procedure TERPFormOperExportOpenCart_edtFileName_OnButtonClick(Sender :TObject);
+  var
+    lkFileName :string;
+  begin
+    with TxcEditCombo(Sender) do
+      begin
+      lkFileName := Text; 
+      if not PromptForFileName(lkFileName, '*.sql;*.sql|*.*', 'sql', 'Выберите файл', ExtractFilePath(lkFileName), true)then exit;
+      Text := lkFileName;
+      end;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_edtCategoryRoot_OnButtonClick(Sender :TObject);
+  var
+    lkLastTop :Integer;
+    lkGrb     :TxcGroupBox;
+    lkEdt     :TxcEditCombo;
+    lkStr     :string;
+  begin
+    with TxcEditCombo(Sender) do
+      begin
+      SetGlobalVariable('TMC_CTGR_ID', IntToStr(Tag));
+      call('DB:CONFIG/REF/TMC_CTGR/DEFAULT_DLG.PS');
+      lkStr := GetGlobalVariable('TMC_CTGR_ID');
+      if( (UpperCase(lkStr) = 'NULL') or (StrTrimAll(lkStr)='') )then exit;
+      Tag := StrToInt(lkStr);
+      GetField(FBDataBase, 'TABL$R_TMC_CTGR', 'PATH', 'ID = '+lkStr, lkStr);
+      Text := lkStr;
+      end;
+  end;
+  //============================================================================
+  function TERPFormOperExportOpenCart_Create:TAmunhotepForm;
+  var
+    lkToolBar  :TxcGradientPanelVista;
+    lkAct      :TCustomAction;
+    lkPnl      :TxcPanel;
+    lkLbl      :TLabel;
+    lkEdt      :TxcEditCombo;
+    lkEdtPrefix:TxcEditCombo;
+    lkEdtRoot  :TxcEditCombo;
+    lkSE       :TSynEdit;
+    lkStr      :string;
+  begin
+    Result := TAmunhotepForm(TERPFormOper_Create('Экспорт ТМЦ в OpenCart','',false, []));
+    lkToolBar := CreateTxcGradientPanelVistaToolBar(Result,Result,obj_name_erp_toolbar,'',alTop, 0,38,TERPForm_DefaultToolButtonWidth, 200,xbsNone);
+    lkPnl  := CreateTxcPanel(Result, Result, obj_name_erp_paneltop, '', alTop, 0,lkToolBar.Top+lkToolBar.Height,132,200,xbsNone);
+    lkLbl  := CreateTLabel(lkPnl,lkPnl,'Укажите путь к файлу экспорта',TERPForm_DefaultControlIndent,TERPForm_DefaultControlIndent,TERPForm_DefaultControlHeight,220,alNone,taLeftJustify);
+    lkEdt  := CreateTxcEditCombo(Result, lkPnl, 'edtFileName', TERPForm_DefaultControlIndent, lkLbl.Top+lkLbl.Height+TERPForm_DefaultControlIndent, TERPForm_DefaultControlHeight, 220);
+    with lkEdt do
+      begin
+      AlwaysEnable  := true;
+      ReadOnly      := false;
+      Text          := 'D:\home\MyDownloads\'+FormatDateTime('yyyymmdd_hhnnss', Now)+'.SQL';
+      OnButtonClick := @TERPFormOperExportOpenCart_edtFileName_OnButtonClick;
+      end;
+    lkLbl  := CreateTLabel(lkPnl,lkPnl,'Префикс для таблиц',lkEdt.Left+lkEdt.Width+TERPForm_DefaultControlIndent,lkLbl.Top,TERPForm_DefaultControlHeight,120,alNone,taLeftJustify);
+    lkEdtPrefix := CreateTxcEditCombo(Result, lkPnl, 'edtTablePrefix', lkLbl.Left, lkLbl.Top+lkLbl.Height+TERPForm_DefaultControlIndent, TERPForm_DefaultControlHeight,120);
+    with lkEdtPrefix do
+      begin
+      AlwaysEnable  := true;
+      ReadOnly      := false;
+      Text          := 'oc';
+      end;
+    lkLbl  := CreateTLabel(lkPnl,lkPnl,'начинать с категории',lkEdtPrefix.Left+lkEdtPrefix.Width+TERPForm_DefaultControlIndent,lkLbl.Top,TERPForm_DefaultControlHeight,180,alNone,taLeftJustify);
+    lkEdtRoot := CreateTxcEditCombo(Result, lkPnl, 'edtCategoryRoot', lkLbl.Left, lkLbl.Top+lkLbl.Height+TERPForm_DefaultControlIndent, TERPForm_DefaultControlHeight,180);
+    with lkEdtRoot do
+      begin
+      AlwaysEnable  := true;
+      ReadOnly      := false;
+      Tag           := 0;
+      GetField(FBDataBase, 'TABL$R_TMC_CTGR', 'PATH', 'ID = '+IntToStr(Tag), lkStr);
+      Text          := lkStr;
+      OnButtonClick := @TERPFormRpti_edtCategoryRoot_OnButtonClick;
+      end;
+    lkPnl  := CreateTxcPanel(Result, Result, obj_name_erp_panelclient, '', alClient, 0,lkPnl.Top+lkPnl.Height,200,200,xbsNone);
+    lkSE := Interface_SynEdit_Create(Result, lkPnl, 'SynEdit');
+    RegisterSynEdit(lkSE, ftSQL);
+    lkAct := TERPForm_CreateAction2(Result,'actImport','Экспорт данных','Выполнить экспорт данных в файл','F9',0,24,@TERPFormOperExportOpenCart_actImport_OnExecute,nil,lkToolBar,120,nil);
+  end; 
+  //============================================================================
+begin
+  TERPFormOperExportOpenCart_Create;
+end.

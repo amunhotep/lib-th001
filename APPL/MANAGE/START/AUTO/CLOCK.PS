@@ -1,0 +1,42 @@
+{$DEFINE PEAKTOP:APPL/MANAGE/START/AUTO/CLOCK.PS}
+  //============================================================================
+  procedure PanelClock_OnDblClick(Sender :TObject);
+  begin
+    call('PEAKTOP:IDE/ERP/DBO/OPER/CALENDAR.PS');
+  end; 
+  //============================================================================
+  procedure CreateClock;
+  var
+    lkCmp    :TComponent;
+    lkPnl    :TxcClockPanel;
+    lkParent :TWinControl;
+  begin
+    DontAutoFree;
+    lkParent := nil;
+    if(Amunhotep.MainForm.FindComponent('STATUSPANEL') <> nil)then
+      if ObjectInheritsFrom(Amunhotep.MainForm.FindComponent('STATUSPANEL'), 'TWinControl')then
+        lkParent := TWinControl(Amunhotep.MainForm.FindComponent('STATUSPANEL'));
+    if(lkParent = nil)then exit;
+    lkCmp := nil;
+    lkCmp := Amunhotep.MainForm.FindComponent('PanelClock');
+    if(lkCmp <> nil)then
+      lkPnl := TxcClockPanel(lkCmp)
+     else 
+      lkPnl := TxcClockPanel.Create(Amunhotep.MainForm);
+    with lkPnl do
+      begin  
+      Name           := 'PanelClock';
+      Parent         := lkParent;
+      BorderStyle    := xbsNone;
+      GradientDirect := gdTopToBottom;
+      SetBounds(1400,1,120,20);
+      Align          := alRight;
+      ShowHint       := true;
+      StyleManager   := Amunhotep.MainForm.StyleManager;
+      OnDblClick     := @PanelClock_OnDblClick;
+      end;
+  end;
+  
+begin
+  CreateClock;
+end.

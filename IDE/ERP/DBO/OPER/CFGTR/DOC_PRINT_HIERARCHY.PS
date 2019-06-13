@@ -1,0 +1,15 @@
+{$DEFINE PEAKTOP:IDE/ERP/DBO/OPER/CFGTR/DOC_PRINT_HIERARCHY.PS}
+var
+  lkRpt :TxReport;
+  lkXFM :string;
+begin
+  lkXFM := StringsLoadFromFile(StrAbsolutePath('./DOC_PRINT_HIERARCHY.XFM', ScriptName));
+  if(StrTrimAll(lkXFM) = '')then exit;
+  lkRpt := TxReport(StrToComponent(lkXFM));
+  lkRpt.DataBase := FBDataBase;
+  while(lkRpt.DataSets.Count < 1)do
+    lkRpt.DataSets.Add;
+  lkRpt.DataSets[0].SQL.Text := StringsLoadFromFile(StrAbsolutePath('./DOC_PRINT_HIERARCHY.SQL', ScriptName));
+  lkRpt.Prepare;
+  lkRpt.Preview;
+end.

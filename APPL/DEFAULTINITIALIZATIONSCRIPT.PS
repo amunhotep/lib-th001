@@ -1,0 +1,6 @@
+{$IFNDEF PEAKTOP:APPL/SPLASH.INC} {$I PEAKTOP:APPL/SPLASH.INC} {$ENDIF}
+begin
+  Amunhotep_Splash_OutText('Запуск среды ERP');
+  Amunhotep_Splash_WriteLn('PEAKTOP:IDE/ERP/IDE.PS');  
+  call('PEAKTOP:IDE/ERP/IDE.PS');
+end.

@@ -1,0 +1,220 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}               {$I PEAKTOP:GLOBAL_VARIABLES.INC}          {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TCOLUMNEH.INC}                  {$I PEAKTOP:OBJ/TCOLUMNEH.INC}             {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TCOLUMNEH_KEYLST.INC}           {$I PEAKTOP:OBJ/TCOLUMNEH_KEYLST.INC}      {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCBUTTON.INC}                  {$I PEAKTOP:OBJ/TXCBUTTON.INC}             {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANEL.INC}           {$I PEAKTOP:OBJ/TXCGRADIENTPANEL.INC}      {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}      {$I PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC} {$ENDIF}
+var
+  ROW_ID   :string;
+  //============================================================================
+  procedure DocDlg_DBGrid_OnKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+  begin
+    if(Shift = [ssCtrl])then
+      begin
+      if(Key = 13)then TForm(TComponent(Sender).Owner).ModalResult := mrOk;
+      end;   
+  end;
+  //============================================================================
+  procedure DocDlg_DataSet_OnFieldChange(Sender: TField);
+  var
+    lkDTS :TxFBDataSet;
+  begin
+    if(Sender.DataSet.State = dsInsert)then exit;
+    lkDTS := TxFBDataSet(Sender.DataSet);
+    if lkDTS.Active then
+      begin
+      if(lkDTS.State = dsEdit)then
+        try
+          lkDTS.Post;
+        except
+          lkDTS.Cancel;
+        end;
+      lkDTS.Close;  
+      end;
+    if lkDTS.Transaction.InTransaction then
+      lkDTS.Transaction.Commit;
+    lkDTS.Open;          
+  end;
+  //============================================================================
+  procedure DocDlg_DataSet_AfterOpen(DataSet :TDataSet);
+  var
+    i:Integer;
+  begin
+    for i:=1 to DataSet.Fields.Count-1 do
+      if((DataSet.Fields[i].FieldName = 'QUANT')or
+         (DataSet.Fields[i].FieldName = 'MASSA'))then
+        DataSet.Fields[i].OnChange := @DocDlg_DataSet_OnFieldChange;
+  end;
+  //============================================================================
+  procedure DocDlg_DataSet_OnNewRecord(DataSet :TDataSet);
+  var
+    lkStr :string; 
+  begin
+    if GetField(FBDataBase, 'RDB$DATABASE', 'GEN_ID(GENR$D_1000062S_ID,0)', '', lkStr)then
+      DataSet.FieldByName('ID').AsInteger := StrToInt(lkStr) + 1
+     else 
+      DataSet.FieldByName('ID').AsString  := '-1';
+    DataSet.FieldByName('D_ID').AsString  := ROW_ID;
+    DataSet.FieldByName('QUANT').AsString := '1';
+  end;
+  //============================================================================
+  function DocDlgExecute:Boolean;
+  var
+    lkForm        :TForm;
+    lkPanelClient :TxcGradientPanel;
+    lkTopBar      :TxcGradientPanelVista;
+    lkPanelBottom :TxcStdPanel;
+    lkBtnOk       :TxcButton; 
+    lkBtnCancel   :TxcButton;
+    lkTr          :TxFBTransaction;
+    lkDTS         :TxFBDataSet;
+    lkDS          :TDataSource;
+    lkDBG         :TDBGridEh;
+    lkCol         :TColumnEh;
+    lkFooter      :TColumnFooterEh;
+  label
+    infinity_loop;  
+  begin
+    Result := false;
+    lkForm := TForm.Create(nil);
+    with lkForm do
+      begin
+      Caption         := Amunhotep.Title;
+      Color           := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      BorderStyle     := bsDialog;
+      BorderIcons     := [biSystemMenu];
+      Position        := poDesktopCenter;
+      Width           := 360;
+      Height          := 320;
+      Font.Size       := 7;
+      end;
+    lkTopBar      := CreateTxcGradientPanelVista(lkForm, lkForm,'PanelTop', #$20+'Камни изделия',alTop,0,0,34,98,xbsRaized);  
+    lkPanelClient := CreateTxcGradientPanel(lkForm, lkForm,'PanelClient','',alClient,0,0,200,98,xbsNone  ,gdTopToBottom);  
+    lkPanelBottom := TxcStdPanel.Create(lkForm);
+    with lkPanelBottom do
+      begin
+      Name         := 'PanelBottom';
+      Parent       := lkForm;
+      Height       := 24;
+      Width        := lkForm.ClientWidth;
+      Align        := alBottom;
+      BorderStyle  := xbsNone;
+      StyleManager := Amunhotep.MainForm.StyleManager;
+      Color        := Amunhotep.MainForm.StyleManager.Colors.Window;
+      end;
+    lkBtnCancel := CreateTxcButton(lkForm,lkPanelBottom,'btnCancel','Отмена',lkPanelBottom.Width - 74,2,lkPanelBottom.Height-4,72,mrCancel,false,true );
+    lkBtnCancel.Font.Style := [fsBold];
+    lkBtnCancel.TabOrder   := 2;
+    lkBtnCancel.Anchors    := [akRight, akBottom]  
+    lkBtnOk     := CreateTxcButton(lkForm,lkPanelBottom,'btnOk'    ,'OK'    ,lkBtnCancel.Left - 74   ,2,lkPanelBottom.Height-4,72,mrOk    ,true ,false);
+    lkBtnOk.Font.Style     := [fsBold];
+    lkBtnOk.TabOrder       := 1;
+    lkBtnOk.Anchors        := [akRight, akBottom]  
+
+    lkTr := TxFBTransaction.Create(lkForm);
+    with lkTr do
+      begin
+      DefaultDataBase := FBDataBase;
+      Params.Clear;
+      Params.Add('isc_tpb_read_committed'); 
+      Params.Add('isc_tpb_write'); 
+      Params.Add('isc_tpb_rec_version'); 
+      Params.Add('isc_tpb_nowait'); 
+      end;
+    lkDTS := TxFBDataSet.Create(lkTr);
+    lkDTS.Transaction    := lkTr;
+    lkDTS.SelectSQL.Text := 
+      'SELECT DS.D_ID, DS.ID, DS.COLOR_ID, DS.QUANT, DS.MASSA, DS.MASSA_INS, DS.NAME '+#13#10+
+      'FROM   TABL$D_1000062S DS '+#13#10+
+      'WHERE  (DS.D_ID = '''+ROW_ID+''') '+#13#10+
+      'ORDER BY DS.ID ';    
+    lkDTS.RefreshSQL.Text  := 
+      'SELECT DS.D_ID, DS.ID, DS.COLOR_ID, DS.QUANT, DS.MASSA, DS.MASSA_INS, DS.NAME '+#13#10+
+      'FROM   TABL$D_1000062S DS '+#13#10+
+      'WHERE  (DS.ID = ?ID) '+#13#10+
+      'ORDER BY DS.ID ';    
+    lkDTS.InsertSQL.Text  := 'INSERT INTO TABL$D_1000062S (D_ID, ID, COLOR_ID, QUANT, MASSA)VALUES (?D_ID, ?ID, ?COLOR_ID, ?QUANT, ?MASSA)';    
+    lkDTS.ModifySQL.Text  :=
+      'UPDATE  TABL$D_1000062S S SET '+#13#10+
+      '   S.COLOR_ID = ?COLOR_ID '+#13#10+
+      '  ,S.QUANT    = ?QUANT '+#13#10+
+      '  ,S.MASSA    = ?MASSA '+#13#10+
+      'WHERE (S.ID = ?ID)';
+    lkDTS.DeleteSQL.Text  := 'DELETE FROM TABL$D_1000062S S WHERE (S.ID = ?ID)';    
+    lkDTS.AfterOpen   := @DocDlg_DataSet_AfterOpen;
+    lkDTS.OnNewRecord := @DocDlg_DataSet_OnNewRecord;
+    lkDS := TDataSource.Create(lkDTS);
+    lkDS.DataSet := lkDTS;
+    lkDBG := TDBGridEh.Create(lkForm);
+    with lkDBG do
+      begin
+      Parent            := lkPanelClient;
+      Align             := alClient;
+      DataSource        := lkDS;
+      Color             := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color        := Amunhotep.MainForm.StyleManager.Colors.Border;
+      FixedColor        := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      TitleFont.Color   := Amunhotep.MainForm.StyleManager.Colors.Border;
+      TitleFont.Style   := [fsBold];
+      UseMultiTitle     := true;
+      AllowedOperations := [alopInsertEh, alopAppendEh, alopUpdateEh, alopDeleteEh];
+      FooterRowCount    := 1;
+      Flat              := true;
+      Ctl3D             := false;
+      SumList.Active    := true;
+      OptionsEh         := OptionsEh + [dghFixed3D, dghFooter3D, dghHighlightFocus, dghRowHighlight];
+      OnKeyDown         := @DocDlg_DBGrid_OnKeyDown;
+      Columns.Clear;
+      end;
+    lkCol := CreateTColumnEh(lkDBG, 'COLOR_ID', '', 'Камни|Цвет', 120, taLeftJustify);
+    TColumnEh_FillKeyList('TABL$R_COLOR', 'ID', 'NAME', '', lkCol.KeyList, lkCol.PickList);
+    lkCol.AlwaysShowEditButton := true;
+    lkCol := CreateTColumnEh(lkDBG, 'QUANT', '# ### ##0','Камни|Кол', 40,taRightJustify);
+    lkCol.AlwaysShowEditButton := true;
+    lkCol.ButtonStyle  := cbsDropDown;
+    lkCol.AutoDropDown := true;
+    lkCol := CreateTColumnEh(lkDBG, 'MASSA', '# ### ##0.000','Камни|Масса 1шт',72,taRightJustify);
+    lkCol.AlwaysShowEditButton := true;
+    lkCol.ButtonStyle  := cbsDropDown;
+    lkCol.AutoDropDown := true;
+    lkCol := CreateTColumnEh(lkDBG, 'MASSA_INS', '# ### ##0.000','Камни|Масса общая',72,taRightJustify);
+    lkCol.Color    := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lkCol.ReadOnly := true;
+      lkFooter               := lkCol.Footers.Add;
+      lkFooter.Color         := lkCol.Color;
+      lkFooter.Alignment     := taRightJustify;
+      lkFooter.DisplayFormat := lkCol.DisplayFormat;
+      lkFooter.FieldName     := 'MASSA_INS';
+      lkFooter.ValueType     := fvtSum;
+      lkFooter.Font.Style    := [fsBold];
+
+    lkDTS.Open;
+  infinity_loop:    
+    Result := (lkForm.ShowModal = mrOk);
+    if Result then
+      begin
+      if(lkDTS.State <> dsBrowse)then
+        try
+          lkDTS.Post;
+        except
+          lkDTS.Cancel;
+        end;
+      if lkTr.InTransaction then
+        lkTr.Commit;  
+      end
+     else
+      begin
+      if(lkDTS.State <> dsBrowse)then
+        lkDTS.Cancel;
+      if lkTr.InTransaction then
+        lkTr.Rollback;  
+      end;
+    lkForm.Free;
+  end;
+  //============================================================================
+begin
+  ROW_ID := GetGlobalVariable('D_ID');
+  writeLn(ROW_ID);
+  if not DocDlgExecute then 
+    ExecSQL(FBdataBase, 'DELETE FROM TABL$D_1000062S D WHERE (D.D_ID = '''+ROW_ID+''')');
+end.

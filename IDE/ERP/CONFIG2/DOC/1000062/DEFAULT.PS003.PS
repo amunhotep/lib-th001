@@ -1,0 +1,10 @@
+{$I ../$COMMON.INC}
+begin
+  JrnlCaptionAdd := 'Перезалоги в течение суток';
+  JrnlDateInit   := true;
+  JrnlDateFrom   := StartOfTheMonth(Now); 
+  JrnlDateTo     := Now; 
+  Jrnl_HardFilter_Add('CS_ID', '(EXISTS(SELECT P.ID FROM PROC$J_1000062_PEREZALOG(ID) P ))');
+  Jrnl_HardFilter_Add('FLAG_COMMIT', '(FLAG_COMMIT = 1)');
+  JrnlForm := JtnlForm_Create('1000062');
+end.

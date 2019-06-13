@@ -1,0 +1,44 @@
+{$DEFINE PEAKTOP:IDE/DEVELOPMENT/EDITOR/DIALOGS/HIGHLIGHTER.PS}
+{$IFNDEF PEAKTOP:IDE/DEVELOPMENT/EDITOR/DIALOGS/HIGHLIGHTER.INC} {$I ./HIGHLIGHTER.INC} {$ENDIF}
+begin
+  DlgHighlighter_Execute(
+    [ SynEditHighlighter(ftPas   ) // 1 
+     ,SynEditHighlighter(ftDfm   ) // 2
+     ,SynEditHighlighter(ftSQL   ) // 3
+     ,SynEditHighlighter(ftJava  ) // 4
+     ,SynEditHighlighter(ftJS    ) // 5
+     ,SynEditHighlighter(ftPerl  ) // 6
+     ,SynEditHighlighter(ftBat   ) // 7
+     ,SynEditHighlighter(ftHTML  ) // 8
+     ,SynEditHighlighter(ftCss   ) // 9
+     ,SynEditHighlighter(ftXML   ) //10
+     ,SynEditHighlighter(ftVB    ) //11
+     ,SynEditHighlighter(ftPython) //12
+     ,SynEditHighlighter(ftC     ) //13
+     ,SynEditHighlighter(ftPHP   ) //14
+     ,SynEditHighlighter(ftAsm   ) //15
+     ,SynEditHighlighter(ftRC    ) //16
+     ,SynEditHighlighter(ftRuby  ) //17
+     ,SynEditHighlighter(ftInno  ) //18
+    ]
+   ,[ 289 // 1
+     ,293 // 2
+     ,290 // 3
+     ,450 // 4
+     ,449 // 5
+     ,284 // 6
+     ,282 // 7
+     ,288 // 8
+     ,288 // 9
+     ,288 //10
+     ,447 //11
+     ,448 //12
+     ,482 //13
+     ,451 //14
+     ,481 //15
+     ,453 //16
+     ,452 //17
+     ,485 //18
+    ]
+  );
+end.

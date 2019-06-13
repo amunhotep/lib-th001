@@ -1,0 +1,46 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}   {$I PEAKTOP:GLOBAL_VARIABLES.INC} {$ENDIF}
+    //==========================================================================
+    function PreviewReport(const ID, ResName:string):Boolean;
+    var
+      lkRpt :TxReport;
+      lkRes :string;
+    begin
+      Result := false;
+      lkRes := StringsLoadFromFile(ResName);
+      if(StrTrimAll(lkRes) = '')then
+        begin
+        Dialogs.MessageDlg('Неверный файл ресурсов '+#13#10+ResName, mtError, [mbOk]);
+        exit;
+        end;
+      lkRpt := TxReport(StrToComponent(lkRes));  
+      lkRpt.DataBase := FBDataBase;
+      if(lkRpt.DataSets.Count < 2)then
+        while(lkRpt.DataSets.Count < 2)do
+          lkRpt.DataSets.Add;
+      lkRes := StringsLoadFromFile( StrAbsolutePath('../1000087/RPT_JOURNAL.SQL', ScriptName) );
+      lkRes := StrReplaceStr(lkRes, '[?J_ID]', ID);    
+      lkRpt.DataSets[0].Name          := 'qrMain';    
+      lkRpt.DataSets[0].SQL.Text      := lkRes;
+      lkRpt.DataSets[1].Name          := 'qrEnt';
+      lkRpt.DataSets[1].MasterDataSet := 'qrMain';    
+      lkRpt.DataSets[1].SQL.Text := StringsLoadFromFile( StrAbsolutePath('../4/RPT_DEFAULT02.SQL', ScriptName) ); 
+      lkRpt.PreviewInitialState := Amunhotep.MainForm.ActiveMDIChild.WindowState;  
+      lkRpt.Prepare;
+      lkRpt.Preview;
+    end;
+    //==========================================================================
+var
+  J_ID      :string;
+  J_TYPE_ID :string;
+  Indx      :Integer;
+begin
+  J_ID := GetGlobalVariable('J_ID');
+  if((StrTrimAll(J_ID)='')or(UpperCase(J_ID)='NULL'))then exit;
+  
+  Indx := 0;
+  if not Dialogs.CaseItem('Печать договора', 'Первая тсраница'+#13#10+'Вторая страница', Indx) then exit;
+  case Indx of
+    0: PreviewReport(J_ID, StrAbsolutePath('./RPT_DEFAULT.XFM', ScriptName) );
+    1: PreviewReport(J_ID, StrAbsolutePath('./RPT_DEFAULT2.XFM', ScriptName) );
+  end;  
+end.    

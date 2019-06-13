@@ -1,0 +1,42 @@
+{$DEFINE PEAKTOP:APPL/FILEPROCESS/CLEARTEMPORARY.PS}
+{$IFDEF MSWINDOWS}
+  {$IFNDEF PEAKTOP:COM/MICROSOFT/WINDOWS/CONST.INC}
+    {$I PEAKTOP:COM/MICROSOFT/WINDOWS/CONST.INC}
+  {$ENDIF} 
+  {$IFNDEF PEAKTOP:COM/MICROSOFT/WINDOWS/KERNEL32.DLL.INC}
+    {$I PEAKTOP:COM/MICROSOFT/WINDOWS/KERNEL32.DLL.INC}
+  {$ENDIF} 
+  {$IFNDEF PEAKTOP:COM/MICROSOFT/WINDOWS/SHELL32.DLL.INC}
+    {$I PEAKTOP:COM/MICROSOFT/WINDOWS/SHELL32.DLL.INC}
+  {$ENDIF}
+{$ENDIF}
+    //==========================================================================
+    function GetEnvironmentVariableLocal(const Name: string): string;
+    {$IFDEF MSWINDOWS}
+    var
+      lkStrLength: LongInt;
+    {$ENDIF}
+    begin
+      Result := '';
+      {$IFDEF MSWINDOWS}
+      lkStrLength := GetEnvironmentVariable(Name, '', 0);
+      if(lkStrLength > 0)then
+        begin
+        SetLength(Result, lkStrLength-1);
+        GetEnvironmentVariable(Name, Result, lkStrLength);
+        end;
+      {$ENDIF}
+    end;
+    //==========================================================================
+var
+  PathToShell   :string;
+  FilesToDelete :string;  
+begin
+  PathToShell := GetEnvironmentVariableLocal('ComSpec');
+{$IFDEF MSWINDOWS}
+  FilesToDelete := '/C ERASE /Q/F/S "'+StrReplaceChar(StrAbsolutePath('../tmp/*.xrp', Amunhotep.ExeName), '/', '\')+'"';
+  ShellExecute(Amunhotep.Handle, '', PathToShell, FilesToDelete, '', SW_HIDE);
+  FilesToDelete := '/C ERASE /Q/F/S "'+StrReplaceChar(StrAbsolutePath('../tmp/*.bat', Amunhotep.ExeName), '/', '\')+'"';
+  ShellExecute(Amunhotep.Handle, '', PathToShell, FilesToDelete, '', SW_HIDE);
+{$ENDIF}  
+end.

@@ -1,0 +1,59 @@
+{$DEFINE DB:CONFIG/REF/TMC/ATTRGEN_ARTCILE.PS}
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC} {$I PEAKTOP:GLOBAL_VARIABLES.INC} {$ENDIF}
+var
+  lkTMC_ID              :string; 
+  lkTMC_ARTICLE         :string; 
+  lkTMC_GROUP_ID        :string;
+  lkTMC_GROUP_PARENT_ID :string;
+  lkTMC_GROUP_PREFIX    :string;
+  lkTMC_COUNTRY_ID      :string;
+  lkTMC_COUNTRY_NAME    :string;
+  lkGENERATOR           :string;
+  lkGENERATOR_VALUE     :string;
+  lkSQL                 :string;
+begin
+  lkTMC_ID := GetGlobalVariable('TMC_ID');
+  GetField(FBDataBase, 'TABL$R_TMC', 'TMC_GROUP_ID', 'ID = '+lkTMC_ID, lkTMC_GROUP_ID);
+  WriteLn(lkTMC_GROUP_ID);
+  GetField(FBDataBase, 'TABL$R_TMC_GROUP', 'PARENT_ID', 'ID = '+lkTMC_GROUP_ID, lkTMC_GROUP_PARENT_ID);
+  if(lkTMC_GROUP_PARENT_ID <> '150000')then
+    begin
+    Dialogs.MessageDlg('Генерация атрикула возможна только для группы "Драг.металлы"', mtWarning, [mbOK]);
+    exit;
+    end;
+  GetField(FBDataBase, 'TABL$R_TMC_GROUP', 'PREFIX', 'ID = '+lkTMC_GROUP_ID, lkTMC_GROUP_PREFIX);
+
+  GetField(FBDataBase, 'TABL$R_TMC', 'COUNTRY_ID', 'ID = '+lkTMC_ID, lkTMC_COUNTRY_ID);
+  if(lkTMC_COUNTRY_ID = '0')then
+    begin
+    Dialogs.MessageDlg('Не указан материал изделия!'+#13#10+'Автоматическая генерация атрикула невозможна.', mtWarning, [mbOK]);
+    exit;
+    end;
+  GetField(FBDataBase, 'TABL$R_COUNTRIES', 'VALUTE', 'ID = '+lkTMC_COUNTRY_ID, lkTMC_COUNTRY_NAME);
+
+  lkGENERATOR := 'GENR$R_TMC_ART'+FormatFloat('000000000',StrToInt(lkTMC_GROUP_ID))+'_'+lkTMC_COUNTRY_ID;
+  lkSQL :=   
+    'EXECUTE BLOCK AS '+#13#10+
+    '  DECLARE VARIABLE P_GEN_NAME DOMN$PSTRING; '+#13#10+
+    '  DECLARE VARIABLE P_SQL      DOMN$PSTRING; '+#13#10+
+    'BEGIN '+#13#10+
+    '  P_GEN_NAME = '''+lkGENERATOR+'''; '+#13#10+
+    '  IF(NOT(EXISTS(SELECT G.RDB$GENERATOR_ID FROM RDB$GENERATORS G WHERE (TRIM(G.RDB$GENERATOR_NAME) = TRIM(:P_GEN_NAME)))))THEN '+#13#10+
+    '    BEGIN  '+#13#10+
+    '    P_SQL = ''CREATE SEQUENCE ''||:P_GEN_NAME; '+#13#10+
+    '    EXECUTE STATEMENT :P_SQL; '+#13#10+
+    '    P_SQL = ''ALTER SEQUENCE ''||:P_GEN_NAME||'' RESTART WITH 200; ''; '+#13#10+
+    '    EXECUTE STATEMENT :P_SQL; '+#13#10+
+    '    END '+#13#10+
+    'END;';
+  ExecSQL(FBDataBase, lkSQL);
+  lkGENERATOR_VALUE := '';
+  GetField(FBDataBase, 'RDB$DATABASE', 'GEN_ID('+lkGENERATOR+', 1)', '', lkGENERATOR_VALUE);
+  if(Length(lkGENERATOR_VALUE) < 4)then
+    while(Length(lkGENERATOR_VALUE) < 4)do
+      lkGENERATOR_VALUE := '0'+lkGENERATOR_VALUE;
+  
+  lkTMC_ARTICLE := Copy(lkTMC_COUNTRY_NAME, 1, 1)+lkTMC_GROUP_PREFIX+lkGENERATOR_VALUE;
+  lkSQL := 'UPDATE TABL$R_TMC T SET T.ARTICLE = '''+lkTMC_ARTICLE+''' WHERE (T.ID = '''+lkTMC_ID+''') '; 
+  ExecSQL(FBDataBase, lkSQL); 
+end.

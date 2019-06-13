@@ -1,0 +1,2 @@
+{$DEFINE PEAKTOP:APPL/FILEPROCESS/DEFAULT.INC}
+const FileProcessingGlobalVariableName = 'FILE_PROCESSING_NAME';

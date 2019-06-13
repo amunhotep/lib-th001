@@ -1,0 +1,19 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC} {$I PEAKTOP:GLOBAL_VARIABLES.INC} {$ENDIF}  
+{$IFNDEF PEAKTOP:IDE/ERP/CONFIG/REF/FIRMS/DIALOGCASEITEM.INC}
+  {$I PEAKTOP:IDE/ERP/CONFIG/REF/FIRMS/DIALOGCASEITEM.INC}
+{$ENDIF} 
+var
+  lkFirmId :string;
+  lkWrkId  :string;
+  lkS :string;
+begin
+  lkWrkId := GetGlobalVariable('WRK_ID');
+  lkFirmId := '0';
+  if not ERPDialogCaseReferenceItem_Firm_Execute(lkFirmId) then exit;
+
+  if GetFieldCommit(FBDataBase, 'PROC$J_INS_1000047('''+lkFirmId+''', '''+lkWrkId+''', 0)', 'J_ID', '', lkS)then
+    begin
+    SetGlobalVariable('J_ID', lkS);
+    call(StrAbsolutePath('../1000047/EDIT.PS', ScriptName));  
+    end;                            
+end.

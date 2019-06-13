@@ -1,0 +1,92 @@
+{$DEFINE DB:CONFIG/OPER/CS/POLL/DLG.PS}
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}               {$I PEAKTOP:GLOBAL_VARIABLES.INC}           {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANEL.INC}           {$I PEAKTOP:OBJ/TXCGRADIENTPANEL.INC}       {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TLABEL.INC}                     {$I PEAKTOP:OBJ/TLABEL.INC}                 {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/$COMMON/FORMERP.INC}    {$I PEAKTOP:IDE/ERP/DBO/$COMMON/FORMERP.INC}{$ENDIF}
+type
+  TCSPollArray = array[0..8]of Boolean;
+  //============================================================================
+  function CSPollDlgExecute(const aCS_NAME:string; var aPoll:TCSPollArray):Boolean;
+  var
+    lkForm        :TForm;
+    lkPanelClient :TxcGradientPanel;
+    lkCaption     :array[0..8]of string;
+    lkCbx         :array[0..8]of TxcCheckBox;
+    lkLastTop, i  :Integer;
+  begin
+    lkCaption[0] := 'Газета';
+    lkCaption[1] := 'Радио';
+    lkCaption[2] := 'Реклама в транспорте';
+    lkCaption[3] := 'Реклама на транспорте';
+    lkCaption[4] := 'Знакомые';
+    lkCaption[5] := 'Наружная вывеска';
+    lkCaption[6] := 'Объявление в подъезде';
+    lkCaption[7] := 'Раздача листовок';
+    lkCaption[8] := 'Интернет';
+  
+    Result := false;
+    lkForm := TERPForm_Create(aCS_NAME, ERP_FILENAME_ICO_REF, ERP_FILENAME_BMP_REF, true, nil);
+    with lkForm do
+      begin
+      Caption         := 'Маркетинговый опрос контрагента';
+      Width           := MaxInteger(480, Trunc(Screen.Width / 2));
+      Height          := 320;
+      end;
+    lkPanelClient := CreateTxcGradientPanel(lkForm, lkForm,'PanelClient','',alClient,0,0,200,98,xbsNone  ,gdTopToBottom);  
+    lkLastTop := 4;
+    for i:=0 to 8 do
+      begin
+      aPoll[i] := false;
+      lkCbx[i] := TxcCheckBox.Create(lkForm);
+      with lkCbx[i] do
+        begin
+        Parent       := lkPanelClient;
+        Left         := 8;
+        Top          := lkLastTop;
+        Height       := 20;
+        Width        := lkForm.Width - 20;
+        StyleManager := Amunhotep.MainForm.StyleManager;
+        Caption      := lkCaption[i];
+        Checked      := aPoll[i];
+        Font.Style   := [fsBold];
+        end;
+      lkLastTop := lkLastTop + lkCbx[i].Height + 4;   
+      end;  
+    Result := (lkForm.ShowModal = mrOk);
+    if Result then
+      for i:=0 to 8 do
+        aPoll[i] := lkCbx[i].Checked;
+    lkForm.Free;
+  end;
+  //============================================================================
+
+var
+  CS_ID   :string;
+  lkCsName:string;
+  lkPoll  :TCSPollArray;
+  lkSQL   :string;
+  lkVars  :string;
+  lkVals  :string;
+  i       :Integer;
+begin
+  CS_ID    := GetGlobalVariable('CS_ID');
+  lkCsName := '';
+  GetField(FBDataBase, 'TABL$R_CS', 'NAME', '(ID = '+CS_ID+')', lkCsName);
+  if CSPollDlgExecute(lkCsName, lkPoll)then
+    begin
+    lkVars := '';
+    lkVals := '';
+    for i:=0 to 8 do
+      begin
+      lkVars := lkVars + ', Q'+FormatFloat('0000',i+1);
+      if lkPoll[i] then
+        lkVals := lkVals + ',1'
+       else 
+        lkVals := lkVals + ',0';
+      end;
+    lkSQL  := 'INSERT INTO TABL$P_CS_POLL(CS_ID, FILIAL_ID, REG_DATE'+lkVars+')VALUES('''+CS_ID+
+      ''',(SELECT FIRST 1 P.ID FROM PROC$R_FILIALS_DEFAULT P), CURRENT_TIMESTAMP '+lkVals+')';
+    ExecSQL(FBDataBase, lkSQL); 
+    Dialogs.MessageDlg('Маркетинговый опрос контрагента "'+lkCsName+'" добавлен в базу данных.', mtInformation, [mbOk]); 
+    end;  
+end.

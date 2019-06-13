@@ -1,0 +1,103 @@
+{$I PEAKTOP:SYSUTILS/IMG/CONVERT/BMP2JPEG.INC}
+var
+  lkTrRead  :TxFBTransaction;
+  lkQrRead  :TxFBQuery;
+  lkTr      :TxFBTransaction;
+  lkTb      :TxFBTable;
+  i, cnt    :Integer;
+  lkStream  :TMemoryStream;
+  lkBitmap  :TBitmap;
+  lkJpgImg  :TJPEGImage;
+begin
+//  exit;
+  lkTrRead := TxFBTransaction.Create(nil);
+  with lkTrRead do
+    begin
+    DefaultDatabase := FBDataBase;
+    with Params do
+      begin
+      Clear;
+      Add('isc_tpb_read_committed');
+      Add('isc_tpb_read');
+      Add('isc_tpb_rec_version');
+      Add('isc_tpb_nowait');
+      end;
+    end;
+  lkQrRead  := TxFBQuery.Create(lkTrRead);
+  lkQrRead.SQL.Text := StringsLoadFromFile(StrAbsolutePath('./CONVERT_IMAGES.SQL',ScriptName));
+  lkQrRead.Open;
+  lkQrRead.FetchAll;
+  lkQrRead.First;
+  i := 0;
+  cnt := lkQrRead.RecordCount;
+  Dialogs.ProgressDlgShow('');
+  while not lkQrRead.EOF do
+    begin
+    lkStream := TMemoryStream.Create;
+    TBlobField(lkQrRead.FieldByName('PHOTO')).SaveToStream(lkStream);
+    lkStream.Seek(0, soFromBeginning);
+
+    lkBitmap := TBitmap.Create;
+    lkJpgImg := TJPEGImage.Create;
+
+    lkBitmap.LoadFromStream(lkStream);
+    lkStream.Free;
+    Image_BmpToJpeg(lkBitmap, lkJpgImg);
+    lkBitmap.Free;
+    
+    lkStream := TMemoryStream.Create;
+    lkJpgImg.SaveToStream(lkStream);
+    lkJpgImg.Free;
+    
+    lkStream.Seek(0, soFromBeginning);
+
+        lkTr := TxFBTransaction.Create(nil);
+        with lkTr do
+          begin
+          DefaultDatabase := FBDataBase;
+          with Params do
+            begin
+            Clear;
+            Add('isc_tpb_read_committed');
+            Add('isc_tpb_write');
+            Add('isc_tpb_rec_version');
+            Add('isc_tpb_nowait');
+            end;
+          end;
+        lkTB := TxFBTable.Create(lkTr);
+        with lkTB do
+          begin
+          Database    := lkTr.DefaultDatabase;
+          Transaction := lkTr;
+          TableName   := 'TABL$R_CS_PHOTO';
+          try
+            Open;
+            try
+              Edit;
+              FieldByName('CS_ID').AsString         := lkQrRead.FieldByName('CS_ID').AsString;
+              FieldByName('ID').AsString            := lkQrRead.FieldByName('ID').AsString;
+              FieldByName('NAME').AsString          := lkQrRead.FieldByName('NAME').AsString;
+              FieldByName('FLAG_DELETE').AsString   := lkQrRead.FieldByName('FLAG_DELETE').AsString;
+              FieldByName('DATE_COMMIT').AsDateTime := lkQrRead.FieldByName('DATE_COMMIT').AsDateTime;
+              TBlobField(FieldByName('PHOTO')).LoadFromStream(lkStream);
+            finally
+              Post;
+            end;
+          finally
+            if Active then Close;
+          end;
+          end;
+        if lkTr.InTransaction then
+          lkTr.Commit;
+        lkTr.Free;
+    
+    lkStream.Free;
+    Dialogs.ProgressDlgSetProgress(Trunc(i * 100 / cnt));
+    lkQrRead.Next;
+    Amunhotep.ProcessMessages;
+    end;
+  Dialogs.ProgressDlgHide;
+  if lkTrRead.InTransaction then
+    lkTrRead.Commit;
+  lkTrRead.Free;    
+end.

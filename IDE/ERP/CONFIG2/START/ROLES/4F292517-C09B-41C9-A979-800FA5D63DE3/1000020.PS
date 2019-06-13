@@ -1,0 +1,119 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG2/START/ROLES/4F292517-C09B-41C9-A979-800FA5D63DE3/1000020.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/USERS/TOOLBAR.INC}   {$I PEAKTOP:IDE/ERP/DBO/USERS/TOOLBAR.INC} {$ENDIF}
+var
+  lkAct     :TAction;
+  lkToolBar :TxcGradientPanelVista;
+  lkTBB     :TxcToolBarButton;
+  lkStr     :string;
+begin
+  DontAutoFree;
+  lkToolBar := CreateToolBarRole('1000020');
+  //----------------- REF 
+  lkAct   := FindTAction(Amunhotep.MainForm, 'act1000020RefTMC', 'Т.М.Ц.','Открыть справочник "ТМЦ"','',0, 27); 
+  with lkAct do
+    begin
+    HelpKeyWord := 'TMC';
+    OnExecute   := @actRef2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name, 0,0,20,56, alLeft, lkAct); lkTBB.ShowCaption := true;
+
+  lkAct   := FindTAction(Amunhotep.MainForm, 'act1000020RefTmcAuto', 'Автомобили','Открыть справочник "Автомобили"','',0, 601); 
+  with lkAct do
+    begin
+    HelpKeyWord := 'TMC_AUTO';
+    OnExecute   := @actRef2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name, 56,0,20,88, alLeft, lkAct); lkTBB.ShowCaption := true;
+
+  lkAct   := FindTAction(Amunhotep.MainForm, 'act1000020RefWrk', 'Сотрудники','Открыть справочник "Сотрудники"','',0, 244); 
+  with lkAct do
+    begin
+    HelpKeyWord := 'WRK';
+    OnExecute   := @actRef2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name, 152,0,20,80, alLeft, lkAct); lkTBB.ShowCaption := true;
+
+  //----------------- DOC 
+  lkAct   := FindTAction(Amunhotep.MainForm, 'act1000020Doc1000151', 'Д.Раб','Новый Договор о приёме на работу','',0, 364); 
+  with lkAct do
+    begin
+    Tag       := 1000151;
+    OnExecute := @actDocNew2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name, 600,0,20,56, alLeft, lkAct); lkTBB.ShowCaption := true;
+  lkAct   := FindTAction(Amunhotep.MainForm, 'act1000020Doc1000152', 'Д.Мат','Новый Договор о мат. ответственности','',0, 364); 
+  with lkAct do
+    begin
+    Tag       := 1000152;
+    OnExecute := @actDocNew2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name, 656,0,20,56, alLeft, lkAct); lkTBB.ShowCaption := true;
+  lkAct   := FindTAction(Amunhotep.MainForm, 'act1000020Doc1000158', 'Взнос','Новый Страховой взнос сотрудника','',0, 301); 
+  with lkAct do
+    begin
+    Tag       := 1000158;
+    OnExecute := @actDocNew2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name, 686,0,20,56, alLeft, lkAct); lkTBB.ShowCaption := true;
+
+  lkAct   := FindTAction(Amunhotep.MainForm, 'act1000020Doc1000154', 'Сервис','Новый Сервисный заказ','',0, 606); 
+  with lkAct do
+    begin
+    Tag       := 1000154;
+    OnExecute := @actDocNew2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name, 756,0,20,56, alLeft, lkAct); lkTBB.ShowCaption := true;
+  lkAct   := FindTAction(Amunhotep.MainForm, 'act1000020Doc1000155', 'Мойка','Новый Заказ мойки','',0, 610); 
+  with lkAct do
+    begin
+    Tag       := 1000155;
+    OnExecute := @actDocNew2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name, 856,0,20,56, alLeft, lkAct); lkTBB.ShowCaption := true;
+  lkAct   := FindTAction(Amunhotep.MainForm, 'act1000020Doc1000156', 'Путевой','Новый Путеовой лист','',0, 378); 
+  with lkAct do
+    begin
+    Tag       := 1000156;
+    OnExecute := @actDocNew2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name, 956,0,20,80, alLeft, lkAct); lkTBB.ShowCaption := true;
+
+  //----------------- JRNL 
+  lkAct   := FindTAction(Amunhotep.MainForm, 'act1000020Jrnl1000151', 'Д.Раб','Журнал Договоров о приёме на работу','',0, 464); 
+  with lkAct do
+    begin
+    Tag       := 1000151;
+    OnExecute := @actJrnl2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name, 1000,0,20,56, alLeft, lkAct); lkTBB.ShowCaption := true;
+  lkAct   := FindTAction(Amunhotep.MainForm, 'act1000020Jrnl1000152', 'Д.Мат','Журнал Договоров о мат. ответственности','',0, 464); 
+  with lkAct do
+    begin
+    Tag       := 1000152;
+    OnExecute := @actJrnl2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name, 1256,0,20,56, alLeft, lkAct); lkTBB.ShowCaption := true;
+  lkAct   := FindTAction(Amunhotep.MainForm, 'act1000020Jrnl1000158', 'Взносы','Журнал Страховых взносов','',0, 352); 
+  with lkAct do
+    begin
+    Tag       := 1000158;
+    OnExecute := @actJrnl2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name, 1286,0,20,56, alLeft, lkAct); lkTBB.ShowCaption := true;
+
+  lkAct   := FindTAction(Amunhotep.MainForm, 'act1000020Jrnl1000153', 'Сервис','Журнал Автосервиса','',0, 355); 
+  with lkAct do
+    begin
+    Tag       := 1000153;
+    OnExecute := @actJrnl2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name, 1456,0,20,56, alLeft, lkAct); lkTBB.ShowCaption := true;
+  lkAct   := FindTAction(Amunhotep.MainForm, 'act1000020Jrnl1000156', 'Такси','Журнал "Путевых листов" и "Сдачи смены"','',0, 464); 
+  with lkAct do
+    begin
+    Tag       := 1000156;
+    OnExecute := @actJrnl2_OnExecute;
+    end; 
+  lkTBB := CreateTxcToolBarButton2(Amunhotep.MainForm, lkToolBar, 'TBB'+lkAct.Name, 1656,0,20,56, alLeft, lkAct); lkTBB.ShowCaption := true;
+
+end.

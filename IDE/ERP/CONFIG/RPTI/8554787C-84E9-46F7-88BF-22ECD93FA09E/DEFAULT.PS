@@ -1,0 +1,175 @@
+{$DEFINE DB:CONFIG/RPTI/8554787C-84E9-46F7-88BF-22ECD93FA09E/DEFAULT.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$I PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC} {$I PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}        {$I PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}        {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCEDITCOMBO.INC}                  {$I PEAKTOP:OBJ/TXCEDITCOMBO.INC}                  {$ENDIF}
+const
+  objname_datefrom   = 'dtpDateFrom';
+  objname_dateto     = 'dtpDateTo';
+  objname_paysrc     = 'edtPaySrc';
+  msg_input_paysrc   = 'Выберите И.Д.С.';
+  //============================================================================
+  function TERPFormRpti_GetExportFilter(aOwner:TComponent):string;
+  begin
+    Result := 
+      msg_erp_lbldatefrom+' "'+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+'" '+
+      msg_erp_lbldateto  +' "'+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto))+'" '+#13#10+
+      'Источник денежных средств: "'+TxcEditCombo(aOwner.FindComponent(objname_paysrc)).Text+'"';
+  end;
+  //============================================================================
+  function TERPFormRpti_OnGetSQL(aOwner:TComponent;var aSQL:string):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnGetSQLFileName(aOwner:TComponent;var aFileName:string);
+  begin
+     // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnProcessParams(aOwner:TComponent;aQr :TxFBQuery);
+  begin
+    if(UpperCase(aQr.Name) = 'QRMAIN')then
+      with aQr do
+        begin
+        ParamByName('DATE_FROM').AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+' 00:00:00';
+        ParamByName('DATE_TO'  ).AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto)+1)+' 00:00:00';
+        ParamByName('PAYSRC_ID').AsString := IntToStr(aOwner.FindComponent(objname_paysrc).Tag);
+        end;  
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnChart(aOwner:TComponent; aParent:TWinControl);
+  var
+    lkPC :TxcPageControlEx;
+    lkTS :TxcTabSheet;
+  begin
+    aParent.Free;
+    exit;
+    lkPC := CreateTxcPageControlEx(aOwner, aParent, 'PCCharts', 0,0,600,600, alClient);
+    lkPC.MultiLine := false;
+    TxcPageControlEx_ActivateDefaultPage(lkPC);
+  end;
+  //============================================================================
+  procedure TERPFormRpti_edtPaysrc_OnButtonClick(Sender :TObject);
+  var
+    lkStr :string;
+  begin
+    with TxcEditCombo(Sender) do
+      begin
+      SetGlobalVariable('PAYSRC_ID', IntToStr(Tag));
+      call('DB:CONFIG/REF/PAYSRC/DEFAULT_DLG.PS');
+      lkStr := GetGlobalVariable('PAYSRC_ID');
+      if( (UpperCase(lkStr) = 'NULL') or (StrTrimAll(lkStr)='') )then exit;
+      Tag := StrToInt(lkStr);
+      GetField(FBDataBase, 'TABL$R_PAYSRC', 'NAME', 'ID = '+lkStr, lkStr);
+      Text := lkStr;
+      end;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnTerms(aOwner:TComponent;aParent:TWinControl);
+  var
+    lkLastTop :Integer;
+    lkGrb     :TxcGroupBox;
+    lkEdt     :TxcEditCombo;
+    lkStr     :string;
+  begin
+    lkLastTop := 4;
+    lkLastTop := lkLastTop + InputIntf_DatePeriod_Create(aOwner, aParent, 'gbDatePeriod', 'Укажите период', 4, lkLastTop, 44,460,objname_datefrom,objname_dateto,StartOfTheMonth(Now),EndOfTheMonth(Now)).Height;
+    lkLastTop := lkLastTop + 4;
+    lkGrb     := CreateTxcGroupBox(aOwner, aParent, '',msg_input_paysrc,alNone,4,lkLastTop,48,460);
+    lkLastTop := lkLastTop + lkGrb.Height + 4;
+    lkStr     := '1000000'; 
+    lkEdt := CreateTxcEditCombo(aOwner,lkGrb,objname_paysrc,TERPForm_DefaultControlIndent,20,20,lkGrb.Width-(TERPForm_DefaultControlIndent*2));
+    with lkEdt do
+      begin
+      Color         := Amunhotep.MainForm.StyleManager.Colors.Window;
+      GlyphKind     := gkEllipsis;
+      ReadOnly      := true;
+      AlwaysEnable  := true;
+      Font.Style    := [fsBold];
+      Tag           := StrToInt(lkStr);
+      GetField(FBDataBase, 'TABL$R_PAYSRC', 'NAME', 'ID = '+lkStr, lkStr);
+      Text          := lkStr;
+      OnButtonClick := @TERPFormRpti_edtPaysrc_OnButtonClick;
+      end;
+  end;
+  //============================================================================
+  function TERPFormRpti_OnColumnsCreate(aOwner:TComponent; aDBG:TDBGridEh):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_Columns_OnEditButtonClick(Sender :TObject; var Handled :Boolean);
+  var
+    lkDBG    :TDBGridEh;
+    lkCmp    :TComponent;
+    lkCol    :TColumnEh;
+    lkScript :string;
+  begin
+    Handled := true;
+    lkDBG   := TDBGridEh(TComponent(Sender).Owner.Owner);
+    if not lkDBG.DataSource.DataSet.Active then exit;
+    lkCol   := lkDBG.Columns[lkDBG.SelectedIndex];
+    if(lkCol=nil)then exit;
+    lkScript := 
+      '{$IFNDEF PEAKTOP:IDE/ERP/DBO/DOC/FORMJRNL.INC}{$I PEAKTOP:IDE/ERP/DBO/DOC/FORMJRNL.INC}{$ENDIF} '+#13#10+
+      'var '+#13#10+
+      '  JrnlForm :TForm; '+#13#10+
+      'begin '+#13#10+
+      '  TERPFormGrid_DataSetFilter_DateInit := true; '+#13#10+
+      '  TERPFormGrid_DataSetFilter_DateFrom := StrToDate('''+FormatDateTime('dd.mm.yyyy',lkDBG.DataSource.DataSet.FieldByName('DATE_COMMIT').AsDateTime)+'''); '+#13#10+ 
+      '  TERPFormGrid_DataSetFilter_DateTo   := StrToDate('''+FormatDateTime('dd.mm.yyyy',lkDBG.DataSource.DataSet.FieldByName('DATE_COMMIT').AsDateTime)+'''); '+#13#10+
+      '  TERPFormGrid_DataSetFilter_Add(''PAYSRC_ID''  ,''PAYSRC_ID = '+IntToStr(lkDBG.Owner.FindComponent(objname_paysrc).Tag)+' ''); '+#13#10+
+      '  TERPFormGrid_DataSetFilter_Add(''FLAG_COMMIT'',''FLAG_COMMIT = 1''); '+#13#10+
+      '  JrnlForm := Journal_Create('''+lkCol.ColParams[0]+'''); '+#13#10+
+      '  TERPForm_SetCaption(JrnlForm, JrnlForm.Caption+'': '+TxcEditCombo(lkDBG.Owner.FindComponent(objname_paysrc)).Text+''');'+#13#10+
+      'end.'+#13#10;
+    run(lkScript, 'DB:CONFIG/DOC/'+lkCol.ColParams[0]+'/DEFAULT.PS');
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsCreated(aOwner:TComponent; aDBG:TDBGridEh);
+  var
+    i :Integer;
+    lkFlag :Boolean;
+  begin
+    for i:=0 to aDBG.Columns.Count-1 do
+      with aDBG.Columns[i] do
+        begin
+        lkFlag := true;
+        ColParams.Clear;
+             if(FieldName = 'KREDIT')then ColParams.Text := '1000021'
+        else if(FieldName = 'DEBET' )then ColParams.Text := '1000020'
+        else lkFlag := false;
+        if lkFlag then
+          begin
+          AlwaysShowEditButton := true;
+          with EditButtons.Add do
+            begin
+            Visible := true;
+            Style   := ebsEllipsisEh;
+            OnClick := @TERPFormRpti_Columns_OnEditButtonClick;
+            end;
+          end;
+        end;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsLoad(aOwner:TComponent; aDBG:TDBGridEh);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  function TERPFormRpti_OnPrint(aOwner:TComponent):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_BeforePreview(aOwner:TComponent; aRpt:TxReport);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  
+
+begin
+  TERPFormRpti_Create('{8554787C-84E9-46F7-88BF-22ECD93FA09E}');
+end.

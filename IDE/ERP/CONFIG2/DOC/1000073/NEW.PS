@@ -1,0 +1,7 @@
+var
+  lkS :string;
+begin
+  if(Dialogs.MessageDlg('Сгенерировать автоматически приказы о передаче прав собственности ?', mtConfirmation,[mbYes, mbNo]) = mrYes)then  
+    if GetFieldCommit(FBDataBase, 'PROC$J_INS_1000073', 'CNT', '', lkS)then
+      Dialogs.MessageDlg('Обработано '+lkS+' невыкупов.', mtInformation,[mbOk]);  
+end.

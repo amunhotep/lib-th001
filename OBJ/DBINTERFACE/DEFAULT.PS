@@ -1,0 +1,60 @@
+{$DEFINE PEAKTOP:OBJ/DBINTERFACE/DEFAULT.PS}
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}                {$I PEAKTOP:GLOBAL_VARIABLES.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:GLOBAL_OBJECTS.INC}                  {$I PEAKTOP:GLOBAL_OBJECTS.INC}   {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/DBINTERFACE/GLOBALVARIABLES.INC} {$I ./GLOBALVARIABLES.INC}        {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/DBINTERFACE/IMAGE.INC}           {$I ./IMAGE.INC}                  {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/DBINTERFACE/TEXT.INC}            {$I ./TEXT.INC}                   {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/DBINTERFACE/RTF.INC}             {$I ./RTF.INC}                    {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/DBINTERFACE/HEX.INC}             {$I ./HEX.INC}                    {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/DBINTERFACE/SYNEDIT.INC}         {$I ./SYNEDIT.INC}                {$ENDIF}
+var
+  lkIndx      :Integer;
+  lkObj       :TObject;
+  lkOwner     :TComponent;
+  lkParent    :TWinControl;
+  lkDataSource:TDataSource;
+  lkDataField :string;
+  lkFieldType :string;
+  lkReadOnly  :Boolean;
+begin
+  if not GlobalObjects_Exists(DBINTERFACE_OBJNAME_OWNER, lkIndx)then exit;
+  lkObj := GlobalObjects_Find(DBINTERFACE_OBJNAME_OWNER);
+  if(lkObj = nil)then exit; if not ObjectInheritsFrom(lkObj, 'TComponent') then exit;
+  lkOwner := TComponent(lkObj);
+
+  if not GlobalObjects_Exists(DBINTERFACE_OBJNAME_PARENT, lkIndx)then exit;
+  lkObj := GlobalObjects_Find(DBINTERFACE_OBJNAME_PARENT);
+  if(lkObj = nil)then exit; if not ObjectInheritsFrom(lkObj, 'TWinControl') then exit;
+  lkParent := TWinControl(lkObj);
+
+  if not GlobalObjects_Exists(DBINTERFACE_OBJNAME_DATASOURCE, lkIndx)then exit;
+  lkObj := GlobalObjects_Find(DBINTERFACE_OBJNAME_DATASOURCE);
+  if(lkObj = nil)then exit; if not ObjectInheritsFrom(lkObj, 'TDataSource') then exit;
+  lkDataSource := TDataSource(lkObj);
+
+  lkDataField := GetGlobalVariable(DBINTERFACE_DATAFIELD);
+  lkFieldType := GetGlobalVariable(DBINTERFACE_DATAFIELDTYPE); 
+  if(Pos('DOMN$BLOB_',lkFieldType) <> 1)then exit;
+  lkReadOnly  := (StrTrimAll(GetGlobalVariable(DBINTERFACE_READONLY)) = '1');
+
+       if(Pos('DOMN$BLOB_IMAGE',lkFieldType) = 1)then DBInterfaceCreateImage  (lkOwner, lkParent, lkDataSource, lkDataField, lkReadOnly)
+  else if(Pos('DOMN$BLOB_TEXT' ,lkFieldType) = 1)then DBInterfaceCreateText   (lkOwner, lkParent, lkDataSource, lkDataField, lkReadOnly)
+  else if(Pos('DOMN$BLOB_RTF'  ,lkFieldType) = 1)then DBInterfaceCreateRtf    (lkOwner, lkParent, lkDataSource, lkDataField, lkReadOnly) 
+  else if(Pos('DOMN$BLOB_BIN'  ,lkFieldType) = 1)then DBInterfaceCreateHex    (lkOwner, lkParent, lkDataSource, lkDataField, lkReadOnly) 
+  else if(Pos('DOMN$BLOB_DFM'  ,lkFieldType) = 1)then DBInterfaceCreateSynEdit(lkOwner, lkParent, lkDataSource, lkDataField, lkReadOnly, lkFieldType)
+  else if(Pos('DOMN$BLOB_PAS'  ,lkFieldType) = 1)then DBInterfaceCreateSynEdit(lkOwner, lkParent, lkDataSource, lkDataField, lkReadOnly, lkFieldType)
+  else if(Pos('DOMN$BLOB_SQL'  ,lkFieldType) = 1)then DBInterfaceCreateSynEdit(lkOwner, lkParent, lkDataSource, lkDataField, lkReadOnly, lkFieldType)
+  else if(Pos('DOMN$BLOB_XML'  ,lkFieldType) = 1)then DBInterfaceCreateSynEdit(lkOwner, lkParent, lkDataSource, lkDataField, lkReadOnly, lkFieldType)
+  else if(Pos('DOMN$BLOB_HTML' ,lkFieldType) = 1)then DBInterfaceCreateSynEdit(lkOwner, lkParent, lkDataSource, lkDataField, lkReadOnly, lkFieldType)
+  else if(Pos('DOMN$BLOB_HTM'  ,lkFieldType) = 1)then DBInterfaceCreateSynEdit(lkOwner, lkParent, lkDataSource, lkDataField, lkReadOnly, lkFieldType)
+  else if(Pos('DOMN$BLOB_PHP'  ,lkFieldType) = 1)then DBInterfaceCreateSynEdit(lkOwner, lkParent, lkDataSource, lkDataField, lkReadOnly, lkFieldType)
+  else {BINARY DATA}                                  DBInterfaceCreateHex    (lkOwner, lkParent, lkDataSource, lkDataField, lkReadOnly)
+  ; 
+  
+  GlobalObjects_Delete(DBINTERFACE_OBJNAME_OWNER     );
+  GlobalObjects_Delete(DBINTERFACE_OBJNAME_PARENT    );
+  GlobalObjects_Delete(DBINTERFACE_OBJNAME_DATASOURCE);
+  SetGlobalVariable(DBINTERFACE_DATAFIELD    ,'');
+  SetGlobalVariable(DBINTERFACE_DATAFIELDTYPE,'');
+  SetGlobalVariable(DBINTERFACE_READONLY     ,'');
+end.

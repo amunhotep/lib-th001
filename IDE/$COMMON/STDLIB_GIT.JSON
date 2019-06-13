@@ -1,0 +1,82 @@
+﻿{"MESSAGES":[
+   {"NAME":"MSG_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Обновления"}
+     ,{"LANG":"1000056","TXT":"Updates"}
+     ,{"LANG":"1000204","TXT":"Mises à jour"}
+     ,{"LANG":"1000123","TXT":"Aktualisierung"}
+     ,{"LANG":"1000071","TXT":"Оновлення програми"}
+     ,{"LANG":"1000008","TXT":"Абнаўлення праграмы"}
+   ]}
+  ,{"NAME":"MSG_ACTUPDATE_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Обновить"}
+     ,{"LANG":"1000056","TXT":"Update"}
+     ,{"LANG":"1000204","TXT":"Mettre à jour"}
+     ,{"LANG":"1000123","TXT":"Aktualisieren"}
+     ,{"LANG":"1000071","TXT":"Оновити"}
+     ,{"LANG":"1000008","TXT":"Абнавіць"}
+   ]}
+  ,{"NAME":"MSG_ACTUPDATE_HINT","CAPTION":[
+      {"LANG":"1000054","TXT":"Обновить библиотеку кода из репозитария"}
+     ,{"LANG":"1000056","TXT":"Update code library from the repository"}
+     ,{"LANG":"1000204","TXT":"Mettre à jour la bibliothèque de code à partir du référentiel"}
+     ,{"LANG":"1000123","TXT":"Aktualisieren Sie die Codebibliothek aus dem Repository"}
+     ,{"LANG":"1000071","TXT":"Оновити бібліотеку коду з репозитарія"}
+     ,{"LANG":"1000008","TXT":"Абнавіць бібліятэку кода з рэпазітара"}
+   ]}
+  ,{"NAME":"MSG_ACTCOMMIT_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Фиксировать"}
+     ,{"LANG":"1000056","TXT":"Commit"}
+     ,{"LANG":"1000204","TXT":"Commettre"}
+     ,{"LANG":"1000123","TXT":"Verpflichten"}
+     ,{"LANG":"1000071","TXT":"Фіксувати"}
+     ,{"LANG":"1000008","TXT":"Фіксаваць"}
+   ]}
+  ,{"NAME":"MSG_ACTCOMMIT_HINT","CAPTION":[
+      {"LANG":"1000054","TXT":"Фиксировать изменения кода"}
+     ,{"LANG":"1000056","TXT":"Commit Source Code Changes"}
+     ,{"LANG":"1000204","TXT":"Valider les modifications du code source"}
+     ,{"LANG":"1000123","TXT":"Änderungen des Quellcodes übernehmen"}
+     ,{"LANG":"1000071","TXT":"Фіксувати зміни коду"}
+     ,{"LANG":"1000008","TXT":"Фіксаваць змены кода"}
+   ]}
+  ,{"NAME":"MSG_ACTCOMMIT_PROMPT","CAPTION":[
+      {"LANG":"1000054","TXT":"Добавьте коментарий"}
+     ,{"LANG":"1000056","TXT":"Please, Add a Comment"}
+     ,{"LANG":"1000204","TXT":"S'il vous plaît, ajoutez un commentaire"}
+     ,{"LANG":"1000123","TXT":"Bitte fügen Sie einen Kommentar hinzu"}
+     ,{"LANG":"1000071","TXT":"Додайте коментар"}
+     ,{"LANG":"1000008","TXT":"Дадайце каментар"}
+   ]}
+  ,{"NAME":"MSG_ACTPUSH_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Отправить"}
+     ,{"LANG":"1000056","TXT":"Push"}
+     ,{"LANG":"1000204","TXT":"Pousser"}
+     ,{"LANG":"1000123","TXT":"Drücken"}
+     ,{"LANG":"1000071","TXT":"Надіслати"}
+     ,{"LANG":"1000008","TXT":"Адправіць"}
+   ]}
+  ,{"NAME":"MSG_ACTPUSH_HINT","CAPTION":[
+      {"LANG":"1000054","TXT":"Отправить исходный код в репозиторий"}
+     ,{"LANG":"1000056","TXT":"Push Source Code into Repository"}
+     ,{"LANG":"1000204","TXT":"Pousser le code source dans le référentiel"}
+     ,{"LANG":"1000123","TXT":"Drücken Sie den Quellcode in das Repository"}
+     ,{"LANG":"1000071","TXT":"Надіслати похідний код до репозиторію"}
+     ,{"LANG":"1000008","TXT":"Адправіць зыходны код у рэпазітар"}
+   ]}
+  ,{"NAME":"MSG_ERROR_GITNOTFOUND","CAPTION":[
+      {"LANG":"1000054","TXT":"Не найден Git-клиент, необходимый для отправки обновления"}
+     ,{"LANG":"1000056","TXT":"Required Git client is not found."}
+     ,{"LANG":"1000204","TXT":"Requis Le client Git est introuvable."}
+     ,{"LANG":"1000123","TXT":"Erforderlicher Git-Client wird nicht gefunden."}
+     ,{"LANG":"1000071","TXT":"Не вдалося знайти Git-клієнт, необхідний для відправки поновлення"}
+     ,{"LANG":"1000008","TXT":"Не знойдзены Git-кліент, неабходны для адпраўкі абнаўлення"}
+   ]}
+  ,{"NAME":"MSG_ERROR_GITPARAMSNOTFOUND","CAPTION":[
+      {"LANG":"1000054","TXT":"Параметры для фиксации кода в репозитарий не найдены."}
+     ,{"LANG":"1000056","TXT":"Git commit params is not found."}
+     ,{"LANG":"1000204","TXT":"Git commit params n'est pas trouvé."}
+     ,{"LANG":"1000123","TXT":"Git-Commits werden nicht gefunden."}
+     ,{"LANG":"1000071","TXT":"Параметри для фіксації коду в репозитарій не знайдені."}
+     ,{"LANG":"1000008","TXT":"Параметры для фіксацыі кода ў рэпазітар не знойдзены."}
+   ]}
+]}

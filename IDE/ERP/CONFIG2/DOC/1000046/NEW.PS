@@ -1,0 +1,21 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG/DOC/1000046/NEW.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/CONFIG/REF/FIRMS/DIALOGCASEITEM.INC}
+  {$I PEAKTOP:IDE/ERP/CONFIG/REF/FIRMS/DIALOGCASEITEM.INC}
+{$ENDIF}  
+var
+  lkFirmId :string;
+  lkDate   :TDateTime;
+  lkDocIds :array of string;
+begin
+  if not ERPDialogCaseReferenceItem_Firm_Execute(lkFirmId) then exit;
+  lkDate := Now;
+  if not Dialogs.InputQueryDate('—оздать ведомость зарплаты','¬ведите мес€ц начислени€ зарплаты',lkDate) then exit;
+
+  SetLength(lkDocIds, 1)
+  if not TERPForm_SelectSQLParams([], 
+    'SELECT * FROM PROC$J_INS_1000046('''+lkFirmId+''', '''+FormatDateTime('dd.mm.yyyy', EndOfTheMonth(lkDate))+' 18:00:00'', 0) ', [],[], 
+    ['J_ID'], lkDocIds)then exit;
+
+  SetGlobalVariable('J_ID', lkDocIds[0]);
+  call(StrAbsolutePath('./EDIT.PS', ScriptName));  
+end.

@@ -1,0 +1,59 @@
+const
+  SQLCRLF = #13#10;
+var
+  lkFilePathItem   :string;
+  lkSourceItem     :string;
+  lkTrans          :TxFBTransaction;
+  lkQuery          :TxFBQuery;
+begin
+  lkTrans   := TxFBTransaction.Create(nil);
+  lkTrans.DefaultDataBase := FBDataBase;
+  lkQuery   := TxFBQuery.Create(lkTrans);
+  lkQuery.SQL.Text := 
+      'WITH RECURSIVE TTT AS( '+SQLCRLF+
+      '  SELECT T1.ID, T1.PARENT_ID, T1.NAME2 AS NAME '+SQLCRLF+
+      '  FROM   TABL$_TB_TYPES T1 WHERE  (T1.ID = 4) '+SQLCRLF+
+      '  UNION ALL '+SQLCRLF+
+      '  SELECT T2.ID, T2.PARENT_ID, T2.NAME2 AS NAME '+SQLCRLF+
+      '  FROM   (SELECT TM.ID, TM.PARENT_ID, TM.NAME2 FROM TABL$_TB_TYPES TM ORDER BY TM.NAME2) T2, TTT T3 WHERE (T2.PARENT_ID = T3.ID) '+SQLCRLF+
+      ')SELECT T.ID, T.PARENT_ID, T.NAME FROM TTT T WHERE (T.ID > 4)';    
+  lkQuery.Open;
+  lkQuery.First;
+  while not lkQuery.EOF do
+    begin
+    WriteLn(lkQuery.FieldByName('ID').AsString+'.'+lkQuery.FieldByName('NAME').AsString);
+
+    lkFilePathItem := 'DB:CONFIG/DOC/'+lkQuery.FieldByName('ID').AsString+'/NAME.TXT';
+    StringsSaveToFile(lkFilePathItem, lkQuery.FieldByName('NAME').AsString);
+
+    lkSourceItem   := StringsLoadFromFile('PEAKTOP:IDE/ERP/DBO/DOC/TEMPLATE_OPEN.PS');
+    lkSourceItem   := StrReplaceStr(lkSourceItem, '<%OBJECT_TYPE%>', lkQuery.FieldByName('ID').AsString);
+    lkFilePathItem := 'DB:CONFIG/DOC/'+lkQuery.FieldByName('ID').AsString+'/OPEN.PS';
+    StringsSaveToFile(lkFilePathItem, lkSourceItem);
+
+    lkSourceItem   := StringsLoadFromFile('PEAKTOP:IDE/ERP/DBO/DOC/TEMPLATE_DLG.PS');
+    lkSourceItem   := StrReplaceStr(lkSourceItem, '<%OBJECT_TYPE%>', lkQuery.FieldByName('ID').AsString);
+    lkFilePathItem := 'DB:CONFIG/DOC/'+lkQuery.FieldByName('ID').AsString+'/DEFAULT_DLG.PS';
+    StringsSaveToFile(lkFilePathItem, lkSourceItem);
+
+    lkSourceItem   := StringsLoadFromFile('PEAKTOP:IDE/ERP/DBO/DOC/TEMPLATE.PS');
+    lkSourceItem   := StrReplaceStr(lkSourceItem, '<%OBJECT_TYPE%>', lkQuery.FieldByName('ID').AsString);
+    lkFilePathItem := 'DB:CONFIG/DOC/'+lkQuery.FieldByName('ID').AsString+'/DEFAULT.PS';
+    StringsSaveToFile(lkFilePathItem, lkSourceItem);
+    
+    lkSourceItem   := StringsLoadFromFile('PEAKTOP:IDE/ERP/DBO/DOC/TEMPLATE_PRINT_DB.PS');
+    lkSourceItem   := StrReplaceStr(lkSourceItem, '<%OBJECT_TYPE%>', lkQuery.FieldByName('ID').AsString);
+    lkFilePathItem := 'DB:CONFIG/DOC/'+lkQuery.FieldByName('ID').AsString+'/PRINT.PS';
+    StringsSaveToFile(lkFilePathItem, lkSourceItem);
+
+{
+    if(lkQuery.FieldByName('ID').AsInteger > 1000126)then
+      StringsSaveToFile('DB:CONFIG/DOC/'+lkQuery.FieldByName('ID').AsString+'/PRINT.PS', 'begin call(''PEAKTOP:IDE/ERP/CONFIG/DOC/1000014/PRINT.PS''); end.');
+}
+    Amunhotep.ProcessMessages;
+    lkQuery.Next;
+    end;
+  if lkTrans.InTransaction then
+    lkTrans.Commit;
+  lkTrans.Free;
+end.

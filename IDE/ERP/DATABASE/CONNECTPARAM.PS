@@ -1,0 +1,15 @@
+{$DEFINE PEAKTOP:IDE/ERP/DATABASE/CONNECTPARAM.PS}
+{$IFNDEF PEAKTOP:COM/MICROSOFT/WINDOWS/USER32.DLL.INC} {$I PEAKTOP:COM/MICROSOFT/WINDOWS/USER32.DLL.INC}  {$ENDIF}  
+{$IFNDEF PEAKTOP:SYSUTILS/GET_PARAM_FILE_NAME.INC}     {$I PEAKTOP:SYSUTILS/GET_PARAM_FILE_NAME.INC}      {$ENDIF}  
+{$IFNDEF PEAKTOP:APPL/SPLASH.INC}                      {$I PEAKTOP:APPL/SPLASH.INC}                       {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DATABASE/CONNECT.INC}         {$I ./CONNECT.INC}                                 {$ENDIF}
+begin
+  if(Amunhotep.ParamCount>0)then
+    if(LowerCase(Amunhotep.ParamStr[1])='-database')then
+      begin
+      Amunhotep_Splash_OutText('Запуск ERP-среды для базы данных');
+      Amunhotep_Splash_WriteLn(GetParamFileName(2));  
+      if ConnectToDataBaseByFileName(GetParamFileName(2)) then
+        call(StrAbsolutePath('../MAINMENU.PS',ScriptName));
+      end;  
+end.

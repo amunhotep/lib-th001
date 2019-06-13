@@ -1,0 +1,186 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}{$I PEAKTOP:GLOBAL_VARIABLES.INC}{$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TCOLUMNEH.INC}   {$I PEAKTOP:OBJ/TCOLUMNEH.INC}   {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TIMAGELIST.INC}  {$I PEAKTOP:OBJ/TIMAGELIST.INC}  {$ENDIF}
+const
+  msg_caption           = 'Выбрать филиалы';
+  msg_toppanel_caption  = 'Выберите филиалы';
+  msg_dbg_role_check    = 'филиал|Выбор'   ;
+  msg_dbg_role_name     = 'филиал|Название';
+  msg_btnok_caption     = 'Выбрать';
+  msg_btnyes_caption    = 'Выбрать все';
+  msg_btncancel_caption = 'Отмена';
+  //============================================================================
+  function FilialsDlgExecute(var aRolesList:string):Boolean;
+  var
+    lkDlg        :TForm;
+    lkTopPanel   :TxcGradientPanelVista;
+    lkBottomPanel:TxcGradientPanel;
+    lkBtnOk      :TxcButton;
+    lkBtnYesToAll:TxcButton;
+    lkBtnCancel  :TxcButton;
+    lkTr         :TxFBTransaction;
+    lkDts        :TxFBDataSet;
+    lkDS         :TDataSource;
+    lkdbg        :TDBGridEh;
+    lkCol        :TColumnEh;
+    lkMr         :TModalResult;
+  begin
+    aRolesList := '';
+    Result     := false;
+    lkDlg             := TForm.Create(nil);
+    lkDlg.BorderStyle := bsDialog;
+    lkDlg.Caption     := msg_caption;
+    lkDlg.Width       := 400;
+    lkDlg.Height      := 480;
+    lkDlg.Color       := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lkDlg.Font.Color  := Amunhotep.MainForm.StyleManager.Colors.Border;
+    lkDlg.Font.Name   := 'Verdana';
+    lkDlg.Font.Size   := 7;
+    lkDlg.Font.Style  := [fsBold];
+    lkDlg.Position    := poDesktopCenter;
+    lkTr                    := TxFBTransaction.Create(lkDlg);
+    lkTr.DefaultDataBase    := FBDataBase;
+    lkDts                   := TxFBDataSet.Create(lkTr);
+    lkDts.Transaction       := lkTr;
+    lkDts.SelectSQL.Text    := 'SELECT CAST((0) AS INTEGER) AS CHK, R.ID, R.NAME FROM TABL$R_FILIALS R ORDER BY R.ID ';
+    lkDts.RefreshSQL.Text   := 
+      'EXECUTE BLOCK ( '+#13#10+
+      '  QCHK   DOMN$INTEGER = ?CHK '+#13#10+
+      ' ,QID    DOMN$INTEGER = ?ID '+#13#10+
+      ' ,QNAME  DOMN$PSTRING = ?NAME '+#13#10+
+      ')RETURNS('+#13#10+
+      '  CHK  DOMN$INTEGER '+#13#10+
+      ' ,ID   DOMN$iNTEGER '+#13#10+
+      ' ,NAME DOMN$PSTRING '+#13#10+
+      ')AS '+#13#10+
+      'BEGIN '+#13#10+
+      '  CHK = :QCHK; '+#13#10+
+      '  SELECT FIRST 1 R.ID, R.NAME '+#13#10+
+      '  FROM   TABL$R_FILIALS R '+#13#10+
+      '  WHERE  (R.ID = :QID) '+#13#10+
+      '  INTO   :ID, :NAME; '+#13#10+
+      '  SUSPEND; '+#13#10+
+      'END ';
+    lkDts.ModifySQL.Text    := 
+      'EXECUTE BLOCK ('+#13#10+
+      '   QROLE_ID DOMN$INTEGER = ?ID '+#13#10+
+      '  ,QCHK     DOMN$INTEGER = ?CHK '+#13#10+
+      ')AS '+#13#10+
+      'BEGIN '+#13#10+
+      'END ';
+    lkDS                    := TDataSource.Create(lkDts);
+    lkDS.DataSet            := lkDts;
+    lkTopPanel              := TxcGradientPanelVista.Create(lkDlg);
+    lkTopPanel.Parent       := lkDlg;
+    lkTopPanel.Left         := 0;
+    lkTopPanel.Top          := 0;
+    lkTopPanel.Height       := 32;
+    lkTopPanel.Align        := alTop;
+    lkTopPanel.Caption      := msg_toppanel_caption;
+    lkTopPanel.StyleManager := Amunhotep.MainForm.StyleManager;
+    lkTopPanel.Font.Color   := Amunhotep.MainForm.StyleManager.Colors.Window;
+    lkTopPanel.Font.Name    := 'Verdana';
+    lkTopPanel.Font.Size    := 12;
+    lkTopPanel.Font.Style   := [fsBold];
+    lkTopPanel.BorderStyle  := xbsRaized;
+    lkdbg                   := TDBGridEh.Create(lkDlg);
+    lkdbg.Parent            := lkDlg;
+    lkdbg.Align             := alClient;
+    lkdbg.Color             := Amunhotep.MainForm.StyleManager.Colors.Window;
+    lkdbg.Font.Color        := Amunhotep.MainForm.StyleManager.Colors.Border;
+    lkdbg.FixedColor        := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lkdbg.TitleFont.Color   := Amunhotep.MainForm.StyleManager.Colors.Border;
+    lkdbg.TitleFont.Style   := [fsBold];
+    lkdbg.UseMultiTitle     := true;
+    lkdbg.Ctl3D             := false;
+    lkdbg.Flat              := true;
+    lkdbg.DataSource        := lkDS;
+    lkdbg.AllowedOperations := [alopUpdateEh];
+    lkdbg.Columns.Clear;
+    lkCol               := CreateTColumnEh(lkdbg,'CHK' ,'',msg_dbg_role_check, 70,taLeftJustify);
+    lkCol.KeyList.Text  := '0'+#13#10+'1';
+    lkCol.PickList.Text := ''+#13#10+msg_btnok_caption;
+    lkCol               := CreateTColumnEh(lkdbg,'NAME','',msg_dbg_role_name ,260,taLeftJustify);
+    lkCol.ReadOnly      := true;
+    lkCol.Color         := Amunhotep.MainForm.StyleManager.Colors.Foreground; 
+    lkBottomPanel              := TxcGradientPanel.Create(lkDlg);
+    lkBottomPanel.Parent       := lkDlg;
+    lkBottomPanel.Left         := 0;
+    lkBottomPanel.Height       := 20;
+    lkBottomPanel.Top          := lkDlg.Height - lkBottomPanel.Height;
+    lkBottomPanel.Align        := alBottom;
+    lkBottomPanel.Caption      := '';
+    lkBottomPanel.StyleManager := Amunhotep.MainForm.StyleManager;
+    lkBottomPanel.BorderStyle  := xbsNone;
+    lkBottomPanel.GradientDirect := gdLeftToRight;
+    lkBtnCancel                := TxcButton.Create(lkDlg);
+    lkBtnCancel.Parent         := lkBottomPanel;
+    lkBtnCancel.Top            := 0;
+    lkBtnCancel.Width          := 96;
+    lkBtnCancel.Left           := lkBottomPanel.Width - lkBtnCancel.Width;
+    lkBtnCancel.Align          := alRight;
+    lkBtnCancel.StyleManager   := Amunhotep.MainForm.StyleManager;
+    lkBtnCancel.Cancel         := true;
+    lkBtnCancel.Caption        := msg_btncancel_caption;
+    lkBtnCancel.ModalResult    := mrCancel;  
+    lkBtnOK                := TxcButton.Create(lkDlg);
+    lkBtnOK.Parent         := lkBottomPanel;
+    lkBtnOK.Top            := 0;
+    lkBtnOK.Width          := 96;
+    lkBtnOK.Left           := lkBottomPanel.Width - lkBtnCancel.Width - lkBtnOK.Width;
+    lkBtnOK.Align          := alRight;
+    lkBtnOK.StyleManager   := Amunhotep.MainForm.StyleManager;
+    lkBtnOK.Default        := true;
+    lkBtnOK.Caption        := msg_btnok_caption;
+    lkBtnOK.ModalResult    := mrOk;  
+    lkBtnYesToAll                := TxcButton.Create(lkDlg);
+    lkBtnYesToAll.Parent         := lkBottomPanel;
+    lkBtnYesToAll.Top            := 0;
+    lkBtnYesToAll.Width          := 96;
+    lkBtnYesToAll.Left           := 0;
+    lkBtnYesToAll.Align          := alLeft;
+    lkBtnYesToAll.StyleManager   := Amunhotep.MainForm.StyleManager;
+    lkBtnYesToAll.Caption        := msg_btnyes_caption;
+    lkBtnYesToAll.ModalResult    := mrYesToAll;  
+    if not lkDts.Active then
+      try
+        lkDts.Open;
+      except
+      end;
+    lkMr   := lkDlg.ShowModal;  
+    Result := (lkMr = mrOk) or (lkMr = mrYesToAll);
+    if Result then
+      begin
+      if(lkDts.Active)then
+        begin
+        if(lkDts.FieldByName('CHK').AsString <> '1')then
+          begin
+          if(lkDts.State = dsBrowse)then
+            lkDts.Edit;
+          lkDts.FieldByName('CHK').AsString := '1';
+          end;
+        if(lkDts.State = dsEdit)then
+          lkDts.Post;
+        lkDts.First;
+        while not lkDts.EOF do
+          begin
+          if( ((lkDts.FieldByName('CHK').AsString='1')and(lkMr=mrOk)) or (lkMr=mrYesToAll))then
+            aRolesList := aRolesList + lkDts.FieldByName('ID').AsString+',';
+          lkDts.Next;
+          end;
+        end
+       else
+        Result := false; 
+      end;
+    lkDlg.Free;  
+  end;
+  //============================================================================
+var
+  FilialsList :string;  
+begin
+  FilialsList := GetGlobalVariable('FILIAL_IDS_LIST');
+  if FilialsDlgExecute(FilialsList)then
+    SetGlobalVariable('FILIAL_IDS_LIST', FilialsList)
+   else 
+    SetGlobalVariable('FILIAL_IDS_LIST', '');
+end.

@@ -1,0 +1,11 @@
+{$DEFINE PEAKTOP:IDE/ERP/DBO/REF/EXTS/TMC/DEFAULT.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/REF/EXTS/TMC/TECHCARD_EDIT.INC} {$I ./TECHCARD_EDIT.INC} {$ENDIF}
+var
+  aOwner, aParent, aDataSet :TComponent;
+begin
+  if ERP_ObjectExtension_GetObjects(aOwner, aParent, aDataSet)then
+    begin
+    TERPFormGridRefTMC_ExtTechCardEdit_Create(aOwner, aParent, TDataSet(aDataSet));
+    TERPForm_OpenDataSetsChilds(TDataSet(aDataSet));
+    end;  
+end.

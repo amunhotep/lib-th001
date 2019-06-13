@@ -1,0 +1,1350 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}           {$I PEAKTOP:GLOBAL_VARIABLES.INC}                {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TCOLUMNEH.INC}              {$I PEAKTOP:OBJ/TCOLUMNEH.INC}                   {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TIMAGELIST.INC}             {$I PEAKTOP:OBJ/TIMAGELIST.INC}                  {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TACTION.INC}                {$I PEAKTOP:OBJ/TACTION.INC}                     {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TACTION.INC}                {$I PEAKTOP:OBJ/TACTION.INC}                     {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCTOOLBARBUTTON.INC}       {$I PEAKTOP:OBJ/TXCTOOLBARBUTTON.INC}            {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TWINCONTROL.AUTOSIZE.INC}   {$I PEAKTOP:OBJ/TWINCONTROL.AUTOSIZE.INC}        {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}  {$I PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}       {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/OBJECTNAMES.INC}    {$I PEAKTOP:IDE/ERP/DBO/OBJECTNAMES.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/FIREBIRD/DIALOGS/CUSTOM.INC}{$I PEAKTOP:IDE/FIREBIRD/DIALOGS/CUSTOM.INC}     {$ENDIF}
+  //============================================================================
+  function CreateTxcEditCalcOper(a_Owner :TComponent; a_Parent:TWinControl; 
+    const a_Name:string;
+    const a_Left, a_Top, a_Height, a_Width:Integer;
+    const a_Enabled:Boolean;
+    const a_Value :Extended):TxcEditCalc;
+  var
+    lkCmp :TComponent;
+  begin
+    lkCmp := a_Owner.FindComponent(a_Name);
+    if(lkCmp <> nil)then
+      Result := TxcEditCalc(lkCmp)
+     else 
+      Result := TxcEditCalc.Create(a_Owner);
+    with Result do
+      begin
+      Name         := a_Name;
+      Parent       := a_Parent;
+      Ctl3d        := false;
+      DisplayFormat:= '# ### ### ##0.00';
+      Color        := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color   := Amunhotep.MainForm.StyleManager.Colors.Border;
+      Font.Style   := [fsBold];
+      Font.Name    := 'Verdana';
+      Font.Size    := 8;
+      Left         := a_Left;
+      Top          := a_Top;
+      Height       := a_Height;
+      Width        := a_Width;
+      Enabled      := a_Enabled;
+      Value        := a_Value;
+      end; 
+  end;
+  //============================================================================
+  function DialogFilialAndHours_Execute(var aFilialId:string; var aHours:Extended):Boolean;
+  var
+    lkForm        :TForm;
+    lkImg         :TImage;
+    lkPanelClient :TxcGradientPanel;
+    lkLabel       :TLabel;
+    lkCbxFilial   :TComboBox;
+    lkEdtHours    :TxcEditCalc;
+    lkStr         :string;
+    I             :Integer;
+  begin
+    Result := false;
+    lkForm        := FirebirdDialog_Create('Добавить выход', 'Добавить', 'Отмена');
+    lkForm.Height := 180;
+    lkForm.Width  := 320;
+    lkPanelClient := TxcGradientPanel(lkForm.FindComponent('PanelClient'));
+    lkImg         := TImage(lkForm.FindComponent('ImageLogo'));
+    lkImg.Visible := false;
+    lkImg.Width   := 0;
+    lkLabel := TLabel.Create(lkForm);
+    with lkLabel do
+      begin
+      Parent      := lkPanelClient;
+      Left        := lkImg.Left + lkImg.Width;
+      Top         := 8;
+      Width       := lkForm.Width - (lkImg.Left + lkImg.Width + 4);
+      Height      := 20; 
+      Transparent := true;
+      Caption     := 'Выбирите филиал';
+      Font.Name   := 'Verdana';
+      Font.Size   := DefaultFirebirdDialogLabelFontHeight;
+      Font.Style  := [fsBold];
+      end;
+    lkCbxFilial := TComboBox.Create(lkForm);
+    with lkCbxFilial do
+      begin
+      Parent     := lkPanelClient;
+      Ctl3d      := false;
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      Font.Style := [fsBold];
+      Font.Name  := 'Verdana';
+      Font.Size  := DefaultFirebirdDialogEditFontHeight;
+      Left       := lkImg.Left + lkImg.Width + 8;
+      Width      := lkForm.Width - (lkImg.Left + lkImg.Width + 16);
+      Top        := lkLabel.Top + lkLabel.Height + 4; 
+      Items.Text := '';
+      if GetField(FBDataBase, 'TABL$R_FILIALS', 'ID||''. ''||NAME', '(ID > 0) AND (FLAG_DELETE = 0)', lkStr)then
+        Items.Text := lkStr;
+      ItemIndex  := 0;
+      for i:=0 to Items.Count-1 do
+        if(Pos(aFilialId+'.', Items[i]) = 1)then
+          begin
+          ItemIndex := I;
+          break;
+          end;
+      Style      := csDropDownList;
+      end;
+    lkLabel := TLabel.Create(lkForm);
+    with lkLabel do
+      begin
+      Parent      := lkPanelClient;
+      Left        := lkImg.Left + lkImg.Width;
+      Top         := lkCbxFilial.Top + lkCbxFilial.Height + 4;
+      Width       := lkForm.Width - (lkImg.Left + lkImg.Width + 4);
+      Height      := 20; 
+      Transparent := true;
+      Caption     := 'Введите количество часов';
+      Font.Name   := 'Verdana';
+      Font.Size   := DefaultFirebirdDialogLabelFontHeight;
+      Font.Style  := [fsBold];
+      end;
+    lkEdtHours := CreateTxcEditCalcOper(lkForm, lkPanelClient, 'EdtHours', lkLabel.Left+lkLabel.Width+4, lkLabel.Top, 20,128, True, aHours);
+    Result := (lkForm.ShowModal = mrOk);
+    if Result then
+      begin
+      aFilialId := StrCiphersOnlyInt(Copy(lkCbxFilial.Items[lkCbxFilial.ItemIndex], 1, Pos('. ',lkCbxFilial.Items[lkCbxFilial.ItemIndex])));
+      aHours    := lkEdtHours.Value;
+      end;
+    lkForm.Free;
+  end;
+  //============================================================================
+
+
+const
+  msg_invalid_resource  = 'Неверный файл ресурсов'; 
+  msg_caption           = 'График выхода сотрудников'; 
+  msg_actrefresh        = 'Обновить'; 
+  msg_actrefresh_hint   = 'Обновить график'; 
+  msg_actprint          = 'Печать'; 
+  msg_actprint_hint     = 'Печать графика выхода'; 
+  msg_actoutins         = 'Добавить'; 
+  msg_actoutins_hint    = 'Добавить выход'; 
+  msg_actoutupd         = 'Изменить'; 
+  msg_actoutupd_hint    = 'Изменить выход'; 
+  msg_actoutdel         = 'Удалить'; 
+  msg_actoutdel_hint    = 'Удалить выход'; 
+ 
+var 
+  AmunhotepForm :TAmunhotepForm; 
+  TopBar        :TxcGradientPanelVista; 
+  ImgLogo       :TImage; 
+  ToolBar       :TxcGradientPanelVista; 
+  cbxYears      :TComboBox; 
+  cbxMonth      :TComboBox; 
+  dbgRef        :TDBGridEh; 
+  trRef         :TxFBTransaction; 
+  dtsRef        :TxFBDataSet; 
+  dsdtsRef      :TDataSource; 
+  actlst        :TActionList;
+  LastYearID    :Integer;
+  LastMonthID   :Integer;
+  SQLText0001   :TStringList;
+const
+  FldPrefixID         = 'ID'; 
+  FldPrefixFilial     = 'FL'; 
+  FldPrefixFilialName = 'FN'; 
+  FldPrefixQuant      = 'QQ'; 
+  //============================================================================
+  procedure CloseDataSets;
+  begin
+    if trRef.InTransaction then
+      begin
+      if dtsRef.Active then
+        begin
+        if(dtsRef.State <> dsBrowse)then
+          dtsRef.Post;
+        dtsRef.Close;
+        end;
+      trRef.Commit;
+      end;
+  end;
+  //============================================================================
+  procedure RefreshView;
+  var
+    lkMonth   :string;
+    lkDate    :TDateTime;
+    lkCol     :TColumnEh;
+    lkSQLDomains       :string;
+    lkSQLSelect        :string;
+    lkFldNameId        :string;
+    lkFldNameFilial    :string;
+    lkFldNameFilialName:string;
+    lkFldNameQuant     :string;
+    lkFldNameQuantSum  :string;
+  begin 
+    CloseDataSets;  
+    lkMonth := '.'+FormatFloat('00',cbxMonth.ItemIndex+1)+'.'+cbxYears.Text;
+    dbgRef.FrozenCols      := 0;
+    if( (LastMonthID <> cbxMonth.ItemIndex) or (LastYearID <> cbxYears.ItemIndex) )then
+      begin
+      dbgRef.Columns.Clear;
+      LastMonthID := cbxMonth.ItemIndex;
+      LastYearID  := cbxYears.ItemIndex; 
+      end;
+    dbgRef.FrozenCols      := 0;  
+    dbgRef.RowLines        := 2;
+    dbgRef.RowPanel.Active := true;
+    lkCol := CreateTColumnEh(dbgRef, 'WRK_NAME', '', 'Сотрудник', 120, taLeftJustify);
+    lkCol.ReadOnly := true;
+    lkCol.Color    := Amunhotep.MainForm.StyleManager.Colors.Foreground + $202020;
+    lkCol.Font.Style := [fsBold];
+    lkCol.InRowLinePos := 0;
+    lkCol.Tag := 666;
+    lkCol := CreateTColumnEh(dbgRef, 'WRK_POST_NAME', '', 'Должность', 120, taLeftJustify);
+    lkCol.ReadOnly := true;
+    lkCol.Color    := Amunhotep.MainForm.StyleManager.Colors.Foreground + $202020;
+    lkCol.InRowLinePos := 1;
+    lkCol.Tag := 666;
+    lkCol := CreateTColumnEh(dbgRef, 'WRK_QUANT', '# ### ##0.000', 'ВСЕГО', 56, taRightJustify);
+    lkCol.ReadOnly := true;
+    lkCol.Color    := Amunhotep.MainForm.StyleManager.Colors.Foreground + $202020;
+    lkCol.Font.Style := [fsBold];
+    lkCol.InRowLinePos := 0;
+    lkCol.Tag := 666;
+    lkCol := CreateTColumnEh(dbgRef, 'WRK_QUANT2', '# ### ##0.000', ' ', 56, taRightJustify);
+    lkCol.ReadOnly := true;
+    lkCol.Color    := Amunhotep.MainForm.StyleManager.Colors.Foreground + $202020;
+    lkCol.Font.Style := [fsBold];
+    lkCol.InRowLinePos := 1;
+    lkCol.Tag := 666;
+
+    lkSQLDomains      := '';
+    lkSQLSelect       := '';
+    lkFldNameQuantSum := '';
+    lkDate := StartOfTheMonth(StrToDate('01'+lkMonth));
+    while(lkDate < EndOfTheMonth(StrToDate('01'+lkMonth)))do
+      begin
+      lkFldNameId         := FldPrefixID         + FormatDateTime('yyyymmdd', lkDate);
+      lkFldNameFilial     := FldPrefixFilial     + FormatDateTime('yyyymmdd', lkDate);
+      lkFldNameFilialName := FldPrefixFilialName + FormatDateTime('yyyymmdd', lkDate);
+      lkFldNameQuant      := FldPrefixQuant      + FormatDateTime('yyyymmdd', lkDate);
+      lkFldNameQuantSum   := lkFldNameQuantSum   +' + COALESCE(:'+lkFldNameQuant+',0)';
+      lkSQLDomains := lkSQLDomains +
+        '  ,'+lkFldNameId         + '    TYPE OF COLUMN TABL$P_WRK_GRAPHIC.ID '+SQLCRLF+
+        '  ,'+lkFldNameFilial     + '    TYPE OF COLUMN TABL$P_WRK_GRAPHIC.FILIAL_ID '+SQLCRLF+
+        '  ,'+lkFldNameFilialName + '    TYPE OF COLUMN TABL$R_FILIALS.PREFIX '+SQLCRLF+
+        '  ,'+lkFldNameQuant      + '    TYPE OF COLUMN TABL$P_WRK_GRAPHIC.HOURS '+SQLCRLF+
+        '';
+      lkSQLSelect := lkSQLSelect +
+        '    '+lkFldNameId+' = 0; '+lkFldNameFilial+' = NULL; '+lkFldNameFilialName+' = NULL; '+lkFldNameQuant+' = NULL; '+SQLCRLF+ 
+        '    SELECT FIRST 1 COALESCE(P.ID,0), COALESCE(P.FILIAL_ID,-1), COALESCE(F.PREFIX,''''), COALESCE(P.HOURS,0) '+SQLCRLF+
+        '    FROM   TABL$P_WRK_GRAPHIC P, TABL$R_FILIALS F '+SQLCRLF+
+        '    WHERE  ((P.WRK_WORK_ID+0) = :WRK_WORK_ID) '+SQLCRLF+
+        '      AND  (P.DATE_COMMIT     = '''+FormatDateTime('dd.mm.yyyy', lkDate)+' 00:00:00'')'+SQLCRLF+
+        '      AND  ( (:FILIAL_ID IS NULL) OR (P.FILIAL_ID = :FILIAL_ID) ) '+SQLCRLF+
+        '      AND  (F.ID              = P.FILIAL_ID) '+SQLCRLF+
+        '    INTO   :'+lkFldNameId+', :'+lkFldNameFilial+', :'+lkFldNameFilialName+', :'+lkFldNameQuant+'; '+SQLCRLF+
+        '';
+      lkCol  := CreateTColumnEh(dbgRef, lkFldNameFilialName, ''      , FormatDateTime('dd' , lkDate), 48, taLeftJustify);
+      lkCol.Color := $00E8FFFF;
+      lkCol.InRowLinePos := 0;
+      lkCol.ColParams.Clear;
+      lkCol.ColParams.Add( IntToStr(DayOfWeek(lkDate)) );
+      lkCol.ColParams.Add( FormatDateTime('yyyymmdd', lkDate) );
+      lkCol.ColParams.Add( FormatDateTime('dd.mm.yyyy', lkDate)+' 00:00:00' );
+      lkCol.ColParams.Add( lkFldNameId );
+      lkCol.ReadOnly := True;
+
+      lkCol  := CreateTColumnEh(dbgRef, lkFldNameQuant     , '#0.000', FormatDateTime('ddd', lkDate), 48, taRightJustify);
+      lkCol.Color := $00E8FFFF;
+      lkCol.InRowLinePos := 1;
+      lkCol.ColParams.Clear;
+      lkCol.ColParams.Add( IntToStr(DayOfWeek(lkDate)) );
+      lkCol.ColParams.Add( FormatDateTime('yyyymmdd', lkDate) );
+      lkCol.ColParams.Add( FormatDateTime('dd.mm.yyyy', lkDate)+' 00:00:00' );
+      lkCol.ColParams.Add( lkFldNameId );
+      lkDate := lkDate + 1;
+      end;
+    dtsRef.SelectSQL.Text :=  
+      'EXECUTE BLOCK RETURNS( '+SQLCRLF+
+      '   FILIAL_ID      TYPE OF COLUMN TABL$R_FILIALS.ID '+SQLCRLF+
+      '  ,FILIAL_NAME    TYPE OF COLUMN TABL$R_FILIALS.NAME '+SQLCRLF+
+      '  ,WRK_ID         TYPE OF COLUMN TABL$R_WRK.ID '+SQLCRLF+
+      '  ,WRK_NAME       TYPE OF COLUMN TABL$R_WRK.NAME '+SQLCRLF+
+      '  ,WRK_POST_ID    TYPE OF COLUMN TABL$R_WRK_POSTS.ID '+SQLCRLF+
+      '  ,WRK_POST_NAME  TYPE OF COLUMN TABL$R_WRK_POSTS.NAME '+SQLCRLF+
+      '  ,WRK_WORK_ID    TYPE OF COLUMN TABL$R_WRK_WORK.ID '+SQLCRLF+
+      '  ,WRK_QUANT      TYPE OF COLUMN TABL$P_WRK_GRAPHIC.HOURS '+SQLCRLF+
+      '  ,WRK_QUANT2     TYPE OF COLUMN TABL$P_WRK_GRAPHIC.HOURS '+SQLCRLF+
+      lkSQLDomains+
+      ')AS '+SQLCRLF+
+      'BEGIN '+SQLCRLF+
+      '  FILIAL_ID = NULL; '+SQLCRLF+
+      '  FOR '+SQLCRLF+
+      '    SELECT W.ID AS WRK_ID, W.NAME AS WRK_NAME '+SQLCRLF+
+      '          ,WP.ID AS WRK_POST_ID, WP.NAME AS WRK_POST_NAME '+SQLCRLF+
+      '          ,WW.ID '+SQLCRLF+
+      '    FROM   TABL$R_WRK_WORK WW, TABL$R_WRK W, TABL$R_WRK_POSTS WP '+SQLCRLF+
+      '    WHERE  (WW.DATE_BEGIN <= '''+FormatDateTime('dd.mm.yyyy', EndOfTheMonth(StrToDate('01'+lkMonth)))+''') '+SQLCRLF+
+      '      AND  (WW.DATE_END   >= '''+FormatDateTime('dd.mm.yyyy', StartOfTheMonth(StrToDate('01'+lkMonth)))+''') '+SQLCRLF+
+      '      AND  (WW.WRK_POST_ID = 1000000) '+SQLCRLF+
+      '      AND  (WW.FIRM_ID     = 0) '+SQLCRLF+
+      '      AND  (WP.ID          = WW.WRK_POST_ID) '+SQLCRLF+
+      '      AND  (W.ID           = WW.WRK_ID) '+SQLCRLF+
+      '    ORDER BY W.NAME, WP.NAME '+SQLCRLF+
+      '    INTO   :WRK_ID, :WRK_NAME, :WRK_POST_ID, :WRK_POST_NAME, :WRK_WORK_ID '+SQLCRLF+
+      '  DO '+SQLCRLF+
+      '    BEGIN '+SQLCRLF+
+      '    WRK_QUANT = 0; '+SQLCRLF+
+      lkSQLSelect +
+      '    WRK_QUANT = :WRK_QUANT '+lkFldNameQuantSum+'; '+SQLCRLF+
+      '    SUSPEND; '+SQLCRLF+
+      '    END '+SQLCRLF+
+      'END ';
+    
+    dtsRef.RefreshSQL.Text :=  
+      'EXECUTE BLOCK( '+SQLCRLF+
+      '   Q_WRK_WORK_ID  TYPE OF COLUMN TABL$R_WRK_WORK.ID = ?WRK_WORK_ID '+SQLCRLF+
+      ')RETURNS( '+SQLCRLF+
+      '   FILIAL_ID      TYPE OF COLUMN TABL$R_FILIALS.ID '+SQLCRLF+
+      '  ,FILIAL_NAME    TYPE OF COLUMN TABL$R_FILIALS.NAME '+SQLCRLF+
+      '  ,WRK_ID         TYPE OF COLUMN TABL$R_WRK.ID '+SQLCRLF+
+      '  ,WRK_NAME       TYPE OF COLUMN TABL$R_WRK.NAME '+SQLCRLF+
+      '  ,WRK_POST_ID    TYPE OF COLUMN TABL$R_WRK_POSTS.ID '+SQLCRLF+
+      '  ,WRK_POST_NAME  TYPE OF COLUMN TABL$R_WRK_POSTS.NAME '+SQLCRLF+
+      '  ,WRK_WORK_ID    TYPE OF COLUMN TABL$R_WRK_WORK.ID '+SQLCRLF+
+      '  ,WRK_QUANT      TYPE OF COLUMN TABL$P_WRK_GRAPHIC.HOURS '+SQLCRLF+
+      '  ,WRK_QUANT2     TYPE OF COLUMN TABL$P_WRK_GRAPHIC.HOURS '+SQLCRLF+
+      lkSQLDomains+
+      ')AS '+SQLCRLF+
+      'BEGIN '+SQLCRLF+
+      '  FILIAL_ID = NULL; '+SQLCRLF+
+      '  FOR '+SQLCRLF+
+      '    SELECT W.ID AS WRK_ID, W.NAME AS WRK_NAME '+SQLCRLF+
+      '          ,WP.ID AS WRK_POST_ID, WP.NAME AS WRK_POST_NAME '+SQLCRLF+
+      '          ,WW.ID '+SQLCRLF+
+      '    FROM   TABL$R_WRK_WORK WW, TABL$R_WRK W, TABL$R_WRK_POSTS WP '+SQLCRLF+
+      '    WHERE  (WW.ID = :Q_WRK_WORK_ID ) '+SQLCRLF+
+      '      AND  (WP.ID = WW.WRK_POST_ID) '+SQLCRLF+
+      '      AND  (W.ID  = WW.WRK_ID) '+SQLCRLF+
+      '    ORDER BY W.NAME, WP.NAME '+SQLCRLF+
+      '    INTO   :WRK_ID, :WRK_NAME, :WRK_POST_ID, :WRK_POST_NAME, :WRK_WORK_ID '+SQLCRLF+
+      '  DO '+SQLCRLF+
+      '    BEGIN '+SQLCRLF+
+      '    WRK_QUANT = 0; '+SQLCRLF+
+      lkSQLSelect +
+      '    WRK_QUANT = :WRK_QUANT '+lkFldNameQuantSum+'; '+SQLCRLF+
+      '    SUSPEND; '+SQLCRLF+
+      '    END '+SQLCRLF+
+      'END ';
+
+    SQLText0001.Text := ' '+   
+      'EXECUTE BLOCK RETURNS( '+SQLCRLF+
+      '   FILIAL_ID      TYPE OF COLUMN TABL$R_FILIALS.ID '+SQLCRLF+
+      '  ,FILIAL_NAME    TYPE OF COLUMN TABL$R_FILIALS.NAME '+SQLCRLF+
+      '  ,WRK_ID         TYPE OF COLUMN TABL$R_WRK.ID '+SQLCRLF+
+      '  ,WRK_NAME       TYPE OF COLUMN TABL$R_WRK.NAME '+SQLCRLF+
+      '  ,WRK_POST_ID    TYPE OF COLUMN TABL$R_WRK_POSTS.ID '+SQLCRLF+
+      '  ,WRK_POST_NAME  TYPE OF COLUMN TABL$R_WRK_POSTS.NAME '+SQLCRLF+
+      '  ,WRK_WORK_ID    TYPE OF COLUMN TABL$R_WRK_WORK.ID '+SQLCRLF+
+      '  ,WRK_QUANT      TYPE OF COLUMN TABL$P_WRK_GRAPHIC.HOURS '+SQLCRLF+
+      '  ,WRK_QUANT2     TYPE OF COLUMN TABL$P_WRK_GRAPHIC.HOURS '+SQLCRLF+
+      lkSQLDomains+
+      ')AS '+SQLCRLF+
+      'BEGIN '+SQLCRLF+
+      '  FOR '+SQLCRLF+
+      '    SELECT DISTINCT P.FILIAL_ID, F.NAME '+SQLCRLF+
+      '    FROM   TABL$P_WRK_GRAPHIC P, TABL$R_FILIALS F '+SQLCRLF+
+      '    WHERE  (P.DATE_COMMIT BETWEEN '''+
+        FormatDateTime('dd.mm.yyyy', StartOfTheMonth(StrToDate('01'+lkMonth)))+' 00:00:00''  AND  '''+
+        FormatDateTime('dd.mm.yyyy', EndOfTheMonth  (StrToDate('01'+lkMonth)))+' 23:59:59'') '+SQLCRLF+
+      '      AND  (F.ID  = P.FILIAL_ID) '+SQLCRLF+
+      '    INTO   :FILIAL_ID, :FILIAL_NAME '+SQLCRLF+
+      '  DO '+SQLCRLF+
+      '  FOR '+SQLCRLF+
+      '    SELECT W.ID AS WRK_ID, W.NAME AS WRK_NAME '+SQLCRLF+
+      '          ,WP.ID AS WRK_POST_ID, WP.NAME AS WRK_POST_NAME '+SQLCRLF+
+      '          ,WW.ID '+SQLCRLF+
+      '    FROM   TABL$R_WRK_WORK WW, TABL$R_WRK W, TABL$R_WRK_POSTS WP '+SQLCRLF+
+      '    WHERE  (WW.DATE_BEGIN <= '''+FormatDateTime('dd.mm.yyyy', EndOfTheMonth(StrToDate('01'+lkMonth)))+''') '+SQLCRLF+
+      '      AND  (WW.DATE_END   >= '''+FormatDateTime('dd.mm.yyyy', StartOfTheMonth(StrToDate('01'+lkMonth)))+''') '+SQLCRLF+
+      '      AND  (WW.WRK_POST_ID = 1000000) '+SQLCRLF+
+      '      AND  (WW.FIRM_ID     = 0) '+SQLCRLF+
+      '      AND  (WP.ID          = WW.WRK_POST_ID) '+SQLCRLF+
+      '      AND  (W.ID           = WW.WRK_ID) '+SQLCRLF+
+      '    ORDER BY W.NAME, WP.NAME '+SQLCRLF+
+      '    INTO   :WRK_ID, :WRK_NAME, :WRK_POST_ID, :WRK_POST_NAME, :WRK_WORK_ID '+SQLCRLF+
+      '  DO '+SQLCRLF+
+      '    BEGIN '+SQLCRLF+
+      '    WRK_QUANT = 0; '+SQLCRLF+
+      lkSQLSelect +
+      '    WRK_QUANT = :WRK_QUANT '+lkFldNameQuantSum+'; '+SQLCRLF+
+      '    IF(:WRK_QUANT <> 0)THEN SUSPEND; '+SQLCRLF+
+      '    END '+SQLCRLF+
+      'END ';
+    dbgRef.FrozenCols := 4;  
+    try 
+      dtsRef.Open; 
+    except 
+    end;
+  end;
+  //============================================================================
+  procedure dbgRef_OnGetCellParams(Sender: TObject; Column: TColumnEh; 
+              AFont: TFont; var Background: TColor; State: TGridDrawState);
+  begin
+   if(Column.Tag=666)then exit;
+   if(not(Column.Field.DataSet.Active))then exit;
+   if(not(Column.Field.DataSet.RecordCount > 0))then exit;
+   if( (Pos(FldPrefixFilialName, Column.FieldName) = 1) or (Pos(FldPrefixQuant, Column.FieldName) = 1) )then
+     begin
+     if(Column.ColParams[0] = '1')then Background := $00FFC0FF;
+     if(Column.ColParams[0] = '7')then Background := $00FFE0FF;
+     end;
+  end;
+  //============================================================================
+  procedure dtsRef_AfterOpen(DataSet :TDataSet);
+  begin
+    if(dbgRef.Tag <> 0)then
+      DataSet.RecNo := dbgRef.Tag;
+  end;
+  //============================================================================
+  procedure dtsRef_BeforeClose(DataSet :TDataSet);
+  begin
+    dbgRef.Tag := DataSet.RecNo;
+  end;
+  //============================================================================
+  procedure dtsRef_AfterScroll(DataSet :TDataSet);
+  begin
+  end;
+  //============================================================================
+  procedure actRefresh_OnExecute(Sender :TObject);
+  begin
+    RefreshView;
+  end;
+  //============================================================================
+  procedure PrintWrk;
+  var
+    lkMonth      :string;
+    lkDate       :TDateTime;
+    lkSQL        :string;
+    lkRes, lkStr :string;
+    lkRpt        :TxReport;
+    lkImg        :TxrImage;
+  begin
+    lkMonth := '.'+FormatFloat('00',cbxMonth.ItemIndex+1)+'.'+cbxYears.Text;
+    lkSQL   := 
+      'EXECUTE BLOCK RETURNS( '+SQLCRLF+
+      '   FILIAL_ID      TYPE OF COLUMN TABL$R_FILIALS.ID '+SQLCRLF+
+      '  ,FILIAL_NAME    TYPE OF COLUMN TABL$R_FILIALS.NAME '+SQLCRLF+
+      '  ,FILIAL_PREFIX  TYPE OF COLUMN TABL$R_FILIALS.PREFIX '+SQLCRLF+
+      '  ,WRK_ID         TYPE OF COLUMN TABL$R_WRK.ID '+SQLCRLF+
+      '  ,WRK_NAME       TYPE OF COLUMN TABL$R_WRK.NAME '+SQLCRLF+
+      '  ,WRK_POST_ID    TYPE OF COLUMN TABL$R_WRK_POSTS.ID '+SQLCRLF+
+      '  ,WRK_POST_NAME  TYPE OF COLUMN TABL$R_WRK_POSTS.NAME '+SQLCRLF+
+      '  ,WRK_WORK_ID    TYPE OF COLUMN TABL$R_WRK_WORK.ID '+SQLCRLF+
+      '  ,WRK_DATE       TYPE OF COLUMN TABL$P_WRK_GRAPHIC.DATE_COMMIT '+SQLCRLF+
+      '  ,WRK_QUANT      TYPE OF COLUMN TABL$P_WRK_GRAPHIC.HOURS '+SQLCRLF+
+      '  ,WRK_QUANTT     TYPE OF COLUMN TABL$P_WRK_GRAPHIC.HOURS '+SQLCRLF+
+      '  ,DATE_FROM      TYPE OF COLUMN TABL$P_WRK_GRAPHIC.DATE_COMMIT '+SQLCRLF+
+      ')AS '+SQLCRLF+
+      'BEGIN '+SQLCRLF+
+      '  DATE_FROM = '''+FormatDateTime('dd.mm.yyyy', StartOfTheMonth(StrToDate('01'+lkMonth)))+''' ; '+SQLCRLF+
+      '  FOR '+SQLCRLF+
+      '    SELECT W.ID AS WRK_ID, W.NAME AS WRK_NAME '+SQLCRLF+
+      '          ,WP.ID AS WRK_POST_ID, WP.NAME AS WRK_POST_NAME '+SQLCRLF+
+      '          ,WW.ID '+SQLCRLF+
+      '    FROM   TABL$R_WRK_WORK WW, TABL$R_WRK W, TABL$R_WRK_POSTS WP '+SQLCRLF+
+      '    WHERE  (WW.DATE_BEGIN <= '''+FormatDateTime('dd.mm.yyyy', EndOfTheMonth(StrToDate('01'+lkMonth)))+''') '+SQLCRLF+
+      '      AND  (WW.DATE_END   >= '''+FormatDateTime('dd.mm.yyyy', StartOfTheMonth(StrToDate('01'+lkMonth)))+''') '+SQLCRLF+
+      '      AND  (WW.WRK_POST_ID = 1000000) '+SQLCRLF+
+      '      AND  (WW.FIRM_ID     = 0) '+SQLCRLF+
+      '      AND  (WP.ID          = WW.WRK_POST_ID) '+SQLCRLF+
+      '      AND  (W.ID           = WW.WRK_ID) '+SQLCRLF+
+      '    ORDER BY W.NAME, WP.NAME '+SQLCRLF+
+      '    INTO   :WRK_ID, :WRK_NAME, :WRK_POST_ID, :WRK_POST_NAME, :WRK_WORK_ID '+SQLCRLF+
+      '  DO '+SQLCRLF+
+      '    BEGIN '+SQLCRLF+
+      '    WRK_QUANTT = 0; '+SQLCRLF+
+      '    FOR '+SQLCRLF+
+      '      SELECT P.DATE_COMMIT, COALESCE(P.FILIAL_ID,-1), COALESCE(F.PREFIX,''''), COALESCE(F.NAME,''''), COALESCE(P.HOURS,0) '+SQLCRLF+
+      '      FROM   TABL$P_WRK_GRAPHIC P, TABL$R_FILIALS F '+SQLCRLF+
+      '      WHERE  ((P.WRK_WORK_ID+0) = :WRK_WORK_ID) '+SQLCRLF+
+      '        AND  (P.DATE_COMMIT <= '''+FormatDateTime('dd.mm.yyyy', EndOfTheMonth(StrToDate('01'+lkMonth)))+''') '+SQLCRLF+
+      '        AND  (P.DATE_COMMIT >= '''+FormatDateTime('dd.mm.yyyy', StartOfTheMonth(StrToDate('01'+lkMonth)))+''') '+SQLCRLF+
+      '        AND  (F.ID              = P.FILIAL_ID) '+SQLCRLF+
+      '      ORDER BY P.DATE_COMMIT '+SQLCRLF+
+      '      INTO   :WRK_DATE, :FILIAL_ID, :FILIAL_PREFIX, :FILIAL_NAME, :WRK_QUANT '+SQLCRLF+
+      '    DO '+SQLCRLF+
+      '      BEGIN '+SQLCRLF+
+      '      WRK_QUANTT = :WRK_QUANTT + :WRK_QUANT; '+SQLCRLF+
+      '      SUSPEND; '+SQLCRLF+
+      '      END '+SQLCRLF+
+      '    END '+SQLCRLF+
+      'END ';
+
+    lkRes := StringsLoadFromFile(StrAbsolutePath('./RPT0001.XFM',ScriptName));
+    lkRpt := TxReport(StrToComponent(lkRes));
+    lkRpt.DataBase := FBDataBase;
+    while(lkRpt.DataSets.Count < 2)do
+      lkRpt.DataSets.Add;
+    lkRpt.DataSets[0].SQL.Text      := lkSQL;
+    lkRpt.DataSets[1].SQL.Text      := 'SELECT PR.* FROM PROC$R_FIRMS_ENT_CONST(0) PR ';
+    lkImg := TxrImage(lkRpt.FindComponent('ImgLogo'));
+    lkRes := StrAbsolutePath('../conf/ent/logo.bmp', Amunhotep.ExeName);
+    if FileExists(lkRes)then
+      try
+        lkImg.Picture.LoadFromFile(lkRes);
+      except
+      end;
+    lkRpt.Prepare;
+    lkRpt.Preview; 
+  end;
+  //============================================================================
+  procedure PrintFull(const GroupBy:Boolean);
+  var
+    lkRpt       :TxReport;
+    i           :Integer;
+    lkS         :string;
+    lkBndHeader :TxrBand;
+    lkBndGroup  :TxrGroup;
+    lkBndDetail :TxrBand;
+    lkBndSummary:TxrBand;
+    lkImg       :TxrImage;
+    lkRptLbl    :TxrLabel;
+    lkRptDBLbl  :TxrDBLabel;
+    lkRptDBLbl2 :TxrDBLabel;
+    lkRptExpr   :TxrExpressionMemo;
+    lkLastLeft  :Integer;
+  begin
+    lkRpt                  := TxReport.Create(nil);
+    lkRpt.AutoFree         := true;
+    lkRpt.StyleManager     := Amunhotep.MainForm.StyleManager;
+    lkRpt.PrevFormStyle    := fsMDIChild;
+    lkRpt.Page.Orientation := poLandscape;
+    lkRpt.DataBase         := FBDataBase;
+    lkRpt.DataSets.Clear;
+    lkRpt.DataSets.Add;
+    lkRpt.DataSets.Add;
+    lkRpt.DataSets[0].Name     := 'qrMain';
+    lkRpt.DataSets[0].SQL.Text := dtsRef.SelectSQL.Text;
+    lkRpt.DataSets[0].Name     := 'qrEnt';
+    lkRpt.DataSets[1].SQL.Text := 'SELECT PR.* FROM PROC$R_FIRMS_ENT_CONST(0) PR ';
+    lkBndHeader           := TxrBand.Create(lkRpt);
+    lkBndHeader.Parent    := lkRpt;
+    lkBndHeader.Height    := 108;
+    lkBndHeader.BandType  := rbPageHeader;
+    lkBndHeader.Visible   := true;         
+    lkBndDetail           := TxrBand.Create(lkRpt);
+    lkBndDetail.Parent    := lkRpt;
+    lkBndDetail.Top       := 33; 
+    lkBndDetail.Height    := 32;
+    lkBndDetail.BandType  := rbDetail;
+    lkBndDetail.Visible   := true;
+
+    lkBndSummary          := TxrBand.Create(lkRpt);
+    lkBndSummary.Parent   := lkRpt;
+    lkBndSummary.Top      := 130; 
+    lkBndSummary.Height   := 80;
+    lkBndSummary.Visible  := true;
+    if(GroupBy)then
+      begin
+      lkBndSummary.BandType   := rbGroupFooter;
+      lkBndGroup              := TxrGroup.Create(lkRpt);
+      lkBndGroup.Parent       := lkRpt;
+      lkBndGroup.Height       := 1;
+      lkBndGroup.Expression   := 'WRK_ID';
+      lkBndGroup.Master       := lkRpt;
+      lkBndGroup.ForceNewPage := True;
+      lkBndGroup.FooterBand   := lkBndSummary;
+      lkBndGroup.Visible      := true;         
+      end
+     else
+      begin
+      lkBndSummary.BandType   := rbSummary;
+      end; 
+    lkRptLbl              := TxrLabel.Create(lkRpt);
+    lkRptLbl.Parent       := lkBndSummary;
+    lkRptLbl.Alignment    := taCenter;
+    lkRptLbl.Caption      := 'Затверджено ___________ (НАЗАРОВ М.Ю.)';
+    lkRptLbl.Font.Style   := lkRptLbl.Font.Style + [fsBold];
+    lkRptLbl.Font.Size    := 14;
+    lkRptLbl.Font.Color   := clBlack;
+    lkRptLbl.Font.Name    := 'Times New Roman';
+    lkRptLbl.Visible      := true;
+    lkRptLbl.Left         := 0;
+    lkRptLbl.Top          := 40; 
+    lkRptLbl.Height       := 36;
+    lkRptLbl.Width        := lkBndSummary.Width;
+    lkRptLbl.Align        := alBottom;
+
+    lkRptLbl              := TxrLabel.Create(lkRpt);
+    lkRptLbl.Parent       := lkBndHeader;
+    lkRptLbl.Alignment    := taCenter;
+    lkRptLbl.Caption      := 'Графік виходу на роботу за '+cbxMonth.Text+' '+cbxYears.Text+' р.';
+    lkRptLbl.Font.Style   := lkRptLbl.Font.Style + [fsBold];
+    lkRptLbl.Font.Size    := 14;
+    lkRptLbl.Font.Color   := clBlack;
+    lkRptLbl.Font.Name    := 'Times New Roman';
+    lkRptLbl.Visible      := true;
+    lkRptLbl.Top          := 56; 
+    lkRptLbl.Height       := 36;
+    lkRptLbl.Left         := 0;
+    lkRptLbl.Width        := lkBndHeader.Width;
+    lkRptLbl.Align        := alTop;
+    lkLastLeft := 0;
+    lkRptLbl              := TxrLabel.Create(lkRpt);
+    lkRptLbl.Parent       := lkBndHeader;
+    lkRptLbl.Alignment    := taCenter;
+    lkRptLbl.Caption      := 'Працiвник' + #13#10 + 'Посада';
+    lkRptLbl.Font.Style   := lkRptLbl.Font.Style + [fsBold];
+    lkRptLbl.Font.Size    := 8;
+    lkRptLbl.Font.Color   := clBlack;
+    lkRptLbl.Color        := clGray;
+    lkRptLbl.Top          := 76; 
+    lkRptLbl.Height       := 32;
+    lkRptLbl.Left         := lkLastLeft;
+    lkRptLbl.Width        := 120;
+    lkRptLbl.Visible      := true;
+    lkRptLbl.Frame.Color  := clBlack;
+    lkRptLbl.Frame.Top    := True;
+    lkRptLbl.Frame.Bottom := True;
+    lkRptLbl.Frame.Left   := True;
+    lkRptLbl.Frame.Right  := (i = (dbgRef.Columns.Count-1));
+      lkRptDBLbl              := TxrDBLabel.Create(lkRpt);
+      lkRptDBLbl.Parent       := lkBndDetail;
+      lkRptDBLbl.Alignment    := dbgRef.Columns[i].Alignment;
+      lkRptDBLbl.Font.Style   := [fsBold];
+      lkRptDBLbl.DataSetIndex := 0;
+      lkRptDBLbl.DataField    := 'WRK_NAME';
+      lkRptDBLbl.Visible      := true;
+      lkRptDBLbl.Frame.Color  := clBlack;
+      lkRptDBLbl.Frame.Top    := False;
+      lkRptDBLbl.Frame.Bottom := True;
+      lkRptDBLbl.Frame.Left   := True;
+      lkRptDBLbl.Frame.Right  := (i = (dbgRef.Columns.Count-1));
+      lkRptDBLbl.Mask.MaskInteger := '#0 ';
+      lkRptDBLbl.Mask.MaskFloat   := '#0 ';
+      lkRptDBLbl.Top          := 0; 
+      lkRptDBLbl.Height       := 16;
+      lkRptDBLbl.Left         := lkLastLeft;
+      lkRptDBLbl.Alignment    := taLeftJustify;
+      lkRptDBLbl.Width        := 120;
+
+      lkRptDBLbl2              := TxrDBLabel.Create(lkRpt);
+      lkRptDBLbl2.Parent       := lkBndDetail;
+      lkRptDBLbl2.Alignment    := dbgRef.Columns[i].Alignment;
+      lkRptDBLbl2.DataSetIndex := 0;
+      lkRptDBLbl2.DataField    := 'WRK_POST_NAME';
+      lkRptDBLbl2.Visible      := true;
+      lkRptDBLbl2.Frame.Color  := clBlack;
+      lkRptDBLbl2.Frame.Top    := False;
+      lkRptDBLbl2.Frame.Bottom := True;
+      lkRptDBLbl2.Frame.Left   := True;
+      lkRptDBLbl2.Frame.Right  := (i = (dbgRef.Columns.Count-1));
+      lkRptDBLbl2.Mask.MaskInteger := '#0 ';
+      lkRptDBLbl2.Mask.MaskFloat   := '#0 ';
+      lkRptDBLbl2.Top          := 16; 
+      lkRptDBLbl2.Height       := 16;
+      lkRptDBLbl2.Left         := lkLastLeft;
+      lkRptDBLbl2.Alignment    := taRightJustify;
+      lkRptDBLbl2.Width        := 120;
+    lkLastLeft := 120;
+    lkRptLbl              := TxrLabel.Create(lkRpt);
+    lkRptLbl.Parent       := lkBndHeader;
+    lkRptLbl.Alignment    := taCenter;
+    lkRptLbl.Caption      := 'УСЬГО' + #13#10 + 'годин';
+    lkRptLbl.Font.Style   := lkRptLbl.Font.Style + [fsBold];
+    lkRptLbl.Font.Size    := 8;
+    lkRptLbl.Font.Color   := clBlack;
+    lkRptLbl.Color        := clGray;
+    lkRptLbl.Top          := 76; 
+    lkRptLbl.Height       := 32;
+    lkRptLbl.Left         := lkLastLeft;
+    lkRptLbl.Width        := 48;
+    lkRptLbl.Visible      := true;
+    lkRptLbl.Frame.Color  := clBlack;
+    lkRptLbl.Frame.Top    := True;
+    lkRptLbl.Frame.Bottom := True;
+    lkRptLbl.Frame.Left   := True;
+    lkRptLbl.Frame.Right  := (i = (dbgRef.Columns.Count-1));
+      lkRptDBLbl              := TxrDBLabel.Create(lkRpt);
+      lkRptDBLbl.Parent       := lkBndDetail;
+      lkRptDBLbl.Alignment    := dbgRef.Columns[i].Alignment;
+      lkRptDBLbl.Font.Style   := [fsBold];
+      lkRptDBLbl.DataSetIndex := 0;
+      lkRptDBLbl.DataField    := 'WRK_QUANT';
+      lkRptDBLbl.Visible      := true;
+      lkRptDBLbl.Frame.Color  := clBlack;
+      lkRptDBLbl.Frame.Top    := False;
+      lkRptDBLbl.Frame.Bottom := True;
+      lkRptDBLbl.Frame.Left   := True;
+      lkRptDBLbl.Frame.Right  := (i = (dbgRef.Columns.Count-1));
+      lkRptDBLbl.Mask.MaskInteger := '#0.00 ';
+      lkRptDBLbl.Mask.MaskFloat   := '#0.00 ';
+      lkRptDBLbl.Top          := 0; 
+      lkRptDBLbl.Height       := 32;
+      lkRptDBLbl.Left         := lkLastLeft;
+      lkRptDBLbl.Alignment    := taRightJustify;
+      lkRptDBLbl.Width        := 48;
+    lkLastLeft := 168;
+    for i:=4 to dbgRef.Columns.Count-1 do
+      begin
+      if Odd(i) then continue;
+      lkS := dbgRef.Columns[i].Title.Caption + SQLCRLF + dbgRef.Columns[i+1].Title.Caption;
+      lkRptLbl              := TxrLabel.Create(lkRpt);
+      lkRptLbl.Parent       := lkBndHeader;
+      lkRptLbl.Alignment    := taCenter;
+      lkRptLbl.Caption      := lkS;
+      lkRptLbl.Font.Style   := lkRptLbl.Font.Style + [fsBold];
+      lkRptLbl.Font.Size    := 8;
+      lkRptLbl.Font.Color   := clBlack;
+      lkRptLbl.Color        := clGray;
+      lkRptLbl.Top          := 76; 
+      lkRptLbl.Height       := 32;
+      lkRptLbl.Left         := lkLastLeft;
+      lkRptLbl.Width        := 28;
+      lkRptLbl.Visible      := true;
+      lkRptLbl.Frame.Color  := clBlack;
+      lkRptLbl.Frame.Top    := True;
+      lkRptLbl.Frame.Bottom := True;
+      lkRptLbl.Frame.Left   := True;
+      lkRptLbl.Frame.Right  := (i = (dbgRef.Columns.Count-1));
+      lkRptDBLbl              := TxrDBLabel.Create(lkRpt);
+      lkRptDBLbl.Parent       := lkBndDetail;
+      lkRptDBLbl.Alignment    := dbgRef.Columns[i].Alignment;
+      lkRptDBLbl.DataSetIndex := 0;
+      lkRptDBLbl.DataField    := dbgRef.Columns[i].FieldName;
+      lkRptDBLbl.Visible      := true;
+      lkRptDBLbl.Frame.Color  := clBlack;
+      lkRptDBLbl.Frame.Top    := False;
+      lkRptDBLbl.Frame.Bottom := True;
+      lkRptDBLbl.Frame.Left   := True;
+      lkRptDBLbl.Frame.Right  := (i = (dbgRef.Columns.Count-1));
+      lkRptDBLbl.Top          := 0; 
+      lkRptDBLbl.Height       := 16;
+      lkRptDBLbl.Left         := lkLastLeft;
+      lkRptDBLbl.Alignment    := taCenter;
+      lkRptDBLbl.Width        := 28;
+      lkRptDBLbl2              := TxrDBLabel.Create(lkRpt);
+      lkRptDBLbl2.Parent       := lkBndDetail;
+      lkRptDBLbl2.Alignment    := dbgRef.Columns[i].Alignment;
+      lkRptDBLbl2.DataSetIndex := 0;
+      lkRptDBLbl2.DataField    := dbgRef.Columns[i+1].FieldName;
+      lkRptDBLbl2.Visible      := true;
+      lkRptDBLbl2.Frame.Color  := clBlack;
+      lkRptDBLbl2.Frame.Top    := False;
+      lkRptDBLbl2.Frame.Bottom := True;
+      lkRptDBLbl2.Frame.Left   := True;
+      lkRptDBLbl2.Frame.Right  := (i = (dbgRef.Columns.Count-1));
+      lkRptDBLbl2.Mask.MaskInteger := '';
+      lkRptDBLbl2.Mask.MaskFloat   := '';
+      lkRptDBLbl2.Top          := 16; 
+      lkRptDBLbl2.Height       := 16;
+      lkRptDBLbl2.Left         := lkLastLeft;
+      lkRptDBLbl2.Alignment    := taCenter;
+      lkRptDBLbl2.Width        := 28;
+
+      if(dbgRef.Columns[i].ColParams[0] = '1')then
+        begin
+        lkRptDBLbl.Color  := $FFC0FF;
+        lkRptDBLbl2.Color := $FFC0FF;
+        end;
+      lkLastLeft := lkLastLeft + lkRptDBLbl.Width;
+      end;
+    lkLastLeft := 0;  
+    lkS := StrAbsolutePath('../conf/ent/logo.bmp', Amunhotep.ExeName);
+    if FileExists(lkS)then
+      begin
+      lkImg              := TxrImage.Create(lkRpt);
+      lkImg.Parent       := lkBndHeader;
+      lkImg.Left         := 0;
+      lkImg.Top          := 0; 
+      lkImg.Height       := lkBndHeader.Height - 32;
+      lkImg.Width        := 28;
+      lkImg.Visible      := true;
+      lkImg.Stretch      := True;
+      lkImg.Center       := True;
+      lkImg.Picture.LoadFromFile(lkS);
+      lkImg.Width := Trunc( lkImg.Picture.Bitmap.Width  * lkImg.Height / lkImg.Picture.Bitmap.Height); 
+      lkLastLeft := lkImg.Left + lkImg.Width; 
+      end;  
+    lkRptDBLbl              := TxrDBLabel.Create(lkRpt);
+    lkRptDBLbl.Parent       := lkBndHeader;
+    lkRptDBLbl.Alignment    := taLeftJustify;
+    lkRptDBLbl.Font.Name    := 'Times New Roman';
+    lkRptDBLbl.Font.Size    := 16;
+    lkRptDBLbl.Font.Style   := [fsBold];
+    lkRptDBLbl.DataSetIndex := 1;
+    lkRptDBLbl.DataField    := 'ENT_CS_NAME';
+    lkRptDBLbl.Visible      := true;
+    lkRptDBLbl.Top          := 0; 
+    lkRptDBLbl.Height       := 20;
+    lkRptDBLbl.Left         := lkLastLeft;
+    lkRptDBLbl.Alignment    := taLeftJustify;
+    lkRptDBLbl.Width        := lkBndHeader.Width - lkLastLeft;
+      
+    lkRptExpr              := TxrExpressionMemo.Create(lkRpt);
+    lkRptExpr.Parent       := lkBndHeader;
+    lkRptExpr.Alignment    := taLeftJustify;
+    lkRptExpr.Font.Name    := 'Times New Roman';
+    lkRptExpr.Font.Size    := 8;
+    lkRptExpr.Font.Style   := [fsItalic];
+    lkRptExpr.Visible      := true;
+    lkRptExpr.Top          := lkRptDBLbl.Top + lkRptDBLbl.Height; 
+    lkRptExpr.Height       := 32;
+    lkRptExpr.Left         := lkLastLeft;
+    lkRptExpr.Alignment    := taLeftJustify;
+    lkRptExpr.Width        := lkBndHeader.Width - lkLastLeft;
+    lkRptExpr.Lines.Text   := 
+      'Юридична адреса: {ENT_CS_ADDR_NAME}'+#13#10+
+      'Номер свідотцтва: {ENT_CS_INN}, МФО: {BANK_MFO}, ЄДРПОУ: {ENT_CS_EDRPOU}, поточний рахунок: {BANK_RS} у {BANK_NAME}';
+
+    lkRpt.Prepare;
+    lkRpt.Preview; 
+  end;
+  //============================================================================
+  procedure PrintFilial;
+  var
+    lkRpt       :TxReport;
+    i           :Integer;
+    lkS         :string;
+    lkBndHeader :TxrBand;
+    lkBndDetail :TxrBand;
+    lkBndSummary:TxrBand;
+    lkBndGroup  :TxrGroup;
+    lkRptLbl    :TxrLabel;
+    lkRptDBLbl  :TxrDBLabel;
+    lkRptDBLbl2 :TxrDBLabel;
+    lkLastLeft  :Integer;
+  begin
+    lkRpt                  := TxReport.Create(nil);
+    lkRpt.AutoFree         := true;
+    lkRpt.StyleManager     := Amunhotep.MainForm.StyleManager;
+    lkRpt.PrevFormStyle    := fsMDIChild;
+    lkRpt.Page.Orientation := poLandscape;
+    lkRpt.DataBase         := FBDataBase;
+    lkRpt.DataSets.Clear;
+    lkRpt.DataSets.Add;
+    lkRpt.DataSets[0].Name     := 'qrMain';
+    lkRpt.DataSets[0].SQL.Text := SQLText0001.Text;
+    lkBndHeader           := TxrBand.Create(lkRpt);
+    lkBndHeader.Parent    := lkRpt;
+    lkBndHeader.Height    := 92;
+    lkBndHeader.BandType  := rbPageHeader;
+    lkBndHeader.Visible   := true;         
+
+    lkBndSummary          := TxrBand.Create(lkRpt);
+    lkBndSummary.Parent   := lkRpt;
+    lkBndSummary.BandType := rbGroupFooter;
+    lkBndSummary.Top      := 130; 
+    lkBndSummary.Height   := 80;
+    lkBndSummary.Visible  := true;
+    lkRptLbl              := TxrLabel.Create(lkRpt);
+    lkRptLbl.Parent       := lkBndSummary;
+    lkRptLbl.Alignment    := taCenter;
+    lkRptLbl.Caption      := 'Затверджено ____________  (_______________)';
+    lkRptLbl.Font.Style   := lkRptLbl.Font.Style + [fsBold];
+    lkRptLbl.Font.Size    := 14;
+    lkRptLbl.Font.Color   := clBlack;
+    lkRptLbl.Font.Name    := 'Times New Roman';
+    lkRptLbl.Visible      := true;
+    lkRptLbl.Left         := 0;
+    lkRptLbl.Top          := 40; 
+    lkRptLbl.Height       := 36;
+    lkRptLbl.Width        := lkBndSummary.Width;
+    lkRptLbl.Align        := alBottom;
+
+    lkBndGroup              := TxrGroup.Create(lkRpt);
+    lkBndGroup.Parent       := lkRpt;
+    lkBndGroup.Height       := 1;
+    lkBndGroup.Expression   := 'FILIAL_ID';
+    lkBndGroup.Master       := lkRpt;
+    lkBndGroup.ForceNewPage := True;
+    lkBndGroup.FooterBand   := lkBndSummary;
+    lkBndGroup.Visible      := true;         
+
+    lkBndDetail           := TxrBand.Create(lkRpt);
+    lkBndDetail.Parent    := lkRpt;
+    lkBndDetail.Top       := 33; 
+    lkBndDetail.Height    := 32;
+    lkBndDetail.BandType  := rbDetail;
+    lkBndDetail.Visible   := true;
+
+    lkRptLbl              := TxrLabel.Create(lkRpt);
+    lkRptLbl.Parent       := lkBndHeader;
+    lkRptLbl.Alignment    := taCenter;
+    lkRptLbl.Caption      := 'Графік виходу на роботу за '+cbxMonth.Text+' '+cbxYears.Text+' р.';
+    lkRptLbl.Font.Style   := lkRptLbl.Font.Style + [fsBold];
+    lkRptLbl.Font.Size    := 14;
+    lkRptLbl.Font.Color   := clBlack;
+    lkRptLbl.Font.Name    := 'Times New Roman';
+    lkRptLbl.Visible      := true;
+    lkRptLbl.Top          := 0; 
+    lkRptLbl.Height       := 36;
+    lkRptLbl.Left         := 0;
+    lkRptLbl.Width        := lkBndHeader.Width;
+    lkRptLbl.Align        := alTop;
+    lkLastLeft := 0;
+      lkRptDBLbl              := TxrDBLabel.Create(lkRpt);
+      lkRptDBLbl.Parent       := lkBndHeader;
+      lkRptDBLbl.Alignment    := taCenter;
+      lkRptDBLbl.Font.Style   := [fsBold];
+      lkRptDBLbl.Font.Size    := 14;
+      lkRptDBLbl.Font.Color   := clBlack;
+      lkRptDBLbl.Font.Name    := 'Times New Roman';
+      lkRptDBLbl.DataSetIndex := 0;
+      lkRptDBLbl.DataField    := 'FILIAL_NAME';
+      lkRptDBLbl.Visible      := true;
+      lkRptDBLbl.Top          := 36; 
+      lkRptDBLbl.Height       := 24;
+      lkRptDBLbl.Left         := 0;
+      lkRptDBLbl.Width        := lkBndHeader.Width;
+
+    lkRptLbl              := TxrLabel.Create(lkRpt);
+    lkRptLbl.Parent       := lkBndHeader;
+    lkRptLbl.Alignment    := taCenter;
+    lkRptLbl.Caption      := 'Працiвник' + #13#10 + 'Посада';
+    lkRptLbl.Font.Style   := lkRptLbl.Font.Style + [fsBold];
+    lkRptLbl.Font.Size    := 8;
+    lkRptLbl.Font.Color   := clBlack;
+    lkRptLbl.Color        := clGray;
+    lkRptLbl.Top          := 60; 
+    lkRptLbl.Height       := 32;
+    lkRptLbl.Left         := lkLastLeft;
+    lkRptLbl.Width        := 120;
+    lkRptLbl.Visible      := true;
+    lkRptLbl.Frame.Color  := clBlack;
+    lkRptLbl.Frame.Top    := True;
+    lkRptLbl.Frame.Bottom := True;
+    lkRptLbl.Frame.Left   := True;
+    lkRptLbl.Frame.Right  := (i = (dbgRef.Columns.Count-1));
+      lkRptDBLbl              := TxrDBLabel.Create(lkRpt);
+      lkRptDBLbl.Parent       := lkBndDetail;
+      lkRptDBLbl.Alignment    := dbgRef.Columns[i].Alignment;
+      lkRptDBLbl.Font.Style   := [fsBold];
+      lkRptDBLbl.DataSetIndex := 0;
+      lkRptDBLbl.DataField    := 'WRK_NAME';
+      lkRptDBLbl.Visible      := true;
+      lkRptDBLbl.Frame.Color  := clBlack;
+      lkRptDBLbl.Frame.Top    := False;
+      lkRptDBLbl.Frame.Bottom := True;
+      lkRptDBLbl.Frame.Left   := True;
+      lkRptDBLbl.Frame.Right  := (i = (dbgRef.Columns.Count-1));
+      lkRptDBLbl.Mask.MaskInteger := '#0 ';
+      lkRptDBLbl.Mask.MaskFloat   := '#0 ';
+      lkRptDBLbl.Top          := 0; 
+      lkRptDBLbl.Height       := 16;
+      lkRptDBLbl.Left         := lkLastLeft;
+      lkRptDBLbl.Alignment    := taLeftJustify;
+      lkRptDBLbl.Width        := 120;
+
+      lkRptDBLbl2              := TxrDBLabel.Create(lkRpt);
+      lkRptDBLbl2.Parent       := lkBndDetail;
+      lkRptDBLbl2.Alignment    := dbgRef.Columns[i].Alignment;
+      lkRptDBLbl2.DataSetIndex := 0;
+      lkRptDBLbl2.DataField    := 'WRK_POST_NAME';
+      lkRptDBLbl2.Visible      := true;
+      lkRptDBLbl2.Frame.Color  := clBlack;
+      lkRptDBLbl2.Frame.Top    := False;
+      lkRptDBLbl2.Frame.Bottom := True;
+      lkRptDBLbl2.Frame.Left   := True;
+      lkRptDBLbl2.Frame.Right  := (i = (dbgRef.Columns.Count-1));
+      lkRptDBLbl2.Mask.MaskInteger := '#0 ';
+      lkRptDBLbl2.Mask.MaskFloat   := '#0 ';
+      lkRptDBLbl2.Top          := 16; 
+      lkRptDBLbl2.Height       := 16;
+      lkRptDBLbl2.Left         := lkLastLeft;
+      lkRptDBLbl2.Alignment    := taRightJustify;
+      lkRptDBLbl2.Width        := 120;
+    lkLastLeft := 120;
+    lkRptLbl              := TxrLabel.Create(lkRpt);
+    lkRptLbl.Parent       := lkBndHeader;
+    lkRptLbl.Alignment    := taCenter;
+    lkRptLbl.Caption      := 'УСЬОГО' + #13#10 + 'годин';
+    lkRptLbl.Font.Style   := lkRptLbl.Font.Style + [fsBold];
+    lkRptLbl.Font.Size    := 8;
+    lkRptLbl.Font.Color   := clBlack;
+    lkRptLbl.Color        := clGray;
+    lkRptLbl.Top          := 60; 
+    lkRptLbl.Height       := 32;
+    lkRptLbl.Left         := lkLastLeft;
+    lkRptLbl.Width        := 48;
+    lkRptLbl.Visible      := true;
+    lkRptLbl.Frame.Color  := clBlack;
+    lkRptLbl.Frame.Top    := True;
+    lkRptLbl.Frame.Bottom := True;
+    lkRptLbl.Frame.Left   := True;
+    lkRptLbl.Frame.Right  := (i = (dbgRef.Columns.Count-1));
+      lkRptDBLbl              := TxrDBLabel.Create(lkRpt);
+      lkRptDBLbl.Parent       := lkBndDetail;
+      lkRptDBLbl.Alignment    := dbgRef.Columns[i].Alignment;
+      lkRptDBLbl.Font.Style   := [fsBold];
+      lkRptDBLbl.DataSetIndex := 0;
+      lkRptDBLbl.DataField    := 'WRK_QUANT';
+      lkRptDBLbl.Visible      := true;
+      lkRptDBLbl.Frame.Color  := clBlack;
+      lkRptDBLbl.Frame.Top    := False;
+      lkRptDBLbl.Frame.Bottom := True;
+      lkRptDBLbl.Frame.Left   := True;
+      lkRptDBLbl.Frame.Right  := (i = (dbgRef.Columns.Count-1));
+      lkRptDBLbl.Mask.MaskInteger := '#0.00 ';
+      lkRptDBLbl.Mask.MaskFloat   := '#0.00 ';
+      lkRptDBLbl.Top          := 0; 
+      lkRptDBLbl.Height       := 32;
+      lkRptDBLbl.Left         := lkLastLeft;
+      lkRptDBLbl.Alignment    := taRightJustify;
+      lkRptDBLbl.Width        := 48;
+    lkLastLeft := 168;
+    for i:=4 to dbgRef.Columns.Count-1 do
+      begin
+      if Odd(i) then continue;
+      lkS := dbgRef.Columns[i].Title.Caption + SQLCRLF + dbgRef.Columns[i+1].Title.Caption;
+      lkRptLbl              := TxrLabel.Create(lkRpt);
+      lkRptLbl.Parent       := lkBndHeader;
+      lkRptLbl.Alignment    := taCenter;
+      lkRptLbl.Caption      := lkS;
+      lkRptLbl.Font.Style   := lkRptLbl.Font.Style + [fsBold];
+      lkRptLbl.Font.Size    := 8;
+      lkRptLbl.Font.Color   := clBlack;
+      lkRptLbl.Color        := clGray;
+      lkRptLbl.Top          := 60; 
+      lkRptLbl.Height       := 32;
+      lkRptLbl.Left         := lkLastLeft;
+      lkRptLbl.Width        := 28;
+      lkRptLbl.Visible      := true;
+      lkRptLbl.Frame.Color  := clBlack;
+      lkRptLbl.Frame.Top    := True;
+      lkRptLbl.Frame.Bottom := True;
+      lkRptLbl.Frame.Left   := True;
+      lkRptLbl.Frame.Right  := (i = (dbgRef.Columns.Count-1));
+      lkRptDBLbl              := TxrDBLabel.Create(lkRpt);
+      lkRptDBLbl.Parent       := lkBndDetail;
+      lkRptDBLbl.Alignment    := dbgRef.Columns[i].Alignment;
+      lkRptDBLbl.DataSetIndex := 0;
+      lkRptDBLbl.DataField    := dbgRef.Columns[i].FieldName;
+      lkRptDBLbl.Visible      := true;
+      lkRptDBLbl.Frame.Color  := clBlack;
+      lkRptDBLbl.Frame.Top    := False;
+      lkRptDBLbl.Frame.Bottom := True;
+      lkRptDBLbl.Frame.Left   := True;
+      lkRptDBLbl.Frame.Right  := (i = (dbgRef.Columns.Count-1));
+      lkRptDBLbl.Top          := 0; 
+      lkRptDBLbl.Height       := 16;
+      lkRptDBLbl.Left         := lkLastLeft;
+      lkRptDBLbl.Alignment    := taCenter;
+      lkRptDBLbl.Width        := 28;
+      lkRptDBLbl2              := TxrDBLabel.Create(lkRpt);
+      lkRptDBLbl2.Parent       := lkBndDetail;
+      lkRptDBLbl2.Alignment    := dbgRef.Columns[i].Alignment;
+      lkRptDBLbl2.DataSetIndex := 0;
+      lkRptDBLbl2.DataField    := dbgRef.Columns[i+1].FieldName;
+      lkRptDBLbl2.Visible      := true;
+      lkRptDBLbl2.Frame.Color  := clBlack;
+      lkRptDBLbl2.Frame.Top    := False;
+      lkRptDBLbl2.Frame.Bottom := True;
+      lkRptDBLbl2.Frame.Left   := True;
+      lkRptDBLbl2.Frame.Right  := (i = (dbgRef.Columns.Count-1));
+      lkRptDBLbl2.Mask.MaskInteger := '';
+      lkRptDBLbl2.Mask.MaskFloat   := '';
+      lkRptDBLbl2.Top          := 16; 
+      lkRptDBLbl2.Height       := 16;
+      lkRptDBLbl2.Left         := lkLastLeft;
+      lkRptDBLbl2.Alignment    := taCenter;
+      lkRptDBLbl2.Width        := 28;
+
+      if(dbgRef.Columns[i].ColParams[0] = '1')then
+        begin
+        lkRptDBLbl.Color  := $FFC0FF;
+        lkRptDBLbl2.Color := $FFC0FF;
+        end;
+      lkLastLeft := lkLastLeft + lkRptDBLbl.Width;
+      end;
+    lkRpt.Prepare;
+    lkRpt.Preview; 
+  end;
+  //============================================================================
+  procedure actPrint_OnExecute(Sender :TObject);
+  var
+    lkMsg  :string;
+    lkIndx :Integer;
+  begin
+    lkMsg := 
+      'Распечатать индивидуальный график по филиалу'+SQLCRLF+
+      'Распечатать индивидуальный график по сотруднику'+SQLCRLF+
+      'Распечатать индивидуальный приказ по сотруднику'+SQLCRLF+
+      'Распечатать общий график по сотрудникам'+SQLCRLF;
+    lkIndx := 0;
+    if not Dialogs.CaseItem('Выберите шаблон печати', lkMsg, lkIndx) then exit;
+    case lkIndx of
+       0: PrintFilial;
+       1: PrintFull(True);
+       2: PrintWrk;
+       3: PrintFull(False);
+    end;
+  end;
+  //============================================================================
+  procedure actOutIns_OnExecute(Sender :TObject);
+  var
+    lkFilialId :string;
+    lkHours    :Extended;
+    lkSQL      :string;
+  begin
+    lkFilialId := '1000001';
+    lkHours    := 10;
+    if not dtsRef.Active then exit;
+    if not (dtsRef.RecordCount > 0) then exit;
+    if not (dbgRef.SelectedIndex > 3) then exit;
+    if (dtsRef.FieldByName( dbgRef.Columns[dbgRef.SelectedIndex].ColParams[3] ).AsInteger > 0)then exit;
+    if not DialogFilialAndHours_Execute(lkFilialId, lkHours) then exit;
+    lkSQL := 
+      'UPDATE OR INSERT INTO TABL$P_WRK_GRAPHIC(DATE_COMMIT,  WRK_WORK_ID, FILIAL_ID, HOURS) '+SQLCRLF+
+      '  VALUES ('''+dbgRef.Columns[dbgRef.SelectedIndex].ColParams[2]+''', '+
+      dtsRef.FieldByName('WRK_WORK_ID').AsString+', '+lkFilialId+', '+StrReplaceStr(FormatFloat('#0.000', lkHours),',','.')+') '+SQLCRLF+
+      '  MATCHING(DATE_COMMIT,  WRK_WORK_ID); '+SQLCRLF;
+    ExecSQL(FBDataBase, lkSQL);
+    RefreshView;      
+  end;
+  //============================================================================
+  procedure actOutIns_OnUpdate(Sender :TObject);
+  var
+    lkEnabled :Boolean;
+  begin
+    lkEnabled := dtsRef.Active;
+    if(lkEnabled)then
+      lkEnabled := (dtsRef.RecordCount > 0);
+    if(lkEnabled)then
+      lkEnabled := (dbgRef.SelectedIndex > 3);
+    if(lkEnabled)then
+      lkEnabled := not(dtsRef.FieldByName( dbgRef.Columns[dbgRef.SelectedIndex].ColParams[3] ).AsInteger > 0);
+    TCustomAction(Sender).Enabled := lkEnabled;
+  end;
+  //============================================================================
+  procedure actOutUpd_OnExecute(Sender :TObject);
+  var
+    lkFilialId :string;
+    lkHours    :Extended;
+    lkSQL      :string;
+  begin
+    if not dtsRef.Active then exit;
+    if not (dtsRef.RecordCount > 0) then exit;
+    if not (dbgRef.SelectedIndex > 3) then exit;
+    if not(dtsRef.FieldByName( dbgRef.Columns[dbgRef.SelectedIndex].ColParams[3] ).AsInteger > 0)then exit;
+
+    lkFilialId := dtsRef.FieldByName( FldPrefixFilial + dbgRef.Columns[dbgRef.SelectedIndex].ColParams[1] ).AsString;
+    lkHours    := dtsRef.FieldByName( FldPrefixQuant  + dbgRef.Columns[dbgRef.SelectedIndex].ColParams[1] ).AsFloat;
+
+    if not DialogFilialAndHours_Execute(lkFilialId, lkHours) then exit;
+    lkSQL := 
+      'UPDATE OR INSERT INTO TABL$P_WRK_GRAPHIC(DATE_COMMIT,  WRK_WORK_ID, FILIAL_ID, HOURS) '+SQLCRLF+
+      '  VALUES ('''+dbgRef.Columns[dbgRef.SelectedIndex].ColParams[2]+''', '+
+      dtsRef.FieldByName('WRK_WORK_ID').AsString+', '+lkFilialId+', '+StrReplaceStr(FormatFloat('#0.000', lkHours),',','.')+') '+SQLCRLF+
+      '  MATCHING(DATE_COMMIT,  WRK_WORK_ID); '+SQLCRLF;
+    ExecSQL(FBDataBase, lkSQL);
+    RefreshView;      
+  end;
+  //============================================================================
+  procedure actOutDel_OnExecute(Sender :TObject);
+  var
+    lkFilialId :string;
+    lkHours    :Extended;
+    lkSQL      :string;
+  begin
+    if not dtsRef.Active then exit;
+    if not (dtsRef.RecordCount > 0) then exit;
+    if not (dbgRef.SelectedIndex > 3) then exit;
+    if not (dtsRef.FieldByName( dbgRef.Columns[dbgRef.SelectedIndex].ColParams[3] ).AsInteger > 0)then exit;
+    lkSQL := 
+      'DELETE FROM TABL$P_WRK_GRAPHIC P '+SQLCRLF+
+      'WHERE (P.DATE_COMMIT     = '''+dbgRef.Columns[dbgRef.SelectedIndex].ColParams[2]+''') '+SQLCRLF+
+      '  AND ((P.WRK_WORK_ID+0) = '+dtsRef.FieldByName('WRK_WORK_ID').AsString+') '+SQLCRLF;
+    ExecSQL(FBDataBase, lkSQL);
+    RefreshView;      
+  end;
+  //============================================================================
+  procedure actOutDel_OnUpdate(Sender :TObject);
+  var
+    lkEnabled :Boolean;
+  begin
+    lkEnabled := dtsRef.Active;
+    if(lkEnabled)then
+      lkEnabled := (dtsRef.RecordCount > 0);
+    if(lkEnabled)then
+      lkEnabled := (dbgRef.SelectedIndex > 3);
+    if(lkEnabled)then
+      lkEnabled := (dtsRef.FieldByName( dbgRef.Columns[dbgRef.SelectedIndex].ColParams[3] ).AsInteger > 0);
+    TCustomAction(Sender).Enabled := lkEnabled;
+  end;
+  //============================================================================
+  procedure AmunhotepForm_actClose_OnExecute(Sender :TObject);
+  begin
+    if(ObjectInheritsFrom(TComponent(Sender).Owner, 'TForm'))then
+      begin
+      if(TForm(TComponent(Sender).Owner).FormStyle <> fsMDIChild)then
+        begin
+        TForm(TComponent(Sender).Owner).ModalResult := mrCancel;
+        exit;
+        end
+      TForm(TComponent(Sender).Owner).Close;
+      end;          
+  end;
+  //============================================================================
+  procedure AmunhotepForm_actSourceCode_OnExecute(Sender :TObject);
+  begin
+    Amunhotep.MainForm.ProcessFile( PrepareAbsoleteFileName(ScriptName) );
+  end; 
+  //============================================================================
+  function AmunhotepForm_CreateActionTopBar(aOwner:TComponent; const aActionName, aHint, aShortCut, aImageFileName :string; aOnExecute, aOnUpdate :TNotifyEvent; aTopBar :TxcGradientPanel):TCustomAction;
+  var
+    lkTBB:TxcToolBarButton;
+  begin
+    Result := CreateTAction(aOwner,aActionName,'',aHint,aShortCut,0,-1);
+    Result.OnExecute := aOnExecute; 
+    Result.OnUpdate  := aOnUpdate; 
+    if(aTopBar <> nil)then
+      begin
+      lkTBB := CreateTxcToolBarButton2(Result, aTopBar,'',aTopBar.Width - ((aTopBar.Height+2) + aTopBar.ControlCount),0,aTopBar.Height+2,aTopBar.Height+2, alRight, Result);
+      with lkTBB do
+        begin
+        ShowHint    := true;
+        ShowCaption := false;
+        if FileExists(PrepareAbsoleteFileName(aImageFileName))then
+          Glyph.LoadFromFile(PrepareAbsoleteFileName(aImageFileName));  
+        end;
+      end;
+  end;
+  //============================================================================
+  procedure AmunhotepForm_OnClose(Sender :TObject; var Action :TCloseAction);
+  begin
+    CloseDataSets;
+    SQLText0001.Free;
+    Action := caFree;
+    AutoFree; 
+  end; 
+  //============================================================================
+  function AmunhotepForm_Create:TAmunhotepForm;
+  var
+    lkFileName :string;
+    lkResBody  :string;
+    lkLbl      :TLabel;
+    lkAct      :TAction;
+    lkAct2     :TCustomAction;
+    lkTS       :TTabSheet;
+    lkPM       :TPopupMenu;
+    lkMM       :TMainMenu;
+    lkCol      :TColumnEh;
+    i          :Integer;
+  begin
+    DontAutoFree;
+    lkFileName := StrAbsolutePath('./DEFAULT.XFM', ScriptName);
+    lkResBody  := StringsLoadFromFile(lkFileName);
+    if(lkResBody = '')then 
+      begin
+      Dialogs.MessageDlg(msg_invalid_resource+SQLCRLF+lkFileName, mtWarning, [mbOK]);
+      exit;
+      end;
+    Result          := TAmunhotepForm(StrToComponent(lkResBody));
+    Result.OnClose  := @AmunhotepForm_OnClose;
+    //Result.FileName := lkFileName;
+    if FileExists(PrepareAbsoleteFileName( ERP_ObjectIcon(ERP_OBJECTTYPE_OPER) ))then
+      Result.Icon.LoadFromFile(PrepareAbsoleteFileName( ERP_ObjectIcon(ERP_OBJECTTYPE_OPER) ));
+    Result.SetCaption(msg_caption);
+    TopBar := TxcGradientPanelVista(Result.FindComponent('TopBar')); 
+    with TopBar do 
+      begin 
+      Caption    := #$20#$20#$20#$20#$20#$20+msg_caption; 
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Window; 
+      Font.Name  := 'Verdana'; 
+      Font.Size  := 14; 
+      Font.Style := [fsBold]; 
+      end; 
+    ImgLogo := TImage(Result.FindComponent('ImgLogo')); 
+    if FileExists(PrepareAbsoleteFileName( ERP_ObjectBitmap(ERP_OBJECTTYPE_OPER) ))then  
+      ImgLogo.Picture.LoadFromFile(PrepareAbsoleteFileName( ERP_ObjectBitmap(ERP_OBJECTTYPE_OPER) ));
+    ToolBar  := TxcGradientPanelVista(Result.FindComponent('ToolBar'));
+    ToolBar.Font.Style := [fsBold];
+    TxcGradientPanelVista_SetColorsToolBar(ToolBar); 
+
+    cbxYears := TComboBox(Result.FindComponent('cbxYears'));
+    with cbxYears do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      end; 
+    cbxMonth := TComboBox(Result.FindComponent('cbxMonth'));
+    with cbxMonth do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      end; 
+    dbgRef   := TDBGridEh(Result.FindComponent('dbgRef'));
+    with dbgRef do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      FixedColor      := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      TitleFont.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      TitleFont.Style := [fsBold];
+      UseMultiTitle   := true;
+      DrawMemoText    := true; 
+      FrozenCols      := 0; 
+      FooterRowCount  := 0; 
+      SumList.Active  := false;
+      Tag             := 0; 
+      OnGetCellParams := @dbgRef_OnGetCellParams;
+      Columns.Clear; 
+      end; 
+    trRef := TxFBTransaction(Result.FindComponent('trRef'));
+    with trRef do 
+      begin 
+      DefaultDataBase := FBDataBase; 
+      Params.Clear; 
+      Params.Add('isc_tpb_read_committed'); 
+      Params.Add('isc_tpb_write'); 
+      Params.Add('isc_tpb_rec_version'); 
+      Params.Add('isc_tpb_nowait'); 
+      end; 
+    dtsRef := TxFBDataSet(Result.FindComponent('dtsRef'));
+    with dtsRef do
+      begin 
+      AfterOpen   := @dtsRef_AfterOpen;
+      BeforeClose := @dtsRef_BeforeClose;
+      AfterScroll := @dtsRef_AfterScroll;
+      end 
+    dsdtsRef                          := TDataSource(Result.FindComponent('dsdtsRef'));
+    lkAct := FindTAction(Result,'actRefresh',msg_actrefresh,msg_actrefresh_hint,'', 0,170); lkAct.OnExecute:=@actRefresh_OnExecute; 
+    lkAct := FindTAction(Result,'actPrint'  ,msg_actprint  ,msg_actprint_hint  ,'', 0,104); lkAct.OnExecute:=@actPrint_OnExecute;   
+    lkAct := FindTAction(Result,'actOutIns' ,msg_actoutins ,msg_actoutins_hint ,'', 0,176); lkAct.OnExecute:=@actOutIns_OnExecute; lkAct.OnUpdate:=@actOutIns_OnUpdate; 
+    lkAct := FindTAction(Result,'actOutUpd' ,msg_actoutupd ,msg_actoutupd_hint ,'', 0,175); lkAct.OnExecute:=@actOutUpd_OnExecute; lkAct.OnUpdate:=@actOutDel_OnUpdate; 
+    lkAct := FindTAction(Result,'actOutDel' ,msg_actoutdel ,msg_actoutdel_hint ,'', 0,177); lkAct.OnExecute:=@actOutDel_OnExecute; lkAct.OnUpdate:=@actOutDel_OnUpdate; 
+    lkAct2 := AmunhotepForm_CreateActionTopBar(Result,'actClose','Отменить и закрыть окно','Ctrl+F4',ERP_FILENAME_BMP_ACTCLOSE, @AmunhotepForm_actClose_OnExecute, nil, TopBar);    
+    if(GetGlobalVariable('DATABASE_USER') = 'PEAKTOP')then
+      begin
+      lkAct2 := AmunhotepForm_CreateActionTopBar(Result,'actSourceCode','Исходный код модуля','',ERP_FILENAME_BMP_ACTSOURCECODE,@AmunhotepForm_actSourceCode_OnExecute,nil,TopBar);
+      end;    
+
+    cbxYears.Items.Clear;
+    for i:=2017 to StrToInt(FormatDateTime('yyyy', Now)) do
+      cbxYears.Items.Add(IntToStr(i));
+    cbxYears.ItemIndex := cbxYears.Items.IndexOf(FormatDateTime('yyyy', Now));
+    cbxYears.Style := csDropDownList;  
+    cbxMonth.Items.Clear;
+    for i:=1 to 12 do
+      cbxMonth.Items.Add(FormatDateTime('mmmmm', StrToDate('01.'+IntToStr(i)+'.2017')));  
+    cbxMonth.ItemIndex := StrToInt(FormatDateTime('mm', Now))-1;
+    cbxMonth.Style := csDropDownList;  
+    LastMonthID := cbxMonth.ItemIndex;
+    LastYearID  := cbxYears.ItemIndex;
+    SQLText0001 := TStringList.Create;
+
+    Amunhotep.MainForm.TaskBar.ButtonByForm(Result).Down := true;
+  end;
+  //============================================================================
+begin
+  AmunhotepForm := AmunhotepForm_Create;
+end.

@@ -1,0 +1,120 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}   {$I PEAKTOP:GLOBAL_VARIABLES.INC} {$ENDIF}
+        //======================================================================
+        function GetFieldFromDataSet(aDataSet :TDataSet; const FieldName:string):string;
+        var
+          lkFld :TField;
+          lkFN  :string;
+        begin
+          Result := '<font color="#FF0080"><b>'+FieldName+'</b></font>';
+          if(Pos(':STRING', AnsiUpperCase(FieldName)) > 0)then
+            begin
+            lkFN := FieldName;
+            Delete(lkFN, Pos(':STRING', UpperCase(lkFN)), 7);
+            lkFld := aDataSet.FindField(lkFN);
+            if(lkFld <> nil)then
+              Result := MoneyToStringFmt(lkFld.AsFloat, valUkraine, langRussian, false);
+            exit;
+            end;  
+          lkFld := aDataSet.FindField(FieldName);
+          if(lkFld = nil)then exit;
+               if(AnsiUpperCase(FieldName)='DATE_COMMIT')then 
+                 Result := FormatDateTime('dd mmmmm yyyy г.', lkFld.AsDateTime)
+          else if((lkFld.DataType=ftFloat)or(lkFld.DataType=ftCurrency)or(lkFld.DataType=ftBCD)or(lkFld.DataType=ftFMTBcd))then 
+                 Result := FormatFloat('#0.00 ', lkFld.AsFloat) 
+          else if(lkFld.DataType=ftDateTime)then 
+                 Result := FormatDateTime('dd.mm.yyyy г.', lkFld.AsDateTime)
+          else Result := aDataSet.FieldByName(FieldName).AsString
+        end;
+        //======================================================================
+        function PreprocessHtml(aDataSet :TDataSet; const aHTML:string):string;
+        var 
+          i,j     :Integer;
+          lkToken :string;
+        begin
+          Result := aHTML;
+          i := Pos('<%', Result);
+          while(i > 0)do
+            begin
+            j := Pos('%>', Result);
+            if(j < i)then break; 
+            lkToken := Copy(Result, i + 2, j - i - 2);
+            WriteLn(lkToken);
+            Delete(Result, i, j - i + 2);
+            Insert(GetFieldFromDataSet(aDataSet, lkToken), Result, i); 
+            i := Pos('<%', Result);
+            end;
+        end;
+        //======================================================================
+        procedure PreviewHTML(const aDocID:string);
+        var
+          lkHtmlView :THTMLViewer;
+          lkTr       :TxFBTransaction;
+          lkQr       :TxFBQuery;
+          lkHTML     :string;
+          lkCnt, i   :Integer;
+        begin
+          lkHTML := StringsLoadFromFile(StrAbsolutePath('./TEMPLATE.HTML', ScriptName));
+          if(lkHTML = '')then
+            begin
+            Dialogs.MessageDlg('Не найден шаблон документа !'+#13#10+
+              StrAbsolutePath('./TEMPLATE.HTML', ScriptName), mtWarning, [mbOk]);
+            exit;
+            end;
+          lkTr := TxFBTransaction.Create(nil);
+          with lkTr do
+            begin
+            DefaultDataBase := FBDataBase;
+            Params.Clear;
+            Params.Add('isc_tpb_read_committed');
+            Params.Add('isc_tpb_read');
+            Params.Add('isc_tpb_rec_version');
+            Params.Add('isc_tpb_nowait');
+            end;
+          lkQr := TxFBQuery.Create(lkTr);
+          with lkQr do
+            begin
+            Transaction := lkTr;
+            SQL.Text := 'SELECT P.* FROM PROC$D_1000062('''+aDocId+''') P ';
+            end;
+          lkQr.Open;
+          if(lkQr.RecordCount=0)then
+            begin
+            Dialogs.MessageDlg('Документ не найден в базе данных !', mtWarning, [mbOk]);
+            if lkTr.InTransaction then 
+              lkTr.Rollback;
+            lkTr.Free;
+            exit;
+            end;
+          lkQr.First;
+          lkHTML := PreprocessHtml(lkQr, lkHTML);
+          if lkTr.InTransaction then 
+            lkTr.Rollback;
+          lkTr.Free;
+
+          lkHtmlView := THTMLViewer.Create(nil);
+          with lkHtmlView do
+            begin
+            Left   := 0;
+            Top    := 0;
+            Width  := 0;
+            Height := 0; 
+            Parent := Amunhotep.MainForm;
+            DefFontSize :=8;
+//            DefFontName := 'Courier New';
+            PrintMarginBottom := 0;
+            PrintMarginLeft   := 1;
+            PrintMarginRight  := 1;
+            PrintMarginTop    := 1;
+            LoadFromString(lkHTML, '');
+            Print(1, 9999);
+            Free;
+            end;
+        end;
+        //======================================================================
+var
+  lkID :string;
+begin
+  lkID := GetGlobalVariable('J_ID');
+  if((StrTrimAll(lkID)='')or(UpperCase(lkID)='NULL'))then exit;
+  PreviewHTML(lkID);
+end.

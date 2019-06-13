@@ -1,0 +1,45 @@
+{$IFDEF MSWINDOWS}
+  {$IFNDEF PEAKTOP:COM/MICROSOFT/WINDOWS/SHELL32.DLL.INC}
+  function ShellExecute(hWindow :LongInt; Operation, FileName, Parameters, Directory :PChar; ShowCmd :LongInt):LongInt; external 'ShellExecuteA@shell32.dll stdcall';
+  {$ENDIF}  
+{$ENDIF}  
+var
+  MidasFileName :string;
+  NeedToRegister:Boolean;
+{$IFDEF MSWINDOWS}
+  Reg           :TxRegComponent;
+{$ENDIF}
+begin
+{$IFDEF MSWINDOWS}
+  MidasFileName := StrAbsolutePath('./midas.dll', Amunhotep.ExeName);
+{$ENDIF}  
+{$IFDEF LINUX}
+  MidasFileName := StrAbsolutePath('./midas.so', Amunhotep.ExeName);
+{$ENDIF}  
+  if not FileExists(MidasFileName) then
+    begin
+    Dialogs.MessageDlg('Не найден файл "'+MidasFileName+'". Возможна некорректная работа экспорта из баз данных.', mtWarning, [mbOK]);
+    exit;
+    end;
+  NeedToRegister := true;
+  {$IFDEF MSWINDOWS}
+  try
+    Reg               := TxRegComponent.Create(nil);
+    Reg.RootKey       := xrgHKCR;
+    Reg.CanCreateKeys := false;
+    Reg.Key           := 'CLSID\{9E8D2FA1-591C-11D0-BF52-0020AF32BD64}\InprocServer32';
+    Reg.Param         := '';
+    if(UpperCase(Reg.ReadString) = UpperCase(MidasFileName))then
+      NeedToRegister := false;
+  finally
+    Reg.Free;
+  end;
+  if NeedToRegister then
+    begin
+    MidasFileName := ' /s "'+MidasFileName+'"';
+    ShellExecute(0, 'open', 'regsvr32.exe', MidasFileName, '', 0);
+    end;
+  {$ENDIF}  
+  {$IFDEF LINUX}
+  {$ENDIF}  
+end.

@@ -1,0 +1,33 @@
+{$DEFINE DB:CONFIG/REF/CS/RPT_DOVER00.PS}
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}  {$I PEAKTOP:GLOBAL_VARIABLES.INC}  {$ENDIF}
+var
+  lkCS_ID :string;
+  lkRes   :string;
+  lkRpt   :TxReport;
+  lkImg   :TxrImage;
+begin
+  lkCS_ID := GetGlobalVariable('CS_ID');
+  if((lkCS_ID='NULL')or(StrTrimAll(lkCS_ID)=''))then exit;
+  lkRes := StringsLoadFromFile(StrAbsolutePath('./RPT_DOVER00.XFM',ScriptName))
+  lkRpt := TxReport(StrToComponent(lkRes));
+  lkRpt.Title := 'Доверенности контрагента';
+  lkRpt.DataBase := FBDataBase;
+  while(lkRpt.DataSets.Count < 2)do
+    lkRpt.DataSets.Add;
+  lkRpt.DataSets[0].SQL.Text := StringsLoadFromFile(StrAbsolutePath('./RPT_DOVER00.SQL',ScriptName));
+  with lkRpt.DataSets[0].Query do
+    begin
+    Prepare;
+    ParamByName('CS_ID').AsString := lkCS_ID;
+    end;
+  lkRpt.DataSets[1].SQL.Text := 'SELECT PR.* FROM PROC$R_FIRMS_ENT_CONST(0) PR ';
+  lkImg := TxrImage(lkRpt.FindComponent('ImgLogo'));
+  lkRes := StrAbsolutePath('../conf/ent/logo.bmp', Amunhotep.ExeName);
+  if FileExists(lkRes)then
+    try
+      lkImg.Picture.LoadFromFile(lkRes);
+    except
+    end;
+  lkRpt.Prepare;
+  lkRpt.Preview;
+end.

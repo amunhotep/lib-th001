@@ -1,0 +1,146 @@
+{"MESSAGES":[
+   {"NAME":"MSG_ACTEDIT_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Правка"}
+     ,{"LANG":"1000056","TXT":"Edit"}
+     ,{"LANG":"1000204","TXT":"Édition"}
+     ,{"LANG":"1000123","TXT":"Bearbeiten"}
+     ,{"LANG":"1000071","TXT":"Редагування"}
+     ,{"LANG":"1000008","TXT":"Праўка"}
+   ]}
+  ,{"NAME":"MSG_ACTEDIT_HINT","CAPTION":[
+      {"LANG":"1000054","TXT":""}
+     ,{"LANG":"1000056","TXT":""}
+     ,{"LANG":"1000204","TXT":""}
+     ,{"LANG":"1000123","TXT":""}
+     ,{"LANG":"1000071","TXT":""}
+     ,{"LANG":"1000008","TXT":""}
+   ]}
+  ,{"NAME":"MSG_ACTEDITUNDO_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Отменить"}
+     ,{"LANG":"1000056","TXT":"Undo"}
+     ,{"LANG":"1000204","TXT":"Annuler"}
+     ,{"LANG":"1000123","TXT":"Rückgängig"}
+     ,{"LANG":"1000071","TXT":"Скасувати"}
+     ,{"LANG":"1000008","TXT":"Адмяніць"}
+   ]}
+  ,{"NAME":"MSG_ACTEDITUNDO_HINT","CAPTION":[
+      {"LANG":"1000054","TXT":"Отменить последнее действие"}
+     ,{"LANG":"1000056","TXT":"Undo Last Action"}
+     ,{"LANG":"1000204","TXT":"Annuler la dernière action"}
+     ,{"LANG":"1000123","TXT":"Letzte Aktion rückgängig machen"}
+     ,{"LANG":"1000071","TXT":"Відмінити останню дію"}
+     ,{"LANG":"1000008","TXT":"Адмяніць апошняе дзеянне"}
+   ]}
+  ,{"NAME":"MSG_ACTEDITREDO_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Вернуть"}
+     ,{"LANG":"1000056","TXT":"Redo"}
+     ,{"LANG":"1000204","TXT":"Rétablir"}
+     ,{"LANG":"1000123","TXT":"Wiederherstellen"}
+     ,{"LANG":"1000071","TXT":"Повернути"}
+     ,{"LANG":"1000008","TXT":"Вярнуць"}
+   ]}
+  ,{"NAME":"MSG_ACTEDITREDO_HINT","CAPTION":[
+      {"LANG":"1000054","TXT":"Вернуть последнее действие"}
+     ,{"LANG":"1000056","TXT":"Redo the Last Action"}
+     ,{"LANG":"1000204","TXT":"Refaire la dernière action"}
+     ,{"LANG":"1000123","TXT":"Wiederholen Sie die letzte Aktion"}
+     ,{"LANG":"1000071","TXT":"Повернути останню дію"}
+     ,{"LANG":"1000008","TXT":"Вярнуць апошняе дзеянне"}
+   ]}
+  ,{"NAME":"MSG_ACTEDITCUT_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Вырезать"}
+     ,{"LANG":"1000056","TXT":"Cut"}
+     ,{"LANG":"1000204","TXT":"Couper"}
+     ,{"LANG":"1000123","TXT":"Ausschneiden"}
+     ,{"LANG":"1000071","TXT":"Вирізати"}
+     ,{"LANG":"1000008","TXT":"Выразаць"}
+   ]}
+  ,{"NAME":"MSG_ACTEDITCUT_HINT","CAPTION":[
+      {"LANG":"1000054","TXT":"Вырезать в буфер обмена"}
+     ,{"LANG":"1000056","TXT":"Cut to Clipboard"}
+     ,{"LANG":"1000204","TXT":"Couper dans le presse-papier"}
+     ,{"LANG":"1000123","TXT":"In die Zwischenablage schneiden"}
+     ,{"LANG":"1000071","TXT":"Вирізати в буфер обміну"}
+     ,{"LANG":"1000008","TXT":"Выразаць у буфер абмену"}
+   ]}
+  ,{"NAME":"MSG_ACTEDITCOPY_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Копировать"}
+     ,{"LANG":"1000056","TXT":"Copy"}
+     ,{"LANG":"1000204","TXT":"Copie"}
+     ,{"LANG":"1000123","TXT":"Kopieren"}
+     ,{"LANG":"1000071","TXT":"Копіювати"}
+     ,{"LANG":"1000008","TXT":"Капіяваць"}
+   ]}
+  ,{"NAME":"MSG_ACTEDITCOPY_HINT","CAPTION":[
+      {"LANG":"1000054","TXT":"Копировать в буфер обмена"}
+     ,{"LANG":"1000056","TXT":"Copy to Clipboard"}
+     ,{"LANG":"1000204","TXT":"Copier dans le presse-papier"}
+     ,{"LANG":"1000123","TXT":"In die Zwischenablage kopieren"}
+     ,{"LANG":"1000071","TXT":"Копіювати в буфер обміну"}
+     ,{"LANG":"1000008","TXT":"Капіяваць ў буфер абмену"}
+   ]}
+  ,{"NAME":"MSG_ACTEDITPASTE_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Вставить"}
+     ,{"LANG":"1000056","TXT":"Paste"}
+     ,{"LANG":"1000204","TXT":"Coller"}
+     ,{"LANG":"1000123","TXT":"Einfügen"}
+     ,{"LANG":"1000071","TXT":"Вставити"}
+     ,{"LANG":"1000008","TXT":"Уставіць"}
+   ]}
+  ,{"NAME":"MSG_ACTEDITPASTE_HINT","CAPTION":[
+      {"LANG":"1000054","TXT":"Вставить из буфера обмена"}
+     ,{"LANG":"1000056","TXT":"Paste from Clipboard"}
+     ,{"LANG":"1000204","TXT":"Coller du presse-papier"}
+     ,{"LANG":"1000123","TXT":"Einfügen aus der Zwischenablage"}
+     ,{"LANG":"1000071","TXT":"Вставити з буфера обміну"}
+     ,{"LANG":"1000008","TXT":"Уставіць з буфера абмену"}
+   ]}
+  ,{"NAME":"MSG_ACTEDITDELETE_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Удалить"}
+     ,{"LANG":"1000056","TXT":"Delete"}
+     ,{"LANG":"1000204","TXT":"Effacer"}
+     ,{"LANG":"1000123","TXT":"Löschen"}
+     ,{"LANG":"1000071","TXT":"Видалити"}
+     ,{"LANG":"1000008","TXT":"Выдаліць"}
+   ]}
+  ,{"NAME":"MSG_ACTEDITDELETE_HINT","CAPTION":[
+      {"LANG":"1000054","TXT":"Удалить выделенное"}
+     ,{"LANG":"1000056","TXT":"Delete Selected"}
+     ,{"LANG":"1000204","TXT":"Supprimer sélectionnée"}
+     ,{"LANG":"1000123","TXT":"Ausgewählte löschen"}
+     ,{"LANG":"1000071","TXT":"Видалити виділене"}
+     ,{"LANG":"1000008","TXT":"Выдаліць вылучанае"}
+   ]}
+  ,{"NAME":"MSG_ACTEDITSELECTALL_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Выделить всё"}
+     ,{"LANG":"1000056","TXT":"Select All"}
+     ,{"LANG":"1000204","TXT":"Tout sélectionner"}
+     ,{"LANG":"1000123","TXT":"Alle auswählen"}
+     ,{"LANG":"1000071","TXT":"Виділити все"}
+     ,{"LANG":"1000008","TXT":"Вылучыць ўсе"}
+   ]}
+  ,{"NAME":"MSG_ACTEDITSELECTALL_HINT","CAPTION":[
+      {"LANG":"1000054","TXT":"Выделить всё"}
+     ,{"LANG":"1000056","TXT":"Select All"}
+     ,{"LANG":"1000204","TXT":"Tout sélectionner"}
+     ,{"LANG":"1000123","TXT":"Alle auswählen"}
+     ,{"LANG":"1000071","TXT":"Виділити все"}
+     ,{"LANG":"1000008","TXT":"Вылучыць ўсе"}
+   ]}
+  ,{"NAME":"MSG_ACTEDITWORDWRAP_CAPTION","CAPTION":[
+      {"LANG":"1000054","TXT":"Перенос строк"}
+     ,{"LANG":"1000056","TXT":"Wordwrap"}
+     ,{"LANG":"1000204","TXT":"Coupure de lignes"}
+     ,{"LANG":"1000123","TXT":"Zeilenumbruch"}
+     ,{"LANG":"1000071","TXT":"Перенесення рядків"}
+     ,{"LANG":"1000008","TXT":"Перанос радкоў"}
+   ]}
+  ,{"NAME":"MSG_ACTEDITWORDWRAP_HINT","CAPTION":[
+      {"LANG":"1000054","TXT":"Включить или выключить перенос строк"}
+     ,{"LANG":"1000056","TXT":"Enable or Disable Line Wrapping."}
+     ,{"LANG":"1000204","TXT":"Activer ou désactiver le retour à la ligne"}
+     ,{"LANG":"1000123","TXT":"Aktivieren oder deaktivieren Sie die Zeilenumbrüche"}
+     ,{"LANG":"1000071","TXT":"Включити або вимкнути перенесення рядків"}
+     ,{"LANG":"1000008","TXT":"Ўключыць або выключыць перанос радкоў"}
+   ]}
+]}

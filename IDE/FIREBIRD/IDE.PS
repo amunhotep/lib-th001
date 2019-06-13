@@ -1,0 +1,13 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}    {$I PEAKTOP:GLOBAL_VARIABLES.INC}    {$ENDIF}
+{$IFDEF MSWINDOWS}
+  {$IFNDEF PEAKTOP:COM/MICROSOFT/WINDOWS/USER32.DLL.INC}
+    {$I PEAKTOP:COM/MICROSOFT/WINDOWS/USER32.DLL.INC}
+  {$ENDIF}  
+{$ENDIF}  
+begin
+{$IFDEF MSWINDOWS}
+  Amunhotep.Icon.Handle      := LoadIcon(Amunhotep.Instance, 'Z004');
+{$ENDIF}
+  Amunhotep.Title            := 'Firebird Console';
+  Amunhotep.MainForm.Caption := Amunhotep.Title;
+end.

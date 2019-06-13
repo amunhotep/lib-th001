@@ -1,0 +1,6 @@
+{$I ../$COMMON.INC}
+begin
+  JrnlCaptionAdd := 'Слив металла';
+  Jrnl_HardFilter_Add('STATE_ID', '(STATE_ID = 2) AND (DAYSCNT = 0)');
+  JrnlForm := JtnlForm_Create('1000062');
+end.

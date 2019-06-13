@@ -1,0 +1,15 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG/DOC/1000075/NEW.PS}
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}
+  {$I PEAKTOP:GLOBAL_VARIABLES.INC}
+{$ENDIF}  
+var
+  lkFirmId :string;
+  lkS :string;
+begin
+  lkFirmId := '1';
+  if GetFieldCommit(FBDataBase, 'PROC$J_INS_1000076('''+lkFirmId+''', NULL, NULL)', 'J_ID', '', lkS)then
+    begin
+    SetGlobalVariable('J_ID', lkS);
+    call(StrAbsolutePath('./EDIT.PS', ScriptName));  
+    end;  
+end.

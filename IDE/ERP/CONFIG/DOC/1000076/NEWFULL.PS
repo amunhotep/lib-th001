@@ -1,0 +1,34 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}
+  {$I PEAKTOP:GLOBAL_VARIABLES.INC}
+{$ENDIF}  
+var
+  lkFirmId  :string;
+  lkPlaceId :string;
+  lkS       :string;
+  i         :Integer;
+begin
+  lkFirmId := '3';
+  SetGlobalVariable('FIRM_ID', lkFirmId);
+  call(StrAbsolutePath('../../REF/FIRMS/DEFAULT_DLG.PS',ScriptName));
+  lkFirmId := GetGlobalVariable('FIRM_ID');
+  if(StrTrimAll(lkFirmId) = '')then exit;
+  
+  GetField(FBDataBase, 'TABL$R_PLACES','ID','(ACC_ID = 281) AND (FILIAL_ID = (SELECT FIRST 1 P.ID FROM PROC$R_FILIALS_DEFAULT P))', lkS);
+  lkPlaceId := lkS;
+  SetGlobalVariable('PLACE_ID', lkPlaceId);
+  call(StrAbsolutePath('../../REF/PLACES/DEFAULT_DLG.PS',ScriptName));
+  lkPlaceId := GetGlobalVariable('PLACE_ID');
+  if(StrTrimAll(lkPlaceId) = '')then exit;
+  
+  if GetFieldCommit(FBDataBase, 'PROC$J_INS_1000076_FULL('''+lkFirmId+''', '''+lkPlaceId+''')', 'J_ID', '', lkS)then
+    with TStringList.Create do
+      begin
+      Text := lkS;
+      for i:=0 to Count-1 do
+        begin
+        SetGlobalVariable('J_ID', Strings[i]);
+        call(StrAbsolutePath('./EDIT.PS', ScriptName));
+        end;  
+      Free;
+      end;  
+end.

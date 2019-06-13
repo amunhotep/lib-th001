@@ -1,0 +1,9 @@
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/MENU/OBJECTEDITOR.INC} {$I ./OBJECTEDITOR.INC} {$ENDIF}
+var
+  lkObjId :string;
+begin
+  lkObjId := GetGlobalVariable(ERP_GLOBALVARIABLE_OBJ_ID);
+  if(StrTrimAll(lkObjId) <> '')then
+    TERPFormEdtrMenu_Create(lkObjId);
+  SetGlobalVariable(ERP_GLOBALVARIABLE_OBJ_ID, '');  
+end.

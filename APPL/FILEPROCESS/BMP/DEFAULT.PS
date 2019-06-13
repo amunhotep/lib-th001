@@ -1,0 +1,133 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}          {$I PEAKTOP:GLOBAL_VARIABLES.INC}  {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TACTION.INC}               {$I PEAKTOP:OBJ/TACTION.INC}       {$ENDIF}
+{$IFNDEF PEAKTOP:APPL/FILEPROCESS/DEFAULT.INC}  {$I ../DEFAULT.INC}               {$ENDIF}
+  //============================================================================
+  function FileProcess_ShowImage(const FileName:string):Boolean;
+  var
+    lkDlg      :TForm;
+    lkImg      :TImage;
+    lkSt       :TMemoryStream;
+    lkFileExt  :string;
+    lkTopBar   :TxcGradientPanelVista;
+    lkBottomBar:TxcGradientPanel;
+  begin
+    Result := false;
+    lkFileExt := UpperCase(ExtractFileExt(FileName)); 
+    if(lkFileExt[1] = '.')then
+      Delete(lkFileExt, 1, 1);
+    lkDlg := TForm.Create(nil);
+    with lkDlg do
+      begin
+      BorderStyle := bsDialog;
+      Height      := Trunc(Screen.Height / 2); 
+      Width       := Trunc(Screen.Width  / 2);
+      Position    := poDesktopCenter;
+      Caption     := 'Редактирование изображения';
+      Color       := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      Font.Color  := Amunhotep.MainForm.StyleManager.Colors.Border;
+      Font.Name   := 'Verdana';
+      Font.Size   := 7;
+      end;
+    lkTopBar := TxcGradientPanelVista.Create(lkDlg);
+    with lkTopBar do
+      begin
+      Parent       := lkDlg;
+      Left         := 0;
+      Top          := 0;
+      Height       := 24;
+      Align        := alTop;
+      BorderStyle  := xbsRaized;
+      StyleManager := Amunhotep.MainForm.StyleManager;
+      Font.Color   := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Name    := 'Verdana';
+      Font.Size    := 10;
+      Font.Style   := [fsBold];
+      Caption      := ' '+FileName;
+      end;
+    
+    lkImg := TImage.Create(lkDlg);
+    with lkImg do
+      begin
+      Parent      := lkDlg;
+      Left        := 0;
+      Top         := 0;
+      Align       := alClient;
+      Visible     := true;
+      Transparent := true;
+      Stretch     := true;
+      Proportional:= true;
+      Center      := false;
+      end;  
+    lkBottomBar := TxcGradientPanel.Create(lkDlg);
+    with lkBottomBar do
+      begin
+      Parent       := lkDlg;
+      Left         := 0;
+      Top          := 0;
+      Height       := 16;
+      Align        := alBottom;
+      BorderStyle  := xbsLowered;
+      StyleManager := Amunhotep.MainForm.StyleManager;
+      Font.Color   := Amunhotep.MainForm.StyleManager.Colors.Border;
+      Font.Name    := 'Verdana';
+      Font.Size    := 7;
+      Font.Style   := [fsBold];
+      Caption      := ' ';
+      end;
+    try
+      lkSt := TMemoryStream.Create;
+      if StreamLoadFromFile(FileName, lkSt)then
+        begin
+        if(lkFileExt = 'BMP')then 
+          begin      
+          lkImg.Picture.Bitmap.LoadFromStream(lkSt);
+          lkBottomBar.Caption := ' Size: Height='+
+            IntToStr(lkImg.Picture.Bitmap.Height)+'; Width = '+
+            IntToStr(lkImg.Picture.Bitmap.Width)
+            ;
+          end
+         else 
+          begin
+          if(lkFileExt = 'ICO')then 
+            begin
+            lkImg.Picture.Icon.LoadFromStream(lkSt);
+            lkBottomBar.Caption := ' Size: Height='+
+              IntToStr(lkImg.Picture.Icon.Height)+'; Width = '+
+              IntToStr(lkImg.Picture.Icon.Width)
+              ;
+            end
+           else
+            begin
+            if(lkFileExt = 'PNG')then 
+              begin
+              lkImg.Picture.Graphic := TPNGImage.Create;
+              TPNGImage(lkImg.Picture.Graphic).LoadFromStream(lkSt);
+              lkBottomBar.Caption := ' Size: Height='+
+                IntToStr(lkImg.Picture.Bitmap.Height)+'; Width = '+
+                IntToStr(lkImg.Picture.Bitmap.Width)
+                ;
+              end
+             else
+              begin
+              if(lkFileExt = 'JPG')then 
+                begin
+                lkImg.Picture.Graphic := TJPEGImage.Create;
+                TJPEGImage(lkImg.Picture.Graphic).LoadFromStream(lkSt);
+                end
+              end; 
+            end 
+          end;
+        end;
+    finally    
+      lkSt.Free;
+    end;  
+    Result := (lkDlg.ShowModal = mrCancel);
+    lkDlg.Free; 
+  end;
+  //============================================================================
+var
+  FileName :string;
+begin
+  FileName := GetGlobalVariable(FileProcessingGlobalVariableName);
+  FileProcess_ShowImage(FileName);
+end.

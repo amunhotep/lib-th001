@@ -1,0 +1,435 @@
+{$DEFINE DB:CONFIG/REF/CS/LIST_POS.PS}
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}  {$I PEAKTOP:GLOBAL_VARIABLES.INC}  {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TCOLUMNEH.INC}     {$I PEAKTOP:OBJ/TCOLUMNEH.INC}     {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TIMAGELIST.INC}    {$I PEAKTOP:OBJ/TIMAGELIST.INC}    {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TACTION.INC}       {$I PEAKTOP:OBJ/TACTION.INC}       {$ENDIF}
+const
+  msg_invalid_resource  = 'Неверный файл ресурсов'; 
+  msg_caption           = 'Контрагенты'; 
+  msg_actrefresh        = 'Обновить'; 
+  msg_actrefresh_hint   = 'Обновить список'; 
+  msg_actnewzalog       = 'Новый залог'; 
+  msg_actnewzalog_hint  = 'Создать новый залог на этого контрагента'; 
+  msg_actnewcs          = 'Новый контрагент'; 
+  msg_actnewcs_hint     = 'Создать запись о новом контрагенте'; 
+  msg_acteditcs         = 'Изменить данные'; 
+  msg_acteditcs_hint    = 'Изменить данные о контрагенте'; 
+  msg_actnewcspoll      = 'Соцопрос'; 
+  msg_actnewcspoll_hint = 'Создать запись об опросе контрагента'; 
+  msg_actprintform      = 'Анкета'; 
+  msg_actprintform_hint = 'Распечатать анкету контрагента'; 
+  msg_show_on_litera    = 'Показать контрагентов на букву ';
+  msg_actcsphoto        = 'Фотографии'; 
+  msg_actcsphoto_hint   = 'Фотографии контрагента'; 
+  msg_actcopy           = 'Копировать'; 
+  msg_actcopy_hint      = 'Копировать контрагента в буфер обмена'; 
+var 
+  RefForm        :TAmunhotepForm; 
+  TopBar         :TxcGradientPanelVista; 
+  ImgLogo        :TImage; 
+  ToolBar        :TxcGradientPanel;
+  ToolBarABC     :TxcGradientPanel; 
+  dbgRef         :TDBGridEh; 
+  trRef          :TxFBTransaction; 
+  qrRef          :TxFBQuery; 
+  DSqrRef        :TDataSource;
+const
+  ABCGroupIndex     = 22;
+  //============================================================================
+  function GetOrderByField:string;
+  var 
+    i :Integer; 
+  begin 
+    Result := dbgRef.Columns[0].FieldName;
+    for i:=1 to dbgRef.Columns.Count-1 do 
+      if((dbgRef.Columns[i].Title.SortMarker = smDownEh)or(dbgRef.Columns[i].Title.SortMarker = smUpEh)) then
+        begin
+        Result := dbgRef.Columns[i].FieldName;
+        if(dbgRef.Columns[i].Title.SortMarker = smDownEh)then
+          Result := Result + ' ASCENDING '
+         else
+          Result := Result + ' DESCENDING ';
+        break;
+        end; 
+  end;
+  //============================================================================
+  procedure RefreshView;
+  var
+    lkS       :string;
+    lkSQL     :string;
+    lkSQLAddr :string;
+    lkFlag    :Boolean;
+    i         :Integer;
+    lkABC     :string;
+  begin 
+    lkFlag := false; 
+    if qrRef.Active then
+      if(qrRef.RecordCount > 0)then
+        begin
+        dbgRef.SaveBookMark;
+        lkFlag := true;
+        end;
+    if trRef.InTransaction then 
+      trRef.Commit;
+    lkABC := '';
+    for i:=0 to ToolBarABC.ComponentCount-1 do
+      if(AnsiUpperCase(ToolBarABC.Components[i].ClassName) = 'TXCTOOLBARBUTTON')then
+        if( (TxcToolBarButton(ToolBarABC.Components[i]).Down) and (ToolBarABC.Components[i].Tag > 0) )then
+          begin
+          lkABC := Chr(ToolBarABC.Components[i].Tag);
+          break;
+          end;  
+    lkSQL     := '';   
+    lkSQLAddr := '';  
+    for i:=0 to dbgRef.Columns.Count-1 do
+      begin
+      lkS := AnsiUpperCase(dbgRef.Columns[i].STFilter.ExpressionStr);
+      if(StrTrimAll(lkS) <> '')then
+        begin
+        if(  (dbgRef.Columns[i].FieldName = 'NAME')
+           or(dbgRef.Columns[i].FieldName = 'INN')
+           or(dbgRef.Columns[i].FieldName = 'BIRTHYEAR')
+           or(dbgRef.Columns[i].FieldName = 'ADDRLIST')
+           or(dbgRef.Columns[i].FieldName = 'DOCLIST')
+           or(dbgRef.Columns[i].FieldName = 'PHONELIST')
+           or(dbgRef.Columns[i].FieldName = 'CODECARD')
+           or(dbgRef.Columns[i].FieldName = 'CODEFLAYER')
+           or(dbgRef.Columns[i].FieldName = 'FILIAL_NAME')
+           or(dbgRef.Columns[i].FieldName = 'FLAG_PHOTO')
+           or(dbgRef.Columns[i].FieldName = 'COMENT')
+          )then
+          lkSQL := lkSQL + '  AND  (UPPER(P.'+dbgRef.Columns[i].FieldName+') CONTAINING '''+StrReplaceStr(lkS, '''', '''''')+''' )'+#13#10;
+        end;  
+      end;
+    lkSQL := 
+      'SELECT P.* FROM PROC$R_CS_LIST_PS(1000002,'''+lkABC+''') P WHERE (1 = 1) '+#13#10+
+      lkSQL+#13#10+
+      'ORDER BY P.'+GetOrderByField+', P.NAME ASCENDING '+#13#10; 
+    qrRef.SQL.Text := lkSQL; 
+    try 
+      qrRef.Open; 
+    except 
+      // Dialogs.MessageDlg(qrRef.SQL.Text, mtError, [mbOk]);
+    end;
+    if(qrRef.Active and lkFlag)then
+      try
+        dbgRef.RestoreBookMark;
+      except
+      end;  
+  end;
+  //============================================================================
+  procedure dbgRef_OnGetCellParams(Sender: TObject; Column: TColumnEh; 
+              AFont: TFont; var Background: TColor; State: TGridDrawState);
+  begin
+   if(Column.Tag=666)then exit;
+   if(not(Column.Field.DataSet.Active))then exit;
+   if(not(Column.Field.DataSet.RecordCount > 0))then exit;
+   if(Column.Field.DataSet.FieldByName('FLAG_BAD').AsInteger = 1)then
+     begin 
+     Background  := Amunhotep_MainForm_StyleManager.Colors.Error;
+     aFont.Color := Amunhotep_MainForm_StyleManager.Colors.Window;
+     aFont.Style := [fsBold];
+     end;
+  end;
+  //============================================================================
+  procedure dbgRef_OnTitleClick(Column :TColumnEh); 
+  var 
+    i     :Integer; 
+    lkDBG :TCustomDBGridEh;
+    lkSM  :TSortMarkerEh; 
+  begin 
+    lkSM  := Column.Title.SortMarker;
+    lkDBG := TDBGridColumnsEh(Column.Collection).Grid;
+    for i:=0 to lkDBG.Columns.Count-1 do 
+      lkDBG.Columns[i].Title.SortMarker := smNoneEh;
+    if(lkSM <> smNoneEh)then
+      begin
+      if(lkSM = smDownEh)then
+        Column.Title.SortMarker := smUpEh
+       else  
+        Column.Title.SortMarker := smDownEh;
+      end
+     else   
+      Column.Title.SortMarker := smDownEh; 
+    RefreshView; 
+  end; 
+  //============================================================================
+  procedure qrRef_AfterOpen(DataSet :TDataSet);
+  begin
+  end;
+  //============================================================================
+  procedure qrRef_BeforeClose(DataSet :TDataSet);
+  begin
+  end;
+  //============================================================================
+  procedure qrRef_AfterScroll(DataSet :TDataSet);
+  begin
+  end;
+  //============================================================================
+  procedure actRefresh_OnExecute(Sender :TObject);
+  begin
+    RefreshView;
+  end;
+  //============================================================================
+  procedure actNewCS_OnExecute(Sender :TObject);
+  var
+    lkID :string;
+  begin
+    if not GetFieldCommit(FBDataBase, 'PROC$R_CS_INS_DEFAULT(''Фамилия Имя Отчество'')', 'CS_ID', '', lkID)then exit;
+    SetGlobalVariable('CS_ID', lkID);
+    call( StrAbsolutePath('./DEFAULT_ITEM_DLG_POS.PS',ScriptName) );
+    RefreshView;
+  end;
+  //============================================================================
+  procedure actCsPhoto_OnExecute(Sender :TObject);
+  begin
+    SetGlobalVariable('CS_ID', qrRef.FieldByName('ID').AsString);
+    call(StrAbsolutePath('../../REF/CS_PHOTO/LIST.PS', ScriptName));
+  end;
+  //============================================================================
+  procedure actEditCS_OnExecute(Sender :TObject);
+  begin
+    if not qrRef.Active then exit;
+    if not (qrRef.RecordCount > 0) then exit;
+    SetGlobalVariable('CS_ID', qrRef.FieldByName('ID').AsString);
+    call( StrAbsolutePath('./DEFAULT_ITEM_DLG_POS.PS',ScriptName) );
+    RefreshView;
+  end;
+  //============================================================================
+  procedure actNewZalog_OnExecute(Sender :TObject);
+  begin
+    SetGlobalVariable('CS_ID', qrRef.FieldByName('ID').AsString);
+    call( StrAbsolutePath('../../DOC/1000062/NEW_CS.PS',ScriptName) );
+  end;
+  //============================================================================
+  procedure actPrintForm_OnExecute(Sender :TObject);
+  begin
+    SetGlobalVariable('CS_ID', qrRef.FieldByName('ID').AsString);
+    call( StrAbsolutePath('./RPT_ANKETA.PS',ScriptName) );
+  end;
+  //============================================================================
+  procedure actJrnl1000062_OnExecute(Sender :TObject);
+  var
+    lkScript :string;
+  begin
+    lkScript := 
+      '{$IFNDEF PEAKTOP:IDE/ERP/DBO/DOC/FORMJRNL.INC} {$I PEAKTOP:IDE/ERP/DBO/DOC/FORMJRNL.INC} {$ENDIF} '+#13#10+
+      'var '+#13#10+
+      '  JrnlForm :TAmunhotepForm; '+#13#10+
+      'begin '+#13#10+
+      '  TERPFormGrid_DataSetFilter_DateInit := true; '+#13#10+
+      '  TERPFormGrid_DataSetFilter_DateFrom := StrToDate(''01.04.2010''); '+#13#10+ 
+      '  TERPFormGrid_DataSetFilter_DateTo   := Now; '+#13#10+ 
+      '  TERPFormGrid_DataSetFilter_Add(''CS_ID'', ''CS_ID = '+qrRef.FieldByName('ID').AsString+'''); '+#13#10+
+      '  JrnlForm := TAmunhotepForm(Journal_Create(''1000062'')); '+#13#10+
+      '  JrnlForm.SetCaption(JrnlForm.Caption+'' ('+qrRef.FieldByName('NAME').AsString+')''); '+#13#10+
+      '  TxcGradientPanelVista(JrnlForm.FindComponent(obj_name_erp_topbar)).Caption := #$20#$20#$20#$20#$20#$20+JrnlForm.Caption; '+#13#10+
+      'end.'+#13#10;
+    run(lkScript, 'DB:CONFIG/DOC/1000062/DEFAULT.CS.PS')
+  end;
+  //============================================================================
+  procedure actJrnl1000062NV_OnExecute(Sender :TObject);
+  var
+    lkScript :string;
+  begin
+    lkScript := 
+      '{$IFNDEF PEAKTOP:IDE/ERP/DBO/DOC/FORMJRNL.INC} {$I PEAKTOP:IDE/ERP/DBO/DOC/FORMJRNL.INC} {$ENDIF} '+#13#10+
+      'var '+#13#10+
+      '  JrnlForm :TAmunhotepForm; '+#13#10+
+      'begin '+#13#10+
+      '  TERPFormGrid_DataSetFilter_DateInit := true; '+#13#10+
+      '  TERPFormGrid_DataSetFilter_DateFrom := StrToDate(''01.04.2010''); '+#13#10+ 
+      '  TERPFormGrid_DataSetFilter_DateTo   := Now; '+#13#10+ 
+      '  TERPFormGrid_DataSetFilter_Add(''FLAG_COMMIT'', ''FLAG_COMMIT = 1''); '+#13#10+
+      '  TERPFormGrid_DataSetFilter_Add(''CS_ID'', ''CS_ID = '+qrRef.FieldByName('ID').AsString+'''); '+#13#10+
+      '  TERPFormGrid_DataSetFilter_Add(''STATE_ID'', ''STATE_ID = 2''); '+#13#10+
+      '  TERPFormGrid_DataSetFilter_Add(''FLAG_REAL'', ''EXISTS(SELECT P.J_ID FROM PROC$D_GET_4_CHILDS(ID, 1000068) P )''); '+#13#10+
+      '  TERPFormGrid_DataSetFilter_Add(''FIRM_ID'', ''FIRM_ID = 0''); '+#13#10+
+      '  JrnlForm := TAmunhotepForm(Journal_Create(''1000062'')); '+#13#10+
+      '  JrnlForm.SetCaption(JrnlForm.Caption+'' ('+qrRef.FieldByName('NAME').AsString+')''); '+#13#10+
+      '  TxcGradientPanelVista(JrnlForm.FindComponent(obj_name_erp_topbar)).Caption := #$20#$20#$20#$20#$20#$20+JrnlForm.Caption; '+#13#10+
+      'end.'+#13#10;
+    run(lkScript, 'DB:CONFIG/DOC/1000062/DEFAULT.CS.PS')
+  end;
+  //============================================================================
+  procedure actNewZalog_OnUpdate(Sender :TObject);
+  begin
+    TCustomAction(Sender).Enabled := qrRef.Active and (qrRef.RecordCount > 0);
+  end;
+  //============================================================================
+  procedure actCsPoll_OnExecute(Sender :TObject);
+  begin
+    SetGlobalVariable('CS_ID', qrRef.FieldByName('ID').AsString);
+    call( StrAbsolutePath('./EXITPOLL_DLG.PS',ScriptName) );
+  end;
+  //============================================================================
+  procedure actCopyToBuffer_OnExecute(Sender :TObject);
+  var
+    lkSQL :string;
+  begin
+    lkSQL := 'INSERT INTO TABL$_BUFFER(NAME, USER_ID, OBJ_NAME, OBJ_ID)VALUES('''+
+      qrRef.FieldByName('NAME').AsString+''', '''+GetGlobalVariable('DATABASE_USER')+''', ''TABL$R_CS-DOVER'', '''+
+      qrRef.FieldByName('ID').AsString+''')';
+    ExecSQL(FBDataBase, lkSQL);  
+  end;
+  //============================================================================
+  function RefForm_Create:TAmunhotepForm;
+  var
+    lkFileName :string;
+    lkResBody  :string;
+    lkStr      :string;
+    lkAccs     :Boolean;
+    lkStrm     :TMemoryStream;
+    lkLbl      :TLabel;
+    lkAct      :TAction;
+    lkTS       :TTabSheet;
+    lkPM       :TPopupMenu;
+    lkMM       :TMainMenu;
+    lkCol      :TColumnEh;
+    lktbbABC   :TxcToolBarButton;
+    i          :Integer;
+  begin
+    DontAutoFree;
+    lkAccs := false;
+    if GetField(FBDataBase, 'PROC$_USERS_ACCS_ROLES', 'ROLES_LIST', '', lkStr)then
+      lkAccs := (Pos('~1000018~', lkStr) > 0) or (Pos('~1000000~', lkStr) > 0)  or (Pos('~1000001~', lkStr) > 0);
+    lkFileName := StrAbsolutePath('./LIST_POS.XFM', ScriptName);
+    for i:=0 to Amunhotep.MainForm.MDIChildCount-1 do
+      if(ObjectInheritsFrom(Amunhotep.MainForm.MDIChildren[i], 'TAmunhotepForm'))then
+        if(TAmunhotepForm(Amunhotep.MainForm.MDIChildren[i]).FileName = lkFileName)then
+          begin
+          Amunhotep.MainForm.MDIChildren[i].BringToFront;
+          exit;
+          end;
+    lkResBody  := StringsLoadFromFile(lkFileName);
+    if(lkResBody = '')then 
+      begin
+      Dialogs.MessageDlg(msg_invalid_resource+#13#10+lkFileName, mtWarning, [mbOK]);
+      exit;
+      end;
+    Result          := TAmunhotepForm(StrToComponent(lkResBody));
+    Result.FileName := lkFileName;
+    try
+      lkStrm := TMemoryStream.Create;
+      if StreamLoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IMG/CONFIG/ERP/REF0016X0016.ICO'),lkStrm)then
+        Result.Icon.LoadFromStream(lkStrm);
+    finally
+      lkStrm.Free;
+    end;
+    Result.SetCaption(msg_caption);
+    TopBar := TxcGradientPanelVista(Result.FindComponent('TopBar')); 
+    with TopBar do 
+      begin 
+      Caption    := #$20#$20#$20#$20#$20#$20+msg_caption; 
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Window; 
+      Font.Name  := 'Verdana'; 
+      Font.Size  := 14; 
+      Font.Style := [fsBold]; 
+      end; 
+    ImgLogo := TImage(Result.FindComponent('ImgLogo')); 
+    try 
+      lkStrm  := TMemoryStream.Create; 
+      if StreamLoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IMG/CONFIG/ERP/REF0032X0032.BMP'), lkStrm)then 
+        ImgLogo.Picture.Bitmap.LoadFromStream(lkStrm); 
+    finally 
+      lkStrm.Free; 
+    end; 
+    ToolBar    := TxcGradientPanel(Result.FindComponent('ToolBar'));
+    ToolBarABC := TxcGradientPanel(Result.FindComponent('ToolBarABC'));
+    ToolBarABC.Font.Style := [fsBold];
+    lktbbABC := TxcToolBarButton.Create(ToolBarABC);
+    with lktbbABC do
+      begin
+      Parent       := ToolBarABC;
+      Left         := 0;
+      Width        := 32;
+      Align        := alLeft;
+      Caption      := ' ВСЕ';
+      Hint         := msg_show_on_litera+' "ВСЕ" ';
+      StyleManager := Amunhotep.MainForm.StyleManager;
+      Down         := false;
+      GroupIndex   := ABCGroupIndex;
+      Tag          := -1;
+      ShowHint     := true;
+      OnClick      := @actRefresh_OnExecute;
+      end;
+    for i:=Ord('А') to Ord('Я') do
+      begin
+      lktbbABC := TxcToolBarButton.Create(ToolBarABC);
+      with lktbbABC do
+        begin 
+        Parent       := ToolBarABC;
+        Left         := ((ToolBarABC.ComponentCount-1) * 20) + 33;
+        Width        := 20;
+        Align        := alLeft;
+        Caption      := ' '+Chr(i)+' ';
+        Down         := (i = Ord('А'));
+        Hint         := msg_show_on_litera+'"'+Chr(i)+'"';
+        StyleManager := Amunhotep.MainForm.StyleManager;
+        GroupIndex   := ABCGroupIndex;
+        Tag          := i;
+        ShowHint     := true;
+        OnClick      := @actRefresh_OnExecute;
+        end;
+      end;
+    dbgRef                             := TDBGridEh(Result.FindComponent('dbgRef'));
+    dbgRef.Color                       := Amunhotep.MainForm.StyleManager.Colors.Window;
+    dbgRef.Font.Color                  := Amunhotep.MainForm.StyleManager.Colors.Border;
+    dbgRef.FixedColor                  := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    dbgRef.TitleFont.Color             := Amunhotep.MainForm.StyleManager.Colors.Border;
+    dbgRef.TitleFont.Style             := [fsBold];
+    dbgRef.UseMultiTitle               := true;
+    dbgRef.OnGetCellParams             := @dbgRef_OnGetCellParams;
+    dbgRef.OnTitleClick                := @dbgRef_OnTitleClick;
+    dbgRef.OnDblClick                  := @actEditCS_OnExecute;
+    dbgRef.Columns.Clear;
+    lkCol := CreateTColumnEh(dbgRef,'ID'             ,'# ### ##0'          ,'Контрагент|Код'         , 72,taRightJustify);
+    lkCol := CreateTColumnEh(dbgRef,'FLAG_PHOTO'     ,'# ### ##0'          ,'Контрагент|фото'        , 20,taLeftJustify);
+    lkCol.KeyList.Text := '1'+#13#10+'0'; lkCol.PickList.Text := 'фото'+#13#10+' ';
+    lkCol.ImageList := CreateTImageList(dbgRef, 'ilPhoto', [488, Amunhotep.MainForm.ImageListMain.Count-1]);
+    lkCol.Title.Orientation := tohVertical;
+//    lkCol := CreateTColumnEh(dbgRef,'KIND_SHORT_NAME',''                   ,'Контрагент|Тип'         , 48,taLeftJustify );
+    lkCol := CreateTColumnEh(dbgRef,'NAME'           ,''                   ,'Контрагент|Фамилия И.О.',160,taLeftJustify );
+    lkCol.Title.SortMarker := smDownEh;
+    lkCol := CreateTColumnEh(dbgRef,'AMOUNT'         ,'# ### ##0.00'       ,'Контрагент|Скидка %'    , 60,taRightJustify);
+    lkCol := CreateTColumnEh(dbgRef,'INN'            ,''                   ,'Контрагент|И.Н.Н.'      , 80,taLeftJustify );
+    lkCol := CreateTColumnEh(dbgRef,'BIRTHDAY'       ,'dd.mm.yyyy'         ,'Контрагент|Дата рожд'   , 72,taLeftJustify );
+    lkCol := CreateTColumnEh(dbgRef,'BIRTHYEAR'      ,''                   ,'Контрагент|год рожд.'   , 40,taLeftJustify );
+    lkCol := CreateTColumnEh(dbgRef,'ADDRLIST'       ,''                   ,'Адрес'                  ,200,taLeftJustify );
+    lkCol := CreateTColumnEh(dbgRef,'PHONELIST'      ,''                   ,'телефоны'               , 96,taLeftJustify );
+    lkCol := CreateTColumnEh(dbgRef,'DOCLIST'        ,''                   ,'Документы'              ,200,taLeftJustify );
+    lkCol := CreateTColumnEh(dbgRef,'CODECARD'       ,''                   ,'Дисконт|Номер карты'    , 60,taLeftJustify );
+    lkCol := CreateTColumnEh(dbgRef,'CODEFLAYER'     ,''                   ,'Дисконт|Номер флайера'  , 60,taLeftJustify );
+    lkCol := CreateTColumnEh(dbgRef,'FILIAL_NAME'    ,''                   ,'Филиал'                 , 80,taLeftJustify );
+    lkCol := CreateTColumnEh(dbgRef,'DATE_LAST'      ,'dd.mm.yyyy hh:nn:ss','Дата последней операции', 72,taLeftJustify );
+    lkCol := CreateTColumnEh(dbgRef,'COMENT'         ,''                   ,'Примечания'             ,120,taLeftJustify );
+    trRef                              := TxFBTransaction(Result.FindComponent('trRef'));
+    trRef.DefaultDataBase              := FBDataBase;
+    trRef.Params.Clear;
+    trRef.Params.Add('isc_tpb_read_committed'); 
+    trRef.Params.Add('isc_tpb_read'); 
+    trRef.Params.Add('isc_tpb_rec_version'); 
+    trRef.Params.Add('isc_tpb_nowait'); 
+    qrRef             := TxFBQuery(Result.FindComponent('qrRef'));
+    qrRef.AfterOpen   := @qrRef_AfterOpen;
+    qrRef.AfterScroll := @qrRef_AfterScroll;
+    qrRef.BeforeClose := @qrRef_BeforeClose;
+    DSqrRef           := TDataSource(Result.FindComponent('DSqrRef'));
+    lkAct := FindTAction(Result,'actRefresh'  ,msg_actrefresh  ,msg_actrefresh_hint  ,'F5'    , 0,170); lkAct.OnExecute:=@actRefresh_OnExecute; 
+    lkAct := FindTAction(Result,'actNewCS'    ,msg_actnewcs    ,msg_actnewcs_hint    ,'Ins'   , 0,176); lkAct.OnExecute:=@actNewCS_OnExecute; 
+    lkAct := FindTAction(Result,'actEditCS'   ,msg_acteditcs   ,msg_acteditcs_hint   ,'Ctrl+E', 0,175); lkAct.OnExecute:=@actEditCS_OnExecute;   lkAct.OnUpdate:=@actNewZalog_OnUpdate;
+    lkAct := FindTAction(Result,'actNewZalog' ,msg_actnewzalog ,msg_actnewzalog_hint ,'Ctrl+N', 0,307); lkAct.OnExecute:=@actNewZalog_OnExecute; lkAct.OnUpdate:=@actNewZalog_OnUpdate;
+    lkAct.Visible := lkAccs; 
+    lkAct := FindTAction(Result,'actNewCsPoll',msg_actnewcspoll,msg_actnewcspoll_hint,'Ctrl+D', 0,495); lkAct.OnExecute:=@actCsPoll_OnExecute;   lkAct.OnUpdate:=@actNewZalog_OnUpdate; 
+    lkAct.Visible := lkAccs; 
+    lkAct := FindTAction(Result,'actPrintForm',msg_actPrintForm,msg_actPrintForm_hint,'Ctrl+P', 0, 48); lkAct.OnExecute:=@actPrintForm_OnExecute;lkAct.OnUpdate:=@actNewZalog_OnUpdate;
+    lkAct := FindTAction(Result,'actCsPhoto'  ,msg_actcsphoto  ,msg_actcsphoto_hint  ,'Ctrl+F8',0,488); lkAct.OnExecute:=@actCsPhoto_OnExecute;  lkAct.OnUpdate:=@actNewZalog_OnUpdate;
+    lkAct := FindTAction(Result,'actCopyToBuffer',msg_actcopy  ,msg_actcopy_hint     ,'F3'     ,0, 68); lkAct.OnExecute:=@actCopyToBuffer_OnExecute;  lkAct.OnUpdate:=@actNewZalog_OnUpdate;
+    lkAct := FindTAction(Result,'actJrnl1000062','Д.Ф.К.','Показать "Договоры финансового кредита" с этим контрагентом','Alt+G', 0, 42); lkAct.OnExecute:=@actJrnl1000062_OnExecute;lkAct.OnUpdate:=@actNewZalog_OnUpdate;
+    lkAct := FindTAction(Result,'actJrnl1000062NV','Невыкуп','Показать реализованные невыкупы этого контрагента','Alt+K', 0, 42); lkAct.OnExecute:=@actJrnl1000062NV_OnExecute;lkAct.OnUpdate:=@actNewZalog_OnUpdate;
+    RefreshView;
+  end;
+  //============================================================================
+begin
+  RefForm := RefForm_Create;
+end.

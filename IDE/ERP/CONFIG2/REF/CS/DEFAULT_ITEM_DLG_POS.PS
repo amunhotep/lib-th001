@@ -1,0 +1,684 @@
+{$DEFINE DB:CONFIG/REF/CS/DEFAULT_ITEM_DLG_POS.PS}
+{$IFNDEF PEAKTOP:OBJ/TCOLUMNEH.INC}                  {$I PEAKTOP:OBJ/TCOLUMNEH.INC}               {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TDBEDITEH.INC}                  {$I PEAKTOP:OBJ/TDBEDITEH.INC}               {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANEL.INC}           {$I PEAKTOP:OBJ/TXCGRADIENTPANEL.INC}        {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCPAGECONTROLEX.INC}           {$I PEAKTOP:OBJ/TXCPAGECONTROLEX.INC}        {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCTABSHEET.INC}                {$I PEAKTOP:OBJ/TXCTABSHEET.INC}             {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/$COMMON/FORMERP.INC}    {$I PEAKTOP:IDE/ERP/DBO/$COMMON/FORMERP.INC} {$ENDIF}
+  //============================================================================
+  procedure CSDlg_ActCalcCSINN_OnExecute(Sender :TObject);
+  var
+    lkDateTime :TDateTime;
+    lkMr       :TModalResult;
+    lkStr      :string;
+  begin
+    lkDateTime := Now;
+    if not Dialogs.InputQueryDate('Расчет И.Н.Н.','Введите дату рождения',lkDateTime)then exit;
+    lkMr := Dialogs.MessageDlg('Введите пол контрагента (Да - мужской, Нет-женский)', mtConfirmation, [mbYes, mbNo, mbCancel]);
+    if(lkMr = mrCancel)then exit;
+    lkStr := FormatFloat('00000', lkDateTime - 2)+'XXX';
+    if lkMr = mrYes then
+      lkStr := lkStr + '3'
+     else 
+      lkStr := lkStr + '2';
+    lkStr := lkStr + 'X';
+    TDBEditEh(TComponent(Sender).Owner.FindComponent('dbeINN')).Value := lkStr;  
+  end;
+  //============================================================================
+  procedure CSDlg_ActCopyToClipboard_OnExecute(Sender :TObject);
+  var
+    lkDTS :TxFBDataSet;
+    lkSQL :string;
+  begin
+    lkDTS := TxFBDataSet(TComponent(Sender).Owner.FindComponent('dtsRef'));
+    if not lkDTS.Active then exit;
+    lkSQL := 'INSERT INTO TABL$_BUFFER(NAME, USER_ID, OBJ_NAME, OBJ_ID)VALUES('''+ScriptName+''', '''+GetGlobalVariable('DATABASE_USER')+''', ''TABL$R_CS'', '''+lkDTS.FieldByName('ID').AsString+''')';
+    ExecSQL(lkDTS.DataBase, lkSQL);   
+  end;
+  //============================================================================
+  procedure CSDlg_ActPasteFromClipboard_OnExecute(Sender :TObject);
+  var
+    lkDTS :TxFBDataSet;
+    lkSQL :string;
+  begin
+    lkDTS := TxFBDataSet(TComponent(Sender).Owner.FindComponent('dtsRef'));
+    if not lkDTS.Active then exit;
+    if not(lkDTS.RecordCount > 0)then exit;
+    lkSQL := 'Вставить в список доверенностей Контрагентов из буфера обмена ?'+#13#10+
+      '(Примечание: Даже если Вы вставите "лишних", их потом можно удалить)';
+    if(Dialogs.MessageDlg(lkSQL, mtConfirmation,[mbYes, mbNo]) <> mrYes)then exit;
+    lkSQL := 
+      'EXECUTE BLOCK AS '+#13#10+
+      '  DECLARE VARIABLE P_CS_ID       TYPE OF COLUMN TABL$R_CS_LINKS.CS_ID; '+#13#10+
+      '  DECLARE VARIABLE P_CS_CHILD_ID TYPE OF COLUMN TABL$R_CS_LINKS.CS_CHILD_ID; '+#13#10+
+      'BEGIN '+#13#10+
+      '  P_CS_ID = '''+lkDTS.FieldByName('ID').AsString+'''; '+#13#10+
+      '  FOR '+#13#10+
+      '    SELECT DISTINCT B.OBJ_ID '+#13#10+
+      '    FROM   TABL$_BUFFER B '+#13#10+
+      '    WHERE  (B.USER_ID = '''+GetGlobalVariable('DATABASE_USER')+''') '+#13#10+
+      '      AND  (TRIM(B.OBJ_NAME) = ''TABL$R_CS'') '+#13#10+
+      '      AND  (B.OBJ_ID <> :P_CS_ID) '+#13#10+
+      '    INTO   :P_CS_CHILD_ID '+#13#10+
+      '  DO '+#13#10+
+      '    BEGIN '+#13#10+
+      '    IF(NOT(EXISTS( '+#13#10+
+      '      SELECT L.ID '+#13#10+
+      '      FROM   TABL$R_CS_LINKS L '+#13#10+
+      '      WHERE  (L.CS_ID           = :P_CS_ID) '+#13#10+
+      '        AND  (L.CS_CHILD_ID     = :P_CS_CHILD_ID) '+#13#10+
+      '        AND  ((L.LINKTYPE_ID+0) = 1000004) '+#13#10+
+      '    )))THEN '+#13#10+
+      '      INSERT INTO TABL$R_CS_LINKS(CS_ID, CS_CHILD_ID, LINKTYPE_ID) '+#13#10+
+      '        VALUES(:P_CS_ID, :P_CS_CHILD_ID, 1000004); '+#13#10+
+      '    END '+#13#10+
+      'END ';
+    ExecSQL(lkDTS.DataBase, lkSQL);
+    if lkDTS.Transaction.InTransaction then
+      lkDTS.Transaction.Commit;
+    try lkDTS.Open; except end;
+  end;
+  //============================================================================
+  procedure CSDlg_actCSDoverDel_OnExecute(Sender :TObject);
+  var
+    lkDTS     :TxFBDataSet;
+    lkDTSChild:TxFBDataSet;
+    lkSQL :string;
+  begin
+    lkDTS      := TxFBDataSet(TComponent(Sender).Owner.FindComponent('dtsRef'));
+    lkDTSChild := TxFBDataSet(lkDTS.FindComponent('dtsCSLINKS'));
+    if not lkDTS.Active then exit;
+    if not(lkDTS.RecordCount > 0)then exit;
+    if not lkDTSChild.Active then exit;
+    if not(lkDTSChild.RecordCount > 0)then exit;
+    lkSQL := 'Удалить Контрагента "'+lkDTSChild.FieldByName('CS_CHILD_NAME').AsString+'" из списка доверенностей ?';
+    if(Dialogs.MessageDlg(lkSQL, mtConfirmation,[mbYes, mbNo]) <> mrYes)then exit;
+    lkSQL := 'DELETE FROM TABL$R_CS_LINKS C WHERE (C.ID = '''+lkDTSChild.FieldByName('ID').AsString+''')'; 
+    ExecSQL(lkDTS.DataBase, lkSQL);
+    if lkDTS.Transaction.InTransaction then
+      lkDTS.Transaction.Commit;
+    try lkDTS.Open; except end;
+  end;
+  //============================================================================
+  procedure CSDlg_actCSIns_OnExecute(Sender :TObject);
+  var
+    lkID  :string;
+    lkDTS :TxFBDataSet;
+    lkSQL :string;
+  begin
+    lkDTS := TxFBDataSet(TComponent(Sender).Owner.FindComponent('dtsRef'));
+    if not lkDTS.Active then exit;
+    if not(lkDTS.RecordCount > 0)then exit;
+
+    if not GetFieldCommit(FBDataBase, 'PROC$R_CS_INS_DEFAULT(''Фамилия Имя Отчество'')', 'CS_ID', '', lkID)then exit;
+    SetGlobalVariable('CS_ID', lkID);
+    call(ScriptName);
+    SetGlobalVariable('CS_ID', lkDTS.FieldByName('ID').AsString);
+    
+    lkSQL := 
+      'EXECUTE BLOCK AS '+#13#10+
+      '  DECLARE VARIABLE P_CS_ID       TYPE OF COLUMN TABL$R_CS_LINKS.CS_ID; '+#13#10+
+      '  DECLARE VARIABLE P_CS_CHILD_ID TYPE OF COLUMN TABL$R_CS_LINKS.CS_CHILD_ID; '+#13#10+
+      'BEGIN '+#13#10+
+      '  P_CS_ID = '''+lkDTS.FieldByName('ID').AsString+'''; '+#13#10+
+      '  P_CS_CHILD_ID = '''+lkID+'''; '+#13#10+
+      '    IF(NOT(EXISTS( '+#13#10+
+      '      SELECT L.ID '+#13#10+
+      '      FROM   TABL$R_CS_LINKS L '+#13#10+
+      '      WHERE  (L.CS_ID           = :P_CS_ID) '+#13#10+
+      '        AND  (L.CS_CHILD_ID     = :P_CS_CHILD_ID) '+#13#10+
+      '        AND  ((L.LINKTYPE_ID+0) = 1000004) '+#13#10+
+      '    )))THEN '+#13#10+
+      '      INSERT INTO TABL$R_CS_LINKS(CS_ID, CS_CHILD_ID, LINKTYPE_ID) '+#13#10+
+      '        VALUES(:P_CS_ID, :P_CS_CHILD_ID, 1000004); '+#13#10+
+      'END ';
+    ExecSQL(lkDTS.DataBase, lkSQL);
+
+    if lkDTS.Transaction.InTransaction then
+      lkDTS.Transaction.Commit;
+    try lkDTS.Open; except end;
+  end;
+  //============================================================================
+  procedure CSDlg_DataSet_AfterOpen(DataSet :TDataSet);
+  var
+    i :Integer;
+  begin
+    for i:=0 to Dataset.ComponentCount-1 do
+      if(ObjectInheritsFrom(DataSet.Components[i], 'TxFBDataSet'))then
+        try TxFBDataSet(DataSet.Components[i]).Open; except end;
+  end;
+  //============================================================================
+  procedure CSDlg_DataSet_BeforeClose(DataSet :TDataSet);
+  var
+    i :Integer;
+  begin
+    for i:=0 to Dataset.ComponentCount-1 do
+      if(ObjectInheritsFrom(DataSet.Components[i], 'TxFBDataSet'))then
+        begin
+        if TxFBDataSet(DataSet.Components[i]).Active then
+          begin
+          if(TxFBDataSet(DataSet.Components[i]).State <> dsBrowse)then
+            try
+              TxFBDataSet(DataSet.Components[i]).Post;
+            except
+              TxFBDataSet(DataSet.Components[i]).Cancel;
+            end;
+          TxFBDataSet(DataSet.Components[i]).Close;
+          end;
+        end;
+  end;
+  //============================================================================
+  procedure CSDlg_DataSetCSA_OnNewRecord(DataSet :TDataSet);
+  var 
+    lkStr :string;
+  begin
+    if GetField(FBDataBase, 'RDB$DATABASE', 'GEN_ID(GENR$R_CS_ADDR_ID,0)', '', lkStr)then
+      DataSet.FieldByName('ID').AsInteger := StrToInt(lkStr) + 1;
+    DataSet.FieldByName('CS_ID').AsString          := TxFBDataSet(DataSet.Owner).FieldByName('ID').AsString;
+    DataSet.FieldByName('FLAG_JURIDICAL').AsString := '1';
+    DataSet.FieldByName('COUNTRY_ID').AsString     := '1000071';
+    DataSet.FieldByName('REGION_ID').AsString      := '1000004';
+    DataSet.FieldByName('ZIP').AsString            := '84300';
+    DataSet.FieldByName('NAME').AsString           := 'г.Краматорск, ул. д.-;кв.-';
+    if GetField(FBDataBase, 'TABL$R_COUNTRIES', 'NAME', 'ID = '+DataSet.FieldByName('COUNTRY_ID').AsString, lkStr)then
+      DataSet.FieldByName('COUNTRY_NAME').AsString := lkStr;
+    if GetField(FBDataBase, 'TABL$R_REGIONS', 'NAME', 'ID = '+DataSet.FieldByName('REGION_ID').AsString, lkStr)then
+      DataSet.FieldByName('REGION_NAME').AsString := lkStr;
+  end;
+  //============================================================================
+  procedure CSDlg_DataSetCSP_OnNewRecord(DataSet :TDataSet);
+  var 
+    lkStr :string;
+  begin
+    if GetField(FBDataBase, 'RDB$DATABASE', 'GEN_ID(GENR$R_CS_PHONES_ID,0)', '', lkStr)then
+      DataSet.FieldByName('ID').AsInteger := StrToInt(lkStr) + 1;
+    DataSet.FieldByName('CS_ID').AsString      := TxFBDataSet(DataSet.Owner).FieldByName('ID').AsString;
+    DataSet.FieldByName('NAME').AsString       := '+38(0626)00-00-00';
+  end;
+  //============================================================================
+  procedure CSDlg_DataSetCSFlayers_OnNewRecord(DataSet :TDataSet);
+  var 
+    lkStr :string;
+  begin
+    if GetField(FBDataBase, 'RDB$DATABASE', 'GEN_ID(GENR$R_CS_FLAYERS_ID,0)', '', lkStr)then
+      DataSet.FieldByName('ID').AsInteger := StrToInt(lkStr) + 1
+     else
+      DataSet.FieldByName('ID').AsInteger := -1;
+    DataSet.FieldByName('CS_ID').AsString := TxFBDataSet(DataSet.Owner).FieldByName('ID').AsString;
+    DataSet.FieldByName('NAME').AsString  := '100000XXX';
+    DataSet.FieldByName('DATE_COMMIT').AsDateTime := Now;
+  end;
+  //============================================================================
+  procedure CSDlg_DataSetCSD_OnNewRecord(DataSet :TDataSet);
+  var 
+    lkStr :string;
+  begin
+    if GetField(FBDataBase, 'RDB$DATABASE', 'GEN_ID(GENR$R_CS_DOCS_ID,0)', '', lkStr)then
+      DataSet.FieldByName('ID').AsInteger := StrToInt(lkStr) + 1;
+    DataSet.FieldByName('CS_ID').AsString      := TxFBDataSet(DataSet.Owner).FieldByName('ID').AsString;
+    DataSet.FieldByName('DOCTYPE_ID').AsString := '1000000';
+    DataSet.FieldByName('DOC_SERIAL').AsString := 'BA';
+    DataSet.FieldByName('DOC_NUMBER').AsString := '000000';
+    DataSet.FieldByName('NAME').AsString       := 'КРАМАТОРСКИМ  ГО  УМВД  В  ДОНЕЦКОЙ ОБЛАСТИ';
+  end;
+  //============================================================================
+  function CSDlgExecute(const CS_ID:string):Boolean;
+  var
+    lkForm        :TForm;
+    lkPanelClient :TxcGradientPanel;
+    lkTr          :TxFBTransaction;
+    lkDTS         :TxFBDataSet;
+    lkDS          :TDataSource;
+    lkDTSChild    :TxFBDataSet; 
+    lkDSChild     :TDataSource;
+    lkDBGChild    :TDBGridEh;
+    lk_Col        :TColumnEh;
+    lkLabel       :TLabel;
+    lkDBE         :TDBEditEh;
+    lkPC          :TxcPageControlEx;
+    lkTS          :TxcTabSheet;
+    lkToolBar     :TxcGradientPanelVista;
+    lkDBM         :TDBMemo;
+    lkS           :string;
+    lkAct         :TCustomAction;
+    lkTBB         :TxcToolBarButton;
+  begin
+    Result := false;
+    {$IFDEF AMUNHOTEP4516}
+    lkForm := TERPForm_Create('Изменить данные контрагента', ERP_FILENAME_ICO_REF, ERP_FILENAME_BMP_REF, true, nil);
+    {$ELSE}
+    lkForm := TFormERP_Create('Изменить данные контрагента', ERP_FILENAME_ICO_REF, ERP_FILENAME_BMP_REF, true, nil);
+    {$ENDIF}
+    with lkForm do
+      begin
+      Position        := poDesktopCenter;
+      Width           := 800;
+      Height          := 320;
+      end;
+    lkPanelClient := CreateTxcGradientPanel(lkForm, lkForm,'PanelClient','',alTop,0,0,48,98,xbsNone,gdRightToLeft);  
+
+    lkTr := TxFBTransaction.Create(lkForm);
+    with lkTr do
+      begin
+      Name := 'trRef';
+      DefaultDataBase := FBDataBase;
+      Params.Clear;
+      Params.Add('isc_tpb_read_committed'); 
+      Params.Add('isc_tpb_write'); 
+      Params.Add('isc_tpb_rec_version'); 
+      Params.Add('isc_tpb_nowait'); 
+      end;
+    lkDTS := TxFBDataSet.Create(lkForm);
+    lkDTS.Name := 'dtsRef';
+    lkDTS.Transaction := lkTr;
+    lkDTS.SelectSQL.Text  := 
+      'SELECT FIRST 1 CS.CS_GROUP_ID, CS.ID, CS.NAME, CS.NAME2, CS.FLAG_DELETE, CS.KIND_ID, '+#13#10+
+      '       CS.NDS_PAYED, CS.NDS_CODE, CS.INN, CS.GUID, CS.COMENT, CS.VALUE_DATE, '+#13#10+
+      '       CS.DATE_LAST, CS.CODEFLAYER, CS.CODECARD '+#13#10+
+      'FROM   TABL$R_CS CS '+#13#10+
+      'WHERE  (CS.ID = '''+CS_ID+''') ';    
+    lkDTS.RefreshSQL.Text  := 
+      'SELECT FIRST 1 CS.CS_GROUP_ID, CS.ID, CS.NAME, CS.NAME2, CS.FLAG_DELETE, CS.KIND_ID, '+#13#10+
+      '       CS.NDS_PAYED, CS.NDS_CODE, CS.INN, CS.GUID, CS.COMENT, CS.VALUE_DATE, '+#13#10+
+      '       CS.DATE_LAST, CS.CODEFLAYER, CS.CODECARD '+#13#10+
+      'FROM   TABL$R_CS CS '+#13#10+
+      'WHERE  (CS.ID = ?ID) ';    
+    lkDTS.ModifySQL.Text  := 
+      'UPDATE TABL$R_CS CS SET '+#13#10+
+      '   CS.NAME       = ?NAME '+#13#10+
+      '  ,CS.INN        = ?INN '+#13#10+
+      '  ,CS.CODEFLAYER = ?CODEFLAYER '+#13#10+
+      '  ,CS.CODECARD   = ?CODECARD '+#13#10+
+      '  ,CS.COMENT     = ?COMENT '+#13#10+
+      'WHERE (CS.ID = ?ID)';
+    lkDTS.AfterOpen   := @CSDlg_DataSet_AfterOpen;
+    lkDTS.BeforeClose := @CSDlg_DataSet_BeforeClose;
+    lkDS := TDataSource.Create(lkDTS);
+    lkDS.DataSet := lkDTS;
+
+    lkLabel := CreateTLabel(lkForm, lkPanelClient, 'Фамилия И.О.', 2,2,20,80, alNone,taLeftJustify); lkLabel.Font.Style := [fsBold];  
+    lkDBE := CreateTDBEditEh(lkForm, 'dbeNAME', lkPanelClient, lkDS, 'NAME', lkLabel.Left + lkLabel.Width + 4, lkLabel.Top, 
+      lkLabel.Height, lkForm.ClientWidth - (lkLabel.Left + lkLabel.Width + 8));
+    lkLabel := CreateTLabel(lkForm, lkPanelClient, 'И.Н.Н.', 2,24,20,80, alNone,taLeftJustify); lkLabel.Font.Style := [fsBold];  
+    lkDBE := CreateTDBEditEh(lkForm, 'dbeINN', lkPanelClient, lkDS, 'INN', lkLabel.Left + lkLabel.Width + 4, lkLabel.Top, 
+      lkLabel.Height, 96);
+    lkLabel := CreateTLabel(lkForm, lkPanelClient, 'Дисконтная карта', lkDBE.Left+lkDBE.Width+4,lkDBE.Top,20,104, alNone,taLeftJustify); lkLabel.Font.Style := [fsBold];  
+    lkDBE := CreateTDBEditEh(lkForm, 'dbeCODECARD', lkPanelClient, lkDS, 'CODECARD', lkLabel.Left + lkLabel.Width + 4, lkLabel.Top, 
+      lkLabel.Height, 140);
+    lkLabel := CreateTLabel(lkForm, lkPanelClient, 'Пришел по флайеру №', lkDBE.Left+lkDBE.Width+4,lkDBE.Top,20,120, alNone,taLeftJustify); lkLabel.Font.Style := [fsBold];  
+    lkDBE := CreateTDBEditEh(lkForm, 'dbeCODEFLAYER', lkPanelClient, lkDS, 'CODEFLAYER', lkLabel.Left + lkLabel.Width + 4, lkLabel.Top, 
+      lkLabel.Height, 140);
+
+    lkPC := CreateTxcPageControlEx(lkForm, lkForm, 'PC', 0, 200, 200, 200, alClient);
+    lkTS := CreateTxcTabSheet(lkPC, '', 'Адресы', 44, Amunhotep.MainForm.StyleManager.Colors.Window);
+    lkDTSChild                := TxFBDataSet.Create(lkDTS);
+    lkDTSChild.Name           := 'dtsCSA';
+    lkDTSChild.Transaction    := lkTr;
+    lkDTSChild.DataSource     := lkDS; 
+    lkDTSChild.SelectSQL.Text := 
+      'SELECT  CSA.CS_ID, CSA.ID, CSA.COUNTRY_ID, CSA.REGION_ID, CSA.NAME '+#13#10+
+      '       ,CSA.ZIP, CSA.FLAG_DELETE, CSA.FLAG_JURIDICAL '+#13#10+
+      '       ,(SELECT FIRST 1 C1.NAME FROM TABL$R_COUNTRIES C1 WHERE (C1.ID = CSA.COUNTRY_ID)) AS COUNTRY_NAME '+#13#10+
+      '       ,(SELECT FIRST 1 R1.NAME FROM TABL$R_REGIONS R1 WHERE (R1.ID = CSA.REGION_ID)) AS REGION_NAME '+#13#10+
+      'FROM   TABL$R_CS_ADDR CSA '+#13#10+
+      'WHERE  (CSA.CS_ID = ?ID)';
+    lkDTSChild.RefreshSQL.Text := 
+      'SELECT  CSA.CS_ID, CSA.ID, CSA.COUNTRY_ID, CSA.REGION_ID, CSA.NAME '+#13#10+
+      '       ,CSA.ZIP, CSA.FLAG_DELETE, CSA.FLAG_JURIDICAL '+#13#10+
+      '       ,(SELECT FIRST 1 C1.NAME FROM TABL$R_COUNTRIES C1 WHERE (C1.ID = CSA.COUNTRY_ID)) AS COUNTRY_NAME '+#13#10+
+      '       ,(SELECT FIRST 1 R1.NAME FROM TABL$R_REGIONS R1 WHERE (R1.ID = CSA.REGION_ID)) AS REGION_NAME '+#13#10+
+      'FROM   TABL$R_CS_ADDR CSA '+#13#10+
+      'WHERE  (CSA.ID = ?ID)';
+    lkDTSChild.InsertSQL.Text := 
+      'INSERT INTO TABL$R_CS_ADDR (CS_ID,COUNTRY_ID,REGION_ID,NAME,ZIP,FLAG_DELETE,FLAG_JURIDICAL) '+
+      'VALUES (?CS_ID,?COUNTRY_ID,?REGION_ID,?NAME,?ZIP,?FLAG_DELETE,0);';
+    lkDTSChild.ModifySQL.Text := 
+      'UPDATE TABL$R_CS_ADDR CSA SET '+#13#10+
+      '   CSA.CS_ID          = ?CS_ID '+#13#10+
+      '  ,CSA.COUNTRY_ID     = ?COUNTRY_ID '+#13#10+
+      '  ,CSA.REGION_ID      = ?REGION_ID '+#13#10+
+      '  ,CSA.NAME           = ?NAME '+#13#10+
+      '  ,CSA.ZIP            = ?ZIP '+#13#10+
+      '  ,CSA.FLAG_DELETE    = ?FLAG_DELETE '+#13#10+
+      '  ,CSA.FLAG_JURIDICAL = ?FLAG_JURIDICAL '+#13#10+
+      'WHERE (CSA.ID = ?ID)';
+    lkDTSChild.DeleteSQL.Text := 'DELETE FROM TABL$R_CS_ADDR CSA WHERE (CSA.ID = ?ID)'; 
+    lkDTSChild.OnNewRecord    := @CSDlg_DataSetCSA_OnNewRecord;         
+    lkDSChild  := TDataSource.Create(lkDTSChild);
+    lkDSChild.DataSet := lkDTSChild;
+    lkDBGChild := TDBGridEh.Create(lkForm);
+    with lkDBGChild do
+      begin
+      Name             := 'dbgCSA';
+      Parent           := lkTS;
+      Align            := alClient;
+      Ctl3D            := false;
+      Flat             := true;
+      DrawMemoText     := true;
+      DataSource       := lkDSChild; 
+      Color            := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color       := Amunhotep.MainForm.StyleManager.Colors.Border;
+      FixedColor       := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      TitleFont.Color  := Amunhotep.MainForm.StyleManager.Colors.Border;
+      TitleFont.Style  := [fsBold];
+      UseMultiTitle    := true;
+      VTitleMargin     := 4;
+      Columns.Clear;
+      end;
+    lk_Col := CreateTColumnEh(lkDBGChild,'ID'          ,'# ### ##0','Код'    , 60,taRightJustify);
+    lk_Col.ReadOnly := true;
+    lk_Col.Color    := Amunhotep.MainForm.StyleManager.Colors.Foreground; 
+    lk_Col := CreateTColumnEh(lkDBGChild,'FLAG_JURIDICAL','','Прописка' , 72,taLeftJustify);
+    lk_Col.KeyList.Text := '1'+#13#10+'0';
+    lk_Col.PickList.Text := 'Прописка'+#13#10+'М./Ж.';
+    lk_Col := CreateTColumnEh(lkDBGChild,'ZIP'         ,'# ### ##0','Индекс' , 72,taLeftJustify);
+    lk_Col := CreateTColumnEh(lkDBGChild,'COUNTRY_NAME',''         ,'Страна' , 80,taLeftJustify);
+    lk_Col.ReadOnly := true;
+    lk_Col.Color    := Amunhotep.MainForm.StyleManager.Colors.Foreground; 
+    lk_Col := CreateTColumnEh(lkDBGChild,'REGION_NAME' ,''         ,'Область',120,taLeftJustify);
+    lk_Col.ReadOnly := true;
+    lk_Col.Color    := Amunhotep.MainForm.StyleManager.Colors.Foreground; 
+    lk_Col := CreateTColumnEh(lkDBGChild,'NAME'        ,''         ,'Адрес'  ,320,taLeftJustify);
+
+    lkTS := CreateTxcTabSheet(lkPC, '', 'Телефоны', 44, Amunhotep.MainForm.StyleManager.Colors.Window);
+    lkDTSChild                := TxFBDataSet.Create(lkDTS);
+    lkDTSChild.Name           := 'dtsCSP';
+    lkDTSChild.Transaction    := lkTr;
+    lkDTSChild.DataSource     := lkDS; 
+    lkDTSChild.SelectSQL.Text := 
+      'SELECT CSP.CS_ID, CSP.ID, CSP.NAME, CSP.FLAG_DELETE, CSP.FLAG_FAX, CSP.FLAG_MOBIL '+#13#10+
+      'FROM   TABL$R_CS_PHONES CSP '+#13#10+
+      'WHERE  (CSP.CS_ID = ?ID)';
+    lkDTSChild.RefreshSQL.Text := 
+      'SELECT CSP.CS_ID, CSP.ID, CSP.NAME, CSP.FLAG_DELETE, CSP.FLAG_FAX, CSP.FLAG_MOBIL '+#13#10+
+      'FROM   TABL$R_CS_PHONES CSP '+#13#10+
+      'WHERE  (CSP.ID = ?ID)';
+    lkDTSChild.InsertSQL.Text := 
+      'INSERT INTO TABL$R_CS_PHONES (CS_ID, NAME, FLAG_DELETE, FLAG_FAX,FLAG_MOBIL) '+
+      'VALUES (?CS_ID,?NAME,?FLAG_DELETE,?FLAG_FAX,?FLAG_MOBIL);';
+    lkDTSChild.ModifySQL.Text := 
+      'UPDATE TABL$R_CS_PHONES CSP SET '+#13#10+
+      '   CSP.CS_ID       = ?CS_ID '+#13#10+
+      '  ,CSP.NAME        = ?NAME '+#13#10+
+      '  ,CSP.FLAG_DELETE = ?FLAG_DELETE '+#13#10+
+      '  ,CSP.FLAG_FAX    = ?FLAG_FAX '+#13#10+
+      '  ,CSP.FLAG_MOBIL  = ?FLAG_MOBIL '+#13#10+
+      'WHERE (CSP.ID = ?ID);';
+    lkDTSChild.DeleteSQL.Text := 'DELETE FROM TABL$R_CS_PHONES CSP WHERE (CSP.ID = ?ID)';          
+    lkDTSChild.OnNewRecord    := @CSDlg_DataSetCSP_OnNewRecord;         
+    lkDSChild  := TDataSource.Create(lkDTSChild);
+    lkDSChild.DataSet := lkDTSChild;
+    lkDBGChild := TDBGridEh.Create(lkForm);
+    with lkDBGChild do
+      begin
+      Name             := 'dbgCSP';
+      Parent           := lkTS;
+      Align            := alClient;
+      Ctl3D            := false;
+      Flat             := true;
+      DrawMemoText     := true;
+      DataSource       := lkDSChild; 
+      Color            := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color       := Amunhotep.MainForm.StyleManager.Colors.Border;
+      FixedColor       := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      TitleFont.Color  := Amunhotep.MainForm.StyleManager.Colors.Border;
+      TitleFont.Style  := [fsBold];
+      UseMultiTitle    := true;
+      VTitleMargin     := 4;
+      Columns.Clear;
+      end;
+    lk_Col := CreateTColumnEh(lkDBGChild,'ID'          ,'# ### ##0','Код'    , 60,taRightJustify);
+    lk_Col.ReadOnly := true;
+    lk_Col.Color    := Amunhotep.MainForm.StyleManager.Colors.Foreground; 
+    lk_Col := CreateTColumnEh(lkDBGChild,'NAME'        ,''         ,'Номер телефона'  ,200,taLeftJustify);
+    lk_Col := CreateTColumnEh(lkDBGChild,'FLAG_FAX','','Факс' , 48,taLeftJustify);
+    lk_Col.KeyList.Text  := '1'+#13#10+'0';
+    lk_Col.PickList.Text := 'Факс'+#13#10+' ';
+    lk_Col := CreateTColumnEh(lkDBGChild,'FLAG_MOBIL','','Мобиль.' , 48,taLeftJustify);
+    lk_Col.KeyList.Text  := '1'+#13#10+'0';
+    lk_Col.PickList.Text := 'Мобиль.'+#13#10+' ';
+
+    lkTS := CreateTxcTabSheet(lkPC, '', 'Документы', 44, Amunhotep.MainForm.StyleManager.Colors.Window);
+    lkDTSChild                := TxFBDataSet.Create(lkDTS);
+    lkDTSChild.Name           := 'dtsCSD';
+    lkDTSChild.Transaction    := lkTr;
+    lkDTSChild.DataSource     := lkDS; 
+    lkDTSChild.SelectSQL.Text := 
+      'SELECT CSD.CS_ID, CSD.ID, CSD.DOCTYPE_ID, CSD.NAME, CSD.FLAG_DELETE, '+#13#10+
+      '       CSD.DOC_SERIAL, CSD.DOC_NUMBER, CSD.DOC_DATE, CSD.DOC_DATEEND, CSD.COMENT '+#13#10+
+      'FROM   TABL$R_CS_DOCS CSD '+#13#10+
+      'WHERE  (CSD.CS_ID = ?ID)';
+    lkDTSChild.RefreshSQL.Text := 
+      'SELECT CSD.CS_ID, CSD.ID, CSD.DOCTYPE_ID, CSD.NAME, CSD.FLAG_DELETE, '+#13#10+
+      '       CSD.DOC_SERIAL, CSD.DOC_NUMBER, CSD.DOC_DATE, CSD.DOC_DATEEND, CSD.COMENT '+#13#10+
+      'FROM   TABL$R_CS_DOCS CSD '+#13#10+
+      'WHERE  (CSD.ID = ?ID)';
+    lkDTSChild.InsertSQL.Text := 
+      'INSERT INTO TABL$R_CS_DOCS (CS_ID, DOCTYPE_ID, NAME, FLAG_DELETE, DOC_SERIAL, '+#13#10+
+      '  DOC_NUMBER, DOC_DATE, DOC_DATEEND,COMENT '+#13#10+
+      ')VALUES (?CS_ID, ?DOCTYPE_ID,?NAME, ?FLAG_DELETE,?DOC_SERIAL,?DOC_NUMBER, '+#13#10+
+      '  ?DOC_DATE,  ?DOC_DATEEND, ?COMENT '+#13#10+
+      ');';
+    lkDTSChild.ModifySQL.Text := 
+      'UPDATE TABL$R_CS_DOCS CSD SET '+#13#10+
+      '   CSD.CS_ID       = ?CS_ID '+#13#10+
+      '  ,CSD.DOCTYPE_ID  = ?DOCTYPE_ID '+#13#10+
+      '  ,CSD.NAME        = ?NAME '+#13#10+
+      '  ,CSD.FLAG_DELETE = ?FLAG_DELETE '+#13#10+
+      '  ,CSD.DOC_SERIAL  = ?DOC_SERIAL '+#13#10+
+      '  ,CSD.DOC_NUMBER  = ?DOC_NUMBER '+#13#10+
+      '  ,CSD.DOC_DATE    = ?DOC_DATE '+#13#10+
+      '  ,CSD.DOC_DATEEND = ?DOC_DATEEND '+#13#10+
+      '  ,CSD.COMENT      = ?COMENT '+#13#10+
+      'WHERE (CSD.ID = ?ID);';
+    lkDTSChild.DeleteSQL.Text := 'DELETE FROM TABL$R_CS_DOCS CSD WHERE (CSD.ID = ?ID)';          
+    lkDTSChild.OnNewRecord    := @CSDlg_DataSetCSD_OnNewRecord;         
+    lkDSChild  := TDataSource.Create(lkDTSChild);
+    lkDSChild.DataSet := lkDTSChild;
+    lkDBGChild := TDBGridEh.Create(lkForm);
+    with lkDBGChild do
+      begin
+      Name             := 'dbgCSD';
+      Parent           := lkTS;
+      Align            := alClient;
+      Ctl3D            := false;
+      Flat             := true;
+      DrawMemoText     := true;
+      DataSource       := lkDSChild; 
+      Color            := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color       := Amunhotep.MainForm.StyleManager.Colors.Border;
+      FixedColor       := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      TitleFont.Color  := Amunhotep.MainForm.StyleManager.Colors.Border;
+      TitleFont.Style  := [fsBold];
+      UseMultiTitle    := true;
+      VTitleMargin     := 4;
+      Columns.Clear;
+      end;
+    lk_Col := CreateTColumnEh(lkDBGChild,'ID'             ,'# ### ##0' ,'код'    , 60,taRightJustify);
+    lk_Col.ReadOnly := true;
+    lk_Col.Color    := Amunhotep.MainForm.StyleManager.Colors.Foreground; 
+    lk_Col := CreateTColumnEh(lkDBGChild,'DOCTYPE_ID'     ,''          ,'тип документа',80,taLeftJustify);
+    if GetField(FBDataBase, 'PROC$R_WRK_DOCTYPES_LIST', 'ID', '', lkS)then
+      lk_Col.KeyList.Text := lkS;
+    if GetField(FBDataBase, 'PROC$R_WRK_DOCTYPES_LIST', 'NAME', '', lkS)then
+      lk_Col.PickList.Text := lkS;
+    lk_Col := CreateTColumnEh(lkDBGChild,'DOC_SERIAL'     ,''          ,'серия'  , 30,taLeftJustify);
+    lk_Col := CreateTColumnEh(lkDBGChild,'DOC_NUMBER'     ,''          ,'номер'  , 72,taLeftJustify);
+    lk_Col := CreateTColumnEh(lkDBGChild,'DOC_DATE'       ,'dd.mm.yyyy','дата выдачи'    , 72,taLeftJustify);
+    lk_Col := CreateTColumnEh(lkDBGChild,'NAME'           ,''          ,'кем выдан'      ,280,taLeftJustify);
+    lk_Col := CreateTColumnEh(lkDBGChild,'DOC_DATEEND'    ,'dd.mm.yyyy','действителен до', 72,taLeftJustify);
+    lk_Col := CreateTColumnEh(lkDBGChild,'COMENT'         ,''          ,'примечания'     ,200,taLeftJustify);
+
+
+    lkTS := CreateTxcTabSheet(lkPC, '', 'Выданные флайеры', 44, Amunhotep.MainForm.StyleManager.Colors.Window);
+    lkDTSChild                := TxFBDataSet.Create(lkDTS);
+    lkDTSChild.Name           := 'dtsCSF';
+    lkDTSChild.Transaction    := lkTr;
+    lkDTSChild.DataSource     := lkDS; 
+    lkDTSChild.SelectSQL.Text := 
+      'SELECT CSF.CS_ID, CSF.ID, CSF.NAME, CSF.FLAG_DELETE, CSF.DATE_COMMIT '+#13#10+
+      'FROM   TABL$R_CS_FLAYERS CSF '+#13#10+
+      'WHERE  (CSF.CS_ID = ?ID)';
+    lkDTSChild.RefreshSQL.Text := 
+      'SELECT CSF.CS_ID, CSF.ID, CSF.NAME, CSF.FLAG_DELETE, CSF.DATE_COMMIT '+#13#10+
+      'FROM   TABL$R_CS_FLAYERS CSF '+#13#10+
+      'WHERE  (CSF.ID = ?ID)';
+    lkDTSChild.InsertSQL.Text := 
+      'INSERT INTO TABL$R_CS_FLAYERS (CS_ID, NAME, FLAG_DELETE, DATE_COMMIT) '+
+      'VALUES (?CS_ID,?NAME,?FLAG_DELETE, NULL);';
+    lkDTSChild.ModifySQL.Text := 
+      'UPDATE TABL$R_CS_FLAYERS CSP SET '+#13#10+
+      '   CSP.CS_ID       = ?CS_ID '+#13#10+
+      '  ,CSP.NAME        = ?NAME '+#13#10+
+      '  ,CSP.FLAG_DELETE = ?FLAG_DELETE '+#13#10+
+      'WHERE (CSP.ID = ?ID);';
+    lkDTSChild.DeleteSQL.Text := 'DELETE FROM TABL$R_CS_FLAYERS CSP WHERE (CSP.ID = ?ID)';          
+    lkDTSChild.OnNewRecord    := @CSDlg_DataSetCSFlayers_OnNewRecord;         
+    lkDSChild  := TDataSource.Create(lkDTSChild);
+    lkDSChild.DataSet := lkDTSChild;
+    lkDBGChild := TDBGridEh.Create(lkForm);
+    with lkDBGChild do
+      begin
+      Name             := 'dbgCSF';
+      Parent           := lkTS;
+      Align            := alClient;
+      Ctl3D            := false;
+      Flat             := true;
+      DrawMemoText     := true;
+      DataSource       := lkDSChild; 
+      Color            := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color       := Amunhotep.MainForm.StyleManager.Colors.Border;
+      FixedColor       := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      TitleFont.Color  := Amunhotep.MainForm.StyleManager.Colors.Border;
+      TitleFont.Style  := [fsBold];
+      UseMultiTitle    := true;
+      VTitleMargin     := 4;
+      Columns.Clear;
+      end;
+    lk_Col := CreateTColumnEh(lkDBGChild,'ID'          ,'# ### ##0','Код'    , 60,taRightJustify);
+    lk_Col.ReadOnly := true;
+    lk_Col.Color    := Amunhotep.MainForm.StyleManager.Colors.Foreground; 
+    lk_Col := CreateTColumnEh(lkDBGChild,'NAME'        ,''         ,'Номер выданного флайера'  ,240,taLeftJustify);
+    lk_Col := CreateTColumnEh(lkDBGChild,'DATE_COMMIT' ,'dd.mm.yyyy hh:nn:ss','Дата выдачи'    ,120,taLeftJustify);
+    lk_Col.ReadOnly := true;
+    lk_Col.Color    := Amunhotep.MainForm.StyleManager.Colors.Foreground; 
+
+    lkTS := CreateTxcTabSheet(lkPC, '', 'Коментарии', 291, Amunhotep.MainForm.StyleManager.Colors.Window);
+    lkDBM := TDBMemo.Create(lkForm);
+    with lkDBM do
+      begin
+      Parent     := lkTS;
+      Align      := alClient;
+      Ctl3D      := false;
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      ScrollBars := ssBoth;
+      DataSource := lkDS;
+      DataField  := 'COMENT';
+      end;
+
+    lkTS := CreateTxcTabSheet(lkPC, '', 'Доверенности', 44, Amunhotep.MainForm.StyleManager.Colors.Window);
+    lkToolBar := CreateTxcGradientPanelVistaToolBar(lkForm, lkTS,'ToolBarCSLINKS','',alTop,0,0,24,24,xbsRaized);  
+
+    lkDTSChild                := TxFBDataSet.Create(lkDTS);
+    lkDTSChild.Name           := 'dtsCSLINKS';
+    lkDTSChild.Transaction    := lkTr;
+    lkDTSChild.DataSource     := lkDS; 
+    lkDTSChild.SelectSQL.Text := 
+      'SELECT CL.CS_ID, CL.CS_CHILD_ID, CS.NAME AS CS_CHILD_NAME, '+#13#10+
+      '       CL.LINKTYPE_ID, CL.ID, CL.NAME, CL.FLAG_DELETE '+#13#10+
+      'FROM   TABL$R_CS_LINKS CL, TABL$R_CS CS '+#13#10+
+      'WHERE  (CL.CS_ID = ?ID) '+#13#10+
+      '  AND  (CL.LINKTYPE_ID = 1000004) '+#13#10+
+      '  AND  (CS.ID = CL.CS_CHILD_ID)';
+    lkDTSChild.RefreshSQL.Text := 
+      'SELECT CL.CS_ID, CL.CS_CHILD_ID, CS.NAME AS CS_CHILD_NAME, '+#13#10+
+      '       CL.LINKTYPE_ID, CL.ID, CL.NAME, CL.FLAG_DELETE '+#13#10+
+      'FROM   TABL$R_CS_LINKS CL, TABL$R_CS CS '+#13#10+
+      'WHERE  (CL.ID = ?ID)';
+    lkDTSChild.DeleteSQL.Text := 'DELETE FROM TABL$R_CS_LINKS CSP WHERE (CSP.ID = ?ID)';          
+//    lkDTSChild.OnNewRecord    := @CSDlg_DataSetCSP_OnNewRecord;         
+    lkDSChild  := TDataSource.Create(lkDTSChild);
+    lkDSChild.DataSet := lkDTSChild;
+    lkDBGChild := TDBGridEh.Create(lkForm);
+    with lkDBGChild do
+      begin
+      Name             := 'dbgCSLINKS';
+      Parent           := lkTS;
+      Align            := alClient;
+      Ctl3D            := false;
+      Flat             := true;
+      DrawMemoText     := true;
+      DataSource       := lkDSChild; 
+      AllowedOperations:= [alopDeleteEh];
+      Color            := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color       := Amunhotep.MainForm.StyleManager.Colors.Border;
+      FixedColor       := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      TitleFont.Color  := Amunhotep.MainForm.StyleManager.Colors.Border;
+      TitleFont.Style  := [fsBold];
+      UseMultiTitle    := true;
+      VTitleMargin     := 4;
+      Columns.Clear;
+      end;
+    lk_Col := CreateTColumnEh(lkDBGChild,'ID'          ,'# ### ##0','№ довереноости', 72,taRightJustify);
+    lk_Col.ReadOnly := true;
+    lk_Col.Color    := Amunhotep.MainForm.StyleManager.Colors.Foreground; 
+    lk_Col := CreateTColumnEh(lkDBGChild,'CS_CHILD_ID'  ,'# ### ##0','Контрагент|Код', 72,taRightJustify);
+    lk_Col.ReadOnly := true;
+    lk_Col.Color    := Amunhotep.MainForm.StyleManager.Colors.Foreground; 
+    lk_Col := CreateTColumnEh(lkDBGChild,'CS_CHILD_NAME','','Контрагент|Фамилия И.О.',420,taLeftJustify);
+    lk_Col.ReadOnly := true;
+    lk_Col.Color    := Amunhotep.MainForm.StyleManager.Colors.Foreground; 
+    lkAct := CreateTAction(lkForm,'actCopyToClipboard','Копировать','Копировать элемент в буфер обмена','F3',0,68); 
+      lkAct.OnExecute := @CSDlg_ActCopyToClipboard_OnExecute;
+      lkTBB := CreateTxcToolBarButton2(lkForm, TWinControl(lkForm.FindComponent(obj_name_erp_topbar)), 'tbb'+lkAct.Name,-1,0,22,32,alRight,lkAct); 
+    lkAct := CreateTAction(lkForm,'actCalcCSINN','Генерировать','Генерировать ИНН контрагента','F9',0,40); 
+      lkAct.OnExecute := @CSDlg_actCalcCSINN_OnExecute;
+      lkTBB := CreateTxcToolBarButton2(lkForm, TWinControl(lkForm.FindComponent(obj_name_erp_topbar)), 'tbb'+lkAct.Name,-2,0,22,32,alRight,lkAct); 
+    lkAct := CreateTAction(lkForm,'actPasteFromClipboard','Вставить','Вставить контрагентов из буфера обмена','Ctrl+V',0,73); 
+      lkAct.OnExecute := @CSDlg_actPasteFromClipboard_OnExecute;
+      lkTBB := CreateTxcToolBarButton2(lkForm, lkToolBar, 'tbb'+lkAct.Name,lkToolBar.ControlCount*80,0,22,80,alLeft,lkAct);lkTBB.ShowCaption := true; 
+    lkAct := CreateTAction(lkForm,'actCSDoverDel','Удалить','Удалить Контрагента из списка доверенностей','F8',0,70); 
+      lkAct.OnExecute := @CSDlg_actCSDoverDel_OnExecute;
+      lkTBB := CreateTxcToolBarButton2(lkForm, lkToolBar, 'tbb'+lkAct.Name,lkToolBar.ControlCount*80,0,22,80,alLeft,lkAct);lkTBB.ShowCaption := true; 
+    lkAct := CreateTAction(lkForm,'actCSIns','Создать','Создать Контрагента и вставить в список доверенностей','Ctrl+Ins',0,416); 
+      lkAct.OnExecute := @CSDlg_actCSIns_OnExecute;
+      lkTBB := CreateTxcToolBarButton2(lkForm, lkToolBar, 'tbb'+lkAct.Name,lkToolBar.ControlCount*80,0,22,80,alLeft,lkAct);lkTBB.ShowCaption := true; 
+    lkDTS.Open;
+    TxcPageControlEx_ActivateDefaultPage(lkPC);
+    Result := (lkForm.ShowModal = mrOk);
+    if Result then
+      begin
+      if lkDTS.Active then
+        begin
+        if(lkDTS.State= dsEdit)then
+          try
+            lkDTS.Post;
+          except
+            lkDTS.Cancel;
+          end;
+        lkDTS.Close;
+        end;
+      if lkTr.InTransaction then
+        lkTr.Commit;    
+      end
+     else
+      begin
+      if lkDTS.Active then
+        begin
+        if(lkDTS.State= dsEdit)then
+          lkDTS.Cancel;
+        lkDTS.Close;
+        end;
+      if lkTr.InTransaction then
+        lkTr.RollBack;    
+      end; 
+    lkForm.Free;
+  end;
+  //============================================================================
+var
+  lkID :string;
+begin
+  lkID := GetGlobalVariable('CS_ID');
+  CSDlgExecute(lkID);
+end.

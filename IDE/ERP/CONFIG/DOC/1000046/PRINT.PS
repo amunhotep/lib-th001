@@ -1,0 +1,50 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG/DOC/1000046/PRINT.PS}
+{$I PEAKTOP:GLOBAL_VARIABLES.INC}
+var
+  J_ID      :string;
+  FIRM_ID   :string;
+  lkXFM     :string;
+  lkRpt     :TxReport;
+  lkImgLogo :TxrImage;
+  lkStrm    :TMemoryStream;
+begin
+  J_ID := GetGlobalVariable('J_ID');
+  if((StrTrimAll(J_ID)='')or(UpperCase(J_ID)='NULL'))then exit;
+  
+  GetField(FBDataBase, 'TABL$J_4', 'FIRM_ID', 'ID = '''+J_ID+''' ', FIRM_ID);
+  if(Dialogs.MessageDlg('Распечатать "Ведомость получения денег" или "Ведомость начислени з/п" ? ', mtConfirmation, [mbYes, mbNo]) = mrYes)then 
+    lkXFM := StringsLoadFromFile(StrAbsolutePath('./RPT'+FIRM_ID+'.XFM', ScriptName))
+   else
+    lkXFM := StringsLoadFromFile(StrAbsolutePath('./RPT'+FIRM_ID+'.LIST.XFM', ScriptName))
+    ;
+  if(StrTrimAll(lkXFM) = '')then exit;
+  lkRpt := TxReport(StrToComponent(lkXFM));
+  lkImgLogo := TxrImage(lkRpt.FindComponent('ImgLogo'));
+  try
+    lkStrm  := TMemoryStream.Create;
+    if StreamLoadFromFile(StrAbsolutePath('../conf/ent/logo.bmp', Amunhotep.ExeName),lkStrm)then
+      lkImgLogo.Picture.Bitmap.LoadFromStream(lkStrm);
+  finally    
+    lkStrm.Free;
+  end;  
+  lkRpt.DataBase := FBDataBase;
+  while(lkRpt.DataSets.Count < 3)do
+    lkRpt.DataSets.Add;
+  lkRpt.DataSets[0].SQL.Text := 
+    'SELECT D0000.J_ID AS J_ID, D0000.FLAG_DELETE, D0000.ID, D0000.WRK_ID, D0000.WRK_POST_ID '+#13#10+
+    '      ,(SELECT FIRST 1 R0003.NAME FROM TABL$R_WRK R0003 WHERE (R0003.ID = D0000.WRK_ID)) AS WRK_ID_ '+#13#10+
+    '      ,(SELECT FIRST 1 R0005.NAME FROM TABL$R_WRK_POSTS R0005 WHERE (R0005.ID = D0000.WRK_POST_ID)) AS WRK_POST_ID_ '+#13#10+
+    '      ,D0000.HOURS_PLAN, D0000.HOURS_FACT, D0000.TARIF, D0000.SUMCALC, D0000.SUMVAC, D0000.SUMFINHELP, D0000.SUMFINHELP2 '+#13#10+
+    '      ,D0000.SUMHOSPITAL, D0000.SUMHOSPITAL2, D0000.SUMCALCTOTAL, D0000.TAXPENSION, D0000.TAXUNEMPLOYMENT '+#13#10+
+    '      ,D0000.TAXINSURANCE, D0000.TAXSINGLE, D0000.TAXINCOME, D0000.TAXTOTAL '+#13#10+
+    '      ,D0000.SUMADVANCE, D0000.SUMTOPAY, D0000.NAME '+#13#10+
+    '      ,(SELECT CAST(SUM(D.SUMTOPAY)+0.01 AS NUMERIC(15,3)) FROM TABL$D_1000046 D WHERE (D.J_ID = D0000.J_ID)) AS SUMMAVEDOMOST '+#13#10+
+    '      ,(SELECT CAST(SUM(D.SUMTOPAY) AS NUMERIC(15,3)) FROM TABL$D_1000046 D WHERE (D.J_ID = D0000.J_ID)) AS SUMMAVEDOMOST_ '+#13#10+
+    'FROM   TABL$D_1000046 D0000 '+#13#10+ 
+    'WHERE (D0000.J_ID = '''+J_ID+''') '+#13#10+
+    'ORDER BY WRK_POST_ID_,  WRK_ID_ ';      
+  lkRpt.DataSets[1].SQL.Text := 'SELECT * FROM PROC$D_4('''+J_ID+''') ';
+  lkRpt.DataSets[2].SQL.Text := 'SELECT * FROM PROC$D_ENT_CONST('''+J_ID+''') ';
+  lkRpt.Prepare;
+  lkRpt.Preview;
+end.

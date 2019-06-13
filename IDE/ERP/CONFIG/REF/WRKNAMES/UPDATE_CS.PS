@@ -1,0 +1,16 @@
+begin
+  if(Dialogs.MessageDlg('ќпределить контрагентов женского пола на основании этого справочника ?', mtConfirmation, [mbYes, mbNo]) <> mrYes)then exit;
+  if ExecSQL(FBDataBase,
+    'EXECUTE BLOCK AS '+#13#10+
+    '  DECLARE VARIABLE P_NAME TYPE OF COLUMN TABL$R_WRKNAMES.NAME; '+#13#10+
+    'BEGIN '+#13#10+
+    '  FOR SELECT UPPER(WN.NAME) FROM TABL$R_WRKNAMES WN WHERE (WN.TYPE_ID = 1) INTO :P_NAME DO '+#13#10+
+    '    BEGIN '+#13#10+
+    '    UPDATE TABL$R_CS C SET '+#13#10+
+    '      C.SEX = 0 '+#13#10+
+    '    WHERE (C.NAME2 CONTAINING '' ''||:P_NAME||'' '') '+#13#10+
+    '      AND (C.CS_GROUP_ID = 1000002); '+#13#10+
+    '    END '+#13#10+
+    'END'
+  )then Dialogs.MessageDlg('ќбработка справочника " онтрагенты" выполнена', mtInformation, [mbOk]);  
+end.

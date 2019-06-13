@@ -1,0 +1,2227 @@
+object ReportB685BA9A0766E3403BDBB0BD23D868B5: TxReport
+  Left = 0
+  Top = 0
+  Width = 794
+  Height = 1123
+  Frame.Color = clBlack
+  Frame.Top = False
+  Frame.Bottom = False
+  Frame.Left = False
+  Frame.Right = False
+  Transparent = False
+  Color = clWhite
+  Font.Charset = RUSSIAN_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -9
+  Font.Name = 'Verdana'
+  Font.Style = []
+  ParentFont = False
+  AutoFree = True
+  DataBase = AmunhotepMainForm.FBDB
+  DataSets.DataBase = AmunhotepMainForm.FBDB
+  DataSets = <
+    item
+      Active = False
+      Name = 'qrDoc'
+    end
+    item
+      Active = False
+      Name = 'qrJrnl'
+      MasterDataSet = 'qrDoc'
+    end
+    item
+      Active = False
+      Name = 'qrEnt'
+      MasterDataSet = 'qrDoc'
+    end
+    item
+      Active = False
+      Name = 'qrCS'
+      MasterDataSet = 'qrJrnl'
+    end>
+  DataSetIndex = 0
+  Functions.Strings = (
+    'PAGENUMBER'
+    'COLUMNNUMBER'
+    'REPORTTITLE')
+  Functions.DATA = (
+    '0'
+    '0'
+    #39#39)
+  StyleManager = AmunhotepMainForm.StyleManager
+  Options = [FirstPageHeader, LastPageFooter]
+  Page.Columns = 1
+  Page.Orientation = poPortrait
+  Page.PaperSize = A4
+  Page.Values = (
+    100.000000000000000000
+    2970.000000000000000000
+    50.000000000000000000
+    2100.000000000000000000
+    100.000000000000000000
+    100.000000000000000000
+    0.000000000000000000)
+  PrinterSettings.Copies = 1
+  PrinterSettings.OutputBin = Auto
+  PrinterSettings.Duplex = False
+  PrinterSettings.FirstPage = 0
+  PrinterSettings.LastPage = 0
+  PrinterSettings.ExtendedDuplex = 0
+  PrinterSettings.UseStandardPrinter = False
+  PrinterSettings.UseCustomBinCode = False
+  PrinterSettings.CustomBinCode = 0
+  PrinterSettings.UseCustomPaperCode = False
+  PrinterSettings.CustomPaperCode = 0
+  PrinterSettings.PrintMetaFile = False
+  PrintIfEmpty = True
+  SnapToGrid = True
+  Units = MM
+  Zoom = 100
+  PrevFormStyle = fsMDIChild
+  PreviewInitialState = wsNormal
+  object ColumnHeaderBand1: TxrBand
+    Left = 38
+    Top = 191
+    Width = 718
+    Height = 82
+    Frame.Color = clBlack
+    Frame.Top = False
+    Frame.Bottom = False
+    Frame.Left = False
+    Frame.Right = False
+    Transparent = False
+    Color = clWhite
+    AlignToBottom = False
+    ForceNewColumn = False
+    ForceNewPage = False
+    Size.Values = (
+      216.958333333333300000
+      1899.708333333333000000)
+    BandType = rbColumnHeader
+    object xrLabel1: TxrLabel
+      Left = 0
+      Top = 50
+      Width = 28
+      Height = 32
+      Frame.Color = clBlack
+      Frame.Top = True
+      Frame.Bottom = True
+      Frame.Left = True
+      Frame.Right = True
+      Size.Values = (
+        84.666666666666670000
+        0.000000000000000000
+        132.291666666666700000
+        74.083333333333330000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #8470
+      Color = clSilver
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 8
+    end
+    object xrLabel2: TxrLabel
+      Left = 28
+      Top = 50
+      Width = 48
+      Height = 32
+      Frame.Color = clBlack
+      Frame.Top = True
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        84.666666666666670000
+        74.083333333333330000
+        132.291666666666700000
+        127.000000000000000000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1074#1085#1091#1090#1088'i'#1096'- '#1085'i'#1081' '#1082#1086#1076
+      Color = clSilver
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 8
+    end
+    object xrLabel3: TxrLabel
+      Left = 76
+      Top = 50
+      Width = 328
+      Height = 32
+      Frame.Color = clBlack
+      Frame.Top = True
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        84.666666666666670000
+        201.083333333333300000
+        132.291666666666700000
+        867.833333333333300000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1085#1072#1081#1084#1077#1085#1091#1074#1072#1085#1085#1103' '#1090#1086#1074#1072#1088#1091' '#1072#1073#1086' '#1087#1086#1089#1083#1091#1075#1080
+      Color = clSilver
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 8
+    end
+    object xrLabel5: TxrLabel
+      Left = 508
+      Top = 50
+      Width = 24
+      Height = 32
+      Frame.Color = clBlack
+      Frame.Top = True
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        84.666666666666670000
+        1344.083333333333000000
+        132.291666666666700000
+        63.500000000000000000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1054#1076'.'
+      Color = clSilver
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 8
+    end
+    object xrLabel6: TxrLabel
+      Left = 532
+      Top = 50
+      Width = 72
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = True
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        42.333333333333330000
+        1407.583333333333000000
+        132.291666666666700000
+        190.500000000000000000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1062'i'#1085#1072
+      Color = clSilver
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 8
+    end
+    object xrLabel7: TxrLabel
+      Left = 604
+      Top = 50
+      Width = 48
+      Height = 32
+      Frame.Color = clBlack
+      Frame.Top = True
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        84.666666666666670000
+        1598.083333333333000000
+        132.291666666666700000
+        127.000000000000000000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1050'i'#1083'.'
+      Color = clSilver
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 8
+    end
+    object xrLabel8: TxrLabel
+      Left = 652
+      Top = 50
+      Width = 64
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = True
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        42.333333333333330000
+        1725.083333333333000000
+        132.291666666666700000
+        169.333333333333300000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1057#1091#1084#1072
+      Color = clSilver
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 8
+    end
+    object xrExpressionMemo4: TxrExpressionMemo
+      Left = 0
+      Top = 0
+      Width = 70
+      Height = 20
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        52.916666666666670000
+        0.000000000000000000
+        0.000000000000000000
+        185.208333333333300000)
+      Transparent = True
+      RemoveBlankLines = False
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold, fsUnderline]
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        #1047#1072#1084#1086#1074#1085#1080#1082':')
+      ParentFont = False
+      WordWrap = True
+      FontSize = 10
+    end
+    object xrExpressionMemo5: TxrExpressionMemo
+      Left = 72
+      Top = 0
+      Width = 646
+      Height = 20
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        52.916666666666670000
+        190.500000000000000000
+        0.000000000000000000
+        1709.208333333333000000)
+      Transparent = True
+      RemoveBlankLines = False
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{qrCS.CS_NAME2}')
+      ParentFont = False
+      WordWrap = True
+      FontSize = 10
+    end
+    object xrExpressionMemo8: TxrExpressionMemo
+      Left = 0
+      Top = 20
+      Width = 70
+      Height = 20
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        52.916666666666670000
+        0.000000000000000000
+        52.916666666666670000
+        185.208333333333300000)
+      Transparent = True
+      RemoveBlankLines = False
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold, fsUnderline]
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        #1050#1086#1085#1090#1072#1082#1090#1080':')
+      ParentFont = False
+      WordWrap = True
+      FontSize = 10
+    end
+    object xrExpressionMemo9: TxrExpressionMemo
+      Left = 72
+      Top = 20
+      Width = 646
+      Height = 20
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        52.916666666666670000
+        190.500000000000000000
+        52.916666666666670000
+        1709.208333333333000000)
+      Transparent = True
+      RemoveBlankLines = False
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Times New Roman'
+      Font.Style = []
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{IF(qrCS.CS_PHONES<>'#39#39', qrCS.CS_PHONES, '#39#1085#1077#1090#39')}')
+      ParentFont = False
+      WordWrap = True
+      FontSize = 10
+    end
+    object xrLabel4: TxrLabel
+      Left = 404
+      Top = 50
+      Width = 104
+      Height = 32
+      Frame.Color = clBlack
+      Frame.Top = True
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        84.666666666666670000
+        1068.916666666667000000
+        132.291666666666700000
+        275.166666666666700000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1072#1088#1090#1080#1082#1091#1083
+      Color = clSilver
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 8
+    end
+    object xrLabel15: TxrLabel
+      Left = 532
+      Top = 66
+      Width = 72
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        42.333333333333330000
+        1407.583333333333000000
+        174.625000000000000000
+        190.500000000000000000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1055#1044#1042
+      Color = clSilver
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 8
+    end
+    object xrLabel16: TxrLabel
+      Left = 652
+      Top = 66
+      Width = 64
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        42.333333333333330000
+        1725.083333333333000000
+        174.625000000000000000
+        169.333333333333300000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1091' '#1090'.'#1088'.'#1055#1044#1042
+      Color = clSilver
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 8
+    end
+  end
+  object SummaryBand1: TxrBand
+    Left = 38
+    Top = 301
+    Width = 718
+    Height = 232
+    Frame.Color = clBlack
+    Frame.Top = False
+    Frame.Bottom = False
+    Frame.Left = False
+    Frame.Right = False
+    Transparent = False
+    Color = clWhite
+    AlignToBottom = False
+    ForceNewColumn = False
+    ForceNewPage = False
+    Size.Values = (
+      613.833333333333300000
+      1899.708333333333000000)
+    BandType = rbSummary
+    object xrLabel11: TxrLabel
+      Left = 0
+      Top = 0
+      Width = 604
+      Height = 14
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = True
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        0.000000000000000000
+        0.000000000000000000
+        1598.083333333333000000)
+      Transparent = False
+      Alignment = taRightJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1057#1091#1084#1072' '
+      Color = clSilver
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 8
+    end
+    object xrExpression1: TxrExpression
+      Left = 604
+      Top = 0
+      Width = 48
+      Height = 42
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        111.125000000000000000
+        1598.083333333333000000
+        0.000000000000000000
+        127.000000000000000000)
+      Transparent = False
+      Alignment = taRightJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      ResetAfterPrint = False
+      WordWrap = True
+      Expression = 'SUM(qrDoc.QUANT)'
+      Mask = '# ### ### ##0 '
+      FontSize = 8
+    end
+    object xrExpression2: TxrExpression
+      Left = 652
+      Top = 0
+      Width = 64
+      Height = 14
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        1725.083333333333000000
+        0.000000000000000000
+        169.333333333333300000)
+      Transparent = False
+      Alignment = taRightJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -8
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      ResetAfterPrint = False
+      WordWrap = True
+      Expression = 'SUM(qrDoc.TOTALPRINT - qrDoc.NDPTOTALPRINT)'
+      Mask = '# ### ### ##0.00 '
+      FontSize = 6
+    end
+    object xrExpressionMemo18: TxrExpressionMemo
+      Left = 0
+      Top = 42
+      Width = 718
+      Height = 58
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        153.458333333333300000
+        0.000000000000000000
+        111.125000000000000000
+        1899.708333333333000000)
+      Transparent = True
+      RemoveBlankLines = False
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Times New Roman'
+      Font.Style = []
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        
+          #1042#1089#1100#1086#1075#1086' '#1085#1072' '#1089#1091#1084#1091': {FORMATCURR(qrJrnl.P_SUMNDP, '#39'UAH'#39', '#39'UKR'#39', FALSE' +
+          ')}')
+      ParentFont = False
+      WordWrap = True
+      FontSize = 10
+    end
+    object xrExpression19: TxrExpression
+      Left = 652
+      Top = 14
+      Width = 64
+      Height = 14
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        1725.083333333333000000
+        37.041666666666670000
+        169.333333333333300000)
+      Transparent = False
+      Alignment = taRightJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -8
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      ResetAfterPrint = False
+      WordWrap = True
+      Expression = 'SUM(qrDoc.NDPTOTALPRINT)'
+      Mask = '# ### ### ##0.00 '
+      FontSize = 6
+    end
+    object xrExpression20: TxrExpression
+      Left = 652
+      Top = 28
+      Width = 64
+      Height = 14
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        1725.083333333333000000
+        74.083333333333330000
+        169.333333333333300000)
+      Transparent = False
+      Alignment = taRightJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -8
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      ResetAfterPrint = False
+      WordWrap = True
+      Expression = 'SUM(qrDoc.TOTALPRINT)'
+      Mask = '# ### ### ##0.00 '
+      FontSize = 6
+    end
+    object xrLabel18: TxrLabel
+      Left = 0
+      Top = 14
+      Width = 604
+      Height = 14
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = True
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        0.000000000000000000
+        37.041666666666670000
+        1598.083333333333000000)
+      Transparent = False
+      Alignment = taRightJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1055#1044#1042' '
+      Color = clSilver
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 8
+    end
+    object xrLabel19: TxrLabel
+      Left = 0
+      Top = 28
+      Width = 604
+      Height = 14
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = True
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        0.000000000000000000
+        74.083333333333330000
+        1598.083333333333000000)
+      Transparent = False
+      Alignment = taRightJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Caption = #1042#1057#1068#1054#1043#1054' '
+      Color = clSilver
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      WordWrap = True
+      FontSize = 8
+    end
+    object xrExpressionMemo10: TxrExpressionMemo
+      Left = 114
+      Top = 93
+      Width = 600
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        42.333333333333330000
+        301.625000000000000000
+        246.062500000000000000
+        1587.500000000000000000)
+      Transparent = True
+      RemoveBlankLines = False
+      Alignment = taRightJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        
+          #1055'i'#1076#1087#1080#1089' ________________ ('#1087#1088#1086#1076#1072#1074#1077#1094#1100' {IF(qrEnt.ENT_CS_WRK_NAME_100' +
+          '0075<>'#39#39', qrEnt.ENT_CS_WRK_NAME_1000075, '#39'_________________'#39')})'
+        '                                  ')
+      ParentFont = False
+      WordWrap = True
+      FontSize = 10
+    end
+    object xrImage1: TxrImage
+      Left = 0
+      Top = 125
+      Width = 713
+      Height = 105
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        277.812500000000000000
+        0.000000000000000000
+        330.729166666666700000
+        1886.479166666667000000)
+      Transparent = False
+      Picture.Data = {
+        0A544A504547496D6167653E520000FFD8FFE000104A46494600010101006000
+        600000FFE1006845786966000049492A000800000004001A010500010000003E
+        0000001B01050001000000460000002801030001000000030000003101020012
+        0000004E00000000000000A3930000E8030000A3930000E80300005061696E74
+        2E4E45542076332E352E313000FFDB0043000604050605040606050607070608
+        0A100A0A09090A140E0F0C1017141818171416161A1D251F1A1B231C1616202C
+        20232627292A29191F2D302D283025282928FFDB0043010707070A080A130A0A
+        13281A161A282828282828282828282828282828282828282828282828282828
+        2828282828282828282828282828282828282828282828FFC00011080071031A
+        03012200021101031101FFC4001F000001050101010101010000000000000000
+        0102030405060708090A0BFFC400B5100002010303020403050504040000017D
+        01020300041105122131410613516107227114328191A1082342B1C11552D1F0
+        2433627282090A161718191A25262728292A3435363738393A43444546474849
+        4A535455565758595A636465666768696A737475767778797A83848586878889
+        8A92939495969798999AA2A3A4A5A6A7A8A9AAB2B3B4B5B6B7B8B9BAC2C3C4C5
+        C6C7C8C9CAD2D3D4D5D6D7D8D9DAE1E2E3E4E5E6E7E8E9EAF1F2F3F4F5F6F7F8
+        F9FAFFC4001F0100030101010101010101010000000000000102030405060708
+        090A0BFFC400B511000201020404030407050404000102770001020311040521
+        31061241510761711322328108144291A1B1C109233352F0156272D10A162434
+        E125F11718191A262728292A35363738393A434445464748494A535455565758
+        595A636465666768696A737475767778797A82838485868788898A9293949596
+        9798999AA2A3A4A5A6A7A8A9AAB2B3B4B5B6B7B8B9BAC2C3C4C5C6C7C8C9CAD2
+        D3D4D5D6D7D8D9DAE2E3E4E5E6E7E8E9EAF2F3F4F5F6F7F8F9FAFFDA000C0301
+        0002110311003F00FAA68A28A0028A28A0028A28A0028A28A0028A2B275EB5D5
+        EE2DC7F63EA31DA4EA49C3421838E300939C639E40E68035AB2352F1368DA6B8
+        4BCD421573FC299761C6790B923F1AF28BB8355B9DF0EAFAA4AD18760C8F3991
+        5645382B8CE32307A67A1AA6D0E976EB22C8ECCFD54B9FE40609A00F47B9F88D
+        A24573E5469793AF004B1C4029CFFBC41FD2BABB0BC8350B48EEAD24F320933B
+        5B6919C1C1E0F3D45786CEFF0069464B5B160A719207961BF1EBF8639E7B1AF4
+        1F848C5743BC8257B733ADD17290B8202B22ED20761C11EFB4FD000773451450
+        0145145001451450014545757105A40D35D4D1C30AE3749230551CE3927DEB9F
+        4F19E9970A5F4D8751D463076B3DA59C8EAA7D09C0E6803A5A2AA695A95AEAB6
+        6B73632892224A9E082A475041E41AB740051451400514514005145140051451
+        4005145140051451400514514005145140051451400514514005145140051451
+        4005145140051451400514514005145140051451400514514005145791FC60F1
+        96BFE18D7AD62D32EA286CE4B6F336F94AE4B6E20939191D074A00F5B2C01E48
+        14B5E05E15F1FF008A7C477E6D626D3A694219034F1151B4638F94FBD2CFF173
+        5ED3357B8D326B7D2E49206230B1BE38C0383BFD6803DF28AF2ED03C6DE2FD67
+        4E4BEB3F0E5B5C5B31203A4BB72475E09CD68378CBC4F003F68F05DDBFFD7194
+        9FE4A6803D068AF2E6F8BB04133C37BA1DDDBCC876BC6D20DCA7D082055883E2
+        C68B70A18B4F6C7A14740FF8E549A00F49A2B84B7F8A3E1C61B64B8B8C8EADE4
+        360D759A1EAF65ADD88BCD36532C058AE4A95208EA306802FD14514005145140
+        0514514005145140051451400514514005145140051451400514523B2A296638
+        1400B48EEA832C40AE675FB76D56780C77F7B6A9036E0B6EE1431F7C83FE4D5D
+        8F841962FEE4927F3340166EB58B6B58DE4B812C688A58B14246075E466837A6
+        43BE1910A8C8C0E46471FA1AAC493C0A6B1545E4802802FC57C7004A8338192B
+        DCFD3B55B8E45914329FFEB5723ADEB2BA79105B209EF5D77053C2C63A6E6FD7
+        8EA71DBAD50D23C4B6FA6DCCD71E22D44C7BD76C4A10EC1CE480AA0E71C72727
+        DE803BFA2B9DB5F1B7876E9F6C3AA459FF006D593FF4202B76DAE61BA4F32DA6
+        8A68FA6E8D830CFD45004B45145001451450014514500145145001589ADF8B34
+        0D11A54D4F56B48678C2968049BE600E307CB5CB1EA0F4E9CF4AF35F1EF8AAFF
+        005FF3B4DB49C691A197314F70FB4CD72B8E571CED539E98C90064804AD71D6B
+        A8787F45578A0D3C5D32ED09230C64907AFE59CFBFB50074FE2EF1F789C6B826
+        D12548746F31522FF475C4832002ECD938279E02601C7504D7516FE38B065592
+        E2DD0EB11A89267B694411485415C3339195F9DB0A7763AF5191E453788AF359
+        B7BDD3B4ED22E2680C7BA431067F2D48E41EB8EFED5068B6F6F79A8C36D3C9A7
+        D94CB1997CCBC5691CAF1C00DB9777CC38C29A00F5DBFF0088FE67989632C0F2
+        796088EC626BC70DDFF78311E00EF935C2F88BE25F8B6CB5B85F4E498E9B36D4
+        C4EF6DE628CF2C554101B93F51F4069B7EBA5D924F6573AADE5D19A18A55716E
+        53C98F72BB6D4CE3254A7A0018FB8AE50696935EB4135C470C526F649C30F2E4
+        009195672A18120E0E4671EBC50074D07882F356D567BB9A3F9E65DCCEE31B88
+        C0191D3A0C7007F2ADCB05636573792C91168C80A8700F519C73FED0FC8D71D0
+        0B7B5D4E3482FE3B9392A234DC081824EE38DA7A0FBAC7AD6BDBDC14991812A5
+        58329519208E9401B33DE4CD6A1FCB65898E3795C03C7207F9FF00EBC7F08967
+        F0AF886D74FBAB85686F0BC792ED8C100A673F7983E541F46A87506BE2EE6E60
+        92276F9CF9C3E627AE7040EBC76ACE125C457B69A8677CD65325C28939DC5483
+        83EDD2803E8FA291195D1591832B0C820E4114B400567DDEB5A759CED0DCDCAC
+        72AE32A4138CF3E9EE2B42BC7EF373F88B539242302EE55E4FA31C7E9401EAF1
+        DFD9CAE123BBB7763C00B2024FEB566BCA676F918C30C720C70FBF91F4183FCE
+        BA3F865797B369D736F7EB2FEE594A34A0824303C73F4FD680323C6DA6CDA86A
+        FA9A6AB6FACCD6AD12269C6C6132C711C02CCCAA7925B23079233EC441E1CF19
+        EBCDE5E977B6903EA236C21E726325C9C02E3E9D7033F53C57A8D788DEDCF97A
+        BDF49327EF4DC3B4871B70771CE17271F4C9C5007A6E8F3C1A5DACC2EAFCDEDE
+        CD219A79117866200C2E38000007E156135F80B36F8DD541F948E73F5F4FD6B8
+        2BAD475386255B58A07523BBA2E3F426B366BEF10BE0A18411D034E78FA1CF1F
+        95007AAA6B968C71FBC5F72BD2A48758D3A6FF00577B01E33F7C0E3F1AF17B98
+        35A287ED296CE8F9E127463ED9C74ADFD3BE22CD610456F730D9148C2A0C1319
+        38EB9EA327E9401EAD1BA4A81E365743D194E41A7579B6B7E2AD375096D2F74C
+        B99A2BA46F29D7201643EE0F6E78F735D97872F65B8B6D974FBA70030E41F97A
+        70475C1041CF7A00D7A28A2800A28A2800A28AC77D5677BA0B6F6D2F94065D64
+        8583E376370E738FC33EDE801B1456726A81A5963118DD1B1561BBBFE549F6E9
+        BFBB1FE47FC68034A8AC86B99C820CA71EC00AC7D4A1F3E491E49B505D880831
+        DE4B1A9EBC615C73C75C771401D7D15CADBDEBDCC11CB0DCC850F24EF3CFEB4F
+        373323065B89723D5C9FD0D0074F45713A96A1E248E207C3D0DBDF5CB38CC770
+        70AB1E39392E39DDE9D8F4E3359DF6CF8997922C5FD9DA4D803D652C180FAFCE
+        C7F4A00F47A2B9AF085A78A2DA4BB3E29D46CEF11F6F90B6E98D879DD93B57DB
+        D7F0EFD2D001451450014523BAC685E460AA39249C0159F73ADE9B6D034F35E4
+        42155DC64072A06339C8E280346B9FD5FC65A06932A4579A9402663B4468DBCE
+        7DF1D3F1AE164F1AB78FF51B8D17C2502DC5B85C4D7733110C4BC1C903A9395C
+        03F80C026B5BC31F0BB40F0F402E2FE49752BC8E2225BAB821770CEE2485EDEC
+        49028026B4F105F7893549ACEC757B3D2A20E444121324D3A8EA559C04F5E818
+        E3AE2B33C5E9ACF83754D0B56B0D66F750D3CCEF16A76D7D3798EF1119DF12AE
+        D5057073C1E08F439E112E6E2C349F0D341A7DC5CDDDF417170F2C47625B08DB
+        31B3B9385DDD17BFCBF966DFA5D7883C59A7596BBA8CB06B9772C3F6686299DE
+        4565024951CECD822CB0E06320E01EA0807D3D45145001451450014514500145
+        1450015F3CFC6474D5FC7E6C5E4658D162B605402738DFC6481D49AFA1ABE57F
+        10DF2EA1E2ABEBF52EF6F2CB34C8E2DFED00E4E1015E072A4E0938F96802A785
+        19BC3D3C93D8DCCC922E6304A46C00EE31BCD450E82FF6D9EEFCC9E5966E599E
+        22339393D335A71058604188CA8E58B5AAC7FA0AD6D26D43C6BA8C7059DC4118
+        12C2619DD245707B80381F80A004D16FB59D3618E2D3B5B92CF4EC3008412558
+        1E58A9C7CB93FAD2C7F103C5F1DCF970EAA27553CB1B742A7E879A8B528A7122
+        CD2DBDEC17D2E4F9A968B2A6D39C02588208F7C7E3D6B125B51691B001031E5C
+        98F68CFAE050026A77525CDFCD75792133CCE6476DB8DCC7926ADA5ECB3CB122
+        5A593348760DC8538C7D40ACA721A78D14DB1CB609DAC49183D011ED5763925B
+        6B9899194E187CA26083191D9B20FD08FCA80288BB59EF64492CD2D5F2D18589
+        8B2B14272724E7AE7F2AFA23E1040B0780AC76A05F31E6738EE4CADCFE95E13A
+        F6966C7C4502AA4BE44D0BCE1E4555CB337CD80A718C9AFA1BE1CC7E5F823481
+        EB007FCC93FD6803A3A323D6BE7BF8A96A97DE3FBD17FE64F649B4797B564EB1
+        C7F20DC4155EADF2F192D9E48279F9EF747D1B624DA4CBE5B8211672250001D0
+        025B03A5007D4991EB4647AD7CB13EA5E12D4E310DFE8B188F208D900520FD57
+        07BFEB55FF00B1EDAFE18AC9B5383EC3B866DC05DBB460AE5586719008C1EB8E
+        D9A00FABF2290B28EA47E75F39D8785EE3ED4B75A05ABDC2AC4207B788469920
+        2E65DC4A82490BC753C9ED573538F51D29A25D634DBAB247211653B64883160A
+        A19D495525880012324E05007BF8743D197F3A50CA7A11F9D7CE168F6715DCA3
+        585D4E7321CA8B567548D7710325700E460F273F4CF1774FB6F0E3CCDE60F11E
+        09670AD79C7CD8C0CE7381B491DFE6392780003E83A335F3BEAE9A5C17F30B66
+        BA5B7FB24AE236BC5DED385C46BF30CFCC5F20E401E5F239AC4B59AE2EA35922
+        58990AFCB8D403038F4FF45A00FA8F23D68C8F5AF949A786DEE58DDDC98A2404
+        3B9954AAB0C7CA0985473C83CF1E86A5D275CD05BCE5BDB7B4D59BCBC6D5BD68
+        829CF5F93AE7F4A00FAA323D68C8F5AF952FF57F0C481D23F0AC963332B2AC8B
+        35C5C6DC8C6EC11838EA074AC3B7B4D396F20BCB4B786D6EE3904B1CA6DF648A
+        E070CA4807230307DA803EC7A2B27C237335EF85746BABA7325C4D670C923918
+        DCC501271DB2735AD4005676B13F950C8C738442D5A248504B1000E4935E11E2
+        7F1DEB2357796DD4B5BCAE63F21A226348978C9CE0E7E7049E3B0F6001DB5AF8
+        A34D92EE2B2F3BFD225CE001919E7E5CF6381DFF009D6E239DC02F7AF0EB1B7B
+        3D6AC1EFB54BBB81725F190D82AC318D9D724E1001EA063B57ABD8F8934997E6
+        FB7431E1B6ED98F94D9E98DAF83401D1C8C63401177331C0FF0013ED4D8D421D
+        CEDBE5EEDFE03B0AE2E4F1E0FED4F2ADF4F9E6B0DA089D51B7364672171918E7
+        39F4ED5ABAD7882D2DEC674B5B9DF72D1909E50C80D8E0E7A718CFE140189ABE
+        AB6EB34F79E5B2972004620316C0503938049C0AE7F5AD1EE754D327BAB8951C
+        DB13B92347C46DDD72460E0632739F503901FA15CDACFADC10CB2331B70F3B79
+        6DF74A29E0E3F3C7B7D2BB9F116A569A6785EEA6B7F29A211324491B00189E30
+        3F1F4A00F26D1F465900912E44A473E5444163F9F4AEC7C0776D67E22B758A77
+        58EE2431CA9336C0BC64023B9E081EE4571BA44B645A3578DF4F987DC9C7033F
+        5AEA7C2905DEA1E2158DA0136731DC3ECCA321EA4F6E99E3DE803DB68AE65EDF
+        51D0897B0637364325AD5DB81FEE31FB9FEEF2BD00DBD6B734DBF8351B6135BB
+        1F464618646FEEB0EC7FFD638A00B5451450023BAC6A59D82A8EA49C01552EB5
+        186DE5F28ACD24D95FDDC71966DA4805BE833C9F6F5E2A6BCB68EF2D26B69F7F
+        952A147D92323608C1C329047D41CD3E28628BFD54689C05F9540E06703F53F9
+        D0066FDB7516998FD8A286D97E612CB2F0CBB41248E0A1CEE1C83D3271D2A37B
+        4BDB997375705570C92C10A12AC8C4E06E6C29C0EA42E7A8AD5304465694C6A6
+        46508CC47254678FA726A4A00F366F85B0DCEB12DDDEEA0CF034AD26CF2C33B6
+        49C12FD01C1C6369E9D6B135AD2AF7488DBFB3FC21A5246B2055BAD66E45C098
+        61B1FBA8F856C03EDC8EBCE3D92BE5DF897F163C4CDE36BDD19ECA1D32C6C277
+        F26DEE6170D74AA42EF790F40577BA6D183903E7E0D0074D7579AEEA36D2D94F
+        AAADDB40AE0D9DB4690C285802A855704F1D013D1893DB3C86B70A596BE66920
+        779211B250AA772BE4E41E3B1DB903D31C5645F78CA5B7BD3ABE8779E46A76A8
+        2481994100B9DACB871F36559870381CF1C1AFA67E1AEB7AC7883C296F7FE22D
+        3574FBF76605115955D7AABAAB12C01071C9E7191C11401F39C71DDEBDAC6A12
+        69BA7CD24B2A4D39B6B55329883C91900E06718047415B2FE08F11FD974E924D
+        3B529A295BCA40911DD18C93CAB10C8B927EF281CE7DEBE9CA2803C33C31F097
+        5317A971A8C896C9192A03B0672BB71CAA641E4F5DE0FB7AFA8F87BC2565A2CA
+        934524D2CCAB80588550718240039EBFC44E2BA2A2803CF3E26D84CD70B78B03
+        35BF9211E4519DA413D71D382057943E9EAFA8CB7CD23995E3F2C038C2AE3A0E
+        33EBC7A93EB5F47EB16EF77A4DEDB478DF340F1AE7D4A903F9D7CFAC311823D7
+        06803DE3C2449F0A68A48C1FB14391FF006CD6A4BCD6EC2D249239A63BD3A854
+        63F8640C571F67A8BDBFC1F8EEE6770D1C3E58C139204BB157E98C0FA579EA78
+        8E2902A4C93C6CC70DB5B217DF3907F4A00F658BC55A649B8F98CA00E376067D
+        8735E63F12516FB5C6BBD1C4CCF2460CE8D951B80C02083CF000C718C75E4E30
+        AD35F5BB965020C448480DBF2C4763B71C56A5ADDF9A31002F93CAE3A1C77F4F
+        AF4A00E2EEAEF50B6CACA92478EE4923F3CD4316B37684309A43F8D777A8E906
+        F2278AE6D64E7904320C1EC41C9AC98BC30D1A34504F731CA70FC48063F2F7FE
+        428037BE1B5FF88B55D56D45A3DC9D3639775C48F91100305973D0B10471D79C
+        F4C9AC6F88303E9BE33D5A1B95924B491C4F1F9A0E1BCCCB12BDB00965C8FEEF
+        AD68681E1EB9B3B9FB536A572938185DB2107AF2720E46460707D6B2FE20ADF5
+        EDF0D46F2E3CE5204218740A00E0E060739381D793C5004B178B16591926B558
+        587F7A618C63E95BD6F709716F1CD19CA48A185796DDE1DCC80927E5078E3A7F
+        F5ABA7D22EA6874A86D5E3380BB8A1084E18EE04827201041191CF6A00E9AF2E
+        5608B71E493851EA6B0DE096562CB07D33112B8F418E951BEA4F1955FB43C631
+        C29936803D866A37D4531B9AF1481CFF00ADC9FCB3401605B5E0DCC2CED988C0
+        5D88771EFCE718AF45F0E5D88EE74B7DBBA42446EB91B941CAE4F7C6707F2AF3
+        6B7D4ED99C93704E54004063CF3C74EB5A769AAC31C8C24BD8D086042B385206
+        3B83F8D007BC51593E13BBFB7F87ED6E3CEF3F7EF1E66EDDBB0E475EFD2B5A80
+        0A82F9EE23B399ECE249AE154948DDF6863E99FF003F8566EB7E26D27452CB7D
+        74A26009F26305DF800E081D33918CE2ABE9BE2AB3BCB5F3CABAAB0DE9800E57
+        3C03CF0477EDC1A0097479356963906B2A2D656219446C19579C6338EA78E39F
+        C7A56278DBC6D69E1E9E0D2A399A4D5258C30542008874DCE5B775EA0609E392
+        322AFF008D7516821FB3091D63700C8626DAE46795CF60463A60FBD780CDA5DC
+        5F78FEEB51B841249712C90913B710A31C44D923A2AA85CE0F00FA5007BB699A
+        8ADCCEE8E208DD97CC5489472BEBD07B525D6BBA558423ED17F6EA141CFEF013
+        C70781CD78C35849E1CD423B7D7229DF4D7939689F0D1B6738F423DBB8E86BD4
+        34CF0E68BAA12D6D6D6578641E77993CC2466C60720648C71C11D7AF26803617
+        528EE7CB6B76731348D16E11B70CBBB39C8E06548C9C73C77A6EA32E2CE52B86
+        61C3213C11919FD2B4A1F0D42162591D638E3E563B78C22AB7F5EA7B55EB4D1A
+        D6DE512FEF257072A646C807E83028030B49F084324105C6A375A8995D033DBA
+        DCB448A48E985C1CFD4F5AE82CF47D3ECFCB305A45E647F76571BE4FFBEDB2C7
+        F3ABF450031618964322C68243905828CFE74FA28A0028A28A0028AC4F166BEB
+        E1FB08E736E6E1E49022A798100F5258F41FD48AE16FBE290B8D9A75B58BC77D
+        74C2259219778841C65B25402402C78C8E073401D1F88B51FB45F98B6663B762
+        067FBDD09FE63FFD75E3DF18F503A9FD9B4089D842E44F7AA1BEFAFF000237B1
+        3F31FF00747635B5E3EBF3A76806EC59CB78639E22238AEDAD9B25800DB97920
+        12091D08CE7A5713E17D18EA3796F6BA889753BB68848CB3C9BE7748F68DE33C
+        9704A1CE38F63401D27C34D4BC3DE1DD06CADADE6834BBD90F9AD0CF32432B6E
+        DC5485DC4ED2B9C73FDEC807701D2F8DBC62EBA4CDA6DADE092E2F633139DDB8
+        47130F998FE1C0FAF15C5681F04BC43A54D74F6BABF9B0C8ACCC97B395696500
+        2A1DE8AC76119FBC3238E3AD771E19F869369F7A975A9DE5A48720BC11C4CCA4
+        7A6E2DC8C71D3F0EB900F2283C3F77E2C92E6E61B9BEB985E1125B2452315451
+        C47E4966D88E30BBA420E48CA9539CFA3FC06F0D5A691E28B9975137D37886DE
+        D5AD1E6BDB832328F30BED5E3B86E7923E518C724F65A56910E832C56B66C248
+        42790A1B23F8B71CB64FA938C7F8567695A7FF0062FC41B0D477CF2C1A86606D
+        E388E4036A827D483C0FF64F3C7001EB14514500145145001451450014514500
+        67788EF3FB3B40D46F07DE82DDDC7D429C7EB5F33DBE8B717F6D2FD9C3082368
+        A2650F8CB3121063BF3FCEBD8FE2F6B063D07EC90C8E8279446C140C48304904
+        E723D78F4AF28B48EEECEC2DB53F2241A7C9710DCA48CBC36D076A939C8539CF
+        3DF1401620D3359B3630C3E6C45A530E226DA59C0CE383CF156ED16FA3C0BAB5
+        9AF23258224CCEC038FBD8E7AF041FC6A7B5D5E7B1D52D9EFE39062E25BB11B6
+        E4762F9000CF650702B52C3C53144BA7072435BF9CD28523E777E8467DF39A00
+        E71574D8A4766D19EDCB8DC1A395B0DCF61B48150CF2DA3ACC1BEDD18238114A
+        0BFE19515D7E9DAFDA2259F9CACF25B58B425885C3CA76E4F07A7CBFAD4F697F
+        A4092C519418ADAC1A221E227749F271D3AE14F3EF401C16A16BA31D4E26B67B
+        D88040764A81C67D4166041E7E951DC4513DC811DCA9EE5658321867A1C7D3D6
+        BD06C174678B468AEC5B022CD8CFBF1FEB36A0C367A9CEE3CFA554D3B4ED25B4
+        8B6931099A6BD084C6C01286520023FDDC5007157934377A847245626D5E283C
+        B73E6332BFCC31807A0E2BE89F0647E5784B464F4B38BFF4015E1FE2982D2D35
+        CD462B34091C4A88467386F2D58FF3AF7DD1E310E936518E89022FE4A2803C23
+        E234AEDF10754B781034D8471B9C20FBAA00C9EA6B99D57C35ADEAB6EBBAD600
+        02B64A5DABB0CF0323823907FEF9AD9F8B17B650F8E3534BC963472EB1C7BBEF
+        65914617BFA74AE72EBC3DE20B89221A3699AD01B18334A9304604762DC73EB4
+        01D3C7A2086D904AF65B46473329279C7001F6C62B0FFB6349468ACA684CA8C0
+        2EC3804F001CA007A75E0F6FA569587C39D7EFA3692E43C30AEDF2E596E51D25
+        EF952858E3B738AB9A8F85A5D19D2E35A9ED638234922B348A5F94065DADBB2A
+        39C6DC01E8680238BC556DE10B8274B1610CCF197F36E2D4BAA4440E06D65627
+        7638CF6F6159DAC78B34CD46F66BCBA162F7331567921B1190C140073B4BFF00
+        09E0B1EB8E95857B6FA223212CB3431288E048E3F38AE4E4A67A633D3278ADB8
+        BC55776E8ABA56916F0A603C62E300671C64053D8D0036E353B4D52D9A183521
+        6B2395CBAFC92050431001C75008CF6CE79E94E874A8F393A85CCAAC10125A51
+        E809E25C73907A7F3A75BF89352BD8E517B6963247968F631385DA4F6553C9C7
+        E47DCD644519B7BE6974EB6302B872D1FEF3C927764382B19E3A81DF91E9C801
+        1DBDACF12DE5C686B2CB200E049732E578C8C61FB54565F64B89E7B44D0E3B44
+        5425C0BA9FCB73F2F5E4F5DDDFAE0F15A5693DAA595BC3F6B81C2A28388DF046
+        0678DBC8AA36D1335E4F359DFDACB249F7A211CEECBF7473B633D71EBE9F4A00
+        BB77790DBE9F3A2D8DC28059556DE1770CD8EB903BFAF1F874AC27D62280ECB9
+        49A13E9244C3FA62B6D211752795737803A0DEF6F09746463D1893827803008C
+        7D7B6749004BA983DE493297242B84C8E4FF00B3F5FCE80208F55B393245C211
+        52FDA6DAEADE6109795A5428922292AADC73BBA02339F5F4072294595AC88448
+        E4B73C6DE2A35B08EDADEEE5B791F7242594331209C8F940271C9C74EBF5A00F
+        AABC1A54F84B4628309F638B03D06C15B158DE0C1B7C23A32820816710C8EFF2
+        0AD9A004655752AE032918208C822B87F127C3DB2BDB791B4E91ADE5C60472B9
+        6888EFD4123EBCFD2BB9A6C882442ADD0D007CDDE2AB7BDF0BEA8B69F6981649
+        0093ED0992DB5B2A70C54EDFBA39033F2FD339B7DABC535D35B192496E164389
+        8B6E59319E41272463BD7B97897C26BAB8513C51B852769DB9233D707A8E9591
+        A77C37B3B67120B48DA4ECF26091F4CF4A00E2AD3CF9E3436F0EFDDDC9C0FCFF
+        00C2B417C3773A946A97933AA6ECED806CC8F42793EA38238AEABC4090E86238
+        5367DA19779C8FB8B9C03E9CE0FE55C9BDEC5712A09AE5C02C033AE4B28CF51F
+        4A00DC8BC172C725BCDA142B67711F1B9542C641C9C11F5F6E790735D569FE10
+        85E373AC2DB4A64219A08531186C0E496E58FB9FD39AC4853534B65B9D0BC4B7
+        3244CB81F6D0B3A331E42EE03E43EA304D68E97E27D5E3D4A2B0D5F4F85FCD91
+        224B9B7665462719C6473D73DBA1A00DC4F0B688A147F665B1DBD3726715AB04
+        115BA0482348D07645005494500079183D2B9BD711B46BB4D5EDB72C0BF2DD44
+        B8C3C7CE4FD57961F88FE2AE92B23C573245A1DCAB2798F20D8918192EC78000
+        F7E9F8D006BD1505840D6D636D03B9768A3542C7F8880066A7A0028A28A0028A
+        28A002B94F8991D9BF85E737704524A484859D012A4904E09E990A6BABAE3FE2
+        9E7FE11B4C75F3C7FE80F401E5FF000DAC2D17C6FA285B3B73C3924C40F2A8CC
+        1BA7504020F5AFA02BC1BE1E5C247E30D18B7452F1F03B94603F535EF3400514
+        51400514514010DE5CC767673DCCE488618DA4720648503278FC2BE7B2B9B653
+        9E58F19FA57D1124692C6F1CA8AF1B82ACAC32083D4115C2FC4CF0BD9CFE11BE
+        9F4CB68AD6F2D6332ABC0162CA8FBDBB039F94123BE47B9C8066DE8FF8B26E09
+        0D820647FD7CD79296E2424E3E4639F7DA6BD56EDA6D7BE0B68D2E9A4CBE5C30
+        2CEA41DCC631E5B81EA438FC8135E59770BC704ACE840518CF6C9E3AD0055B4B
+        50D0A4A0C914B9E1B7751EC31FD7D6B46C6FE582EB7060B3274E3871DF8FE7FA
+        74AEC74231587872791172D265482BB815CB205E9920046E0E796AE1F59548DE
+        3785B29C491EE1D032861D7DB1401E87617B1DED8AB29EA3B37DD3DD7FC8A8E4
+        9E0B4547B892287713832CA07FFAFE99AE0AC2E9A45728DB0E3E7553D8FA7B54
+        0F630B82630D1E71FED7F93F8D0075775E26B08A75963967B8740C36420AC638
+        3C9C919FD7A7E78FA87880DDC2D1C912AC5821A26CB49BC75C1FE11CF5C67AD6
+        0B59481F0B861EB4A6CF6E7737D368CFF5A007477135C481208A1466E0AA2801
+        BEA0F07D6B460B294B7EF7CA2028C8F98E39C6318E319FD69DE19B0135FA248D
+        8576C3151C8500B363DF00D6DEA9A7369D711950A0BEE40AEFB8A10718620018
+        3F4F5EB8C900E62F6510058DA1873D7695CE064FF87EB496D309DCAA808A0672
+        7815D3EB3A2DD5D08E286C84D346E880F9AC772B6429396E065719240C863DEB
+        7F5AF85735BDA4B7B677EA25318DB64C8172DB7EE0707E6391C0C73EBDE80399
+        D32D64B291CCBB58BAA302809EA09EE3DF1F9D69B159D363A1650CAC47A10430
+        FE958AB7DAADBE976F34133C325C1745CEE24C689D03B1238DCC48E30769EFC6
+        3DC5C2BDD7DB225279D843E483F2E3F97B9A00FA9ED2E61BBB749ED6549A17FB
+        AE8720F383FAF1589E39D4AE34CD05DED0959A57110901FB990493F90C7E35C9
+        7C21BD93CEBAB42C4C52C7F68DA5B3B586D53F9823F215E8D7B6905F5AC96D75
+        189217C6E5248CF39EDF4A00F9DEF639A492462DB998E493D49F7AD1D4F4FD62
+        DA661E1F96E174D6DA4496E15CB2E31F7994AE4B6491804703240E3B4D53C017
+        313BBE9F225CC63911BE15CF3D3D0F1DF23E958EFE1BD7EC583C769711BE3AC2
+        C09C7FC04D00713E2DD77C51A6C52A6AF73A8DCACF16D865DD1A847EA158A052
+        BB86E3923A8C0E4D78EDBD9789AFF548A6B8D63538D477174E4807AF7E7A0E3A
+        715F495CF85F5DD76D5EDAEEDEFA58587CCB3B951C1E3EF11C838228D1BC2234
+        D26DB5A8A34B951BD5D951B727404E0E01C83D07A50063F8720D5350D42CAD7C
+        4F33496254297B8550D22AB12AA718FEFE09EE060E79AE8BFB4623F11F44D334
+        228D246E4DCADA30222B7038DE4719247FBD807B735B369E0FB8BCBF8DAE1A58
+        EDE338323121BA7F08F5F7E9D7E95DC69DA558E9BBCD8DAC50B392599472738E
+        FD7B0A00BB4514500145145001451450015C87C4CF14C9E18D1627B5D9F6DBA9
+        44311719C6481C2FF13125540F561D7A1EBEBCFF00E2EDA492DB693796F1319A
+        CE76904DB3708C63F9E4291F4A00E7EDBE1F788B5B956EB5FD412DDDD431F31B
+        CF954F752010A3EAAC47B559D6FE163595BC57DE16BE924D62DE759546A04347
+        245B595E2F902E33BB703C9CA819009AE962F1CD92C5109E7B0F38A8DD8BA550
+        5BBE073FCCD25E78EED21B669215826908F91639F7E4FBE071401E1AB2F8835E
+        91DF5EFECB4B386566B686D55F27B067663C90091C00393ED5E85F08FC34B671
+        DE7892ED51AFB530B1DB314F9A2B35E5541233F3B6E90F6394FEE8AE62DB4D1A
+        EEA16FA1C3FEAEE49FB514600C76E3FD61EA08CE44608E55A453D8D7B62C6A88
+        15142A28C2AA8C003D050055BE175E59FB0ADBF9855B99B3807076F03A8CE33C
+        F4A640B7C6F17CF16C2D8C7CAA02583E7D738C63DB35748C557BC8AE5DE2F2CB
+        2420E64DA9B8BAED230307239C1CFB63BE400656A763A82EB704B62EAF1905CC
+        5237CA180C671FF02E4E7230300F353496BA8CD144EF6EB1CCB341318D650C00
+        5951980638C9C2B63803E6C7AD5C8AD9512DA22EED8DDB44B9DE5723D4E4E381
+        CD69468140C13C7AD003A2D5A62F89F4DB98C678657460064F5C367A609C03D4
+        8E7192C3AEED8D98E9BA8165CE1151496C7A1DD8FCEB0ED23F147D89DAEA5D24
+        5E18815551234624DEF919C03B4AF9601C654EEFBDC56BC725DAA219A04672A0
+        B089F203770338C8F7E3E9401627D7ACE01FBE5BB53DC0B590E3F10B83F81A57
+        F1069693C313DDA2BCA18A6E5603E5655209C601CB0E0F270C470AD885267322
+        AB5BCCA0824B6530BC8183F367B93C7607BE0195D430C30047A1A00D4465750C
+        8C194F420E41A5AC2D3E2169ABC696F94865888685000A36E30D8C67BE3A81D2
+        B76800AA1ABDDADB5B37CC0123927B0ABB2B88E3676E8057927C51D7E5936E93
+        65B9AEAEBEF85EAA9E9F8D00705E35D626F106A523DBB816D11D916E190467E6
+        6C7A9AE934AD4AFF005DB2B6B692C6DE5B68240D2946207CA32A36F6F988E6B0
+        B4F8A7B38238D94796C039DD0A48B920F70738C027F0CD2E83A5259B4ED72D1C
+        CF29CF9AB2CD1B1031C302BB4F63D7AF3401D26A3AD91E20B2D4AFF4A9FCAB68
+        DA38989032EDD700F1D051A4EA5A53DFEB7A95C59B9370D801E3DF945419381C
+        024E7F4AAF75713EA9666DAF26925643FB85370BC3F4E8403D0FEB58F6715ED9
+        5C645AC64DBB98DA6F25A423072572A7F4F7A009EDDB433E0F1692EE8F53976B
+        190C459E36761C0238C01D7B55CBEB7F0FB6B3A5456F7490DAA46ED7277B00FB
+        700649E849CFA53226B6BCBB861C58461C85CCD03C601F720E0553BF3A647A84
+        96663B77543B5A682E08527D8609F6A0098E9F632DD6B862D50C70DBF16CA250
+        403B371C93D4668FEC695AC342316A01AE6F5D566570ACAA0A16253D7A56578B
+        750F0B5BBC36BA6BCE974F967690160473C7F5CFB5655BBD89855B739906591D
+        0EDC1C11C0DBC7048EBD0D006E5897B7F1C47A4CED0C96ED7488D205DBB94AA9
+        39C1E0E0E2BE8EB6458E08D1061154281E800AF95BC3391E27B176CEE6BA4258
+        9CEEE00CFE431F857D5717FAB5FA5007CFFF001298C3E3ED55D59E2DDE503246
+        CD1B101011F32907824E067B9F535C35F6BFA9694F11D1AFE659989F3BCD6376
+        48C71FEBB790393D2BAAF8A7B62F88DAB4F75049756FFBAD90A3851B82007703
+        D54F1EBC835CAEA3E2D9F4C9238E1B3B38C302551771C2820139C0C751401AB6
+        DE36F162C4633AE6EE84016B00DA303850A8383EE3BFD2AF41E26BDBA9CDAEBB
+        7B25E6236F29A68E30159412DF75541042E31CE3F138C28FC5B2DCC6D0DED846
+        77020B23FDDFA6E079150DB2E8DF695BC9EDCA000B64C2A79208E483CF53DBD7
+        DE8025BBD5ECD6E7CB9EC0471B4802EE8D91D98AE7F84F523D466AF88F4998B3
+        C3AAAC2FB76B0764665E3F03EB5B9A2F85749F189BA9E69AEE17050EE8098C4A
+        AC4E41C8E7818182304E4E7805FAC7C25D0A38516D6FEF6DF6379D7052D249CB
+        F18E3C9DA77640383B8E38C720D007350699A6C685DB57BCBA8908DC20208524
+        F7C02473EF59934D6F6FA834965E608D3743E516798B9E0839C918C64F1CFB77
+        17F5CD224D22DA067B9B54F3D82C16C52582E4285625DE17456550548CE4E4B2
+        FF007B359A2E9C3A92211B4F07CA4240EA4648CD004A905C9117956F313F287F
+        9481B7079E79F4E3DCD45A7585FC57D70CBA7DDB991304C7031279539E9EA3F3
+        ACB924912F65B72F2058CBAF049C9C818CFAE39FC38A4D2AF6733DC859DDBF73
+        BC1CEF0A78E4641F5F4E6803A086CEF66B82AD692C4A00C493831F3D4A95E383
+        C7B1E7D2B2EEF4EB879A5F32DAD2DA5F30FCF6EDB7231D780327EBF9F15622BA
+        B9849BE8B7F90A4BB140D2AB0C720283D718E40EFDCE6AAEA5737D3BACDA7998
+        EE660E92C78DBE84655783F8F4EB40107F63DC3A0C5C4AAE38C891987F3A9ACE
+        CAEEC6394CDB6E1C02D9248381D7939FC318F4351799AD15E62B7FA1247F8D4F
+        05DDF2C729D45634842E1C2291807FDBCE79E87006064E45007D5DE0039F0568
+        BCE716A8BF90C7F4ADFAE73E1D12DE08D20B7530FF00535D1D001451450023BA
+        C68CEEC151464B138007AD70BE27F1F5BDA6FB7D2712CC320CC47CABEE3D7F1E
+        38EF5C8F8CF51F166A3E22BFD2C5B31B48A7DB0790A7CB68CE30CC7B9C1E7D0E
+        40E95ADE1EF00DC8D935F05F37AFEF46429E7A2FE3D4E7A64628039D65D475B9
+        FED5792148A4E7CE946770E3EE8EADC1E3A0E319E29F75A246FA325B5BDDB7DB
+        6362C2E24438907242919F9792067E6E17B935EAD6BE1AB38DFCCB92F7327AB9
+        E3F2ABE34AB01D2D62FCA803C162B4F12E952A5D5848E920F94FD9A40777CDD5
+        D4E372900607B9CFA5749E00D7EDA6D73CDF11DFC7673C2A4C56F344205C9006
+        E3C051C01C0FAF6E7D54E9160463ECB1E2B8DF156B7E0ED2192DEFD96E183F30
+        4204A233C82C73C0C639E73CF4C5007756F776D730896DAE219A23FC71B865EB
+        8EA2892EEDE352CF3C6A075CB0AE13C2DA3786BC4FA5B4E34411468FB7E70396
+        C02DB5B00E01247E03E83A0B6F057872DBFD5E916A4FFB6BBFF9E68012E7C5DA
+        6F9BE469ACFA9DD9E90D9A9908E71F311C28E7A92051A6E957B7BA843AA6BC55
+        658C66DECA36DC901239663FC4FCE3D0738CF5ADDB6B782D61586D618E1897A2
+        46A1547E02A5A0028A28A0028A28A0028A28A002B92F89E8CDE1777552C23943
+        3719C0C11FCC8AEB6B1BC61653EA3E1BBCB5B48BCD9E40BB1320648707A9E3B5
+        0078B781632FE29D2369E44E09FA8FFEB57D055E2DF0C742D5A3F125A5D5D697
+        7505AC0CECEF3C5E56328E1701B04F38E838CF38EA7DA6800A28A2800A28A280
+        0A6C88B246C922ABA302ACAC32083D88A75140191E17D02D7C37A52E9D612DC3
+        DB2B975133862B9EA0600C02727EA4D67F8CBC1D65E25B078B70B4B92C184E88
+        0F7E430E339C9EE0F4FA574F4D92349576C88AEBD70C33401E237AE3C3F3DDE8
+        BAA1B8658A5DE924289891082464139032770C127248AE17579BED1705E4DE58
+        92D9273C7A7E9F957D1BA9784B43D4B06F6C16461D183BA9FA641071ED5453E1
+        E785D24F3174CF9F39DC6E25241F5FBD401C27843E1B69779A1DADEEB37F756D
+        7B2FEF04514D1A796B9F9739079C73DB19C6322B03C69A6D8E8BACB59D8DC3C9
+        0A460992691492C79EAAA001CE3A76F7AF643E0DD0F610B66CA7D7CE727F526A
+        197C11A43A1502E13DD24C7F4A00F9FCC8BD7CC871FF005D3FFAD4D2F11FF968
+        84FB115EE927C38D29FF00E5F7555F61703FF89A8D3E1A694872B7FAB0FF00B6
+        EBFF00C4D0079178767583558C34C1632C5770232A194AE4F3D06E06B63C516B
+        6B6D35C340CED35F3FDA1F2E0EC186C018FF0078F3CE71906BD12E3E1B69CD0B
+        F977DA834DB4F97E748ACA1B1C1236F4AE567F863AF33911DD699E5E4F591C12
+        3FEF8340187A6477B34AF1D8C12C8C4C61BC8491DF68652588C9C0F954671E83
+        B027DCB478A34B0B7758DD64312A334AAC24206783BBE6E096C67D6B8FF0F7C3
+        C8F4E8035C5E1374DCBF920AA8F607209FC7D0702BAEB7D34C51856BDBB723B9
+        94FF005CD0070FF1AF48B9BCD2AC752B54322D833F9C83AEC7DB93F41B707EB9
+        EC6BC5E695256D8818233EE62DC1CFF935F5535AC6460B4DF84CE3FAD73A3C01
+        E17126F1A4441B39FBEF8FCB38A00E4FE0CE9D73E75CEA522ECB6117D9D3FDB6
+        2558F7ED81EDF37B1AF54A65BC31DBC11C102048A350888BD1540C0029F40051
+        45140054620845C9B81147F68282332ED1B8A839DB9EB8C92715251400514514
+        00514514005145140051451400514514015AEEC2CEF71F6CB4B7B8C74F3630FF
+        00CC5655D783F40B920BE976E87FE98E62FF00D008ADEA280394B0F055A6933D
+        CCFA2DCDC5B3CE814A3ED91060E4632323A9EFFC852B697E234E52FB4E940ECD
+        03293F886AEAA8A00E2D93C5711E74FD3A651D4A4E413F811FD6A11A8EBC0EC7
+        F0F4E1B3FEB159597AFA6E07D6BBAA280382437F7DA8DB4975A7DC4661CFCC17
+        20023071824FA7A7415D1B5B5931877DC5E45B3AAB48EBBFE523E6FCC1E31C81
+        EE0ED51401931D8DB296D9A84E72738332B63DB906A43A7CC526C5F382C4F944
+        46BF202075FEF739F4E0E39C66B41E3493EFA2B7D466A336B0118F2907FBA31F
+        CA80289D2E7F2F8D426F339E4C69B7BE38C7D3BD27F65DC6F88FF694DB47DF1E
+        5A7CC78E9C703AFAF6E7839D016E8A30A641F491BFC69CB19518F31CFD71FE14
+        015AD74E86099A625A5988037C98246011C71C753D3D6AE514500727F103C4C9
+        E1EB4811AD65B87B90FB4A1C052B8EA7DF35E03797B77777F35DCFE6ADCCADBB
+        7838FA01F4E95F4C6BBA2586BB682DB5287CC8D5B7290C54A9F622B8FD43E14E
+        8D7313241757D6F9E721C360E73E9401E4BA7A6A33A295D442B15FF572C83B80
+        30727AE140FC6AF3FF006BD8E9E7529DA27B4DC19A43820E64CF6E79247E95DC
+        5D7C26700FD97555638C05961C03EC704FF2AC8BBF861AE46A761B4B803A2A4A
+        549FCC01401C7B789E42C236282431C801E79672096EBD7A5179AA3DDDD452B0
+        58A350014889076807183EBCF5AEAACBE15EAF750BBDC47696B22B90B1CB26EC
+        8F5CA86AAF79F0BF5F807EEADE09FF00EB8CE07FE85B6803057510D1A462F6E9
+        70C4859635900240FF006B3DA9F0C0F73728F14FA3DC8C636C8C636FC4114B7B
+        E08D7AD72F2E9B78A8A3731550E063B9C66B291A14B3923FB223DCB86C5C79A7
+        838C0F97A7140127882C12D112E069F6D7178F227D9D6D242E0618162C3AEDDA
+        187D4D58B9D5007DAFA55A6001C34254F419E9EF9AE3EDAD357D3F5D9751B3D4
+        4AC92288C0201289D485E7DABAF5F14EA49BD5DD65423004B1038FAE314015B4
+        EB88A6F13E9AF14096E3CE5051492339EBCD7D4B0FDC1F4AF95ECEF16EBC45A7
+        DC4C96F028993CC30A6C5033CB115F51D85C43776914F6D22C90C8A195D4E411
+        401F3DFC528B1F10355FB54D3C10C86358DE35079289DB6927923A74C37B6797
+        FF0084734DBF646935F87CA50C183BA87C9C1C1507E9D31DFD2BEA7D4748D375
+        3D9FDA5A7D9DE6CCEDFB442B26DCFA641A863F0F68B12858F48D3914740B6C80
+        7F2A00F9826D37C3D6A5C35FA5F4FB7216DCB10727A150037E5E955E1D65ACEE
+        20920D2E37854738689703FDA3236E15F5449A0E8F2295934AD3DC1EA1AD90FF
+        004A83FE115F0F7FD00749FF00C038FF00C2803E7497C517F6B348BA35D3DBA3
+        10EF24623662C3908432B05C13CF1DCF1DEB3354F106AF7ED17DBF58D4A68E38
+        CA34626F2239411D5C44137707BF1EDDEBEA14F0D6849F7345D317E96918FE94
+        FF00F847B45FFA0469DFF80C9FE1401F21D8C33D9C3E55BA5B8893E6546B7057
+        763EF600E09EE71EFDEA7792F02EED968C073816BCFEA6BEB98F46D2E3FF0057
+        A6D92FFBB028FE9532D859AFDDB4B71F48D7FC2803E488F52111612D9E9D2287
+        3F7ED233F374C9E33922A1B9D7E09C799E66911B720816B1A10467E9FE735F5F
+        FD8AD7FE7DA0FF00BF628FB15AFF00CFB41FF7EC5007C929E29B46B7911E5824
+        918945292A28E547F0E4B0E723A1F5AA71DE4F29DD0DBB4EB8FF00965267FF00
+        42DB5F617D8ED7FE7DA1FF00BF6290D8DA1EB6B01FFB662803E48B36BF99371D
+        26F53B8DE10FE1C31AB36F6DA95D89AD5345BB8CDC46D1EF75047279202EECB6
+        3381C0E7F0AFAB3FB3ECBFE7CEDFFEFD2FF85034EB10722CEDB3EBE52FF85006
+        6F81AD66B2F08E956F729E5CC900DE9FDD3D71D074ADCA4550AA15400A3A0029
+        6800A28A28011982A96620281924F6AC1D4FC5FA2E9CC524BC59A518FDDC037B
+        73DF8AE3BE21E91AECDE2037315D8974C75531DB4B232C6AC060AED5049CF5CF
+        7CE3B567C1E0FD57544855961B5800638B6B658B049CFDE39C81F41401ABA87C
+        49949FF41B38913905A662DF43C74FA1AC48FC5BE22D5F745697333E4F0D0C4A
+        ABD402378F4CE7824F1D3D2D59E85E11B2D456DF56D5A2B8BBC72AEE5C1C0DDD
+        7EEE71E9DF8EBC574B6DE25D22D50C7E1ED36E2F0AB08CC8B194456C7466232B
+        FF007CE28021D3BC33A86A96710F105DDCCEAAB8F24CCEB19E49048072CC0938
+        6E38C0C715AABE0AF0F41B27B9B2B56F2403BDD140007724F5FA9359FF00DA5E
+        27D51B16E20D3E3C9E2341348BE99272A41F5183FCA962F04B5E3AC9AD5DDC5D
+        38031E6CACDB4F72BCF00FA64D004DADF8EB41D020548185CE070B6803203C60
+        16E9CFB66B3B4BF19EBBAF5CDBFF0064684915BB9C3C97126401C7CDDB0073D3
+        3F4ED5D4DAF8674AB7C62D22639DDCA8033EB81DEB5E3448D42C6AAAA3B28C0A
+        0075145140051451400515CCF8AFC41FD9AB2C71C8D0A4281E79D63F319739DA
+        88BD0B90A4F3C2A8C9E08AB8BA0C61C4E350D5BCFF00BDBCDE3919FF00AE64EC
+        FC36E3DA8036A8AE6BC2BAF9D404514F20944C85EDE72BB1A4031B91D3F86419
+        070382391DC08FC73AD5E68FF62FB1322F9BBF76E5CF4DB8FE66803A9A2B82BF
+        D5FC51A65BA5D5E476FE4120670A473EB839ADF3E24862F0CC5AB4F190641B56
+        207EF3E48C67B0E09CFA5006F515C05BEA9E2CBFB76BDB4893ECDC90AA8BC81E
+        80FCC6B73C3FE278F51D2EEAE2E23D935AA192544EEA01395CFD2803A3A2B84B
+        2D5BC4BADF9F73A60862B746DA10853CF5C648E4E31E9D6B77C3DAADECF6776F
+        ACDB1B56B5FBD2152030C649C7B0C1E3D68037A8AE0C6BFAEEB77937F60C223B
+        78FF00BC1738ED92DC64FA0FFEBD5AB4D7B584B0D4D2FECF65C5A46C44FB7E5D
+        DC707B13820F1DA803B2A2B03C17AA5CEADA5CB3DE32B48B3141B571C6D53FD4
+        D54D035ABCBDF14EA3633B21B783CCD802E0FCAE00E7E86803AAA2B87F883AD6
+        A7A46AFA1AE9CC648E691BCCB64C069718E33D8609AC682FBC550F88E6D6E4B0
+        B87D3650556D3ED8A517803819C6723D3B9A00F51A2B83F006BBA95D687ACDEE
+        A92F9C6D646D913603A6D04953C7E1F8574FE1ED5FFB6341835210F95E6A96D9
+        BB38C13DFF000A00D5A2B07C23E228FC41A4A5E346B6CCF2346B1B3824E31D3F
+        3ADCF363F37CBDEBE6633B73CE3E9400EA2A186EEDA791E386E219244FBCA8E0
+        95FA814925EDAC77296D25CC0970E32B134803B0F61D68027A2A28EE609582C7
+        346EC46405604D2BDC429BF7CD1AF9632F960368F53E940125155EDAFAD2EA16
+        9AD6EA09A25E19E390328FA9141BEB4593CB3750093687DA6419DA7A1C7A7BD0
+        058A2A24B881E7685268DA6519640C0B0FA8A8E5D42CA1B95B696EEDD2E1BEEC
+        4D2A873F419CD0059A2B81F88B766E6DF4D88DBBC7E4EB102032AE55F87E71DC
+        7F422B44E96DD934DFFC02FF00ECE803ADA2B80D5AD353B5B7696C74ED22F0A8
+        C98FC928C7E9C907F3AE2A2F1A5ECCCEB17872C9D90E1C2C0C4A9F7F4A00F74A
+        2BC6F48F125DDE6A76F6F75E1FB6B686570865FB2B1D99E84F4E338AE9BC48B2
+        691A35C5F4367A75C1840631FD9B6F19C139DC7A75A00EFA8AE3ACF4F926B486
+        49EDF4E8A5745678FECB9DA48E4677738ACDF0E1B8D552F4DD5869B6CD6D70D6
+        F816FBC315EA47238E6803D0E8AF3596F4FF00C25D1E896D65A74B88BCD9A6FB
+        363CAE338C679FE1EFFC55BAFA63046D9169A5F1C0369819FF00BEA803ADA2BC
+        7BC37E239757D7D74C9B49D36D9FE70CDE4EE2A541C8C647A56F78AE53A0E8D2
+        5F2DA69D395655D86DB6E7271D771A00F43A2B89D36DD2F6CADE754D3034B12C
+        8505AE76E4038FBDEF565F4E541975D3147A9B4C7FECD401D6D15E59E0620FC5
+        6D6F688805B42A3CA5DABC18870327D2BD465758A3791CE154124D003A8AE2C4
+        F7BA95E91148FB9B24286C002ACFF65EABFDF6FF00BFB401D5D15810D85FC7A7
+        4EBB98DC48C00CC9F7547BD635E0BCB394473CCE1C8CE0484D00771457210586
+        A73C292C6EFB1864665C54BABCB2DA5ADADA095FCD037C8431CE4F6CFE7401D5
+        5158D66EF63A0B4F333348CBBC6E39E4F41FCAB3FC3626B8BE32492C8C918C9C
+        B1C127A7F5A00EA68AC9F125D9B7B2091B1592438041E401D6A0F0C893ECF35C
+        CF23953C0DCD9C01D4FF009F4A00DDA2B8E8269F50D5C0592408EF9C06230BFF
+        00EAAE9F5191E2B4668C95E402C06768EE6802D534BA0382CA0FB9ACED1E595B
+        7ABB975001E4EEDA7D33DFD6ABEB17F6D67338B89D236232BB980CF1401B3E62
+        7F7D7F3A3CC4FEFAFE75F3BEAFF1075C8755BB8ADA780C2B2111FC99C8FCEAA7
+        FC2C5F11AE03CB129EDBA2C7F5A00FA4FCC4FEFAFE747989FDF5FCEBE6CFF858
+        DE22FF009ED0FF00DFAFFEBD1FF0B17C45FF003DA0FF00BF7FFD7A00FA4FCC4F
+        EFAFE747989FDF5FCEBE6C1F11BC447FE5B41F8C7FFD7A3FE1637887BCD07FDF
+        BFFEBD007D245E32082CA41F7158779E16F0EDDA91369765CF531A043F9AE2BC
+        27FE16378879C4D07FDFAFFEBD1FF0B17C43FF003DA1FF00BF5FFD7A00F5FB9F
+        86FE1599B72DABC2D8C652E1BFA9359571F09F44662D6F7F7711F76461FC8579
+        AFFC2C5F117FCF683FEFDFFF005E8FF858DE21FF009ED0FF00DFAFFEBD0076F7
+        1F08F93F66D6D3AFFCB487FC1ABD3F46B4874CD2AD2CA391596089630D903381
+        D6BE793F117C443ACD07FDFBFF00EBD35FE22F88F69DB3404FFD72FF00EBD007
+        D2A2442701D73F5A7572DE1ED5EDAF61B41F6989EE1C025430CE7E949E296F14
+        1BF5FEC208968B18DCC4C7F33773F374ED401D5515E59A36B3E30D65656D3EE1
+        6511603E5225C67A751ED5BF3F886FB40D1513596173AD4EC4C508550157A027
+        6F5191F539C76C800ED28AF3E966F1DCEA6E52348232BBC44AB1E40C74C365B3
+        EC4E6B77C13E237D7ED27FB4C4B15CDB91BF67DC20E7046791D0FE5EFC007494
+        5799DB6B9E28D72FAF5B43910DB44FC2ED8C6D524EDE5864F02AD69FE21D7F4D
+        F1059E9DAFAC720BA640385DCA1895041538EBD739E9401E8545707E23BAF175
+        ADC5F5D5B14874E88929C447E41DF9E79EBF8FE159FA5EA1E35D52D05CD94AAF
+        092543148572475EA2803D328AE0F50D6B578759D13488AE7174E919BC6DB1B1
+        DCC7E61803036804F1D411F53D57896FCE99A0DEDDA960F1C6421001C31E14F3
+        EE450069515C3D8EBDA945E03BAD56FA656BA7722DDB628E090A381C70771E7D
+        2B6FC2536A17BE1C8EE3519F7DCDC6E6425026C5E8BD3AF4CE7DE803556F6D1A
+        E8DB2DCC06E47FCB2120DFF975AB15C25BE9EE2FE209A74D1DC1022C980010B0
+        11E26DE170C014738DC7390303269DE3DB1D38C52CD369B6124F24A1E5B99E11
+        90888A4E5F6938E064672231230CECC50077345719E0AD2F4B10ADD5BE93636F
+        3EE12C7247082541E3E572492382BB860360B018615E4BF126E5B4FF008A9797
+        D0A46D35B4F04C81C6416544233ED91401F46100E3201C1C8CD65789B4A9359D
+        30DAC57B2DA7CDB99A3246F182369C1E9920FE15E31F0E7C0F67E2FD1B58BAD4
+        6E08B87956247C0774219243273CE4E36E73D37F5AE2351DD25F4D3D8B4B35A5
+        AB2C515CAA15DA8BC46C7FBA4819EDCE6803D9ACFE1BDCC17018DEDB88FBA04C
+        861EF95E6BBEB5D26DA155F3019DC01F34873FA74AF07F10E8B676BF0DAD756B
+        6B8339D5AFA2965531ED11C8B1CE194773862C33ED5CD791A6D968F61A8E9DAA
+        489AD894F996E91321840DD8759381D00E073F37B5007D58AA154050001D852D
+        7CFDE28D775BF10DC685E18D41DED2671047768C082F2BB02ACE3BE14A36DC0C
+        313E831BDA7F823C45E11F16D9CFA03CD7BA6B18CDD309122DCB92194A97F9B0
+        0920F62DC74CD007B1D15F3B78075CD3FC35E38D52F751DC913A4B1031A6E258
+        C8A7FA1AE6B4248D6CBC42022E0E9D8E9D7FD2ADE803EAEA335F2A68761E1DB8
+        B476D66FEE2D2E04842A436A240570307391CE73C7B55BF1F69567A6DC6836F6
+        4FF68B53A4C734523C61599649A6906476FBF401F4FBBAC68CEECAA8A32589C0
+        03D6A2FB55BFFCF78BFEFB15F37E96068BE31B187C0FA84BA98B82819042D089
+        393BA3707AAED0496C60039ED9AFA20691A7F7B2B663EAD12B13F52464D00711
+        E276581B5A372DD0DC8C9EC64B55119FA615D01F5E2B63FB3F491167FE11EBCC
+        81D3CBF6FF007AB575ED1135356923F256E0A794DE6C7BE399339D922F048EA4
+        73952723B82BF68D6B1E58D36CF763EFFDB1B67FE8BCFE9401C5F83FCB9A7D01
+        ADA32143C458F50C52C191D87A805E3427D455FF008A5FF30CFF00B6BFFB2574
+        FA0E8E9A64419FCA6B8D9E58F2A3F2E3893AEC8D79C2E793C924F24F402B78A7
+        C3DFDBDF65FF004AF23C9DDFF2CF76EDD8F71E9401C9F88F47D5EDF481717BA9
+        7DA6DD0A9F2CBB719E07078EF55F58BAFB778434E786110C56F3B40C8A720B6D
+        0411DFA66B765F044F3AAACFAD4D2A039DAD113FCDABA08340B18746934C5463
+        6D272E49F998F1CE7D781F95003FC3B346FE1ED3DD5D4A2DBA02D9E0155C1FC8
+        835C678405BCDE20D66721469AD148199F850ACE3009EDC03F955C3E059D77C3
+        16AACB6AE72CBE59E48E991BB07EB5D2695A159E9DA63D92A798928C4CCFD64F
+        AFA0F41DBF5A00E622F0FCAA0EA3E12D4898CE7F76C71923F87D0FD187A5241A
+        D5D6B9E16D56DA603ED704618B2F1BD41CB71EB807F3AB32F82648AE243A6EA7
+        2DBC320DACA41CEDEE3208C8F635B9E1DD02DF45B496256334937FAD76180C06
+        7031D8727F3A00C9F869221D1AE23523CC59CB30F62A307F43F956B789A68A5F
+        0FEA6B1C88ED1C655C2B0254FA1F4AC4BCF04EDBB79F4ABE7B50D91B307E507A
+        80C0E71ED56F4FF07C36761790FDA59EE2E6331198A602A9E785CFB7AD0072BE
+        18D1F57BFB2926D32FFECB1090A32F9AE9920039C28F7157FC071CB0F8B3508A
+        E1FCC9923915DF24EE61228272793CD75BE19D1FFB12C24B6F3FCFDD299376CD
+        B8C80318C9F4AAFA4F87BFB3F5DBCD4BED5E67DA37FEEFCBC6DDCC1BAE79E9E9
+        401C8F8DD89F891A7239CC6BA64CCA0F4DDB26FF00015CB336B3FF000AE34D12
+        25A7F63FDA7E4604F9B9F31BAF6C6735E9FE32F0DCBACC96779613C706A3684E
+        C6917723A9EAAC3D3FFAFEB580744F17369F1E9E6DFC3A2CD1B72C7E51DAA739
+        C85C633924FE34015F48C26B9F10121E22D85881D3761F3FA9351F83B40D56EB
+        C256B736DE23BAB58591888122055793C6735D67857C2EBA4E997B15F4A2EAEE
+        FDD9EEA5031BB39E07E67F335B5A6E9D6DA6E9F1D959C652D901555C93807DCD
+        0078CF84D82B78359880BF6EB8193FF00AE9B5E8D6E3C7BAD426F23B4DFA56CF
+        3DDF6AC6491D4F6AEADBC1FA2B6909A6FD9316A9219506F3B958F70DD453ACBC
+        25A2D93BBC3660B4909824DEC5B7A1EA0E4F3401C368D147A15EE82752D16D07
+        98CB0DB6A36173C48C4601603EF03EA78E699E11D334CD63C35AD6A7AD6D6D4F
+        CD91A499DB6BC040C823D39FE58AEDF4DF05E89A75EC7756F6CE6488E63124AC
+        CA87D81351DFF82345BABC9EECDA913CB96650E446CDEA57A75A00E07C3ABFD9
+        7A378575F4F9563B892D6E0F631BBB609FA64D493C96D7D05C5FDDDA4D772EB7
+        A862D2059BCA568E3E177B63A73D3D85771E1EF0B241E0D8F43D65639D773170
+        8C707E7DC30783E9576FFC2BA4DF6936DA74D6C45BDB7FA9DAE4327D0F5A00F3
+        0BA8A5B2D7B5A80D9DAE9E1F4794BDBDAC8593A1C13EFF00E7BD686B3A4DA5A7
+        C268AF123DD79711406499B962372E173E806001ED5DADAF81F43B5691A2B793
+        74913432334AC4BAB0C1CF35A575A0E9F75A247A4CF096B1455558F71180BD39
+        EBDA8038CD7F4DB2D1F58F09DCD9C4229E49F134C0FCF20DA3258F72727AD733
+        AB2DBDFF0087B56D4F4FD162FB2BCC5BEDD7573BA727701955C71C9E99AF5EBD
+        D26CEF65B292E622EF66FBE13B88DA7FAF4AC27F87FE1E7965736B2059092625
+        9582027B81DA80313C4F23CBE0BF05C9231691EEEC9998F524C6726B67C582E5
+        BC397E2C3CEFB518FF0077E4E77E723A639AA7F112DEDF4FD0FC396E8E22B5B7
+        D4ADD033B7088AAFD49F402ADFFC245A47FD05B4DFFC085FF1A0083C103541E1
+        F886B7E67DAB71C79BF7F6F6DDEFD7AD53F0B7D9CF8AFC53F64DBE5F9B0EEDBD
+        37ED6DDFF8F67F1A76B1ABC179034563E26D2AC830C170CAEE3E877803F2ACCF
+        0745A4F8705E67C47A75D1B92A49322AE319FF0068E7AD0058F1D6AB35A697A9
+        A45A9E9D9D9B3ECBB7F7C03601E77F5E73F76B7746BA875FF0D5BCD32878EEA1
+        DB2AE7BFDD61F9E6A86ABA8687A858DDC0DAA692AF3C4D1F99E6A12B918CF5ED
+        543C232699E1ED3A4B33E22D36E63321914991536E40C8FBC7D2803AE6B9892E
+        E2B566C4D22348AB8EA14A83FF00A10A76D8ADD2470151726473FCCD7217D369
+        F73E26B2D597C4BA746B6C8505BF98A43039DDCEEEF91DBB0ABFACEADA66A1A5
+        5D59C7AEE9B034E863F304CADB41EBC6E1DB340147E1EC2D7926A7AFCE1B7DFC
+        CC22DDD444A7007F4FF808AEAE36B837932C91A2DB055F2D836598F3BB23B0E9
+        8FC6B134DD5748D3F4FB7B48357D2C470A041FBE5E703AF5AC7B1963B7D71AFA
+        5F1A5ACF033BB7D95A51B006CE00F9FB6476ED4008DA4FD83E295B5DC6B882F2
+        291F3DB785C30FE47F1AD6F8876373A8F8666B7B285A698C88422F5C03CD4D36
+        B3A44B3412BEAFA56F858B21F3978CA907BFBD4DFF00090E99FF00418D2FFEFF
+        00AFF8D0070FF0C749BED2BC4D3AEA36CF034966C543F7C3A56BFC61FF00916A
+        D7FEBED7FF00407AD56D534B6D5E3BEFEDBD2F290343B3CE5E77329CE777FB3F
+        AD55F115D699AC5BDB4635ED26268271302CEAE090AC318DC3FBD9FC280397F8
+        1FFF002365DFFD793FFE8C8EBD9355B792EAC2586160AEC3BF7E7A57977C3486
+        383E23EAB1C1750DDC62CC91342004625A2271827B923AD77DAAC3AACD78CD6B
+        BD210005DB2019F7EB4019A9A36A31B651369F50E07F5AA92497705C18DA6904
+        AA7180E4F35A5F64D6FF00BF2FFDFE1FE34FD3347BA17E935E200AA77925812C
+        7FFD7401D1C5B8429E691BC28DC7DFBD71770CDA96AE76FF00CB47DABEC3A7F2
+        AEBB52133594AB6CBBA561B40C81D6B1F41D2A7B6BB335D46176AE1790793F4A
+        00DF5558E30A385518FA015C69CEA9ACFF00B323FE4A3FFAC2BAAD51667B1952
+        D9774AE368E40C03D6B33C3FA64D6B34935CA056C6D51907EBD28023F15CE163
+        82D9381F7881E9D07F5AA16DA2DE4D024B1945571900B106AD6A1A65EDEEA6D2
+        345888B000EE1C2FE75D1B031C0444B92ABF2AFF0021401C1CF1491DCB42C43B
+        AB6DE0E79AE975561A7E8696E87E66023FF13FE7D6A9E97A45D2EA2935DC7855
+        25C9DC0E4FE153F882CAF2F6E53C98B7448BC1DC0649EBDE8023F09DB7335CB0
+        FF00617FAFF4AE8EB908F4BD5635DB1ABAAFA2CA00FE753DBE9DAA99E31334AB
+        1EE1B8F9B9E3F3A00E9D5428C28007A0AF10F8F801D4AC7F1FFD0457B857887C
+        7A04EA56380C7AF419EC2802B7C20D174EBE82E6EAF2349AE53858DF071827B7
+        BD6EF8BEDF4D3A4CC6FF004736F2A728F1807F90AE53E181D30BCC2E2F5ECAFC
+        FDD65603775C0AF41D5B58B4D2BC3B751EA9A8C77723290A33CB7B50053F064F
+        E1CF11C3225A69B10307CAE5907271F4ACA99344D7FC490E9763A7AC6D6CFBE6
+        60A002148E3A566FC17BDB6B37D4CDD4C9089252CA18F6C0AD9F054FA6D85E6B
+        5A95C5CC41A4958AF3CED19E94011FC4FF000FD8BF8664BAD26DE2492DDB04A2
+        8F5C1ABDE0FF000F699A9F822DFCEB588C92C43F78546738F5A9F4BD77C3DAA6
+        99A859DB4EA8ADB998391CB1CFF5AA969A9DAE91E0330C1771F9F6C00400F271
+        8A008F4BF0BDB69FE11D4A1BCB58E4B9872048CA32781CE6A9FC41D26C2D7C11
+        0CF6F6D124BB946E5500D6FB789F4FD5BC1934E678E39A483E68C9E41F4A4D5A
+        2D2BC41E1A82C67D46389782486C1E28038BF839A75A5FDC5F0BC823982E36EF
+        00E38AEB75C5B1B1B6BA63E1C1E5C60E251B31F5AADE0BB2D27C33AADC4506A2
+        92472A83B99B3838AB7AE471DF5BDD2B788C881C13E506E3E9D280337C3BA769
+        3E2FF071486DA18AF5576B32A8041E39AA9E3FB6D2BC37E18874F86DA16BE953
+        607DA323DEB13E115E47A6F882EE292E163B6D800C9E1B93599F132F45EF8AEE
+        1D2612C29C210780302801FF0009801E3DB2E39D9FFB3AD7BE78DAF3EC5E18BF
+        705773A794A1BBEE3B4E3DF049FC2BC13E13A91E3BB2CAB01B7AE38FBEB5EE1E
+        3AD1F50D6ED2DADAC1A158959A493CC623240C281C7BB50027C38B1367E198A4
+        7043DCB998E57071D07E1819FC6B0F450357F8957F2DE65BEC7E61894F201460
+        8383F5CF1DF9AEFECEDD2D2D20B68B3E5C28B1AE4E4E00C0FE55C66B5E18D520
+        D726D5BC3972914B2E4BC64E0927EF7504104F3CF7FC2803AED52FA2D374EB8B
+        C9CFEEE152C47A9EC3F13815E6DE1779B4BF076BBAA32E05C6D862E3073CAEE1
+        ED97FF00C74D6B2F85F5DD6E443E24D4B16E841F26223271EC0050704F3C9AD4
+        F1678766D4345B3D37484B78208640D8762A0000818C039FBC4927F5CD00725E
+        154F14D9E9A1B47B3436D3B79819F664F6EE471C5743A0787352B8D69759F11C
+        8A6E13FD5C2083B48E9D380075C0FC6BAEB0B64B2B282DA2036428106063A0A9
+        E8038DF8A57DF67D062B55601EEA5195C7545E4F3F5D9F9D743E1CB13A6E8765
+        68C30F1C6378F463CB7EA4D637893C3977ACF8874FB96961FECFB70BBA2676DC
+        4EECB60018E46075ED5D550079D7850FF6C78FF52D4BEFC50EEF2DC2E07F713F
+        3506AEFC54BE09A5DB5846EDE74F2876453D5173D7F1231F4F6AA7FF0008BEBF
+        A25ECEFE1DBB4304C7F88A8200E818118279EA3DFA6715A3A37852F24D522D53
+        C45786E6EA3219235390A472327D89270063340191E3A8E4B6D3342D02DF6B4C
+        55772271B9B8507F1258F35E89656E9696705B45F7218D635FA018AE3BC4DE19
+        D6753F10AEA367716712C3B3C8DECDB976F3923691D7356B4FD3FC5A97D035EE
+        AB6925B2B8322228CB2E7903E41401D6D656AF64F7D6B7502ABC729612413A80
+        7CB9028DAF8C8CE08E41E08C83C1AD5ACFBA91D6760AEC071C03ED4015BC35A6
+        B693A54168EACF3F0D34DB5143BF1D02F450005518E15547415E6DE29F036ADA
+        C7C497BE7D3BCED1A69E1F35FCE45CC61503F1B83763D39F4AF4DF3A4FEFB7E7
+        4BE749FDF6FCE803C86DFC19E32F0DEA1ABC1A0DB8B8B1BB89EDFCCFB42A8646
+        E8D82CA43A83D71C1CE323AB34AF85DAF3F87F506B9BB9ECAE0E71A7A1565BAD
+        A0326E61205FBD9037743CD7B079B27F7DBF3A3CD93FBEDF9D0078FF00FC219E
+        2C93C0EDA34BA665E2D412EA206E633F298E4561F7B0003B4E3D58D5AD53E1D6
+        A12F80F468AD74A886BB0CD20B80AF1AB323331059B386C6131C9233F5AF56F3
+        64FEFB7E7479D27F7DBF3A00F2CD67C07E209ECB41D534E8638757B28238A581
+        9D030789B08E1B254F00753D00EBC8125A7853C57E25F1958EABE29B782D6DED
+        8A123E421911B76C0AA49E493C93DCFA015EA1E6C9FDF6FCE8F364FF009E8DF9
+        D0079A781BC077B0F8B750B9F1268D6F2E9D2249E5FDA3CA997797520EDC9C1C
+        679C5739A5FC3DF14416FAC24BA661AE2CFCA8FF007F17CCDE7C2F8FBDC7CA8C
+        7F0FA57B779D27FCF46FCE8F364FF9E8DF9D0078E687E15F16E9368F01F0868B
+        7E19CBF997CB0CAE380300F99D38E9EE69DE31F0778B35FB8D32EBFB16DE2922
+        B15B7786DE5892388ACB2ED5505FA6C2878E39FC2BD87CD93FBEDF9D1E6C9FF3
+        D1BF3A00F33F17F817518FC7167A9F86B498C58C6619996078E30B22B7385660
+        07014F1C67DF35EC1597E749FF003D1BF3AD3A005A28A2800A28A2800A28A280
+        0A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A2800A28A280
+        0A28A2800A28A2800A28A280380F8D5FF22ADAFF00D7EA7FE80F5E2B45140051
+        4514005145140051451400514514005145140051451401E81F057FE46ABAFF00
+        AF27FF00D0E3AF69A28A0028A28A0028A28A0028A28A0028A28A0028A28A0028
+        A28A002B85F1D7FC7E0FF74FF2A28A00F03BBFF90E4FFF005D0D26ADD07D68A2
+        8021B5FF0058DF4A7FFCB17FC68A28022D3FEF3D4B27FA91FEF514500321FF00
+        51254F1FFAB1F5A28A004FF96C7E9522FDD3F8D1450052B4FF008F814973D5A8
+        A2803DABC09FF210B1FF00747F315EAF45140051451400514514005145140051
+        4514005145140051451400514514005145140051451400514514005145140051
+        4514005145140051451401FFD9}
+      Stretch = True
+    end
+    object xrExpressionMemo6: TxrExpressionMemo
+      Left = 90
+      Top = 109
+      Width = 624
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        42.333333333333330000
+        238.125000000000000000
+        288.395833333333300000
+        1651.000000000000000000)
+      Transparent = True
+      RemoveBlankLines = False
+      Alignment = taRightJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        
+          #1056#1072#1093#1091#1085#1086#1082'-'#1092#1072#1082#1090#1091#1088#1072' '#1076'i'#1081'c'#1085#1080#1081' '#1076#1086' {FORMATDATETIME('#39'dd.mm.yyyy'#39',qrJrnl.D' +
+          'ATE_COMMIT+1)} '#1088'.')
+      ParentFont = False
+      WordWrap = True
+      FontSize = 10
+    end
+  end
+  object DetailBand1: TxrBand
+    Left = 38
+    Top = 273
+    Width = 718
+    Height = 28
+    Frame.Color = clBlack
+    Frame.Top = False
+    Frame.Bottom = False
+    Frame.Left = False
+    Frame.Right = False
+    Transparent = False
+    Color = clWhite
+    Font.Charset = RUSSIAN_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -8
+    Font.Name = 'Verdana'
+    Font.Style = []
+    ParentFont = False
+    AlignToBottom = False
+    ForceNewColumn = False
+    ForceNewPage = False
+    Size.Values = (
+      74.083333333333330000
+      1899.708333333333000000)
+    BandType = rbDetail
+    object xrSysData1: TxrSysData
+      Left = 0
+      Top = 0
+      Width = 28
+      Height = 28
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = True
+      Frame.Right = True
+      Size.Values = (
+        74.083333333333330000
+        0.000000000000000000
+        0.000000000000000000
+        74.083333333333330000)
+      Transparent = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      Color = clWhite
+      Data = xrDetailNo
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      Layout = tlTop
+      Indent = 0
+      ParentFont = False
+      FontSize = 7
+    end
+    object xrExpression6: TxrExpression
+      Left = 28
+      Top = 0
+      Width = 48
+      Height = 28
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        74.083333333333330000
+        74.083333333333330000
+        0.000000000000000000
+        127.000000000000000000)
+      Transparent = True
+      Alignment = taRightJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      ResetAfterPrint = False
+      WordWrap = True
+      Expression = 'qrDoc.TMC_ID'
+      Mask = '# ### ##0 '
+      FontSize = 6
+    end
+    object xrExpression7: TxrExpression
+      Left = 76
+      Top = 0
+      Width = 328
+      Height = 28
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        74.083333333333330000
+        201.083333333333300000
+        0.000000000000000000
+        867.833333333333300000)
+      Transparent = True
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -8
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      ResetAfterPrint = False
+      WordWrap = True
+      Expression = 'qrDoc.TMC_NAME'
+      FontSize = 6
+    end
+    object xrExpression8: TxrExpression
+      Left = 404
+      Top = 0
+      Width = 104
+      Height = 28
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        74.083333333333330000
+        1068.916666666667000000
+        0.000000000000000000
+        275.166666666666700000)
+      Transparent = True
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      ResetAfterPrint = False
+      WordWrap = True
+      Expression = 'qrDoc.TMC_ARTICLE'
+      FontSize = 6
+    end
+    object xrExpression12: TxrExpression
+      Left = 508
+      Top = 0
+      Width = 24
+      Height = 28
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        74.083333333333330000
+        1344.083333333333000000
+        0.000000000000000000
+        63.500000000000000000)
+      Transparent = True
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      ResetAfterPrint = False
+      WordWrap = True
+      Expression = 'qrDoc.TMC_EDIZM_SHORT'
+      FontSize = 6
+    end
+    object xrExpression13: TxrExpression
+      Left = 532
+      Top = 0
+      Width = 72
+      Height = 14
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        1407.583333333333000000
+        0.000000000000000000
+        190.500000000000000000)
+      Transparent = True
+      Alignment = taRightJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -8
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      ResetAfterPrint = False
+      WordWrap = True
+      Expression = 'qrDoc.PRICEPRINT'
+      Mask = '# ### ### ##0.0000 '
+      FontSize = 6
+    end
+    object xrExpression14: TxrExpression
+      Left = 532
+      Top = 14
+      Width = 72
+      Height = 14
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        1407.583333333333000000
+        37.041666666666670000
+        190.500000000000000000)
+      Transparent = True
+      Alignment = taRightJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      ResetAfterPrint = False
+      WordWrap = True
+      Expression = 'qrDoc.NDPPRINT'
+      Mask = '# ### ### ##0.0000 '
+      FontSize = 6
+    end
+    object xrExpression15: TxrExpression
+      Left = 652
+      Top = 0
+      Width = 64
+      Height = 14
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        1725.083333333333000000
+        0.000000000000000000
+        169.333333333333300000)
+      Transparent = True
+      Alignment = taRightJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -8
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      ResetAfterPrint = False
+      WordWrap = True
+      Expression = 'qrDoc.TOTALPRINT'
+      Mask = '# ### ### ##0.00 '
+      FontSize = 6
+    end
+    object xrExpression16: TxrExpression
+      Left = 652
+      Top = 14
+      Width = 64
+      Height = 14
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        37.041666666666670000
+        1725.083333333333000000
+        37.041666666666670000
+        169.333333333333300000)
+      Transparent = True
+      Alignment = taRightJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      ResetAfterPrint = False
+      WordWrap = True
+      Expression = 'qrDoc.NDPTOTALPRINT'
+      Mask = '# ### ### ##0.00 '
+      FontSize = 6
+    end
+    object xrExpression17: TxrExpression
+      Left = 604
+      Top = 0
+      Width = 48
+      Height = 28
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = True
+      Frame.Left = False
+      Frame.Right = True
+      Size.Values = (
+        74.083333333333330000
+        1598.083333333333000000
+        0.000000000000000000
+        127.000000000000000000)
+      Transparent = True
+      Alignment = taRightJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Times New Roman'
+      Font.Style = []
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      ResetAfterPrint = False
+      WordWrap = True
+      Expression = 'qrDoc.QUANT'
+      Mask = '# ### ### ##0 '
+      FontSize = 8
+    end
+  end
+  object PageHeaderBand2: TxrBand
+    Left = 38
+    Top = 19
+    Width = 718
+    Height = 172
+    Frame.Color = clBlack
+    Frame.Top = False
+    Frame.Bottom = False
+    Frame.Left = False
+    Frame.Right = False
+    Transparent = False
+    Color = clWhite
+    AlignToBottom = False
+    ForceNewColumn = False
+    ForceNewPage = False
+    Size.Values = (
+      455.083333333333300000
+      1899.708333333333000000)
+    BandType = rbPageHeader
+    object xrExpressionMemo1: TxrExpressionMemo
+      Left = 0
+      Top = 148
+      Width = 718
+      Height = 24
+      Frame.Color = clBlack
+      Frame.Top = True
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        63.500000000000000000
+        0.000000000000000000
+        391.583333333333300000
+        1899.708333333333000000)
+      Transparent = True
+      RemoveBlankLines = False
+      Alignment = taCenter
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -21
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        
+          #1056#1040#1061#1059#1053#1054#1050'-'#1060#1040#1050#1058#1059#1056#1040' {qrJrnl.DOCNUMBERSTR} '#1074'i'#1076' {FORMATDATETIME('#39'dd.mm' +
+          '.yyyy'#39',qrJrnl.DATE_COMMIT)} '#1088'.')
+      ParentFont = False
+      WordWrap = True
+      FontSize = 16
+    end
+    object ImgLogo: TxrImage
+      Left = 0
+      Top = 0
+      Width = 121
+      Height = 90
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        238.125000000000000000
+        0.000000000000000000
+        0.000000000000000000
+        320.145833333333300000)
+      Transparent = False
+      Center = True
+      Stretch = True
+    end
+    object xrExpressionMemo2: TxrExpressionMemo
+      Left = 122
+      Top = 20
+      Width = 592
+      Height = 84
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        222.250000000000000000
+        322.791666666666700000
+        52.916666666666670000
+        1566.333333333333000000)
+      Transparent = True
+      RemoveBlankLines = False
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -12
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsItalic]
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        
+          '{IF(qrEnt.ENT_CS_INN='#39#39','#39#39','#39'I'#1055#1053': '#39'+qrEnt.ENT_CS_INN+'#39', '#39')} {IF(q' +
+          'rEnt.ENT_CS_EDRPOU='#39#39','#39#39','#39#1045#1044#1056#1055#1054#1059': '#39'+qrEnt.ENT_CS_EDRPOU+'#39', '#39')} {' +
+          'IF(qrEnt.ENT_CS_NDS_PAYED=0,'#39#39','#39#1050#1086#1076' '#1087#1083#1072#1090#1085#1080#1082#1072' '#1055#1044#1042': '#39'+qrEnt.ENT_CS' +
+          '_NDS_CODE+'#39', '#39')} {IF(qrEnt.ENT_CS_CERTIFICATE='#39#39','#39#39','#39#1085#1086#1084#1077#1088' '#1089#1074'i'#1076#1086 +
+          #1090#1094#1090#1074#1072': '#39'+qrEnt.ENT_CS_CERTIFICATE+'#39', '#39')} '
+        #1070#1088#1080#1076#1080#1095#1085#1072' '#1072#1076#1088#1077#1089#1072': {qrEnt.ENT_CS_ADDR_NAME}'
+        
+          #1050#1086#1085#1090#1072#1082#1090#1080': {qrEnt.ENT_CS_PHONES}{IF(qrEnt.ENT_CS_URLS='#39#39','#39#39','#39', '#1042#1077 +
+          #1073'-'#1089#1090#1086#1088'i'#1085#1082#1072': '#39'+qrEnt.ENT_CS_URLS)}{IF(qrEnt.ENT_CS_EMAILS='#39#39','#39#39','#39 +
+          ', '#1045#1083#1077#1082#1090#1088#1086#1085#1085#1072' '#1087#1086#1096#1090#1072': '#39'+qrEnt.ENT_CS_EMAILS)}'
+        
+          #1056'/'#1056#1072#1093#1091#1085#1086#1082': '#8470'{qrEnt.BANK_RS} '#1091' "{qrEnt.BANK_NAME}", '#1052#1060#1054' '#1073#1072#1085#1082#1091': {q' +
+          'rEnt.BANK_MFO}')
+      ParentFont = False
+      WordWrap = True
+      FontSize = 9
+    end
+    object xrExpression3: TxrExpression
+      Left = 122
+      Top = 0
+      Width = 592
+      Height = 23
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        60.854166666666670000
+        322.791666666666700000
+        0.000000000000000000
+        1566.333333333333000000)
+      Transparent = True
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -19
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold, fsItalic]
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      ResetAfterPrint = False
+      WordWrap = True
+      Expression = 'qrEnt.ENT_CS_KIND_SHORT+'#39' '#39'+qrEnt.ENT_CS_NAME'
+      FontSize = 14
+    end
+    object xrExpression4: TxrExpression
+      Left = 122
+      Top = 94
+      Width = 592
+      Height = 20
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        52.916666666666670000
+        322.791666666666700000
+        248.708333333333300000
+        1566.333333333333000000)
+      Transparent = True
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -16
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold, fsItalic]
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      ResetAfterPrint = False
+      WordWrap = True
+      Expression = 'qrEnt.FILIAL_NAME'
+      FontSize = 12
+    end
+    object xrExpressionMemo3: TxrExpressionMemo
+      Left = 122
+      Top = 112
+      Width = 592
+      Height = 36
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        95.250000000000000000
+        322.791666666666700000
+        296.333333333333300000
+        1566.333333333333000000)
+      Transparent = True
+      RemoveBlankLines = False
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -12
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsItalic]
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        
+          '{IF(qrEnt.FILIAL_ADDRESS='#39#39','#39#39','#39#1040#1076#1088#1077#1089#1072': '#39'+qrEnt.FILIAL_ADDRESS)}' +
+          '{IF(qrEnt.FILIAL_PHONE='#39#39','#39#39','#39', '#1058#1077#1083#1077#1092#1086#1085': '#39'+qrEnt.FILIAL_PHONE)}'
+        
+          '{IF(qrEnt.FILIAL_GRAPHIK='#39#39','#39#39','#39#1056#1086#1073#1086#1095'i'#1081' '#1075#1088#1072#1092'i'#1082': '#39'+qrEnt.FILIAL_G' +
+          'RAPHIK)} '
+        '')
+      ParentFont = False
+      WordWrap = True
+      FontSize = 9
+    end
+    object xrExpression5: TxrExpression
+      Left = 634
+      Top = 2
+      Width = 84
+      Height = 16
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        42.333333333333330000
+        1677.458333333333000000
+        5.291666666666667000
+        222.250000000000000000)
+      Transparent = True
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      Color = clWhite
+      Indent = 0
+      Layout = tlTop
+      ParentFont = False
+      ResetAfterPrint = False
+      WordWrap = True
+      Expression = #39#1057#1090#1086#1088'i'#1085#1082#1072' '#8470#39'+PAGENUMBER'
+      FontSize = 8
+    end
+  end
+end

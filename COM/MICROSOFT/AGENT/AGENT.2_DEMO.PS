@@ -1,0 +1,11 @@
+{$IFNDEF PEAKTOP:COM/MICROSOFT/AGENT/AGENT.2.INC}
+{$I PEAKTOP:COM/MICROSOFT/AGENT/AGENT.2.INC}
+{$ENDIF}
+
+var
+  Agent :Variant;
+begin
+  Agent := CreateMicrosoftAgent('merlin');
+  Agent.Show;
+  Agent.Speak('This is is a demo, how to use Microsoft Agent.');
+end.

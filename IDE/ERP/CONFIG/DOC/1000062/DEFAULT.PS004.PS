@@ -1,0 +1,15 @@
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/DOC/FORMJRNL.INC} {$I PEAKTOP:IDE/ERP/DBO/DOC/FORMJRNL.INC} {$ENDIF}
+var
+  JrnlForm :TAmunhotepForm;
+begin
+  TERPFormGrid_DataSetFilter_DateInit := true;
+  TERPFormGrid_DataSetFilter_DateFrom := StrToDate('01.04.2010'); 
+  TERPFormGrid_DataSetFilter_DateTo   := Now; 
+  TERPFormGrid_DataSetFilter_Add('STATE_ID', 'STATE_ID = 2');
+  TERPFormGrid_DataSetFilter_Add('FLAG_REAL', 'EXISTS(SELECT P.J_ID FROM PROC$D_GET_4_CHILDS(ID, 1000068) P )');
+  TERPFormGrid_DataSetFilter_Add('FIRM_ID', 'FIRM_ID = 0');
+  JrnlForm := TAmunhotepForm(Journal_Create('1000062'));
+  JrnlForm.SetCaption(JrnlForm.Caption+' (Реализованные невыкупы)');
+  TxcGradientPanelVista(JrnlForm.FindComponent(obj_name_erp_topbar)).Caption := #$20#$20#$20#$20#$20#$20+JrnlForm.Caption;
+end.
+

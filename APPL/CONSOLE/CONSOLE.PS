@@ -1,0 +1,120 @@
+{$I PEAKTOP:APPL/CONSOLE/CAPTURED.INC}
+
+{-$IFNDEF LanguageResourceFileName}
+{-$I LanguageResourceFileName}
+{-$ENDIF}
+//------------------------------------------------------------------------------
+//                       Language resource file
+const
+{$IFDEF LANGUAGE_UKR}
+  msg_invalid_resource  = 'Поганий файл ресурсiв'; 
+  msg_actexec                     = ''; 
+  msg_actexec_hint                = ''; 
+  msg_actclear                    = ''; 
+  msg_actclear_hint               = ''; 
+{$ENDIF}
+{$IFDEF LANGUAGE_RUS}
+  msg_invalid_resource  = 'Неверный файл ресурсов'; 
+  msg_actexec                     = ''; 
+  msg_actexec_hint                = ''; 
+  msg_actclear                    = ''; 
+  msg_actclear_hint               = ''; 
+{$ENDIF}
+{$IFDEF LANGUAGE_ENG}
+  msg_invalid_resource  = 'Invalid resourec file'; 
+  msg_actexec                     = ''; 
+  msg_actexec_hint                = ''; 
+  msg_actclear                    = ''; 
+  msg_actclear_hint               = ''; 
+{$ENDIF}
+{$IFDEF LANGUAGE_DEU}
+  msg_invalid_resource  = 'Invalid resource file'; 
+  msg_actexec                     = ''; 
+  msg_actexec_hint                = ''; 
+  msg_actclear                    = ''; 
+  msg_actclear_hint               = ''; 
+{$ENDIF}
+//------------------------------------------------------------------------------
+var 
+  AmunhotepForm :TAmunhotepForm; 
+  lblPath     :TLabel; 
+  MemoOutput  :TMemo; 
+  MemoCommand :TMemo; 
+  actExec     :TAction; 
+  actClear    :TAction; 
+  //============================================================================
+  procedure actExec_OnExecute(Sender :TObject);
+  var
+    Dir :string;
+    SL  :TStrings;
+  begin
+    MemoOutput.Lines.Add(lblPath.Caption+MemoCommand.Lines.Text);
+    Dir := Copy(lblPath.Caption, 1, Length(lblPath.Caption)-1);
+    SL := TStringList.Create;
+    SL.Text := RunCaptured(Dir, 'd:\appl\python\v2_5\python.exe', MemoCommand.Lines.Text);
+    MemoOutput.Lines.AddStrings(SL);
+    SL.Free;
+  end;
+  //============================================================================
+  procedure actClear_OnExecute(Sender :TObject);
+  begin
+    MemoOutput.Lines.Clear;
+  end;
+  //============================================================================
+  procedure AmunhotepForm_OnClose(Sender :TObject; var Action :TCloseAction);
+  begin
+    Action := caFree;
+    AutoFree; 
+  end; 
+  //============================================================================
+  function AmunhotepForm_Create(        // create a new instance of the form
+             const aFileName:string; // - absolute path to resource xfm-file
+             const aCaption :string  // - caption of new form
+             ):TAmunhotepForm;
+  var
+    ResBody     :string;
+  begin
+    ResBody := StringsLoadFromFile(aFileName);
+    if(ResBody='')then 
+      begin
+      Dialogs.MessageDlg(msg_invalid_resource+#13#10+aFileName, mtWarning, [mbOK]);
+      exit;
+      end;
+    Result          := TAmunhotepForm(StrToComponent(ResBody));
+    DontAutoFree;
+    Result.OnClose  := @AmunhotepForm_OnClose;
+    Result.FileName := aFileName;
+    Result.SetCaption(aCaption);
+    //todo : add initialization code here 
+    
+    lblPath                := TLabel(Result.FindComponent('lblPath'));
+    lblPath.Caption        := 'C:\>';
+    lblPath.Font.Color     := Amunhotep_MainForm_StyleManager.Colors.Border;
+    MemoOutput             := TMemo(Result.FindComponent('MemoOutput'));
+    MemoOutput.Color       := Amunhotep_MainForm_StyleManager.Colors.Border;
+    MemoOutput.Font.Color  := clLime;
+    MemoOutput.Lines.Text  := '';
+    MemoCommand            := TMemo(Result.FindComponent('MemoCommand'));
+    MemoCommand.Color      := Amunhotep_MainForm_StyleManager.Colors.Border;
+    MemoCommand.Font.Color := clLime;
+    MemoCommand.Lines.Text := '';
+    actExec                := TAction(Result.FindComponent('actExec'));
+    actExec.Caption        := msg_actexec ;
+    actExec.Hint           := msg_actexec_hint ;
+    actExec.OnExecute      := @actExec_OnExecute;
+    actClear               := TAction(Result.FindComponent('actClear'));
+    actClear.Caption       := msg_actclear ;
+    actClear.Hint          := msg_actclear_hint ;
+    actClear.OnExecute     := @actClear_OnExecute;
+    
+    //todo : add finalization code here 
+    
+    Amunhotep_MainForm_TaskBar.ButtonByForm(Result).Down := true;
+  end;
+  //============================================================================
+  
+begin
+  AmunhotepForm := AmunhotepForm_Create(StrAbsolutePath('./CONSOLE.XFM', ScriptName), 'Консоль');
+  //todo : add code after create form
+  
+end.

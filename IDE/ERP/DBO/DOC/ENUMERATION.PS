@@ -1,0 +1,309 @@
+{$DEFINE PEAKTOP:IDE/ERP/DBO/DOC/ENUMERATION.PS}
+{$IFNDEF PEAKTOP:APPL/LOCAL/FILE.INC}                         {$I PEAKTOP:APPL/LOCAL/FILE.INC}             {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TIMAGELIST.INC}                          {$I PEAKTOP:OBJ/TIMAGELIST.INC}              {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TCOLUMNEH.INC}                           {$I PEAKTOP:OBJ/TCOLUMNEH.INC}               {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TDBGRIDEH.INC}                           {$I PEAKTOP:OBJ/TDBGRIDEH.INC}               {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TSPLITTER.INC}                           {$I PEAKTOP:OBJ/TSPLITTER.INC}               {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANEL.INC}                    {$I PEAKTOP:OBJ/TXCGRADIENTPANEL.INC}        {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}               {$I PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}   {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCPANEL.INC}                            {$I PEAKTOP:OBJ/TXCPANEL.INC}                {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCSTDPANEL.INC}                         {$I PEAKTOP:OBJ/TXCSTDPANEL.INC}             {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCTOOLBARBUTTON.INC}                    {$I PEAKTOP:OBJ/TXCTOOLBARBUTTON.INC}        {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXFBDATASETS.INC}                        {$I PEAKTOP:OBJ/TXFBDATASETS.INC}            {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXFBTREEVIEW.INC}                        {$I PEAKTOP:OBJ/TXFBTREEVIEW.INC}            {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCPAGECONTROLEX.INC}                    {$I PEAKTOP:OBJ/TXCPAGECONTROLEX.INC}        {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCTABSHEET.INC}                         {$I PEAKTOP:OBJ/TXCTABSHEET.INC}             {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/SHORTCUTS.INC}                   {$I ../SHORTCUTS.INC}                        {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/OBJECTNAMES.INC}                 {$I ../OBJECTNAMES.INC}                      {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/DBGRID/COL_PROTOCOL.INC}         {$I ../DBGRID/COL_PROTOCOL.INC}              {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/DBGRID/ACTIONS.INC}              {$I ../DBGRID/ACTIONS.INC}                   {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/USERS/GLOBALVARIABLES.INC}       {$I ../USERS/GLOBALVARIABLES.INC}            {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/$COMMON/FORMERP.INC}             {$I ../$COMMON/FORMERP.INC}                  {$ENDIF}
+  //=================== PEAKTOP:IDE/ERP/DBO/DOC/ENUMERATION.PS =================
+const
+  msg_document_demo_str = #$20+'Образец отображения строки документа в журнале'+#13#10+
+                          #$20+'Sample of the Document string in the Journal'+#13#10+
+                          #$20+'Ўзор адлюстравання радкі дакумента ў Часопісе'+#13#10+
+                          #$20+'Зразок відображення рядка документу в Журналі'+#13#10;
+  //============================================================================
+  procedure ERP_DocEnum_CloseDataSets(aOwner :TComponent);
+  begin
+    if(TERPForm_TransactionMain(aOwner).InTransaction)then
+      begin
+      with TERPForm_DataSetMain(aOwner) do
+        if Active then
+          begin
+          if(State <> dsBrowse)then
+            try
+              Post;
+            except
+              Cancel;
+            end;
+          Close;   
+          end;
+      TERPForm_TransactionMain(aOwner).Commit;
+      end;
+  end;
+  //============================================================================
+  procedure ERP_DocEnum_RefreshView(aOwner :TComponent; const aTypeId:string);
+  begin
+    ERP_DocEnum_CloseDataSets(aOwner);
+    with TERPForm_DataSetMain(aOwner) do
+      begin
+      Prepare;
+      ParamByName('TYPE_ID').AsString := aTypeId; 
+      Open;
+      end;
+  end;
+  //============================================================================
+  procedure ERP_DocEnum_FBTreeView_OnClick(Sender :TObject);
+  begin
+    with TxFBTreeView(Sender) do
+      ERP_DocEnum_RefreshView(Owner, GetID);
+  end;
+  //============================================================================
+  procedure ERP_DocEnum_FBTreeView_OnBuildNode(Sender :TObject; StateFieldValue :Variant; var StateImage :Integer);
+  begin
+    StateImage := 37;
+  end;
+  //============================================================================
+  procedure ERP_DocEnum_DataSetMain_AfterScroll(DataSet :TDataSet);
+  begin
+    with TxcStdPanel( DataSet.FindComponent(obj_name_erp_paneltop) ) do
+      begin
+      Color      := DataSet.FieldByName('COLOR_BGR').AsInteger;
+      Font.Color := DataSet.FieldByName('COLOR_FRG').AsInteger;
+      RePaint;
+      end;
+  end;
+  //============================================================================
+  procedure ERP_DocEnum_tbbColorFrg_OnClick(Sender :TObject);
+  var
+    lkClr :TColor;
+  begin
+    with TDataSet(TComponent(Sender).Owner) do
+      begin
+      lkClr := FieldByName('COLOR_FRG').AsInteger;
+      if not Dialogs.SelectColor(lkClr) then exit;
+      if(State <> dsEdit)then Edit;
+      FieldByName('COLOR_FRG').AsInteger := lkClr;
+      Post;
+      end;
+    ERP_DocEnum_DataSetMain_AfterScroll( TDataSet(TComponent(Sender).Owner) );  
+  end;
+  //============================================================================
+  procedure ERP_DocEnum_tbbColorBgr_OnClick(Sender :TObject);
+  var
+    lkClr :TColor;
+  begin
+    with TDataSet(TComponent(Sender).Owner) do
+      begin
+      lkClr := FieldByName('COLOR_BGR').AsInteger;
+      if not Dialogs.SelectColor(lkClr) then exit;
+      if(State <> dsEdit)then Edit;
+      FieldByName('COLOR_BGR').AsInteger := lkClr;
+      Post;
+      end;
+    ERP_DocEnum_DataSetMain_AfterScroll(TDataSet(TComponent(Sender).Owner));  
+  end;
+  //============================================================================
+  procedure ERP_DocEnum_OnClose(Sender :TObject; var Action :TCloseAction);
+  begin
+    ERP_DocEnum_CloseDataSets(TComponent(Sender));
+    Action := caFree;
+  end;
+  //============================================================================
+  function ERP_DocEnum_Create():TAmunhotepForm;
+  var
+    lkLocal        :TStringList;
+    lkStrAccss     :string;
+    lkTr           :TxFBTransaction;
+    lkDTS          :TxFBDataSet;
+    lkDS           :TDataSource;
+    lkFBTree       :TxFBTreeView;
+    lkSplt         :TSplitter;
+    lkPC           :TxcPageControlEx;
+    lkPanelTopBar  :TxcGradientPanelVista;
+    lkPanelDemoDoc :TxcStdPanel;
+    lkToolBar      :TxcGradientPanelVista;
+    lkLBL          :TLabel;
+    lkTBB          :TxcToolBarButton;
+    lkDBG          :TDBGridEh;
+    lkCol          :TColumnEh;
+  begin
+    GetField(FBDataBase, 'PROC$_USERS_ACCS('''+ERP_GLOBALVARIABLE_USER_CURRENT+''')', 'ROLES_LIST', '', lkStrAccss);
+    Result := TAmunhotepForm(TERPForm_Create('', ERP_FILENAME_ICO_DOC, ERP_FILENAME_BMP_DOC, false, @ERP_DocEnum_OnClose));
+    lkLocal := TERPForm_Local(Result); 
+    AmunhotepLocalStringsLoad(lkLocal, '1000054', ChangeFileExt(ScriptName, '.JSON') );
+    TERPForm_SetCaption( Result, AmunhotepLocalString(lkLocal, 'MSG_CAPTION', 'Свойства документов') );           
+    with TxcGradientPanelVista(Result.FindComponent(obj_name_erp_topbar)) do
+      begin
+      Caption               := #$20#$20#$20#$20#$20#$20+AmunhotepLocalString(lkLocal, 'MSG_CAPTION', 'Свойства документов');
+      StyleManager          := nil;
+      Colors.HotTrack       := ERP_ObjectColorLight(ERP_OBJECTTYPE_DOC);
+      Colors.HotTrackBorder := ERP_ObjectColor(ERP_OBJECTTYPE_DOC);
+      end;  
+    CreateTxFBTransDataSet(Result, obj_name_erp_data_trmain, obj_name_erp_data_dtsmain, 'DataSource'+obj_name_erp_data_dtsmain, ['isc_tpb_read_committed', 'isc_tpb_write', 'isc_tpb_rec_version', 'isc_tpb_nowait'], lkTr, lkDTS, lkDS);  
+    with lkDTS do
+      begin
+      SelectSQL.Text  := StringsLoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/DBO/SQL/OBJECTEDITOR/DOCENUM_SEL.SQL'));
+      RefreshSQL.Text := StringsLoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/DBO/SQL/OBJECTEDITOR/DOCENUM_REF.SQL'));
+      ModifySQL.Text  := StringsLoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/DBO/SQL/OBJECTEDITOR/DOCENUM_UPD.SQL'));
+      AfterScroll     := @ERP_DocEnum_DataSetMain_AfterScroll;
+      AfterOpen       := @TERPForm_OpenDataSetsChilds;
+      BeforeClose     := @TERPForm_CloseDataSetsChilds;
+      end;    
+    lkFBTree := TxFBTreeView.Create(Result);
+    with lkFBTree do
+      begin
+      Parent    := Result;
+      Left      := 0;
+      Top       := 0;
+      Width     := 200;
+      Ctl3D     := false;
+      Align     := alLeft;
+      Color     := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color:= Amunhotep.MainForm.StyleManager.Colors.Border;
+      Images    := Amunhotep.MainForm.ImageListMain;
+      DataBase  := FBDataBase;
+      with DBTreeInfo do
+        begin
+        TableName     := 'TABL$_TB_TYPES';
+        FieldId       := 'ID';
+        FieldParentId := 'PARENT_ID';
+        FieldStateId  := 'ID';
+        FieldName     := 'NAME2';
+        RootParentId  := '0';
+        Where         := '(ROOT_ID = 4)';
+        OrderBy       := 'NAME2';
+        end;
+      ShowOnlyRoots    := false;
+      RightClickSelect := true;
+      HideSelection    := false;
+      OnBuildNode      := @ERP_DocEnum_FBTreeView_OnBuildNode;  
+      OnClick          := @ERP_DocEnum_FBTreeView_OnClick;
+      BuildTree;
+      if(Items.Count > 0)then
+        begin
+        Items[0].Selected := true;
+        end;  
+      end;
+    lkSplt := TSplitter.Create(Result);
+    with lkSplt do
+      begin
+      Parent := Result;
+      Left   := lkFBTree.Left + lkFBTree.Width + 4;
+      Top    := 0;
+      Width  := 8;
+      Align  := alLeft;
+      Color  := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      end;
+    lkPC := CreateTxcPageControlEx(Result, Result, obj_name_erp_pagecontrol, 0, 48, 200,200,alClient);
+    with CreateTxcTabSheet(lkPC,'tsSett',AmunhotepLocalString(lkLocal, 'MSG_TSSETTINGS_CAPTION', 'Настройки'), 53,ERP_ObjectColor(ERP_OBJECTTYPE_OPER)) do
+      begin
+      end;
+    with CreateTxcTabSheet(lkPC,'tsEnum',AmunhotepLocalString(lkLocal, 'MSG_TSENUMS_CAPTION', 'Нумераторы'),379,ERP_ObjectColor(ERP_OBJECTTYPE_DOC)) do
+      begin
+      end;
+    TxcPageControlEx_ActivateDefaultPage(lkPC);  
+    
+    lkPanelTopBar := CreateTxcGradientPanelVista(lkPC.Pages[0], lkPC.Pages[0], obj_name_erp_topbar,#$20#$20+
+      AmunhotepLocalString(lkLocal, 'MSG_HDR_DISPLAY_CAPTION', 'Настройки визуального отображения документов в Журналах'),alTop, 0,0,20,800,xbsRaized);
+    with lkPanelTopBar do
+      begin
+      Font.Size             := 10;
+      StyleManager          := nil;
+      Colors.HotTrack       := ERP_ObjectColorLight(ERP_OBJECTTYPE_DOC);
+      Colors.HotTrackBorder := ERP_ObjectColor(ERP_OBJECTTYPE_DOC);
+      end;  
+    lkPanelDemoDoc := CreateTxcStdPanel(lkDTS,lkPC.Pages[0],obj_name_erp_paneltop,'',alTop,1,lkPanelTopBar.Top+lkPanelTopBar.Height+1,32,800,xbsNone);
+    with lkPanelDemoDoc do
+      begin
+      Font.Size  := 12;
+      Font.Style := [fsBold];
+      end;
+    lkLBL := CreateTLabel(lkPanelDemoDoc,lkPanelDemoDoc, #$20#$20+AmunhotepLocalString(lkLocal, 'MSG_DOCUMENT_DEMOSTR', 'Пример изображения строки документа в Журнале'), 
+                  0, 0, lkPanelDemoDoc.Height, lkPanelDemoDoc.Width, alClient, taLeftJustify);
+    lkToolBar := CreateTxcGradientPanelVistaToolBar(lkPC.Pages[0],lkPC.Pages[0],obj_name_erp_toolbar,'',alTop, 0,lkPanelDemoDoc.Top+lkPanelDemoDoc.Height+1,TERPForm_DefaultToolButtonWidth+2, 200,xbsRaized);
+      lkTBB := CreateTxcToolBarButton(lkDTS, lkToolBar,'tbbColorFrg','Изменить цвет шрифта', 'Изменить цвет шрифта',4,lkLBL.Top+lkLBL.Height+1,20,140, alLeft, 123, nil);
+      with lkTBB do
+        begin
+        ShowHint    := true;
+        ShowCaption := true;
+        OnClick     := @ERP_DocEnum_tbbColorFrg_OnClick;
+        end;
+      lkTBB := CreateTxcToolBarButton(lkDTS, lkToolBar,'tbbColorBgr','Изменить цвет фона', 'Изменить цвет фона',lkTBB.Left+lkTBB.Width+4,lkLBL.Top+lkLBL.Height+1,20,140, alLeft, 120, nil);
+      with lkTBB do
+        begin
+        ShowHint    := true;
+        ShowCaption := true;
+        OnClick     := @ERP_DocEnum_tbbColorBgr_OnClick;
+        end;
+    
+    lkPanelTopBar := CreateTxcGradientPanelVista(lkPC.Pages[1], lkPC.Pages[1], obj_name_erp_topbar,
+                        #$20#$20+AmunhotepLocalString(lkLocal, 'MSG_HDR_ENUM_CAPTION', 'Настройки нумераторов документов'),alTop, 0,0,20,800,xbsRaized);
+    with lkPanelTopBar do
+      begin
+      Font.Size             := 10;
+      StyleManager          := nil;
+      Colors.HotTrack       := ERP_ObjectColorLight(ERP_OBJECTTYPE_DOC);
+      Colors.HotTrackBorder := ERP_ObjectColor(ERP_OBJECTTYPE_DOC);
+      end;  
+    //lkToolBar     := CreateTxcGradientPanelVistaToolBar(lkPC.Pages[1],lkPC.Pages[1],obj_name_erp_toolbar,'',alTop, 0,50,TERPForm_DefaultToolButtonWidth+2, 200,xbsNone);
+    lkDBG         := CreateTDBGridEh(lkPC.Pages[1],lkPC.Pages[1],lkDS,obj_name_erp_data_dbgmain, 0,100,200,200,alClient);
+    with lkDBG do
+      begin
+      HelpKeyWord := '0';
+      with IndicatorTitle do
+        begin
+        UseGlobalMenu    := true;
+        ShowDropDownSign := true;
+        TitleButton      := true;
+        end;
+      Options      := Options   + [dgAlwaysShowSelection];  
+      OptionsEh    := OptionsEh + [dghFixed3D, dghFrozen3D, dghFooter3D, dghAutoSortMarking, dghMultiSortMarking,  
+        dghIncSearch, dghPreferIncSearch, dghHighlightFocus, dghRowHighlight, dghColumnResize, dghColumnMove, dghExtendVertLines, dghHotTrack];
+      EditActions  := [geaSelectAllEh, geaCopyEh];
+      SortLocal    := true;
+      ShowHint     := true;
+      AllowedOperations := [alopUpdateEh];
+      VTitleMargin := 4;
+      Columns.Clear;
+      end; 
+    lkCol := CreateTColumnEh(lkDBG,'NAME'      ,''             ,'Фирма учета',240,taLeftJustify ); 
+    with lkCol do
+      begin
+      Color    := lkDBG.FixedColor;
+      ReadOnly := true;
+      end;  
+    lkCol := CreateTColumnEh(lkDBG,'GENR_NAME' ,''             ,'Нумератор'  ,240,taLeftJustify );  
+    with lkCol do
+      begin
+      Color    := lkDBG.FixedColor;
+      ReadOnly := true;
+      end;  
+    lkCol := CreateTColumnEh(lkDBG,'GENR_VALUE','# ### ### ##0','Значение'   , 80,taRightJustify); 
+      lkCol.ReadOnly := not( (Pos('~1000000~', lkStrAccss) > 0) or (GetGlobalVariable(ERP_GLOBALVARIABLE_USER_CURRENT) = 'PEAKTOP') );
+    lkDBG.FrozenCols := 2;   
+    //ERP_DBGridEh_StdActions_Create(lkDBG, [erpGrid,erpGridNavigation, erpGridExport], lkToolBar, nil);
+    {
+    lkLBL := CreateTLabel(lkDBG.Parent,lkDBG.Parent,'', 0, lkDBG.Top+lkDBG.Height+1, 120, 800, alBottom, taLeftJustify);
+    with lkLBL do
+      begin
+      Layout      := taTop;
+      Transparent := false;
+      Color       := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color  := Amunhotep.MainForm.StyleManager.Colors.Border;
+      Font.Size   := 8;
+      Font.Style  := [fsBold];
+      Caption     := AmunhotepLocalString(lkLocal, 'MSG_ENUM_HELP_WARNING', 'Свойства документов');
+      end;
+    }
+    ERP_DocEnum_FBTreeView_OnClick(lkFBTree);
+  end;
+
+begin
+//  ExecSQL(FBDataBase, StringsLoadFromFile('PEAKTOP:IDE/ERP/DBO/SQL/OBJECTEDITOR/DOCENUM_CHECK.SQL') );
+
+  ERP_DocEnum_Create();
+end.

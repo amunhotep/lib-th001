@@ -1,0 +1,6 @@
+{$IFNDEF DB:CONFIG/REF/$COMMON.INC} 
+  {$I ../$COMMON.INC} 
+{$ENDIF}
+begin
+  RefForm := Reference_Execute('TABL$R_PERIODS');
+end.

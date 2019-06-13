@@ -1,0 +1,57 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}   {$I PEAKTOP:GLOBAL_VARIABLES.INC} {$ENDIF}
+    //==========================================================================
+    function PreviewReport(const ID, ResName:string):Boolean;
+    var
+      lkRpt :TxReport;
+      lkRes :string;
+      lkImg :TxrImage;
+    begin
+      Result := false;
+      lkRes := StringsLoadFromFile(ResName);
+      if(StrTrimAll(lkRes) = '')then
+        begin
+        Dialogs.MessageDlg('Неверный файл ресурсов '+#13#10+ResName, mtError, [mbOk]);
+        exit;
+        end;
+      lkRpt := TxReport(StrToComponent(lkRes));  
+      lkRpt.DataBase := FBDataBase;
+      if(lkRpt.DataSets.Count < 3)then
+        while(lkRpt.DataSets.Count < 3)do
+          lkRpt.DataSets.Add;
+      lkRpt.DataSets[0].SQL.Text := 
+        'SELECT J.ID, J.ID AS J_ID, J.NAME, J.FLAG_DELETE, J.FLAG_COMMIT, J.TYPE_ID, TD.NAME AS TYPE_NAME, TD.COLOR_FRG, TD.COLOR_BGR, '+#13#10+
+        '       J.DOCNUMBER, J.DOCSUM, J.DOCSUMVAL, J.VALUTE_ID, CONTR.VALUTE, CONTR.VALUTE_SHORT, J.FIRM_ID, FIRM.NAME AS FIRM_NAME, J.FILIAL_ID, '+#13#10+
+        '       (SELECT FIRST 1 COALESCE(FF.NAME,'''') FROM TABL$R_FILIALS FF WHERE (FF.ID = J.FILIAL_ID)) AS FILIAL_NAME, '+#13#10+
+        '       J.USER_ID, (SELECT FIRST 1 COALESCE(W.NAME,'''') FROM TABL$R_WRK W WHERE (W.USER_NAME = J.USER_ID)) AS USER_NAME, '+#13#10+
+        '       J.DATE_COMMIT, J.DOCNUMBERSTR, J.DOCSTR, J87.WRK_ID, J87.DATE_VALUE '+#13#10+
+        '       ,(SELECT FIRST 1 W.NAME FROM TABL$R_WRK W WHERE (W.ID = J87.WRK_ID)) AS WRK_NAME '+#13#10+
+        'FROM   TABL$J_4 J, TABL$R_FIRMS FIRM, TABL$R_COUNTRIES CONTR, TABL$_TB_DOCS TD, TABL$J_1000087 J87 '+#13#10+
+        'WHERE  (J.ID = '''+ID+''') '+#13#10+
+        '  AND  (TD.ID = J.TYPE_ID) '+#13#10+
+        '  AND  (FIRM.ID  = J.FIRM_ID) '+#13#10+
+        '  AND  (CONTR.ID = J.VALUTE_ID) '+#13#10+
+        '  AND  (J87.J_ID = J.ID) ';      
+      lkRpt.DataSets[1].SQL.Text := StringsLoadFromFile('DB:CONFIG/DOC/4/RPT_DEFAULT02.SQL'); 
+      lkRpt.DataSets[2].SQL.Text := StringsLoadFromFile('DB:CONFIG/REF/WRK/RPT_DEFAULT.SQL'); 
+      lkImg := TxrImage(lkRpt.FindComponent('ImgLogo'));
+      lkRes := StrAbsolutePath('../conf/ent/logo.bmp', Amunhotep.ExeName);
+      if FileExists(lkRes)then
+        try
+          lkImg.Picture.LoadFromFile(lkRes);
+        except
+        end;
+      lkRpt.PreviewInitialState := Amunhotep.MainForm.ActiveMDIChild.WindowState;  
+      lkRpt.Prepare;
+      lkRpt.Preview;
+    end;
+    //==========================================================================
+var
+  J_ID      :string;
+  J_TYPE_ID :string;
+  i         :Integer;
+begin
+  J_ID := GetGlobalVariable('J_ID');
+  if((StrTrimAll(J_ID)='')or(UpperCase(J_ID)='NULL'))then exit;
+  for i:=0 to 2 do
+    PreviewReport(J_ID, StrAbsolutePath('./RPT_DEFAULT'+IntToStr(i)+'.XFM', ScriptName));
+end.    

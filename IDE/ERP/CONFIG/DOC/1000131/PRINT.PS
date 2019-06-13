@@ -1,0 +1,63 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG/DOC/1000014/PRINT.PS}
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC} {$I PEAKTOP:GLOBAL_VARIABLES.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/$COMMON/DIALOG_CASELISTTEM.INC}{$I PEAKTOP:IDE/ERP/DBO/$COMMON/DIALOG_CASELISTTEM.INC}{$ENDIF}
+    //==========================================================================
+    function PreviewReport(const ID, ResName:string):Boolean;
+    var
+      lkRpt :TxReport;
+      lkRes :string;
+      lblType01 :TxrLabel;
+      lblType02 :TxrLabel;
+    begin
+      Result := false;
+      lkRes := StringsLoadFromFile(ResName);
+      if(StrTrimAll(lkRes) = '')then
+        begin
+        Dialogs.MessageDlg('Неверный файл ресурсов '+#13#10+ResName, mtError, [mbOk]);
+        exit;
+        end;
+      lkRpt := TxReport(StrToComponent(lkRes));  
+      lkRpt.DataBase := FBDataBase;
+      if(lkRpt.DataSets.Count < 4)then
+        while(lkRpt.DataSets.Count < 4)do
+          lkRpt.DataSets.Add;
+      lkRpt.DataSets[0].SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/DOC/1000014/RPT_DEFAULT00.SQL');
+      lkRpt.DataSets[0].Query.Prepare;
+      lkRpt.DataSets[0].Query.ParamByName('J_ID').AsString := ID;
+      lkRpt.DataSets[1].SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/DOC/1000014/RPT_DEFAULT01.SQL');
+      lkRpt.DataSets[2].SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/DOC/4/RPT_DEFAULT02.SQL');
+      lkRpt.DataSets[3].SQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/REF/CS/RPT0000.SQL'); 
+      lblType01 := TxrLabel(lkRpt.FindComponent('lblType01')); lblType01.Caption := '';
+      lblType02 := TxrLabel(lkRpt.FindComponent('lblType02')); lblType02.Caption := '';
+      if(Dialogs.MessageDlg('Печатать экземпляр покупателя ?', mtConfirmation, [mbYes, mbNo]) = mrYes)then
+        lblType01.Caption := 'X'
+       else
+        lblType02.Caption := 'X'; 
+      lkRpt.Prepare;
+      lkRpt.Preview;
+    end;
+    
+var
+  J_ID      :string;
+  J_TYPE_ID :string;
+  lkList    :string;
+  Indx      :Integer;
+  Varnts    :string;
+begin
+  J_ID := GetGlobalVariable('J_ID');
+  if( (StrCiphersOnlyInt(J_ID)='') or (UpperCase(J_ID)='NULL') )then exit;
+  if not GetField(FBDataBase, 'TABL$J_4', 'TYPE_ID', 'ID = '+J_ID+' ', J_TYPE_ID)then exit;
+  lkList := 
+    'Бланк 2014.11.14'+#13#10+
+    'Бланк 2014.11.14 (дробное количество)'+#13#10+
+    'Бланк 2014.09.22'+#13#10+
+    'Бланк 2014.09.22 (дробное количество)'+#13#10+
+    'Бланк 2014.01.14'+#13#10+
+    'Бланк 2014.01.14 (дробное количество)'+#13#10+
+    'Бланк 2011.11.01'+#13#10+
+    'Бланк 2011.11.01 (мелкий шрифт адреса покупателя)';
+  Indx := 0;
+  if not ERPDialogCaseListItemInteger_Execute('Выберите шаблон печати', 'Доступные шаблоны', ERP_ObjectBitmap(ERP_OBJECTTYPE_DOC), lkList, Indx) then exit;
+
+  PreviewReport(J_ID, 'PEAKTOP:IDE/ERP/CONFIG/DOC/'+J_TYPE_ID+'/RPT_DEFAULT000'+IntToStr(Indx)+'.XFM')
+end.

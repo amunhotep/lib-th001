@@ -1,0 +1,281 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}               {$I PEAKTOP:GLOBAL_VARIABLES.INC}          {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TCOLUMNEH.INC}                  {$I PEAKTOP:OBJ/TCOLUMNEH.INC}             {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCBUTTON.INC}                  {$I PEAKTOP:OBJ/TXCBUTTON.INC}             {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TCOMBOBOX.INC}                  {$I PEAKTOP:OBJ/TCOMBOBOX.INC}             {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TLABEL.INC}                     {$I PEAKTOP:OBJ/TLABEL.INC}                {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TIMAGE.INC}                     {$I PEAKTOP:OBJ/TIMAGE.INC}                {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANEL.INC}           {$I PEAKTOP:OBJ/TXCGRADIENTPANEL.INC}      {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}      {$I PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCTOOLBARBUTTON.INC}           {$I PEAKTOP:OBJ/TXCTOOLBARBUTTON.INC}      {$ENDIF}
+  //============================================================================
+  procedure PeriodDlg_RefreshView(Sender :TForm);
+  var
+    lkQr       :TxFBQuery;
+    lkCbx      :TComboBox;
+    lkFld      :string;
+    lkTBBYear  :TxcToolBarButton; 
+    lkTBBMonth :TxcToolBarButton; 
+    lkTBBQuart :TxcToolBarButton;
+  begin
+    lkQr       := TxFBQuery(Sender.FindComponent('Query'));
+    lkCbx      := TComboBox(Sender.FindComponent('ComboBoxYear'));
+    lkTBBYear  := TxcToolBarButton(Sender.FindComponent('tbbYear')); 
+    lkTBBQuart := TxcToolBarButton(Sender.FindComponent('tbbQuart')); 
+    lkTBBMonth := TxcToolBarButton(Sender.FindComponent('tbbMonth'));
+    lkFld := 'FLAG_YEAR';
+         if lkTBBYear.Down  then lkFld := 'FLAG_YEAR'
+    else if lkTBBQuart.Down then lkFld := 'FLAG_QUART' 
+    else if lkTBBMonth.Down then lkFld := 'FLAG_MONTH'; 
+    if lkQr.Active then
+      lkQr.Close;
+    lkQr.SQL.Text := 
+      'SELECT P.* '+#13#10+
+      'FROM   TABL$R_PERIODS P '+#13#10+
+      'WHERE  (P.DATE_FROM >= ''01.01.'+lkCbx.Items[lkCbx.ItemIndex]+' 00:00:00'') '+#13#10+
+      '  AND  (P.DATE_TO   <= ''31.12.'+lkCbx.Items[lkCbx.ItemIndex]+' 23:59:59'') '+#13#10+
+      '  AND  (P.'+lkFld+' = 1) '+#13#10+
+      'ORDER BY P.ID';
+    lkQr.Open;
+  end;
+  //============================================================================
+  procedure PeriodDlg_Action_OnExecute(Sender :TObject);
+  begin
+    TxcToolBarButton(Sender).Down := true;
+    PeriodDlg_RefreshView(TForm(TComponent(Sender).Owner));
+  end;
+  //============================================================================
+  procedure PeriodDlg_ComboBoxYear_OnChange(Sender :TObject);
+  begin
+    PeriodDlg_RefreshView(TForm(TComponent(Sender).Owner));
+  end;
+  //============================================================================
+  procedure PeriodDlg_Form_OnKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+  begin
+    if(Shift = [ssCtrl])then
+      begin
+      if(Key = $70 {F1})then PeriodDlg_Action_OnExecute(TComponent(Sender).FindComponent('tbbYear'));
+      if(Key = $71 {F2})then PeriodDlg_Action_OnExecute(TComponent(Sender).FindComponent('tbbQuart'));
+      if(Key = $72 {F3})then PeriodDlg_Action_OnExecute(TComponent(Sender).FindComponent('tbbMonth'));
+      end;   
+  end;
+  //============================================================================
+  function PeriodDlg_Execute(var aPeriodId:string):Boolean;
+  var
+    lkForm        :TForm;
+    lkTopBar      :TxcGradientPanelVista;
+    lkImg         :TImage;
+    lkToolBar     :TxcGradientPanel;
+    lkLbl         :TLabel;
+    lkCbxYear     :TComboBox;
+    lkTBBYear     :TxcToolBarButton; 
+    lkTBBMonth    :TxcToolBarButton; 
+    lkTBBQuart    :TxcToolBarButton;
+    lkPanelBottom :TxcStdPanel;
+    lkBtnOk       :TxcButton; 
+    lkBtnCancel   :TxcButton;
+    lkFileName    :string; 
+    lkStr         :string; 
+    lkStrm        :TMemoryStream;
+    lkTr          :TxFBTransaction;
+    lkQr          :TxFBQuery;
+    lkDS          :TDataSource;
+    lkDBG         :TDBGridEh;
+    lkCol         :TColumnEh;
+    i             :Integer;
+  begin
+    Result := false;
+    lkStr := 'Временные периоды';
+    GetField(FBDataBase,'TABL$_TB','NAME','(ID = ''TABL$R_PERIODS'')', lkStr);
+    lkForm := TForm.Create(nil);
+    with lkForm do
+      begin
+      Caption         := Amunhotep.Title;
+      Color           := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      BorderStyle     := bsDialog;
+      BorderIcons     := [biSystemMenu];
+      Position        := poDesktopCenter;
+      Width           := 640;
+      Height          := 400;
+      Font.Size       := 7;
+      KeyPreview      := true;
+      OnKeyDown       := @PeriodDlg_Form_OnKeyDown;
+      end;
+    lkTopBar      := CreateTxcGradientPanelVista(lkForm, lkForm,'PanelTop', #$20#$20#$20#$20#$20#$20+lkStr,alTop,0,0,34,98,xbsRaized);  
+    lkImg := CreateTImage(lkForm, lkTopBar, 'ImageLogo', alLeft, 0,0,32,33); 
+    lkFileName   := StrAbsolutePath('./DEFAULT_BITMAP.BMP', ScriptName);
+    if(Pos('PEAKTOP:',UpperCase(lkFileName)) = 1)then
+      begin
+      Delete(lkFileName, 1, 8);
+      lkFileName   := StrAbsolutePath('./'+lkFileName, Amunhotep.SourcePath);
+      end;
+    {$IFDEF MSWINDOWS}
+    lkFileName   := StrReplaceStr(lkFileName, '/', '\');
+    {$ENDIF}
+    {$IFDEF LINUX}
+    lkFileName   := StrReplaceStr(lkFileName, '\', '/');
+    {$ENDIF}
+    try
+      lkStrm  := TMemoryStream.Create;
+      if StreamLoadFromFile(lkFileName, lkStrm)then
+        if(lkStrm.Size > 0)then
+         lkImg.Picture.Bitmap.LoadFromStream(lkStrm);
+    finally    
+      lkStrm.Free;
+    end;
+    lkToolBar     := CreateTxcGradientPanel(lkForm, lkForm,'ToolBar','',alTop,0,lkTopBar.Top+lkTopBar.Height+1,24,200,xbsNone,gdBottomToTop);
+    lkToolBar.Font.Style := [fsBold];
+    lkLbl         := CreateTLabel(lkForm, lkToolBar, ' Год: ', 0,0,24,32, alLeft, taLeftJustify);
+    lkCbxYear     := CreateTComboBox(lkForm, lkToolBar, '', lkLbl.Left+lkLbl.Width+1,1,20,60,'',-1);
+    with lkCbxYear do
+      begin
+      Name := 'ComboBoxYear';
+      Items.Clear;
+      for i:=2009 to 2030 do
+        Items.Add(IntToStr(i));
+      Style     := csDropDownList; 
+      OnChange  := @PeriodDlg_ComboBoxYear_OnChange; 
+      end;
+    lkTBBYear  := CreateTxcToolBarButton(lkForm, lkToolBar, 'tbbYear', 'Год', 'Выбрать период 1 год', 
+                   lkCbxYear.Left+lkCbxYear.Width +1, 1, 20, 48, alNone, 147, nil);
+    with lkTBBYear do
+      begin
+      ShowCaption := true;
+      GroupIndex  := 64;
+      Down        := false;
+      OnClick     := @PeriodDlg_Action_OnExecute;
+      end;
+    lkTBBQuart := CreateTxcToolBarButton(lkForm, lkToolBar, 'tbbQuart', 'Квартал', 'Выбрать период 1 квартал', 
+       lkTBBYear.Left+lkTBBYear.Width +1, 1, 20, 72, alNone, 147, nil);
+    with lkTBBQuart do
+      begin
+      ShowCaption := true;
+      GroupIndex  := 64;
+      Down        := false;
+      OnClick     := @PeriodDlg_Action_OnExecute;
+      end;
+    lkTBBMonth := CreateTxcToolBarButton(lkForm, lkToolBar, 'tbbMonth', 'Месяц', 'Выбрать период 1 месяц',
+       lkTBBQuart.Left+lkTBBQuart.Width +1, 1, 20, 54, alNone, 147, nil);
+    with lkTBBMonth do
+      begin
+      ShowCaption := true;
+      GroupIndex  := 64;
+      Down        := false;
+      OnClick     := @PeriodDlg_Action_OnExecute;
+      end;
+    lkPanelBottom := TxcStdPanel.Create(lkForm);
+    with lkPanelBottom do
+      begin
+      Name         := 'PanelBottom';
+      Parent       := lkForm;
+      Height       := 24;
+      Width        := lkForm.ClientWidth;
+      Align        := alBottom;
+      BorderStyle  := xbsNone;
+      StyleManager := Amunhotep.MainForm.StyleManager;
+      Color        := Amunhotep.MainForm.StyleManager.Colors.Window;
+      end;
+    lkBtnCancel := CreateTxcButton(lkForm,lkPanelBottom,'btnCancel','Отмена',lkPanelBottom.Width - 122,2,lkPanelBottom.Height-4,120,mrCancel,false,true );
+    lkBtnCancel.Font.Style := [fsBold];
+    lkBtnCancel.TabOrder   := 2;
+    lkBtnCancel.Anchors    := [akRight, akBottom]  
+    lkBtnOk     := CreateTxcButton(lkForm,lkPanelBottom,'btnOk'    ,'Выбрать',lkBtnCancel.Left - 122   ,2,lkPanelBottom.Height-4,120,mrOk    ,true ,false);
+    lkBtnOk.Font.Style     := [fsBold];
+    lkBtnOk.TabOrder       := 1;
+    lkBtnOk.Anchors        := [akRight, akBottom]
+    lkTr := TxFBTransaction.Create(lkForm);
+    with lkTr do
+      begin
+      Name  := 'Trans';
+      DefaultDataBase := FBDataBase;
+      Params.Clear;
+      Params.Add('isc_tpb_read_committed');
+      Params.Add('isc_tpb_read');
+      Params.Add('isc_tpb_rec_version');
+      Params.Add('isc_tpb_nowait');
+      end;
+    lkQr := TxFBQuery.Create(lkForm);
+    with lkQr do
+      begin
+      Name        := 'Query';
+      Transaction := lkTr;
+      end;
+    lkDS := TDataSource.Create(lkQr);
+    with lkDS do
+      begin
+      Name    := 'DataSource';
+      DataSet := lkQr;
+      end;
+    lkDBG := TDBGridEh.Create(lkForm);
+    with lkDBG do
+      begin
+      Parent          := lkForm;
+      Left            := 0;
+      Top             := 0;
+      Ctl3D           := false;
+      Flat            := true;
+      Align           := alClient;
+      Color           := Amunhotep.MainForm.StyleManager.Colors.Window;
+      FixedColor      := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      Font.Color      := Amunhotep.MainForm.StyleManager.Colors.Border;
+      TitleFont.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      TitleFont.Style := TitleFont.Style + [fsBold];
+      UseMultiTitle   := true;
+      ShowHint        := true;
+      DataSource      := lkDS;
+      Options         := [dgAlwaysShowSelection, dgRowSelect,dgTitles,dgIndicator,dgColumnResize, dgColLines,dgRowLines,
+                           dgTabs,dgConfirmDelete, dgCancelOnExit];
+      OptionsEh       := [dghFixed3D,dghHighlightFocus,dghClearSelection, dghRowHighlight,dghDialogFind,dghTraceColSizing, 
+                           dghColumnResize, dghColumnMove,dghExtendVertLines];                           
+      Columns.Clear;
+      end;
+    lkForm.ActiveControl := lkDBG;  
+    lkCol := CreateTColumnEh(lkDBG,'NAME'     ,''                   ,'Название'      ,320,taLeftJustify);
+    lkCol := CreateTColumnEh(lkDBG,'DATE_FROM','dd.mm.yyyy hh:nn:ss','Период|С даты' ,128,taLeftJustify);
+    lkCol := CreateTColumnEh(lkDBG,'DATE_TO'  ,'dd.mm.yyyy hh:nn:ss','Период|По дату',128,taLeftJustify);
+
+    lkCbxYear.ItemIndex := lkCbxYear.Items.IndexOf(FormatDateTime('yyyy',Now));
+    lkTBBMonth.Down     := true;
+    if((StrTrimAll(aPeriodId)<>'') and (UpperCase(aPeriodId)<>'NULL'))then
+      begin
+      lkQr.SQL.Text := 'SELECT FIRST 1 P.* FROM TABL$R_PERIODS P WHERE (P.ID = '+aPeriodId+')';
+      lkQr.Open;
+      lkQr.FetchAll;
+      if(lkQr.RecordCount > 0)then
+        begin
+        lkQr.First;
+        lkCbxYear.ItemIndex := lkCbxYear.Items.IndexOf(FormatDateTime('yyyy',lkQr.FieldByName('DATE_FROM').AsDateTime));
+        lkTBBYear.Down   := (lkQr.FieldByName('FLAG_YEAR').AsInteger  = 1);
+        lkTBBQuart.Down  := (lkQr.FieldByName('FLAG_QUART').AsInteger = 1);
+        lkTBBMonth.Down  := (lkQr.FieldByName('FLAG_MONTH').AsInteger = 1);
+        end;
+      end;
+    PeriodDlg_RefreshView(lkForm);
+    if lkQr.Active then
+      begin
+      lkQr.FetchAll;
+      if((StrTrimAll(aPeriodId)<>'') and (UpperCase(aPeriodId)<>'NULL'))then
+        if(lkQr.RecordCount > 0)then
+          begin
+          lkQr.First;
+          while not lkQr.EOF do
+            begin
+            if(lkQr.FieldByName('ID').AsString = aPeriodId)then break;
+            lkQr.Next;
+            end;
+          end;
+      end;    
+    Result := (lkForm.ShowModal = mrOk); 
+    if Result then
+      aPeriodId := lkQr.FieldByName('ID').AsString; 
+    lkForm.Free;
+  end;
+  //============================================================================
+var
+  PERIOD_ID :string;
+begin
+  PERIOD_ID := GetGlobalVariable('PERIOD_ID');
+  if PeriodDlg_Execute(PERIOD_ID)then
+    SetGlobalVariable('PERIOD_ID', PERIOD_ID)
+   else
+    SetGlobalVariable('PERIOD_ID', 'NULL');  
+end.

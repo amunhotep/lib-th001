@@ -1,0 +1,111 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}  {$I PEAKTOP:GLOBAL_VARIABLES.INC}      {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/FIREBIRD/DIALOGS/CUSTOM.INC}
+  {$I PEAKTOP:IDE/FIREBIRD/DIALOGS/CUSTOM.INC}
+{$ENDIF}
+  //============================================================================
+  function System_DialogFirmAndTMCGroup_Execute(const aCaption:string; var aFirmId, aTMCGroupId:string):Boolean;
+  var
+    lkForm        :TForm;
+    lkImg         :TImage;
+    lkPanelClient :TxcGradientPanel;
+    lkLabel       :TLabel;
+    lkCbxFirm     :TComboBox;
+    lkCbxTmcGroup :TComboBox;
+    lkStr         :string;
+  begin
+    Result := false;
+    lkForm        := FirebirdDialog_Create(aCaption,'Создать', 'Отмена');
+    lkForm.Height := 180;
+    lkForm.Width  := 320;
+    lkPanelClient := TxcGradientPanel(lkForm.FindComponent('PanelClient'));
+    lkImg         := TImage(lkForm.FindComponent('ImageLogo'));
+    lkImg.Visible := false;
+    lkImg.Width   := 0;
+    lkLabel := TLabel.Create(lkForm);
+    with lkLabel do
+      begin
+      Parent      := lkPanelClient;
+      Left        := lkImg.Left + lkImg.Width;
+      Top         := 8;
+      Width       := lkForm.Width - (lkImg.Left + lkImg.Width + 4);
+      Height      := 20; 
+      Transparent := true;
+      Caption     := 'Выбирите фирму';
+      Font.Name   := 'Verdana';
+      Font.Size   := DefaultFirebirdDialogLabelFontHeight;
+      Font.Style  := [fsBold];
+      end;
+    lkCbxFirm := TComboBox.Create(lkForm);
+    with lkCbxFirm do
+      begin
+      Parent     := lkPanelClient;
+      Ctl3d      := false;
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      Font.Style := [fsBold];
+      Font.Name  := 'Verdana';
+      Font.Size  := DefaultFirebirdDialogEditFontHeight;
+      Left       := lkImg.Left + lkImg.Width + 8;
+      Width      := lkForm.Width - (lkImg.Left + lkImg.Width + 16);
+      Top        := lkLabel.Top + lkLabel.Height + 4; 
+      Items.Text := '';
+      if GetField(FBdataBase, 'TABL$R_FIRMS', 'ID||''.  ''||NAME', '(FLAG_DELETE <> 1)', lkStr)then
+        Items.Text := lkStr;
+      ItemIndex  := 0;
+      Style      := csDropDownList;
+      end;
+    lkLabel := TLabel.Create(lkForm);
+    with lkLabel do
+      begin
+      Parent      := lkPanelClient;
+      Left        := lkImg.Left + lkImg.Width;
+      Top         := lkCbxFirm.Top + lkCbxFirm.Height + 4;
+      Width       := lkForm.Width - (lkImg.Left + lkImg.Width + 4);
+      Height      := 20; 
+      Transparent := true;
+      Caption     := 'Выбирите вид залога';
+      Font.Name   := 'Verdana';
+      Font.Size   := DefaultFirebirdDialogLabelFontHeight;
+      Font.Style  := [fsBold];
+      end;
+    lkCbxTmcGroup := TComboBox.Create(lkForm);
+    with lkCbxTmcGroup do
+      begin
+      Parent     := lkPanelClient;
+      Ctl3d      := false;
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      Font.Style := [fsBold];
+      Font.Name  := 'Verdana';
+      Font.Size  := DefaultFirebirdDialogEditFontHeight;
+      Left       := lkImg.Left + lkImg.Width + 8;
+      Width      := lkForm.Width - (lkImg.Left + lkImg.Width + 16);
+      Top        := lkLabel.Top + lkLabel.Height + 4; 
+      Items.Text := '';
+      if GetField(FBdataBase, 'TABL$R_TMC_GROUP', 'ID||''.  ''||NAME', 'PARENT_ID = 1', lkStr)then
+        Items.Text := lkStr;
+      ItemIndex  := 0;
+      Style      := csDropDownList;
+      end;
+    Result := (lkForm.ShowModal = mrOk);
+    if Result then
+      begin
+      aFirmId     := StrCiphersOnlyInt(Copy(lkCbxFirm.Items[lkCbxFirm.ItemIndex], 1, Pos('.  ',lkCbxFirm.Items[lkCbxFirm.ItemIndex])));
+      aTMCGroupId := StrCiphersOnlyInt(Copy(lkCbxTmcGroup.Items[lkCbxTmcGroup.ItemIndex], 1, Pos('.  ',lkCbxTmcGroup.Items[lkCbxTmcGroup.ItemIndex])));
+      end;
+    lkForm.Free;
+  end;
+
+var
+  lkFirmId, 
+  lkTmcGroupId, 
+  lkJ_ID :string;
+begin
+  if(System_DialogFirmAndTMCGroup_Execute('Создать новый залог', lkFirmId, lkTMCGroupId))then
+    if GetFieldCommit(FBDataBase, 'PROC$J_INS_1000062('''+lkFirmId+''','''+lkTMCGroupId+''', '''+
+    GetGlobalVariable('CS_ID')+''', NULL)', 'J_ID', '', lkJ_ID)then
+      begin
+      SetGlobalVariable('J_ID', lkJ_ID);
+      call(StrAbsolutePath('./EDIT.PS',ScriptName));
+      end;  
+end.  

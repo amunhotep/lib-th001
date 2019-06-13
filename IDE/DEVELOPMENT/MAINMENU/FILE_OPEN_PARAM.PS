@@ -1,0 +1,45 @@
+{$DEFINE PEAKTOP:IDE/DEVELOPMENT/MAINMENU/FILE_OPEN_PARAM.PS}
+{$IFNDEF PEAKTOP:COM/MICROSOFT/WINDOWS/USER32.DLL.INC} {$I PEAKTOP:COM/MICROSOFT/WINDOWS/USER32.DLL.INC}  {$ENDIF}  
+{$IFNDEF PEAKTOP:SYSUTILS/GET_PARAM_FILE_NAME.INC}     {$I PEAKTOP:SYSUTILS/GET_PARAM_FILE_NAME.INC}      {$ENDIF}  
+var
+  OpenTimer    :TxsTimer;
+  OpenCounter  :Integer;
+  OpenFileName :string;
+    //==========================================================================
+    procedure OpenTimer_OnTimer(Sender :TObject);
+    begin
+      OpenCounter := OpenCounter + 1;
+      if(OpenCounter > 0)then
+        begin
+        TxsTimer(Sender).Enabled := false;
+        Amunhotep_MainForm_ProcessFile(OpenFileName);
+        end;
+    end;
+    //==========================================================================
+begin
+  if(Amunhotep.ParamCount>0)then
+    begin
+    if(  (LowerCase(Amunhotep.ParamStr[1])='-editor'   )
+       or(LowerCase(Amunhotep.ParamStr[1])='-idephp'   )
+       or(LowerCase(Amunhotep.ParamStr[1])='-idepython')
+       or(LowerCase(Amunhotep.ParamStr[1])='-ideruby'  )
+    )then
+      begin
+      {$IFDEF MSWINDOWS}
+//      Amunhotep.Icon.Handle := LoadIcon(Amunhotep.Instance, 'Z006');
+      {$ENDIF}
+      DontAutoFree;
+      Amunhotep.MainForm.WindowState := wsMaximized;
+      OpenCounter        := 0;
+      OpenFileName       := GetParamFileName(2);
+      if(StrTrimAll(OpenFileName) <> '')then
+        begin
+        WriteLn('OpenFileName='+OpenFileName+'<<');
+        OpenTimer          := TxsTimer.Create(nil);
+        OpenTimer.Interval := 200;
+        OpenTimer.OnTimer  := @OpenTimer_OnTimer;
+        OpenTimer.Enabled  := true;
+        end;
+      end;
+    end;
+end.

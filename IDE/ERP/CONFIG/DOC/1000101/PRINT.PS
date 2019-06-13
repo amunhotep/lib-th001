@@ -1,0 +1,320 @@
+{$I PEAKTOP:GLOBAL_VARIABLES.INC}
+    //==========================================================================
+    function PreviewBills(const ID, ResName:string):Boolean;
+    var
+      lkRpt :TxReport;
+      lkRes :string;
+      lkImg :TxrImage;
+    begin
+      Result := false;
+      lkRes := StringsLoadFromFile(ResName);
+      if(StrTrimAll(lkRes) = '')then
+        begin
+        Dialogs.MessageDlg('Неверный файл ресурсов '+#13#10+ResName, mtError, [mbOk]);
+        exit;
+        end;
+      lkRpt := TxReport(StrToComponent(lkRes));  
+      lkRpt.DataBase := FBDataBase;
+      if(lkRpt.DataSets.Count < 4)then
+        while(lkRpt.DataSets.Count < 4)do
+          lkRpt.DataSets.Add;
+      lkRpt.DataSets[0].SQL.Text := 
+        'SELECT DP.J_ID, DP.ID, DP.NAME, DP.FLAG_DELETE, DP.J_BILL_ID, JB.WRK_ID '+#13#10+
+        '      ,(SELECT FIRST 1 W.NAME FROM TABL$R_WRK W WHERE (W.ID = JB.WRK_ID))AS WRK_NAME '+#13#10+
+        'FROM   TABL$D_1000101 DP, TABL$J_1000014 JB '+#13#10+
+        'WHERE  (DP.J_ID = '''+ID+''') '+#13#10+
+        '  AND  (JB.J_ID = DP.J_BILL_ID) '+#13#10+
+        'ORDER BY WRK_NAME, DP.J_BILL_ID';      
+      lkRpt.DataSets[1].SQL.Text := 'SELECT PC.* FROM PROC$D_GET_1000014( ?J_BILL_ID ) PC ';
+      lkRpt.DataSets[2].SQL.Text := 'SELECT P1.* FROM PROC$D_1000014(?J_ID) P1 ';
+      lkRpt.DataSets[3].SQL.Text := 'SELECT P2.* FROM PROC$D_ENT_CONST('''+ID+''') P2 ' 
+      lkImg := TxrImage(lkRpt.FindComponent('ImgLogo'));
+      lkRes := StrAbsolutePath('../conf/ent/logo.bmp', Amunhotep.ExeName);
+      if FileExists(lkRes)then
+        try
+          lkImg.Picture.LoadFromFile(lkRes);
+        except
+        end;
+      lkRpt.Prepare;
+      lkRpt.Preview;
+    end;
+    //==========================================================================
+    function PreviewBillsTown(const ID, ResName:string):Boolean;
+    var
+      lkRpt :TxReport;
+      lkRes :string;
+      lkImg :TxrImage;
+    begin
+      Result := false;
+      lkRes := StringsLoadFromFile(ResName);
+      if(StrTrimAll(lkRes) = '')then
+        begin
+        Dialogs.MessageDlg('Неверный файл ресурсов '+#13#10+ResName, mtError, [mbOk]);
+        exit;
+        end;
+      lkRpt := TxReport(StrToComponent(lkRes));  
+      lkRpt.DataBase := FBDataBase;
+      if(lkRpt.DataSets.Count < 4)then
+        while(lkRpt.DataSets.Count < 4)do
+          lkRpt.DataSets.Add;
+      lkRpt.DataSets[0].SQL.Text :=
+        'SELECT TMP.J_ID, TMP.ID, TMP.NAME, TMP.FLAG_DELETE, TMP.J_BILL_ID, TMP.TOWN_ID '+#13#10+
+        '      ,(SELECT FIRST 1 TW.NAME FROM TABL$R_REGIONSTOWNS TW WHERE (TW.ID = TMP.TOWN_ID)) AS TOWN_NAME '+#13#10+
+        'FROM   ( '+#13#10+
+        '  SELECT DP.J_ID, DP.ID, DP.NAME, DP.FLAG_DELETE, DP.J_BILL_ID '+#13#10+
+        '        ,(SELECT FIRST 1 CSA.TOWN_ID  '+#13#10+
+        '          FROM   TABL$R_CS_ADDR CSA '+#13#10+
+        '          WHERE  (CSA.ID  = JB.CS_ADDR_ID) '+#13#10+
+        '         )AS TOWN_ID '+#13#10+
+        '  FROM   TABL$D_1000101 DP, TABL$J_1000014 JB '+#13#10+
+        '  WHERE  (DP.J_ID = '''+ID+''') '+#13#10+
+        '    AND  (JB.J_ID = DP.J_BILL_ID) '+#13#10+
+        ')TMP '+#13#10+
+        'ORDER BY TOWN_NAME, J_BILL_ID ';      
+      lkRpt.DataSets[1].SQL.Text := 'SELECT PC.* FROM PROC$D_GET_1000014( ?J_BILL_ID ) PC ';
+      lkRpt.DataSets[2].SQL.Text := 'SELECT P1.* FROM PROC$D_1000014(?J_ID) P1 ';
+      lkRpt.DataSets[3].SQL.Text := 'SELECT P2.* FROM PROC$D_ENT_CONST('''+ID+''') P2 ' 
+      lkImg := TxrImage(lkRpt.FindComponent('ImgLogo'));
+      lkRes := StrAbsolutePath('../conf/ent/logo.bmp', Amunhotep.ExeName);
+      if FileExists(lkRes)then
+        try
+          lkImg.Picture.LoadFromFile(lkRes);
+        except
+        end;
+      lkRpt.Prepare;
+      lkRpt.Preview;
+    end;
+    //==========================================================================
+    function PreviewBillsRoute(const ID, ResName:string):Boolean;
+    var
+      lkRpt :TxReport;
+      lkRes :string;
+      lkImg :TxrImage;
+    begin
+      Result := false;
+      lkRes := StringsLoadFromFile(ResName);
+      if(StrTrimAll(lkRes) = '')then
+        begin
+        Dialogs.MessageDlg('Неверный файл ресурсов '+#13#10+ResName, mtError, [mbOk]);
+        exit;
+        end;
+      lkRpt := TxReport(StrToComponent(lkRes));  
+      lkRpt.DataBase := FBDataBase;
+      if(lkRpt.DataSets.Count < 4)then
+        while(lkRpt.DataSets.Count < 4)do
+          lkRpt.DataSets.Add;
+      lkRpt.DataSets[0].SQL.Text :=
+        'SELECT TMP.J_ID, TMP.ID, TMP.NAME, TMP.FLAG_DELETE, TMP.J_BILL_ID, TMP.ROUTE_ID AS TOWN_ID '+#13#10+
+        '      ,(SELECT FIRST 1 TW.NAME FROM TABL$R_ROUTES TW WHERE (TW.ID = TMP.ROUTE_ID)) AS TOWN_NAME '+#13#10+
+        'FROM   ( '+#13#10+
+        '  SELECT DP.J_ID, DP.ID, DP.NAME, DP.FLAG_DELETE, DP.J_BILL_ID '+#13#10+
+        '        ,(SELECT FIRST 1 CSA.ROUTE_ID FROM TABL$R_CS_ADDR CSA WHERE (CSA.ID = JB.CS_ADDR_ID) )AS ROUTE_ID '+#13#10+
+        '  FROM   TABL$D_1000101 DP, TABL$J_1000014 JB '+#13#10+
+        '  WHERE  (DP.J_ID = '''+ID+''') '+#13#10+
+        '    AND  (JB.J_ID = DP.J_BILL_ID) '+#13#10+
+        ')TMP '+#13#10+
+        'ORDER BY TOWN_NAME, J_BILL_ID ';      
+      lkRpt.DataSets[1].SQL.Text := 'SELECT PC.* FROM PROC$D_GET_1000014( ?J_BILL_ID ) PC ';
+      lkRpt.DataSets[2].SQL.Text := 'SELECT P1.* FROM PROC$D_1000014(?J_ID) P1 ';
+      lkRpt.DataSets[3].SQL.Text := 'SELECT P2.* FROM PROC$D_ENT_CONST('''+ID+''') P2 ' 
+      lkImg := TxrImage(lkRpt.FindComponent('ImgLogo'));
+      lkRes := StrAbsolutePath('../conf/ent/logo.bmp', Amunhotep.ExeName);
+      if FileExists(lkRes)then
+        try
+          lkImg.Picture.LoadFromFile(lkRes);
+        except
+        end;
+      lkRpt.Prepare;
+      lkRpt.Preview;
+    end;
+    //==========================================================================
+    function PreviewTMC(const ID, ResName:string):Boolean;
+    var
+      lkRpt :TxReport;
+      lkRes :string;
+      lkImg :TxrImage;
+    begin
+      Result := false;
+      lkRes := StringsLoadFromFile(ResName);
+      if(StrTrimAll(lkRes) = '')then
+        begin
+        Dialogs.MessageDlg('Неверный файл ресурсов '+#13#10+ResName, mtError, [mbOk]);
+        exit;
+        end;
+      lkRpt := TxReport(StrToComponent(lkRes));  
+      lkRpt.DataBase := FBDataBase;
+      if(lkRpt.DataSets.Count < 2)then
+        while(lkRpt.DataSets.Count < 2)do
+          lkRpt.DataSets.Add;
+      lkRpt.DataSets[0].SQL.Text := 'SELECT PC.* FROM PROC$D_GET_1000101_TMC('''+ID+''') PC ';
+      lkRpt.DataSets[1].SQL.Text := 'SELECT P1.* FROM PROC$D_4('''+ID+''') P1 ';
+      lkRpt.DataSets[2].SQL.Text := 'SELECT P2.* FROM PROC$D_ENT_CONST('''+ID+''') P2 ' 
+      lkImg := TxrImage(lkRpt.FindComponent('ImgLogo'));
+      lkRes := StrAbsolutePath('../conf/ent/logo.bmp', Amunhotep.ExeName);
+      if FileExists(lkRes)then
+        try
+          lkImg.Picture.LoadFromFile(lkRes);
+        except
+        end;
+      lkRpt.Prepare;
+      lkRpt.Preview;
+    end;    
+    //==========================================================================
+    function PreviewTMCTown(const ID, ResName:string):Boolean;
+    var
+      lkRpt :TxReport;
+      lkRes :string;
+      lkImg :TxrImage;
+    begin
+      Result := false;
+      lkRes := StringsLoadFromFile(ResName);
+      if(StrTrimAll(lkRes) = '')then
+        begin
+        Dialogs.MessageDlg('Неверный файл ресурсов '+#13#10+ResName, mtError, [mbOk]);
+        exit;
+        end;
+      lkRpt := TxReport(StrToComponent(lkRes));  
+      lkRpt.DataBase := FBDataBase;
+      if(lkRpt.DataSets.Count < 2)then
+        while(lkRpt.DataSets.Count < 2)do
+          lkRpt.DataSets.Add;
+      lkRpt.DataSets[0].SQL.Text := 'SELECT PC.* FROM PROC$D_GET_1000101_TMC_TOWN('''+ID+''') PC ';
+      lkRpt.DataSets[1].SQL.Text := 'SELECT P1.* FROM PROC$D_4('''+ID+''') P1 ';
+      lkRpt.DataSets[2].SQL.Text := 'SELECT P2.* FROM PROC$D_ENT_CONST('''+ID+''') P2 ' 
+      lkImg := TxrImage(lkRpt.FindComponent('ImgLogo'));
+      lkRes := StrAbsolutePath('../conf/ent/logo.bmp', Amunhotep.ExeName);
+      if FileExists(lkRes)then
+        try
+          lkImg.Picture.LoadFromFile(lkRes);
+        except
+        end;
+      lkRpt.Prepare;
+      lkRpt.Preview;
+    end;    
+    //==========================================================================
+    function PreviewTMCRoute(const ID, ResName:string):Boolean;
+    var
+      lkRpt :TxReport;
+      lkRes :string;
+      lkImg :TxrImage;
+    begin
+      Result := false;
+      lkRes := StringsLoadFromFile(ResName);
+      if(StrTrimAll(lkRes) = '')then
+        begin
+        Dialogs.MessageDlg('Неверный файл ресурсов '+#13#10+ResName, mtError, [mbOk]);
+        exit;
+        end;
+      lkRpt := TxReport(StrToComponent(lkRes));  
+      lkRpt.DataBase := FBDataBase;
+      if(lkRpt.DataSets.Count < 2)then
+        while(lkRpt.DataSets.Count < 2)do
+          lkRpt.DataSets.Add;
+      lkRpt.DataSets[0].SQL.Text := 'SELECT PC.* FROM PROC$D_GET_1000101_TMC_ROUTE('''+ID+''') PC ';
+      lkRpt.DataSets[1].SQL.Text := 'SELECT P1.* FROM PROC$D_4('''+ID+''') P1 ';
+      lkRpt.DataSets[2].SQL.Text := 'SELECT P2.* FROM PROC$D_ENT_CONST('''+ID+''') P2 ' 
+      lkImg := TxrImage(lkRpt.FindComponent('ImgLogo'));
+      lkRes := StrAbsolutePath('../conf/ent/logo.bmp', Amunhotep.ExeName);
+      if FileExists(lkRes)then
+        try
+          lkImg.Picture.LoadFromFile(lkRes);
+        except
+        end;
+      lkRpt.Prepare;
+      lkRpt.Preview;
+    end;    
+    //==========================================================================
+    function PreviewTMCCalc0(const ID, ResName:string):Boolean;
+    var
+      lkRpt :TxReport;
+      lkRes :string;
+      lkImg :TxrImage;
+    begin
+      Result := false;
+      lkRes := StringsLoadFromFile(ResName);
+      if(StrTrimAll(lkRes) = '')then
+        begin
+        Dialogs.MessageDlg('Неверный файл ресурсов '+#13#10+ResName, mtError, [mbOk]);
+        exit;
+        end;
+      lkRpt := TxReport(StrToComponent(lkRes));  
+      lkRpt.DataBase := FBDataBase;
+      if(lkRpt.DataSets.Count < 2)then
+        while(lkRpt.DataSets.Count < 2)do
+          lkRpt.DataSets.Add;
+      lkRpt.DataSets[0].SQL.Text := 'SELECT PC.* FROM PROC$D_GET_1000101_TMCCALC0('''+ID+''') PC ';
+      lkRpt.DataSets[1].SQL.Text := 'SELECT P1.* FROM PROC$D_4('''+ID+''') P1 ';
+      lkRpt.DataSets[2].SQL.Text := 'SELECT P2.* FROM PROC$D_ENT_CONST('''+ID+''') P2 ' 
+      lkImg := TxrImage(lkRpt.FindComponent('ImgLogo'));
+      lkRes := StrAbsolutePath('../conf/ent/logo.bmp', Amunhotep.ExeName);
+      if FileExists(lkRes)then
+        try
+          lkImg.Picture.LoadFromFile(lkRes);
+        except
+        end;
+      lkRpt.Prepare;
+      lkRpt.Preview;
+    end;    
+    //==========================================================================
+    function PreviewTMCCalc1(const ID, ResName:string):Boolean;
+    var
+      lkRpt :TxReport;
+      lkRes :string;
+      lkImg :TxrImage;
+    begin
+      Result := false;
+      lkRes := StringsLoadFromFile(ResName);
+      if(StrTrimAll(lkRes) = '')then
+        begin
+        Dialogs.MessageDlg('Неверный файл ресурсов '+#13#10+ResName, mtError, [mbOk]);
+        exit;
+        end;
+      lkRpt := TxReport(StrToComponent(lkRes));  
+      lkRpt.DataBase := FBDataBase;
+      if(lkRpt.DataSets.Count < 2)then
+        while(lkRpt.DataSets.Count < 2)do
+          lkRpt.DataSets.Add;
+      lkRpt.DataSets[0].SQL.Text := 'SELECT PC.* FROM PROC$D_GET_1000101_TMCCALC1('''+ID+''') PC ';
+      lkRpt.DataSets[1].SQL.Text := 'SELECT P1.* FROM PROC$D_4('''+ID+''') P1 ';
+      lkRpt.DataSets[2].SQL.Text := 'SELECT P2.* FROM PROC$D_ENT_CONST('''+ID+''') P2 ' 
+      lkImg := TxrImage(lkRpt.FindComponent('ImgLogo'));
+      lkRes := StrAbsolutePath('../conf/ent/logo.bmp', Amunhotep.ExeName);
+      if FileExists(lkRes)then
+        try
+          lkImg.Picture.LoadFromFile(lkRes);
+        except
+        end;
+      lkRpt.Prepare;
+      lkRpt.Preview;
+    end;    
+var
+  J_ID :string;
+  i    :Integer;
+begin
+  J_ID := GetGlobalVariable('J_ID');
+  if((StrTrimAll(J_ID)='')or(UpperCase(J_ID)='NULL'))then exit;
+  WriteLn(J_ID);
+  i := 0;
+  if not Dialogs.CaseItem('Выберите шаблон печати', 
+    'Пакет накладных на доставку'+#13#10+
+    'Производственная программа'+#13#10+
+    '    Потребность в продуктах на производственную программу'+#13#10+
+    '    Потребность в полуфабрикатах'+#13#10+
+    'Задание на развоз (по торговым представителям)'+#13#10+
+    'Задание на развоз (по городам)'+#13#10+
+    '    Комплектация на развоз (по городам)'+#13#10+
+    'Задание на развоз (по маршрутам)'+#13#10+
+    '    Комплектация на развоз (по маршрутам)'
+    ,i)then exit;
+  case i of
+    0: PreviewBills     (J_ID, StrAbsolutePath('./RPT_BILLS.XFM'  , ScriptName));
+    1: PreviewTMC       (J_ID, StrAbsolutePath('./RPT_TMC.XFM'    , ScriptName));
+    2: PreviewTMCCalc0  (J_ID, StrAbsolutePath('./RPT_TMC.XFM'    , ScriptName));
+    3: PreviewTMCCalc1  (J_ID, StrAbsolutePath('./RPT_TMC.XFM'    , ScriptName));
+    4: PreviewBills     (J_ID, StrAbsolutePath('./RPT_CS.XFM'     , ScriptName));
+    5: PreviewBillsTown (J_ID, StrAbsolutePath('./RPT_CSTOWN.XFM' , ScriptName));
+    6: PreviewTMCTown   (J_ID, StrAbsolutePath('./RPT_TMCTOWN.XFM', ScriptName));
+    7: PreviewBillsRoute(J_ID, StrAbsolutePath('./RPT_CSTOWN.XFM' , ScriptName));
+    8: PreviewTMCRoute  (J_ID, StrAbsolutePath('./RPT_TMCTOWN.XFM', ScriptName));
+    end;  
+end.

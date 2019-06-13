@@ -1,0 +1,46 @@
+{$IFNDEF PEAKTOP:IDE/ERP/CONFIG/REF/FIRMS/DIALOGCASEITEM.INC}
+  {$I PEAKTOP:IDE/ERP/CONFIG/REF/FIRMS/DIALOGCASEITEM.INC}
+{$ENDIF}  
+var
+  lkFirmId :string;
+  lkDocIds :array of string;
+  lkSQL    :string;
+begin
+  if not ERPDialogCaseReferenceItem_Firm_Execute(lkFirmId) then exit;
+
+  lkSQL := 
+    'EXECUTE BLOCK RETURNS ( '+SQLCRLF+
+    '   J_ID       TYPE OF COLUMN TABL$J_4.ID '+SQLCRLF+
+    '  ,DOCTYPE_ID TYPE OF COLUMN TABL$J_4.TYPE_ID '+SQLCRLF+
+    ')AS '+SQLCRLF+
+    '  DECLARE VARIABLE P_FIRM_ID     TYPE OF COLUMN TABL$J_4.FIRM_ID; '+SQLCRLF+
+    '  DECLARE VARIABLE P_PARENT_J_ID TYPE OF COLUMN TABL$J_4.ID; '+SQLCRLF+
+    '  DECLARE VARIABLE P_DATE_STR    TYPE OF COLUMN TABL$J_4.DOCSTR; '+SQLCRLF+
+    '  DECLARE VARIABLE P_DATE_COMMIT TYPE OF COLUMN TABL$J_4.DATE_COMMIT; '+SQLCRLF+
+    'BEGIN '+SQLCRLF+
+    '  P_FIRM_ID     = '+lkFirmId+'; '+SQLCRLF+
+    '  P_PARENT_J_ID = NULL; '+SQLCRLF+
+    '  DOCTYPE_ID    = 1000019; '+SQLCRLF+
+    ' '+SQLCRLF+
+    '  SELECT FIRST 1 P.J_ID '+SQLCRLF+
+    '  FROM   PROC$J$INS(:P_PARENT_J_ID, :P_FIRM_ID, :DOCTYPE_ID) P '+SQLCRLF+
+    '  INTO   :J_ID; '+SQLCRLF+
+    ' '+SQLCRLF+
+    '  P_DATE_STR = '+SQLCRLF+
+    '    LPAD(EXTRACT(DAY   FROM CURRENT_TIMESTAMP),2,''0'')||''.''|| '+SQLCRLF+
+    '    LPAD(EXTRACT(MONTH FROM CURRENT_TIMESTAMP),2,''0'')||''.''|| '+SQLCRLF+
+    '    LPAD(EXTRACT(YEAR  FROM CURRENT_TIMESTAMP),4,''0'')||'' 06:00:00''; '+SQLCRLF+
+    ' '+SQLCRLF+
+    '  P_DATE_COMMIT = CAST(:P_DATE_STR AS TIMESTAMP); '+SQLCRLF+
+    ' '+SQLCRLF+
+    '  UPDATE TABL$J_4 J SET J.DATE_COMMIT = :P_DATE_COMMIT WHERE (J.ID = :J_ID); '+SQLCRLF+
+    ' '+SQLCRLF+
+    '  SUSPEND; '+SQLCRLF+
+    'END';
+
+  SetLength(lkDocIds, 1)
+  if not TERPForm_SelectSQLParams([], lkSQL, [],[], ['J_ID'], lkDocIds)then exit;
+
+  SetGlobalVariable('J_ID', lkDocIds[0]);
+  call(StrAbsolutePath('./EDIT.PS', ScriptName));  
+end.

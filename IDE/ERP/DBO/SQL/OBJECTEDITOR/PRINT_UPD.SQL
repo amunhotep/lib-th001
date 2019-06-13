@@ -1,0 +1,8 @@
+UPDATE TABL$_TB_DOCSRPT SET
+   NAME        = ?NAME
+  ,FLAG_DELETE = ?FLAG_DELETE
+  ,ORDERID     = ?ORDERID
+  ,SUBTYPE     = ?SUBTYPE
+  ,PATH        = ?PATH
+  ,DESCR       = ?DESCR
+WHERE (ID = ?ID)

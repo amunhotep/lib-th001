@@ -1,0 +1,13 @@
+{$DEFINE PEAKTOP:IDE/ERP/DBO/REF/DIALOGCASEFOLDER.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/$COMMON/DIALOG_CASEOBJECTFOLDER.INC}
+  {$I ../$COMMON/DIALOG_CASEOBJECTFOLDER.INC}
+{$ENDIF}
+var
+  lkTypeId :string;
+begin
+  lkTypeId := IntToStr(ERP_OBJECTTYPE_REF);
+  if ERPDialogCaseObjFolder_Execute(ERP_OBJECTTYPE_REF, lkTypeId) then
+    SetGlobalVariable('TYPE_ID', lkTypeId)
+   else
+    SetGlobalVariable('TYPE_ID', 'NULL');
+end.  

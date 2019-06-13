@@ -1,0 +1,9 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}    {$I PEAKTOP:GLOBAL_VARIABLES.INC}    {$ENDIF}
+var
+  lkFileName :string;
+begin
+//  Amunhotep.Icon.Handle      := LoadIcon(Amunhotep.Instance, 'Z004');
+  Amunhotep.Title            := 'Редактор регистра Windows';
+  Amunhotep.MainForm.Caption := Amunhotep.Title;
+  call(StrAbsolutePath('./MAINMENU/CREATE.PS', ScriptName));
+end.

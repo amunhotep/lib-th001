@@ -1,0 +1,209 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG/RPTI/329A4A13-D8D2-4EBE-BBEE-05A8AF8DDAB2/DEFAULT.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$I PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/DATEMONTH/INTF.INC}  {$I PEAKTOP:IDE/ERP/DBO/INPUT/DATEMONTH/INTF.INC}  {$ENDIF}
+const
+  FIELD_PREFIXCS = 'CS_CNT';   
+  FIELD_PREFIXPH = 'PH_CNT';   
+  //============================================================================
+  function TERPFormRpti_GetExportFilter(aOwner:TComponent):string;
+  begin
+    Result := '';
+  end;
+  //============================================================================
+  function TERPFormRpti_OnGetSQL(aOwner:TComponent;var aSQL:string):Boolean;
+  begin
+    Result := true;
+    aSQL :=  TxsStringsHolder(aOwner.FindComponent(obj_name_erp_data_settings)).Items[1].Strings.Text;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnGetSQLFileName(aOwner:TComponent;var aFileName:string);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnProcessParams(aOwner:TComponent;aQr :TxFBQuery);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnChart(aOwner:TComponent; aParent:TWinControl);
+  begin
+    aParent.Free;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnTerms(aOwner:TComponent;aParent:TWinControl);
+  var
+    lkLastTop :Integer;
+  begin
+    lkLastTop := 4;
+    lkLastTop := lkLastTop + InputIntf_DateMonth_Create(aOwner, aParent, 'gbDateMonth', 'Укажите период', 4, lkLastTop, 44, 360).Height;
+    lkLastTop := lkLastTop + 4;
+  end;
+  //============================================================================
+  function TERPFormRpti_OnColumnsCreate(aOwner:TComponent; aDBG:TDBGridEh):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsCreated(aOwner:TComponent; aDBG:TDBGridEh);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsLoad(aOwner:TComponent; aDBG:TDBGridEh);
+  var
+    lkDateFrom :TDateTime;
+    lkDateTo   :TDateTime;
+    lkCol      :TColumnEh;
+    lkSQLVars  :string;
+    lkSQLBody  :string;
+    lkSQLBodyE :string;
+    lkFldName  :string;
+    lkCol      :TColumnEh;
+  begin
+    lkDateFrom := InputIntf_DateMonth_Date(aOwner, 'gbDateMonth', InputIntf_DateMonth_DateFrom);
+    lkDateTo   := InputIntf_DateMonth_Date(aOwner, 'gbDateMonth', InputIntf_DateMonth_DateTo  );
+    aDBG.Visible    := false; 
+    aDBG.FrozenCols := 0;
+    aDBG.Columns.Clear;
+    lkCol := CreateTColumnEh(aDBG,'WRK_ID','# ### ##0','Сотрудник|код', 56, taRightJustify);
+    with lkCol do
+      begin
+      Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      HideDuplicates := True;
+      Tag   := 666;
+      end;
+    lkCol := CreateTColumnEh(aDBG,'WRK_NAME','','Сотрудник|Имя', 80, taLeftJustify);
+    with lkCol do
+      begin
+      Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      HideDuplicates := True;
+      Tag   := 666;
+      end;
+    lkCol := CreateTColumnEh(aDBG,'WRK_POSTS','','Сотрудник|Занимаемые должности', 120, taLeftJustify);
+    with lkCol do
+      begin
+      Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      Tag   := 666;
+      end;
+    lkCol := CreateTColumnEh(aDBG,'FILIAL_NAME','','Филиал', 80, taLeftJustify);
+    with lkCol do
+      begin
+      Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      Tag   := 666;
+      end;
+    lkFldName := 'T'+FormatDateTime('mm',lkDateFrom);
+    lkSQLVars := '  ,'+lkFldName+' DOMN$FLOAT '+SQLCRLF;
+    lkSQLBody := '    '+lkFldName+' = 0;'+SQLCRLF;
+    lkSQLBodyE:= '    '+lkFldName+' = :'+lkFldName+' ';
+    lkCol := CreateTColumnEh(aDBG,lkFldName,'#0.000','Всего часов', 48,taRightJustify);
+    with lkCol do
+      begin
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      Font.Style := [fsBold];
+      Tag        := 666;
+      with Footer do
+        begin
+        Color         := lkCol.Color;
+        Alignment     := lkCol.Alignment;
+        Font.Style    := [fsBold];
+        DisplayFormat := lkCol.DisplayFormat;
+        ValueType     := fvtSum;
+        end;
+      end;
+    while(lkDateFrom <= lkDateTo)do
+      begin
+      lkFldName := 'T'+FormatDateTime('dd',lkDateFrom);
+      lkSQLVars := lkSQLVars + '  ,'+lkFldName+'S DOMN$DATETIME, '+lkFldName+'E DOMN$DATETIME, '+lkFldName+'O DOMN$FLOAT_KURS '+SQLCRLF;
+      lkSQLBody := lkSQLBody +
+      '    '+lkFldName+'S = NULL; '+SQLCRLF+  
+      '    '+lkFldName+'E = NULL; '+SQLCRLF+  
+      '    SELECT MIN(I1.DATE_COMMIT) '+SQLCRLF+
+      '    FROM   TABL$P_WRK_INOUT I1 '+SQLCRLF+
+      '    WHERE  (I1.DATE_COMMIT BETWEEN '''+FormatDateTime('dd.mm.yyyy',lkDateFrom)+' 05:00:01'' AND '''+FormatDateTime('dd.mm.yyyy',lkDateFrom+1)+' 00:00:00'') '+SQLCRLF+
+      '      AND  (I1.WRK_ID = :WRK_ID) '+SQLCRLF+
+      '      AND  (I1.FILIAL_ID = :FILIAL_ID) '+SQLCRLF+
+      '      AND  (I1.INOUT = 1) '+SQLCRLF+
+      '    INTO   :'+lkFldName+'S;'+SQLCRLF+
+      '    SELECT COALESCE( MAX(I2.DATE_COMMIT), :'+lkFldName+'S) '+SQLCRLF+
+      '    FROM   TABL$P_WRK_INOUT I2 '+SQLCRLF+
+      '    WHERE  (I2.DATE_COMMIT BETWEEN '''+FormatDateTime('dd.mm.yyyy',lkDateFrom)+' 00:00:00'' AND '''+FormatDateTime('dd.mm.yyyy',lkDateFrom+1)+' 05:00:00'') '+SQLCRLF+
+      '      AND  (I2.WRK_ID = :WRK_ID) '+SQLCRLF+
+      '      AND  (I2.FILIAL_ID = :FILIAL_ID) '+SQLCRLF+
+      '      AND  (I2.INOUT = 1) '+SQLCRLF+
+      '    INTO   :'+lkFldName+'E;'+SQLCRLF+
+      '    '+lkFldName+'O = DATEDIFF(MINUTE FROM :'+lkFldName+'S TO :'+lkFldName+'E); IF(:'+lkFldName+'O IS NULL)THEN '+lkFldName+'O = 0; '+lkFldName+'O = :'+lkFldName+'O / 60;  '+SQLCRLF;
+      lkSQLBodyE := lkSQLBodyE + '+:'+lkFldName+'O ';   
+      lkCol := CreateTColumnEh(aDBG,lkFldName+'S','hh:nn',FormatDateTime('yyyy|mmmmm|dd|dddd',lkDateFrom)+'|пришёл', 36,taLeftJustify);
+      with lkCol do
+        begin
+        Color      := Amunhotep.MainForm.StyleManager.Colors.Highlight;
+        Title.Hint := FormatDateTime('dd.mm.yyyy',lkDateFrom);
+        end;
+      lkCol := CreateTColumnEh(aDBG,lkFldName+'E','hh:nn',FormatDateTime('yyyy|mmmmm|dd|dddd',lkDateFrom)+'|ушёл', 36,taLeftJustify );
+        lkCol.Title.Hint := FormatDateTime('dd.mm.yyyy',lkDateFrom);
+      lkCol := CreateTColumnEh(aDBG,lkFldName+'O','#0.00',FormatDateTime('yyyy|mmmmm|dd|dddd',lkDateFrom)+'|часов', 36,taRightJustify);
+      with lkCol do
+        begin
+        Color := $00C0FFC0;
+        Title.Hint := FormatDateTime('dd.mm.yyyy',lkDateFrom);
+        with Footer do
+          begin
+          Color         := lkCol.Color;
+          Alignment     := lkCol.Alignment;
+          Font.Style    := [fsBold];
+          DisplayFormat := lkCol.DisplayFormat;
+          ValueType     := fvtSum;
+          end;
+        end;
+      lkDateFrom := lkDateFrom + 1;
+      end;
+    aDBG.FrozenCols     := 5;
+    aDBG.FooterRowCount := 1;
+    aDBG.SumList.Active := true;
+    aDBG.Visible        := true; 
+    with TxsStringsHolder(aOwner.FindComponent(obj_name_erp_data_settings)) do
+      begin
+      while(Items.Count < 2)do
+        Items.Add;
+      Items[1].Strings.Text := 
+        'EXECUTE BLOCK RETURNS( '+SQLCRLF+
+        '   WRK_ID         TYPE OF COLUMN TABL$R_WRK.ID '+#13#10+
+        '  ,WRK_NAME       TYPE OF COLUMN TABL$R_WRK.NAME '+#13#10+
+        '  ,WRK_POSTS      TYPE OF COLUMN TABL$R_WRK.NAME '+#13#10+
+        '  ,FILIAL_ID      TYPE OF COLUMN TABL$R_FILIALS.ID '+#13#10+
+        '  ,FILIAL_NAME    TYPE OF COLUMN TABL$R_FILIALS.NAME '+#13#10+
+        lkSQLVars+
+        ')AS '+SQLCRLF+
+        'BEGIN '+SQLCRLF+
+        '  FOR '+SQLCRLF+
+        '    SELECT P.WRK_ID, P.WRK_NAME, P.FILIAL_ID, P.FILIAL_NAME, P.WRK_POSTS '+SQLCRLF+
+        '    FROM   PROC$P_WRK_INOUT_WRK('''+
+                        FormatDateTime('dd.mm.yyyy',InputIntf_DateMonth_Date(aOwner, 'gbDateMonth', InputIntf_DateMonth_DateFrom))+' 00:00:00'', '''+
+                        FormatDateTime('dd.mm.yyyy',InputIntf_DateMonth_Date(aOwner, 'gbDateMonth', InputIntf_DateMonth_DateTo  ))+' 23:59:59'') P '+SQLCRLF+
+        '    INTO   :WRK_ID, :WRK_NAME, :FILIAL_ID, :FILIAL_NAME, :WRK_POSTS '+SQLCRLF+
+        '  DO '+SQLCRLF+
+        '    BEGIN '+SQLCRLF+
+        '    '+SQLCRLF+
+        lkSQLBody+
+        lkSQLBodyE+'; '+SQLCRLF+
+        '    SUSPEND; '+SQLCRLF+
+        '    END '+SQLCRLF+
+        'END'; 
+      end;
+  end;
+  //============================================================================
+  function TERPFormRpti_OnPrint(aOwner:TComponent):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_BeforePreview(aOwner:TComponent; aRpt:TxReport);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+begin
+  TERPFormRpti_Create('{329A4A13-D8D2-4EBE-BBEE-05A8AF8DDAB2}');
+end.

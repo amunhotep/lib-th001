@@ -1,0 +1,131 @@
+{$DEFINE PEAKTOP:IDE/DEVELOPMENT/OBJECTINSPECTOR/DEFAULT.PS}
+{$IFNDEF PEAKTOP:OBJ/TACTION.INC}  {$I PEAKTOP:OBJ/TACTION.INC}  {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TMENUITEM.INC}{$I PEAKTOP:OBJ/TMENUITEM.INC}{$ENDIF}
+const
+  msg_mi_view_caption                = 'Вид'                   ; msg_mi_view_hint                 = 'Вид'; 
+  msg_mi_arrange_caption             = 'Упорядочить'           ; msg_mi_arrange_hint              = 'Упорядочить'; 
+  msg_mi_arrange_by_category_caption = 'по категориям'         ; msg_mi_arrange_by_category_hint  = 'Упорядочить по категориям'; 
+  msg_mi_arrange_by_name_caption     = 'по имени'              ; msg_mi_arrange_by_name_hint      = 'Упорядочить по имени'; 
+  msg_mi_insp_props_caption          = 'Свойства'              ; msg_mi_insp_props_hint           = 'Свойства инспектора объектов'; 
+  msg_act_highlightnondefaultvalues  = 'Выделять измененные'   ;
+  msg_mi_viewshowallcategory_caption = 'Показать все категории';
+  msg_mi_viewhideallcategory_caption = 'Срыть все категории'   ;
+
+  //============================================================================
+  procedure actViewCategory_OnExecute(Sender :TObject);
+  var
+    lkIndex :Integer;
+  begin
+    lkIndex := TCustomAction(Sender).Tag;
+    with Amunhotep.ObjectInspectorForm.Inspector do
+      begin
+      if RegisteredCategories[lkIndex].Visible then
+        HideCategory(RegisteredCategories[lkIndex].Name)
+       else 
+        ShowCategory(RegisteredCategories[lkIndex].Name);
+      end;
+  end;
+  //============================================================================
+  procedure actViewCategory_OnUpdate(Sender :TObject);
+  begin
+    TCustomAction(Sender).Visible := true;
+    TCustomAction(Sender).Checked := Amunhotep.ObjectInspectorForm.Inspector.RegisteredCategories[TCustomAction(Sender).Tag].Visible;
+  end;
+  //============================================================================
+  procedure actViewShowAllCategory_OnExecute(Sender :TObject);
+  begin
+    Amunhotep.ObjectInspectorForm.Inspector.ShowAllCategories;
+  end;
+  //============================================================================
+  procedure actViewHideAllCategory_OnExecute(Sender :TObject);
+  begin
+    Amunhotep.ObjectInspectorForm.Inspector.HideAllCategories;
+  end;
+  //============================================================================
+  procedure actArrangeByName_OnExecute(Sender :TObject);
+  begin
+    Amunhotep.ObjectInspectorForm.Inspector.ArrangeKind := akByName;
+  end;
+  //============================================================================
+  procedure actArrangeByName_OnUpdate(Sender :TObject);
+  begin
+    TCustomAction(Sender).Checked := (Amunhotep.ObjectInspectorForm.Inspector.ArrangeKind = akByName);
+  end;
+  //============================================================================
+  procedure actArrangeByCategory_OnExecute(Sender :TObject);
+  begin
+    Amunhotep.ObjectInspectorForm.Inspector.ArrangeKind := akByCategory;
+  end;
+  //============================================================================
+  procedure actArrangeByCategory_OnUpdate(Sender :TObject);
+  begin
+    TCustomAction(Sender).Checked := (Amunhotep.ObjectInspectorForm.Inspector.ArrangeKind = akByCategory);
+  end;
+  //============================================================================
+  procedure actHighlightNonDefaultValues_OnExecute(Sender :TObject);
+  begin
+    Amunhotep.ObjectInspectorForm.Inspector.HighlightNonDefaultValues := 
+      not Amunhotep.ObjectInspectorForm.Inspector.HighlightNonDefaultValues;
+  end;
+  //============================================================================
+  procedure actHighlightNonDefaultValues_OnUpdate(Sender :TObject);
+  begin
+    TCustomAction(Sender).Checked := Amunhotep.ObjectInspectorForm.Inspector.HighlightNonDefaultValues;
+  end;
+  //============================================================================
+  procedure miInspectorProps_OnClick(Sender :TObject);
+  begin
+  
+  end;
+  //============================================================================
+  function CreateObjectInspectorPopupMenu(Owner :TControl):TPopupMenu;
+  var
+    lk_act    :TCustomAction;
+    lk_mi     :TMenuItem;
+    lk_mi_sub :TMenuItem;
+    i         :Integer;
+  begin
+    Result        := TPopupMenu.Create(Owner);
+    Result.Images := Amunhotep.MainForm.ImageListMain;
+    lk_mi       := CreateTMenuItem(Result.Items,'miView'             ,msg_mi_view_caption               ,msg_mi_view_hint              ,'', -1, 0);
+    for i:=0 to Amunhotep.ObjectInspectorForm.Inspector.RegisteredCategories.Count-1 do
+      begin
+      lk_act           := CreateTAction(Result,'actViewCategory'+FormatFloat('0000', i), Amunhotep.ObjectInspectorForm.Inspector.RegisteredCategories[i].Name, 
+                            Amunhotep.ObjectInspectorForm.Inspector.RegisteredCategories[i].Name, '', 0, -1);
+      lk_act.OnExecute := @actViewCategory_OnExecute;
+      lk_act.OnUpdate  := @actViewCategory_OnUpdate;
+      lk_act.Tag       := i;
+      lk_mi_sub        := CreateTMenuItem2(lk_mi, lk_act);
+      end;
+      lk_mi_sub        := CreateTMenuItem(lk_mi,'miViewN0001','-','-','', -1, 0);
+      lk_act           := CreateTAction(Result,'actViewShowAllCategory', msg_mi_viewshowallcategory_caption, msg_mi_viewshowallcategory_caption,'', 2, -1); 
+      lk_act.OnExecute := @actViewShowAllCategory_OnExecute;
+      lk_mi_sub := CreateTMenuItem2(lk_mi, lk_act);
+      lk_act           := CreateTAction(Result,'actViewHideAllCategory', msg_mi_viewhideallcategory_caption, msg_mi_viewhideallcategory_caption,'', 2, -1); 
+      lk_act.OnExecute := @actViewHideAllCategory_OnExecute;
+      lk_mi_sub := CreateTMenuItem2(lk_mi, lk_act);
+    lk_mi       := CreateTMenuItem(Result.Items,'miArrange'          ,msg_mi_arrange_caption            ,msg_mi_arrange_hint            ,'',252, 0);
+      lk_act           := CreateTAction(Result,'actArrangeByCategory', msg_mi_arrange_by_category_caption, msg_mi_arrange_by_category_hint,'', 2, -1); 
+      lk_act.OnExecute := @actArrangeByCategory_OnExecute;
+//      lk_act.OnUpdate  := @actArrangeByCategory_OnUpdate;
+      lk_mi_sub := CreateTMenuItem2(lk_mi, lk_act);
+      lk_act           := CreateTAction(Result,'actArrangeByName', msg_mi_arrange_by_name_caption, msg_mi_arrange_by_name_hint,'', 2, -1); 
+      lk_act.OnExecute := @actArrangeByName_OnExecute;
+//      lk_act.OnUpdate  := @actArrangeByName_OnUpdate;
+      lk_mi_sub := CreateTMenuItem2(lk_mi, lk_act);
+    lk_mi       := CreateTMenuItem(Result.Items,'miN0001'            ,'-'                               ,'-'                            ,'', -1, 0);
+      lk_act           := CreateTAction(Result,'actHighlightNonDefaultValues', msg_act_highlightnondefaultvalues, msg_act_highlightnondefaultvalues,'', 0, -1); 
+      lk_act.OnExecute := @actHighlightNonDefaultValues_OnExecute;
+      lk_act.OnUpdate  := @actHighlightNonDefaultValues_OnUpdate;
+      lk_mi_sub := CreateTMenuItem2(Result.Items, lk_act);
+    lk_mi       := CreateTMenuItem(Result.Items,'miN0002'            ,'-'                               ,'-'                            ,'', -1, 0);
+    lk_mi       := CreateTMenuItem(Result.Items,'miInspectorProps'   ,msg_mi_insp_props_caption         ,msg_mi_insp_props_hint         ,'',148, 0); 
+      lk_mi.OnClick := @miInspectorProps_OnClick;
+    Amunhotep.MainForm.xcMenu.AddMenu(Result);
+  end;
+  //============================================================================
+begin
+  DontAutoFree;
+  RegisterStandardPropertyCategories(Amunhotep.ObjectInspectorForm.Inspector);
+  Amunhotep.ObjectInspectorForm.PopupMenu := CreateObjectInspectorPopupMenu(Amunhotep.ObjectInspectorForm);
+end.

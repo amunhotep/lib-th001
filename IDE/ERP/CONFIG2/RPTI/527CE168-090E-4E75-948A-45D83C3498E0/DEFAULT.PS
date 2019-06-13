@@ -1,0 +1,343 @@
+{$DEFINE DB:CONFIG/RPTI/527CE168-090E-4E75-948A-45D83C3498E0/DEFAULT.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$I PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC} {$I PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}        {$I PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}        {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/CHECKBOX/INTF.INC}   {$I PEAKTOP:IDE/ERP/DBO/INPUT/CHECKBOX/INTF.INC}   {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCEDITCOMBO.INC}                  {$I PEAKTOP:OBJ/TXCEDITCOMBO.INC}                  {$ENDIF}
+const
+  objname_datefrom   = 'dtpDateFrom';
+  objname_dateto     = 'dtpDateTo';
+  objname_firms      = 'gbFirms';
+  objname_check      = 'cbxCheck';
+  msg_input_check    = 'Не показывать корневые счета и классы счетов';
+  msg_input_firms    = 'Выберите фирму учета';
+  //============================================================================
+  function TERPFormRpti_GetExportFilter(aOwner:TComponent):string;
+  begin
+    Result := 
+      msg_erp_lbldatefrom+' "'+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+'" '+
+      msg_erp_lbldateto  +' "'+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto))+'" '+
+      'Фирма учета: "'+InputIntf_Ref_GetNames(aOwner.FindComponent(objname_firms))+'" ';
+  end;
+  //============================================================================
+  function TERPFormRpti_OnGetSQL(aOwner:TComponent;var aSQL:string):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnGetSQLFileName(aOwner:TComponent;var aFileName:string);
+  begin
+     // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnProcessParams(aOwner:TComponent;aQr :TxFBQuery);
+  begin
+    with aQr do
+      begin
+      ParamByName('FIRM_IDS' ).AsString := InputIntf_Ref_GetIds(aOwner.FindComponent(objname_firms));
+      ParamByName('DATE_FROM').AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+' 00:00:00';
+      ParamByName('DATE_TO'  ).AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto)+1)+' 00:00:00';
+      ParamByName('FLAG'     ).AsString := InputIntf_CheckBox_Checked(aOwner, objname_check);
+      end;  
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnChart(aOwner:TComponent; aParent:TWinControl);
+  var
+    lkPC :TxcPageControlEx;
+    lkTS :TxcTabSheet;
+  begin
+    aParent.Free;
+    exit;
+    lkPC := CreateTxcPageControlEx(aOwner, aParent, 'PCCharts', 0,0,600,600, alClient);
+    lkPC.MultiLine := false;
+    TxcPageControlEx_ActivateDefaultPage(lkPC);
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnTerms(aOwner:TComponent;aParent:TWinControl);
+  var
+    lkLastTop :Integer;
+  begin
+    lkLastTop := 4;
+    lkLastTop := lkLastTop + InputIntf_DatePeriod_Create(aOwner, aParent, 'gbDatePeriod', 'Укажите период', 4, lkLastTop, 44, 360,objname_datefrom,objname_dateto,StartOfTheMonth(Now),EndOfTheMonth(Now)).Height;
+    lkLastTop := lkLastTop + 4;
+    lkLastTop := lkLastTop + InputIntf_Ref_Create(aOwner,aParent,objname_firms   ,msg_input_firms   ,4,lkLastTop,220,360,'TABL$R_FIRMS',TERPForm_Settings(aOwner).Values[ERP_SETTINGS_TABLENAME]).Height;
+    lkLastTop := lkLastTop + 4;
+    with InputIntf_CheckBox_Create(aOwner,aParent,objname_check,msg_input_check,4,lkLastTop, 20,360) do
+      begin
+      Checked   := true;
+      lkLastTop := lkLastTop + Height;
+      end;
+    lkLastTop := lkLastTop + 4;
+  end;
+  //============================================================================
+  function TERPFormRpti_OnColumnsCreate(aOwner:TComponent; aDBG:TDBGridEh):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_Columns_OnEditButtonClick(Sender :TObject; var Handled :Boolean);
+  var
+    lkDBG    :TDBGridEh;
+    lkCmp    :TComponent;
+    lkCol    :TColumnEh;
+    lkSubkonto:string;
+    lkScript :string;
+  begin
+    Handled := true;
+    lkDBG   := TDBGridEh(TComponent(Sender).Owner.Owner);
+    if not lkDBG.DataSource.DataSet.Active then exit;
+    lkCol   := lkDBG.Columns[lkDBG.SelectedIndex];
+    if(lkCol=nil)then exit;
+    lkSubkonto := '';
+    if(lkCol.ColParams[0] = '1')then
+      begin
+      lkSubkonto := 
+        '  TERPFormGrid_DataSetFilter_Add(''ACC_ID_DEB''     , ''ACC_IDS_DEB CONTAINING ''''~'+lkDBG.DataSource.DataSet.FieldByName('BUHG_ACCS_ID').AsString+'~'''' ''); '+SQLCRLF;
+      end
+     else
+      begin
+      lkSubkonto := 
+        '  TERPFormGrid_DataSetFilter_Add(''ACC_ID_KRED''     , ''ACC_IDS_KRED CONTAINING ''''~'+lkDBG.DataSource.DataSet.FieldByName('BUHG_ACCS_ID').AsString+'~'''' ''); '+SQLCRLF;
+      end; 
+    lkScript := 
+      '{$IFNDEF PEAKTOP:IDE/ERP/DBO/REG/FORMREG.INC} {$I PEAKTOP:IDE/ERP/DBO/REG/FORMREG.INC} {$ENDIF} '+SQLCRLF+
+      'begin '+SQLCRLF+
+      '  TERPFormGrid_DataSetFilter_DateInit := true; '+SQLCRLF+
+      '  TERPFormGrid_DataSetFilter_DateFrom := StrToDate('''+FormatDateTime('dd.mm.yyyy',lkDBG.DataSource.DataSet.FieldByName('DATE_FROM').AsDateTime)+'''); '+SQLCRLF+ 
+      '  TERPFormGrid_DataSetFilter_DateTo   := StrToDate('''+FormatDateTime('dd.mm.yyyy',lkDBG.DataSource.DataSet.FieldByName('DATE_TO').AsDateTime-1)+'''); '+SQLCRLF+
+      '  TERPFormGrid_DataSetFilter_Add(''FIRM_ID'', '' '''''+InputIntf_Ref_GetIds(lkDBG.Owner.FindComponent(objname_firms))+''''' CONTAINING ''''~''''||FIRM_ID||''''~'''' ''); '+SQLCRLF+
+      lkSubkonto+
+      '  Registry_Create(''TABL$P_CND''); '+SQLCRLF+ 
+      'end.';
+    //Dialogs.MessageDlg(lkScript, mtInformation, [mbOK]);  
+    run(lkScript, 'DB:CONFIG/REG/CND/DEFAULT.PS');
+  end;
+  //============================================================================
+  procedure TERPFormRpti_Columns_OnEditButtonClick_Ved(Sender :TObject; var Handled :Boolean);
+  var
+    lkDBG    :TDBGridEh;
+    lkScript :string;
+  begin
+    Handled := true;
+    lkDBG   := TDBGridEh(TComponent(Sender).Owner.Owner);
+    if not lkDBG.DataSource.DataSet.Active then exit;
+    lkScript := 
+      '{$IFNDEF PEAKTOP:IDE/ERP/CONFIG2/RPTI/EC59A1C9-A2C8-4251-AF50-6FAA05ACA43A/DEFAULT.INC} '+SQLCRLF+
+      '  {$I PEAKTOP:IDE/ERP/CONFIG2/RPTI/EC59A1C9-A2C8-4251-AF50-6FAA05ACA43A/DEFAULT.INC} '+SQLCRLF+
+      '{$ENDIF} '+SQLCRLF+
+      'var '+SQLCRLF+
+      '  lkFrm :TForm; '+SQLCRLF+
+      '  lkStr :string; '+SQLCRLF+
+      'begin '+SQLCRLF+
+      '  lkFrm := TERPFormRpti_Create(''{EC59A1C9-A2C8-4251-AF50-6FAA05ACA43A}''); '+SQLCRLF+
+      '  InputIntf_DatePeriod_SetDate(lkFrm, objname_datefrom, '''+FormatDateTime('dd.mm.yyyy',lkDBG.DataSource.DataSet.FieldByName('DATE_FROM').AsDateTime)+'''); '+SQLCRLF+
+      '  InputIntf_DatePeriod_SetDate(lkFrm, objname_dateto  , '''+FormatDateTime('dd.mm.yyyy',lkDBG.DataSource.DataSet.FieldByName('DATE_TO').AsDateTime-1)+'''); '+SQLCRLF+
+      '  InputIntf_Ref_SetIds(lkFrm.FindComponent(objname_firms), '''+lkDBG.DataSource.DataSet.FieldByName('FIRM_IDS').AsString+'''); '+SQLCRLF+
+      '  with TxcEditCombo(lkFrm.FindComponent(objname_acc))do '+SQLCRLF+
+      '    begin '+SQLCRLF+
+      '    Tag   := '+lkDBG.DataSource.DataSet.FieldByName('BUHG_ACCS_ID').AsString+'; '+SQLCRLF+
+      '    lkStr := ''''; '+SQLCRLF+
+      '    if GetField(FBDataBase, ''TABL$R_BUHG_ACCS'', ''NAME'', ''ID = ''+IntToStr(Tag), lkStr)then '+SQLCRLF+
+      '      Text := lkStr; '+SQLCRLF+
+      '    end; '+SQLCRLF+ 
+      '  InputIntf_CheckBox_SetCheckedStr(lkFrm, objname_showjrnl, ''0''); '+SQLCRLF+  
+      '  TERPFormRpti_RefreshView(lkFrm); '+SQLCRLF+
+      'end.';    
+    run(lkScript, 'PEAKTOP:IDE/ERP/CONFIG2/RPTI/EC59A1C9-A2C8-4251-AF50-6FAA05ACA43A/DEFAULT.PS');
+  end;
+  //============================================================================
+  procedure TERPFormRpti_Columns_OnEditButtonClick_Obor(Sender :TObject; var Handled :Boolean);
+  var
+    lkDBG    :TDBGridEh;
+    lkScript :string;
+  begin
+    Handled := true;
+    lkDBG   := TDBGridEh(TComponent(Sender).Owner.Owner);
+    if not lkDBG.DataSource.DataSet.Active then exit;
+    lkScript := 
+      '{$IFNDEF PEAKTOP:IDE/ERP/CONFIG2/RPTI/99A279B4-8174-4FF9-BE81-07D1EB47A5EC/DEFAULT.INC} '+SQLCRLF+
+      '  {$I PEAKTOP:IDE/ERP/CONFIG2/RPTI/99A279B4-8174-4FF9-BE81-07D1EB47A5EC/DEFAULT.INC} '+SQLCRLF+
+      '{$ENDIF} '+SQLCRLF+
+      'var '+SQLCRLF+
+      '  lkFrm :TForm; '+SQLCRLF+
+      '  lkStr :string; '+SQLCRLF+
+      'begin '+SQLCRLF+
+      '  lkFrm := TERPFormRpti_Create(''{99A279B4-8174-4FF9-BE81-07D1EB47A5EC}''); '+SQLCRLF+
+      '  InputIntf_DatePeriod_SetDate(lkFrm, objname_datefrom, '''+FormatDateTime('dd.mm.yyyy',lkDBG.DataSource.DataSet.FieldByName('DATE_FROM').AsDateTime)+'''); '+SQLCRLF+
+      '  InputIntf_DatePeriod_SetDate(lkFrm, objname_dateto  , '''+FormatDateTime('dd.mm.yyyy',lkDBG.DataSource.DataSet.FieldByName('DATE_TO').AsDateTime-1)+'''); '+SQLCRLF+
+      '  InputIntf_Ref_SetIds(lkFrm.FindComponent(objname_firms), '''+lkDBG.DataSource.DataSet.FieldByName('FIRM_IDS').AsString+'''); '+SQLCRLF+
+      '  with TxcEditCombo(lkFrm.FindComponent(objname_acc))do '+SQLCRLF+
+      '    begin '+SQLCRLF+
+      '    Tag   := '+lkDBG.DataSource.DataSet.FieldByName('BUHG_ACCS_ID').AsString+'; '+SQLCRLF+
+      '    lkStr := ''''; '+SQLCRLF+
+      '    if GetField(FBDataBase, ''TABL$R_BUHG_ACCS'', ''NAME'', ''ID = ''+IntToStr(Tag), lkStr)then '+SQLCRLF+
+      '      Text := lkStr; '+SQLCRLF+
+      '    end; '+SQLCRLF+ 
+      '  TERPFormRpti_RefreshView(lkFrm); '+SQLCRLF+
+      'end.';    
+    run(lkScript, 'PEAKTOP:IDE/ERP/CONFIG2/RPTI/99A279B4-8174-4FF9-BE81-07D1EB47A5EC/DEFAULT.PS');
+  end;
+  //============================================================================
+  procedure TERPFormRpti_Columns_OnEditButtonClick_Shahmatka(Sender :TObject; var Handled :Boolean);
+  var
+    lkDBG    :TDBGridEh;
+    lkScript :string;
+  begin
+    Handled := true;
+    lkDBG   := TDBGridEh(TComponent(Sender).Owner.Owner);
+    if not lkDBG.DataSource.DataSet.Active then exit;
+    lkScript := 
+      '{$IFNDEF PEAKTOP:IDE/ERP/CONFIG2/RPTI/ECDA7A07-5697-4D05-9EE4-05D645433EDE/DEFAULT.INC} '+SQLCRLF+
+      '  {$I PEAKTOP:IDE/ERP/CONFIG2/RPTI/ECDA7A07-5697-4D05-9EE4-05D645433EDE/DEFAULT.INC} '+SQLCRLF+
+      '{$ENDIF} '+SQLCRLF+
+      'var '+SQLCRLF+
+      '  lkFrm :TForm; '+SQLCRLF+
+      '  lkStr :string; '+SQLCRLF+
+      'begin '+SQLCRLF+
+      '  lkFrm := TERPFormRpti_Create(''{ECDA7A07-5697-4D05-9EE4-05D645433EDE}''); '+SQLCRLF+
+      '  InputIntf_DatePeriod_SetDate(lkFrm, objname_datefrom, '''+FormatDateTime('dd.mm.yyyy',lkDBG.DataSource.DataSet.FieldByName('DATE_FROM').AsDateTime)+'''); '+SQLCRLF+
+      '  InputIntf_DatePeriod_SetDate(lkFrm, objname_dateto  , '''+FormatDateTime('dd.mm.yyyy',lkDBG.DataSource.DataSet.FieldByName('DATE_TO').AsDateTime-1)+'''); '+SQLCRLF+
+      '  InputIntf_Ref_SetIds(lkFrm.FindComponent(objname_firms), '''+lkDBG.DataSource.DataSet.FieldByName('FIRM_IDS').AsString+'''); '+SQLCRLF+
+      '  with TxcEditCombo(lkFrm.FindComponent(objname_acc))do '+SQLCRLF+
+      '    begin '+SQLCRLF+
+      '    Tag   := '+lkDBG.DataSource.DataSet.FieldByName('BUHG_ACCS_ID').AsString+'; '+SQLCRLF+
+      '    lkStr := ''''; '+SQLCRLF+
+      '    if GetField(FBDataBase, ''TABL$R_BUHG_ACCS'', ''NAME'', ''ID = ''+IntToStr(Tag), lkStr)then '+SQLCRLF+
+      '      Text := lkStr; '+SQLCRLF+
+      '    end; '+SQLCRLF+ 
+      '  TERPFormRpti_RefreshView(lkFrm); '+SQLCRLF+
+      'end.';    
+    run(lkScript, 'PEAKTOP:IDE/ERP/CONFIG2/RPTI/ECDA7A07-5697-4D05-9EE4-05D645433EDE/DEFAULT.PS');
+  end;
+  //============================================================================
+  procedure TERPFormRpti_Columns_OnEditButtonClick_Card(Sender :TObject; var Handled :Boolean);
+  var
+    lkDBG    :TDBGridEh;
+    lkScript :string;
+  begin
+    Handled := true;
+    lkDBG   := TDBGridEh(TComponent(Sender).Owner.Owner);
+    if not lkDBG.DataSource.DataSet.Active then exit;
+    lkScript := 
+      '{$IFNDEF PEAKTOP:IDE/ERP/CONFIG2/RPTI/E6EE37CE-3812-4D0D-AE8C-6734F1B2CCED/DEFAULT.INC} '+SQLCRLF+
+      '  {$I PEAKTOP:IDE/ERP/CONFIG2/RPTI/E6EE37CE-3812-4D0D-AE8C-6734F1B2CCED/DEFAULT.INC} '+SQLCRLF+
+      '{$ENDIF} '+SQLCRLF+
+      'var '+SQLCRLF+
+      '  lkFrm :TForm; '+SQLCRLF+
+      '  lkStr :string; '+SQLCRLF+
+      'begin '+SQLCRLF+
+      '  lkFrm := TERPFormRpti_Create(''{E6EE37CE-3812-4D0D-AE8C-6734F1B2CCED}''); '+SQLCRLF+
+      '  InputIntf_DatePeriod_SetDate(lkFrm, objname_datefrom, '''+FormatDateTime('dd.mm.yyyy',lkDBG.DataSource.DataSet.FieldByName('DATE_FROM').AsDateTime)+'''); '+SQLCRLF+
+      '  InputIntf_DatePeriod_SetDate(lkFrm, objname_dateto  , '''+FormatDateTime('dd.mm.yyyy',lkDBG.DataSource.DataSet.FieldByName('DATE_TO').AsDateTime-1)+'''); '+SQLCRLF+
+      '  InputIntf_Ref_SetIds(lkFrm.FindComponent(objname_firms), '''+lkDBG.DataSource.DataSet.FieldByName('FIRM_IDS').AsString+'''); '+SQLCRLF+
+      '  with TxcEditCombo(lkFrm.FindComponent(objname_acc))do '+SQLCRLF+
+      '    begin '+SQLCRLF+
+      '    Tag   := '+lkDBG.DataSource.DataSet.FieldByName('BUHG_ACCS_ID').AsString+'; '+SQLCRLF+
+      '    lkStr := ''''; '+SQLCRLF+
+      '    if GetField(FBDataBase, ''TABL$R_BUHG_ACCS'', ''NAME'', ''ID = ''+IntToStr(Tag), lkStr)then '+SQLCRLF+
+      '      Text := lkStr; '+SQLCRLF+
+      '    end; '+SQLCRLF+ 
+      '  TERPFormRpti_RefreshView(lkFrm); '+SQLCRLF+
+      'end.';    
+    run(lkScript, 'PEAKTOP:IDE/ERP/CONFIG2/RPTI/E6EE37CE-3812-4D0D-AE8C-6734F1B2CCED/DEFAULT.PS');
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsCreated(aOwner:TComponent; aDBG:TDBGridEh);
+  var
+    i:Integer;
+  begin
+    with aDBG do
+      begin
+      Font.Size := 8;
+      RowHeight := 16;
+      ShowHint  := true;
+      for i:=0 to Columns.Count-1 do
+        begin
+        if( (Columns[i].FieldName = 'BUHG_ACCS_NAME') or (Columns[i].FieldName = 'BUHG_ACCS_NAMEPATH') )then
+          with Columns[i] do
+            begin
+            AlwaysShowEditButton := true;
+            ShowHint := true;
+            with EditButtons.Add do
+              begin
+              Width   := 16;
+              Glyph.LoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IMG/CONFIG/DBGRID/BTN_K.BMP'));
+              Style   := ebsGlyphEh;
+              Hint    := 'Карточка счета';
+              ShowHint:= true;
+              Visible := true;
+              OnClick := @TERPFormRpti_Columns_OnEditButtonClick_Card;
+              end; 
+            with EditButtons.Add do
+              begin
+              Width   := 16;
+              Glyph.LoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IMG/CONFIG/DBGRID/BTN_O.BMP'));
+              Style   := ebsGlyphEh;
+              Hint    := 'Оборотно-сальдовая ведомость по счету';
+              ShowHint:= true;
+              Visible := true;
+              OnClick := @TERPFormRpti_Columns_OnEditButtonClick_Obor;
+              end; 
+            with EditButtons.Add do
+              begin
+              Width   := 16;
+              Glyph.LoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IMG/CONFIG/DBGRID/BTN_SHAHMATKA.BMP'));
+              Style   := ebsGlyphEh;
+              Hint    := 'Шахматка по счету';
+              ShowHint:= true;
+              Visible := true;
+              OnClick := @TERPFormRpti_Columns_OnEditButtonClick_Shahmatka;
+              end; 
+            with EditButtons.Add do
+              begin
+              Width   := 16;
+              Glyph.LoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IMG/CONFIG/DBGRID/BTN_B.BMP'));
+              Style   := ebsGlyphEh;
+              Hint    := 'Ведомость по счету';
+              ShowHint:= true;
+              Visible := true;
+              OnClick := @TERPFormRpti_Columns_OnEditButtonClick_Ved;
+              end; 
+            end; 
+        if( (Columns[i].FieldName = 'DEBET') or (Columns[i].FieldName = 'KREDIT') )then
+          with Columns[i] do
+            begin
+            AlwaysShowEditButton := true;
+            ColParams.Clear;
+            if(FieldName = 'DEBET')then
+              ColParams.Add('1')
+             else 
+              ColParams.Add('0');
+            with EditButtons.Add do
+              begin
+              Width   := 16;
+              Glyph.LoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IMG/0046.BMP'));
+              Style   := ebsGlyphEh;
+              Hint    := 'Проводки';
+              ShowHint:= true;
+              Visible := true;
+              OnClick := @TERPFormRpti_Columns_OnEditButtonClick;
+              end; 
+            end;
+        end;
+      end;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsLoad(aOwner:TComponent; aDBG:TDBGridEh);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  function TERPFormRpti_OnPrint(aOwner:TComponent):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_BeforePreview(aOwner:TComponent; aRpt:TxReport);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+begin
+  TERPFormRpti_Create('{527CE168-090E-4E75-948A-45D83C3498E0}');
+end.

@@ -1,0 +1,19 @@
+var
+  lkFileName :string;
+  lkSL       :TStrings;
+  i           :Integer;
+begin
+{ not implemented 
+  lkFileName := StrAbsolutePath('../conf/amunhotep.colors.conf', Amunhotep.ExeName);
+  if FileExists(lkFileName)then
+    try
+      lkSL := TStringList.Create;
+      lkSL.Text := StringsLoadFromFile(lkFileName);
+      if(lkSL.Count > 0)then
+        RegisterCustomColors(lkSL);
+    finally
+      lkSL.Free;  
+    end;
+  WriteLn(ColorToStr($6BB7BD));  
+}  
+end.

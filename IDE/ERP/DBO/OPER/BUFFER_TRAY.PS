@@ -1,0 +1,28 @@
+{$DEFINE PEAKTOP:IDE/ERP/DBO/BUFFER/BUFFER_TRAY.PS}
+{$IFNDEF PEAKTOP:OBJ/TRAY.INC} {$I PEAKTOP:OBJ/TRAY.INC} {$ENDIF}
+    //==========================================================================
+    procedure TBBBuffer_OnClick(Sender :TObject);
+    begin
+      call(StrAbsolutePath('./BUFFER.PS', ScriptName));
+    end;
+    //==========================================================================
+var
+  TBBBuffer :TxcToolBarButton;
+  lkStr :string;
+begin
+  lkStr := '';
+  GetField(FBDataBase, 'RDB$RELATIONS', 'COUNT(RDB$RELATION_ID)', 'TRIM(RDB$RELATION_NAME) = ''TABL$_BUFFER''', lkStr);
+  if(StrTrimAll(lkStr) = '')then exit;
+  if(StrTrimAll(lkStr) = '0')then exit;
+  DontAutoFree;
+  TBBBuffer := CreateTray('TBBBuffer', 'буфер', 'Показать буфер обмена');
+  with TBBBuffer do
+    begin
+    ShowCaption:= false;
+    Width      := 20;
+    Visible    := true;
+    OnClick    := @TBBBuffer_OnClick;
+    ImageIndex := 73;
+    end;  
+end.
+

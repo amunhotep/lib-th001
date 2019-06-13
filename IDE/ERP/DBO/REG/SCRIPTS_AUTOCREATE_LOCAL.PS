@@ -1,0 +1,57 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}        {$I PEAKTOP:GLOBAL_VARIABLES.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/OBJECTNAMES.INC} {$I ../OBJECTNAMES.INC}           {$ENDIF}
+var
+  lkFolderName :string;
+  lkFileName   :string;
+  lkSourceItem :string;
+  lkTrans      :TxFBTransaction;
+  lkQuery      :TxFBQuery;
+begin
+  // prepare root folder
+  ChDir(ExtractFilePath(PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/CONFIG/DUMMY.FILE')));
+  lkFolderName := ERP_ObjectDir(ERP_OBJECTTYPE_REG);
+  lkFolderName := Copy(lkFolderName, 1, Length(lkFolderName)-1);
+  if not DirectoryExists(lkFolderName)then
+    CreateDir(lkFolderName);
+  ChDir(ExtractFilePath(PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/CONFIG/'+lkFolderName+'/DUMMY.FILE')));
+  // creating folders
+  lkTrans   := TxFBTransaction.Create(nil);
+  lkTrans.DefaultDataBase := FBDataBase;
+  lkQuery   := TxFBQuery.Create(lkTrans);
+  lkQuery.SQL.Text := 'SELECT T.* FROM TABL$_TB T WHERE (T.BASE_TYPE_ID = 6) ORDER BY T.ID ';    
+  lkQuery.Open;
+  lkQuery.First;
+  while not lkQuery.EOF do
+    begin
+    WriteLn(lkQuery.FieldByName('ID').AsString+' - '+lkQuery.FieldByName('NAME').AsString);
+    lkFolderName := lkQuery.FieldByName('ID').AsString;
+    if(  (Pos('TABL$',UpperCase(lkFolderName)) = 1)
+       or(Pos('PROC$',UpperCase(lkFolderName)) = 1)
+       or(Pos('VIEW$',UpperCase(lkFolderName)) = 1)
+    )then Delete(lkFolderName, 1, 5);
+    if(  (Pos('R_',UpperCase(lkFolderName)) = 1)
+       or(Pos('O_',UpperCase(lkFolderName)) = 1)
+       or(Pos('P_',UpperCase(lkFolderName)) = 1)
+       or(Pos('D_',UpperCase(lkFolderName)) = 1)
+       or(Pos('J_',UpperCase(lkFolderName)) = 1)
+    )then Delete(lkFolderName, 1, 2);
+
+    if not DirectoryExists(lkFolderName)then
+      CreateDir(lkFolderName);
+
+    lkSourceItem := StringsLoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/DBO/REG/TEMPLATE.PS'));
+    lkSourceItem := StrReplaceStr(lkSourceItem, '<%OBJECT_ID%>', lkQuery.FieldByName('ID').AsString);
+    lkFileName   := PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/CONFIG/'+ERP_ObjectDir(ERP_OBJECTTYPE_REG)+lkFolderName+'/DEFAULT.PS');
+    if not FileExists(lkFileName) then StringsSaveToFile(lkFileName, lkSourceItem);
+
+    lkSourceItem := StringsLoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/CONFIG/'+ERP_ObjectDir(ERP_OBJECTTYPE_REG)+'RPT_0000.XFM'));
+    lkFileName   := PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/CONFIG/'+ERP_ObjectDir(ERP_OBJECTTYPE_REG)+lkFolderName+'/RPT_0000.XFM');
+    if not FileExists(lkFileName) then StringsSaveToFile(lkFileName, lkSourceItem);
+
+    Amunhotep.ProcessMessages;
+    lkQuery.Next;
+    end;
+  if lkTrans.InTransaction then
+    lkTrans.Commit;
+  lkTrans.Free;
+end.

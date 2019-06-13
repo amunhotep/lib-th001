@@ -1,0 +1,34 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}{$I PEAKTOP:GLOBAL_VARIABLES.INC}{$ENDIF}
+const
+  CASH_RESONANCE_MARIA_USER_NAME     = ' ‡ÒË';
+  CASH_RESONANCE_MARIA_USER_PASSWORD = '1111111111';
+
+var
+  lkJ_ID  :string;
+  Cash    :Variant;
+  Sum     :LongInt;
+  DepName :string;
+begin
+  lkJ_ID := GetGlobalVariable('J_ID');
+
+  Cash := CreateOleObject('M301Manager.Application');
+  if(Cash.Init(9, GetGlobalVariable('DATABASE_USER'), CASH_RESONANCE_MARIA_USER_PASSWORD, 1, UpperCase(Amunhotep.Name)) = 1)then
+    begin
+    Cash.SetCheckMessagesMode(0);
+//    if(Cash.LockPrinter(3000) = 1)then
+      begin
+      Sum := 0;
+      if(Cash.OpenCheck('ﬁ‚ÂÎ.Ï‡„‡ÁËÌ') = 1)then
+        begin
+        Cash.FreeTextLine(1, 0, 1, 'ﬁ¬≈ÀI–ÕI ¬»–Œ¡»:');
+        Cash.LongName(Copy(' ŒÀ‹÷Œ [ ¿ÃÕ»: ¡≈À€… 1ÿ“]',1,18));
+        Cash.FiscalLineEx(Copy(' ¬00001', 1,12), 100, 200000,  2,   0,0,  0,   -1,'',0);
+        Cash.CloseCheck();
+        end;
+//      Dialogs.MessageDlg(Cash.GetArticleInfoXML(1), mtInformation, [mbOk]);  
+//      Cash.ZReportAsync();
+//      Cash.UnlockPrinter();
+      end;
+    Cash.Done();  
+    end;
+end.

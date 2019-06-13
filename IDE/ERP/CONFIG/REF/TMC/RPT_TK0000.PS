@@ -1,0 +1,63 @@
+{$DEFINE DB:CONFIG/REF/TMC/RPT_TK0000.PS}
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC} {$I PEAKTOP:GLOBAL_VARIABLES.INC} {$ENDIF}
+  //============================================================================
+  procedure PreviewReport(const aTMC_ID:string);
+  var
+    lkRpt    :TxReport;
+    lkImgLogo:TxrImage;
+    lkStrm   :TMemoryStream;
+    lkXFM    :string;
+  begin
+    lkXFM := StringsLoadFromFile(StrAbsolutePath('./RPT_TK0000.XFM', ScriptName));
+    lkRpt := TxReport(StrToComponent(lkXFM));
+    lkImgLogo := TxrImage(lkRpt.FindComponent('ImgLogo'));
+    try
+      lkStrm  := TMemoryStream.Create;
+      if StreamLoadFromFile(StrAbsolutePath('../conf/ent/logo.bmp', Amunhotep.ExeName),lkStrm)then
+        lkImgLogo.Picture.Bitmap.LoadFromStream(lkStrm);
+    finally    
+      lkStrm.Free;
+    end;  
+    lkRpt.DataBase := FBDataBase;
+    with lkRpt.DataSets[0] do
+      begin
+      Name := 'qrMain';
+      SQL.Text := StringsLoadFromFile(StrAbsolutePath('./RPT_TK0000_01.SQL', ScriptName));
+      Query.Prepare;
+      Query.ParamByName('TMC_ID').AsString := aTMC_ID; 
+      end;
+    with lkRpt.DataSets[1] do
+      begin
+      Name := 'qrTK';
+      MasterDataSet := 'qrMain';
+      SQL.Text := StringsLoadFromFile(StrAbsolutePath('./RPT_TK0000_02.SQL', ScriptName));
+      end;
+    with lkRpt.DataSets[2] do
+      begin
+      Name := 'qrLIMIT';
+      MasterDataSet := 'qrMain';
+      SQL.Text := StringsLoadFromFile(StrAbsolutePath('./RPT_TK0000_03.SQL', ScriptName));
+      end;
+    with lkRpt.DataSets[3] do
+      begin
+      Name := 'qrANALOG';
+      MasterDataSet := 'qrMain';
+      SQL.Text := StringsLoadFromFile(StrAbsolutePath('./RPT_TK0000_04.SQL', ScriptName));
+      end;
+    with lkRpt.DataSets[4] do
+      begin
+      Name := 'qrEnt';
+      SQL.Text := StringsLoadFromFile('DB:CONFIG/DOC/4/RPT_DEFAULT02_0.SQL');
+      end;
+    lkRpt.Prepare;
+    lkRpt.Preview;
+  end;
+  //============================================================================
+var
+  lkTMC_ID :string;
+begin
+  lkTMC_ID := GetGlobalVariable('TMC_ID');
+  if(StrTrimAll(lkTMC_ID)<>'')then
+    if(StrCiphersOnly(lkTMC_ID)<>'')then
+      PreviewReport(lkTMC_ID);  
+end.

@@ -1,0 +1,287 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG/RPTI/9BC57D02-93D3-4847-8681-D54537CA3554/DEFAULT.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$I PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC} {$I PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}        {$I PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}        {$ENDIF}
+const
+  objname_datefrom   = 'dtpDateFrom';
+  objname_dateto     = 'dtpDateTo';
+  objname_firms      = 'gbFirms';
+  msg_input_firms    = 'Выберите фирмы учета';
+var
+  GlobalSQL :string;  
+  //============================================================================
+  function TERPFormRpti_GetExportFilter(aOwner:TComponent):string;
+  begin
+    Result := 
+      msg_erp_lbldatefrom+' "'+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+'" '+
+      msg_erp_lbldateto  +' "'+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto))+'" '+
+      'Фирмы учета: "'+InputIntf_Ref_GetNames(aOwner.FindComponent(objname_firms))+'"';
+  end;
+  //============================================================================
+  function TERPFormRpti_OnGetSQL(aOwner:TComponent;var aSQL:string):Boolean;
+  begin
+    Result := True;
+    aSQL   := GlobalSQL;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnGetSQLFileName(aOwner:TComponent;var aFileName:string);
+  begin
+     // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnProcessParams(aOwner:TComponent;aQr :TxFBQuery);
+  begin
+    with aQr do
+      begin
+      ParamByName('FIRM_IDS' ).AsString := InputIntf_Ref_GetIds(aOwner.FindComponent(objname_firms));
+      ParamByName('DATE_FROM').AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+' 00:00:00';
+      ParamByName('DATE_TO'  ).AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto)+1)+' 00:00:00';
+      end;  
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnChart(aOwner:TComponent; aParent:TWinControl);
+  var
+    lkPC :TxcPageControlEx;
+    lkTS :TxcTabSheet;
+  begin
+    aParent.Free;
+    exit;
+    lkPC := CreateTxcPageControlEx(aOwner, aParent, 'PCCharts', 0,0,600,600, alClient);
+    lkPC.MultiLine := false;
+    TxcPageControlEx_ActivateDefaultPage(lkPC);
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnTerms(aOwner:TComponent;aParent:TWinControl);
+  var
+    lkLastTop :Integer;
+  begin
+    lkLastTop := 4;
+    lkLastTop := lkLastTop + InputIntf_DatePeriod_Create(aOwner, aParent, 'gbDatePeriod', 'Укажите период', 4, lkLastTop, 44, 360,objname_datefrom,objname_dateto,StartOfTheMonth(Now),EndOfTheMonth(Now)).Height;
+    lkLastTop := lkLastTop + 4;
+    lkLastTop := lkLastTop + InputIntf_Ref_Create(aOwner,aParent,objname_firms   ,msg_input_firms   ,4,lkLastTop, 0,360,'TABL$R_FIRMS' ,TERPForm_Settings(aOwner).Values[ERP_SETTINGS_TABLENAME]).Height;
+    lkLastTop := lkLastTop + 4;
+  end;
+  //============================================================================
+  function TERPFormRpti_OnColumnsCreate(aOwner:TComponent; aDBG:TDBGridEh):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_Columns_OnEditButtonClick(Sender :TObject; var Handled :Boolean);
+  var
+    lkDBG    :TDBGridEh;
+    lkTypes  :string;
+    lkPlace  :string;
+    lkScript :string;
+  begin
+    Handled := true;
+    lkDBG   := TDBGridEh(TComponent(Sender).Owner.Owner);
+    if not lkDBG.DataSource.DataSet.Active then exit;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsCreated(aOwner:TComponent; aDBG:TDBGridEh);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsLoad(aOwner:TComponent; aDBG:TDBGridEh);
+  var
+    lkFld     :string;
+    lkSQLFlds :string;
+    lkSQLSum  :string;
+    lkSQLBody :string;
+    lkSQLBody0:string;
+    lkSQLBody1:string;
+    lkSQLBody2:string;
+    lkSQLBody3:string;
+    lkSQLBody4:string;
+    lkCol     :TColumnEh;
+    lkTr      :TxFBTransaction;
+    lkQr      :TxFBQuery;
+    i         :Integer;
+  begin
+    i := aDBG.Columns.Count-1;
+    while(i >= 0)do
+      begin
+      if(Pos('SALES_', aDBG.Columns[i].FieldName) = 1)then
+        aDBG.Columns.Delete(i)
+       else 
+        i := i - 1;
+      end;
+      
+    lkFld     := '';
+    lkSQLFlds := '';
+    lkSQLBody := '';
+    lkSQLBody0:= '';
+    lkSQLBody1:= '';
+    lkSQLBody2:= '';
+    lkSQLBody3:= '';
+    lkSQLBody4:= '';
+    lkTr := TxFBTransaction.Create(nil);
+    with lkTr do 
+      begin 
+      DefaultDataBase := FBDataBase; 
+      Params.Clear; 
+      Params.Add('isc_tpb_read_committed'); 
+      Params.Add('isc_tpb_read'); 
+      Params.Add('isc_tpb_rec_version'); 
+      Params.Add('isc_tpb_nowait'); 
+      end; 
+    lkQr := TxFBQuery.Create(lkTr);
+    lkQr.Transaction := lkTr;
+    lkQr.SQL.Text    := 
+      'SELECT DISTINCT C.FILIAL_ID AS ID, F.NAME '+SQLCRLF+
+      'FROM   TABL$P_CND C, TABL$R_FILIALS F '+SQLCRLF+
+      'WHERE  (C.DATE_COMMIT BETWEEN  '''+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+' 00:00:00'' AND '''+
+        FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto))+' 23:59:59'') '+SQLCRLF+
+      '  AND  ('''+InputIntf_Ref_GetIds(aOwner.FindComponent(objname_firms))+''' CONTAINING ''~''||C.FIRM_ID||''~'') '+SQLCRLF+
+      '  AND  (F.ID = C.FILIAL_ID) '+SQLCRLF+
+      'ORDER BY 1 ';
+    lkQr.Open;
+    lkQr.First;
+    while not lkQr.EOF do
+      begin
+      lkFld      := 'SALES_QUANT'+lkQr.FieldByName('ID').AsString;
+      lkSQLFlds  := lkSQLFlds  + ' ,'   + lkFld + ' TYPE OF COLUMN TABL$D_1000014.QUANT '+SQLCRLF;
+      lkSQLBody0 := lkSQLBody0 + '    ' + lkFld + ' = 0; '+SQLCRLF;
+      lkCol := CreateTColumnEh(aDBG,lkFld,'# ### ### ##0.00', 'В разрезе по филиалам|'+lkQr.FieldByName('NAME').AsString+'|кол-во', 80, taRightJustify );
+      with lkCol do
+        begin
+        Color                := $FFE8E8;
+        Footer.Color         := Color;
+        Footer.Alignment     := Alignment;
+        Footer.DisplayFormat := DisplayFormat;
+        Footer.FieldName     := FieldName;
+        Footer.ValueType     := fvtSum;
+        end;
+      lkFld      := 'SALES_TOTAL'+lkQr.FieldByName('ID').AsString;
+      lkSQLFlds  := lkSQLFlds  + ' ,'   + lkFld + ' TYPE OF COLUMN TABL$D_1000014.QUANT '+SQLCRLF;
+      lkSQLBody0 := lkSQLBody0 + '    ' + lkFld + ' = 0; '+SQLCRLF;
+      lkCol := CreateTColumnEh(aDBG,lkFld,'# ### ### ##0.00', 'В разрезе по филиалам|'+lkQr.FieldByName('NAME').AsString+'|Сумма', 80, taRightJustify );
+      with lkCol do
+        begin
+        Color                := $FFD8D8;
+        Footer.Color         := Color;
+        Footer.Alignment     := Alignment;
+        Footer.DisplayFormat := DisplayFormat;
+        Footer.FieldName     := FieldName;
+        Footer.ValueType     := fvtSum;
+        end;
+      lkSQLBody1 := lkSQLBody1 +
+      '    SELECT COALESCE(SUM(DB.QUANT),0), COALESCE(SUM(IIF((DB.NDP < 0), ((DB.PRICE + DB.NDP) * DB.QUANT), (DB.PRICE * DB.QUANT))), 0) '+SQLCRLF+
+      '    FROM   TABL$J_4 J, TABL$J_1000014 J14, TABL$D_1000014 DB, TABL$R_TMC TMC '+SQLCRLF+
+      '    WHERE  (J.DATE_COMMIT BETWEEN :DATE_FROM AND :DATE_TO) '+SQLCRLF+
+      '      AND  (:Q_FIRM_IDS CONTAINING ''~''||J.FIRM_ID||''~'') '+SQLCRLF+
+      '      AND  ((J.FILIAL_ID+0) = '+lkQr.FieldByName('ID').AsString+') '+SQLCRLF+
+      '      AND  (J.FLAG_COMMIT   = 1) '+SQLCRLF+
+      '      AND  (''~1000028~1000127~'' CONTAINING ''~''||J.TYPE_ID||''~'') '+SQLCRLF+
+      '      AND  (J14.J_ID        = J.ID) '+SQLCRLF+
+      '      AND  (J14.WRK_ID      = :WRK_ID_BILL) '+SQLCRLF+
+      '      AND  (DB.J_ID         = J.ID) '+SQLCRLF+
+      '      AND  (DB.TMC_ID       = :TMC_ID) '+SQLCRLF+
+      '      AND  (DB.WRK_ID       = :WRK_ID) '+SQLCRLF+
+      '      AND  (TMC.ID          = DB.TMC_ID) '+SQLCRLF+
+      '    INTO   :SALES_QUANT'+lkQr.FieldByName('ID').AsString+', :SALES_TOTAL'+lkQr.FieldByName('ID').AsString+'; '+SQLCRLF;
+      lkQr.Next;
+      end;
+    if lkQr.Active then
+      lkQr.Close;
+    if lkTr.InTransaction then
+      lkTr.Commit;
+    lkTr.Free;
+        
+    GlobalSQL :=
+      'EXECUTE BLOCK ( '+SQLCRLF+
+      '   Q_DATE_FROM TYPE OF COLUMN TABL$J_4.DATE_COMMIT = ?DATE_FROM '+SQLCRLF+
+      '  ,Q_DATE_TO   TYPE OF COLUMN TABL$J_4.DATE_COMMIT = ?DATE_TO '+SQLCRLF+
+      '  ,Q_FIRM_IDS  TYPE OF COLUMN TABL$J_4.DOCSTR      = ?FIRM_IDS '+SQLCRLF+
+      ')RETURNS ( '+SQLCRLF+ 
+      '   DATE_FROM              TYPE OF COLUMN TABL$J_4.DATE_COMMIT '+SQLCRLF+
+      '  ,DATE_TO                TYPE OF COLUMN TABL$J_4.DATE_COMMIT '+SQLCRLF+
+      '  ,FIRM_IDS               TYPE OF COLUMN TABL$J_4.DOCSTR '+SQLCRLF+
+      '  ,TMC_GROUP_ID           TYPE OF COLUMN TABL$R_TMC_GROUP.ID '+SQLCRLF+
+      '  ,TMC_GROUP_NAME         TYPE OF COLUMN TABL$R_TMC_GROUP.NAME '+SQLCRLF+
+      '  ,TMC_GROUP_PATH         TYPE OF COLUMN TABL$R_TMC_GROUP.PATH '+SQLCRLF+
+      '  ,TMC_CTGR_ID            TYPE OF COLUMN TABL$R_TMC.TMC_CTGR_ID '+SQLCRLF+
+      '  ,TMC_CTGR_NAME          TYPE OF COLUMN TABL$R_TMC_CTGR.NAME '+SQLCRLF+
+      '  ,TMC_CTGR_PATH          TYPE OF COLUMN TABL$R_TMC_CTGR.PATH '+SQLCRLF+
+      '  ,TMC_ID                 TYPE OF COLUMN TABL$R_TMC.ID '+SQLCRLF+
+      '  ,TMC_NAME               TYPE OF COLUMN TABL$R_TMC.NAME '+SQLCRLF+
+      '  ,TMC_NAME2              TYPE OF COLUMN TABL$R_TMC.NAME2 '+SQLCRLF+
+      '  ,TMC_ARTICLE            TYPE OF COLUMN TABL$R_TMC.ARTICLE '+SQLCRLF+
+      '  ,TMC_BARCODE            TYPE OF COLUMN TABL$R_TMC.BARCODE '+SQLCRLF+
+      '  ,TMC_VEDCODE            TYPE OF COLUMN TABL$R_TMC.VEDCODE '+SQLCRLF+
+      '  ,TMC_NUMSHOW            TYPE OF COLUMN TABL$R_TMC.NUMSHOW '+SQLCRLF+
+      '  ,WRK_ID                 TYPE OF COLUMN TABL$D_1000014.WRK_ID '+SQLCRLF+
+      '  ,WRK_ID_BILL            TYPE OF COLUMN TABL$D_1000014.WRK_ID '+SQLCRLF+
+      '  ,WRK_NAME               TYPE OF COLUMN TABL$R_WRK.NAME '+SQLCRLF+
+      '  ,QUANT                  TYPE OF COLUMN TABL$D_1000014.QUANT '+SQLCRLF+
+      '  ,TOTAL                  TYPE OF COLUMN TABL$D_1000014.QUANT '+SQLCRLF+
+      lkSQLFlds+
+      ')AS '+SQLCRLF+
+      'BEGIN  '+SQLCRLF+
+      '  DATE_FROM = :Q_DATE_FROM; '+SQLCRLF+
+      '  DATE_TO   = :Q_DATE_TO; '+SQLCRLF+
+      '  FIRM_IDS  = :Q_FIRM_IDS; '+SQLCRLF+
+      '  FOR  '+SQLCRLF+
+      '    SELECT J14.WRK_ID  '+SQLCRLF+
+      '          ,DB.WRK_ID, TMC.TMC_GROUP_ID, TMC.TMC_CTGR_ID '+SQLCRLF+
+      '          ,DB.TMC_ID, TMC.NAME, TMC.NAME2, TMC.ARTICLE, TMC.BARCODE, TMC.VEDCODE, TMC.NUMSHOW  '+SQLCRLF+
+      '          ,SUM(DB.QUANT), SUM(IIF((DB.NDP < 0), ((DB.PRICE + DB.NDP) * DB.QUANT), (DB.PRICE * DB.QUANT))) '+SQLCRLF+
+      '    FROM   TABL$J_4 J, TABL$J_1000014 J14, TABL$D_1000014 DB, TABL$R_TMC TMC '+SQLCRLF+
+      '    WHERE  (J.DATE_COMMIT BETWEEN :DATE_FROM AND :DATE_TO) '+SQLCRLF+
+      '      AND  (:Q_FIRM_IDS CONTAINING ''~''||J.FIRM_ID||''~'') '+SQLCRLF+
+      '      AND  (J.FLAG_COMMIT = 1) '+SQLCRLF+
+      '      AND  (''~1000028~1000127~'' CONTAINING ''~''||J.TYPE_ID||''~'') '+SQLCRLF+
+      '      AND  (J14.J_ID = J.ID) '+SQLCRLF+
+      '      AND  (DB.J_ID = J.ID) '+SQLCRLF+
+      '      AND  (TMC.ID = DB.TMC_ID) '+SQLCRLF+
+      '    GROUP BY '+SQLCRLF+ 
+      '           J14.WRK_ID '+SQLCRLF+
+      '          ,DB.WRK_ID, TMC.TMC_GROUP_ID, TMC.TMC_CTGR_ID '+SQLCRLF+
+      '          ,DB.TMC_ID, TMC.NAME, TMC.NAME2, TMC.ARTICLE, TMC.BARCODE, TMC.VEDCODE, TMC.NUMSHOW '+SQLCRLF+
+      '    INTO  :WRK_ID_BILL '+SQLCRLF+
+      '         ,:WRK_ID, :TMC_GROUP_ID, :TMC_CTGR_ID '+SQLCRLF+
+      '         ,:TMC_ID, :TMC_NAME, :TMC_NAME2, :TMC_ARTICLE, :TMC_BARCODE, :TMC_VEDCODE, :TMC_NUMSHOW '+SQLCRLF+
+      '         ,:QUANT, :TOTAL '+SQLCRLF+
+      '  DO '+SQLCRLF+
+      '    BEGIN '+SQLCRLF+ 
+      '    IF(:WRK_ID = 0)THEN '+SQLCRLF+
+      '      BEGIN '+SQLCRLF+
+      '      IF(:WRK_ID_BILL <> 0)THEN '+SQLCRLF+
+      '        WRK_ID = :WRK_ID_BILL; '+SQLCRLF+
+      '      END '+SQLCRLF+
+      '    SELECT FIRST 1 COALESCE(W.NAME,'''') FROM TABL$R_WRK    W WHERE(W.ID = :WRK_ID  )INTO :WRK_NAME; '+SQLCRLF+
+      ' '+SQLCRLF+
+      '    SELECT FIRST 1 COALESCE(C1.NAME,''''), COALESCE(C1.PATH, '''') '+SQLCRLF+
+      '    FROM   TABL$R_TMC_CTGR C1 '+SQLCRLF+
+      '    WHERE  (C1.ID = :TMC_CTGR_ID) '+SQLCRLF+
+      '    INTO   :TMC_CTGR_NAME, :TMC_CTGR_PATH; '+SQLCRLF+
+      ' '+SQLCRLF+
+      '    SELECT FIRST 1 TG.NAME, TG.PATH '+SQLCRLF+
+      '    FROM   TABL$R_TMC_GROUP TG '+SQLCRLF+
+      '    WHERE  (TG.ID = :TMC_GROUP_ID) '+SQLCRLF+
+      '    INTO   :TMC_GROUP_NAME, :TMC_GROUP_PATH; '+SQLCRLF+
+      ' '+SQLCRLF+
+      lkSQLBody0+
+      lkSQLBody1+
+      '    SUSPEND; '+SQLCRLF+ 
+      '    END '+SQLCRLF+ 
+      'END';
+  end;
+  //============================================================================
+  function TERPFormRpti_OnPrint(aOwner:TComponent):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_BeforePreview(aOwner:TComponent; aRpt:TxReport);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  
+
+begin
+  TERPFormRpti_Create('{9BC57D02-93D3-4847-8681-D54537CA3554}');
+end.

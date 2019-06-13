@@ -1,0 +1,8 @@
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/REF/FORMREFITEM.INC}            {$I PEAKTOP:IDE/ERP/DBO/REF/FORMREFITEM.INC}            {$ENDIF} 
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/REF/EXTS/TMC/TECHCARD_EDIT.INC} {$I PEAKTOP:IDE/ERP/DBO/REF/EXTS/TMC/TECHCARD_EDIT.INC} {$ENDIF}
+var
+  lkForm :TForm;
+begin 
+  lkForm := ReferenceItem_Create('TABL$R_TMC');
+  TERPFormGridRefTMC_ExtTechCardEdit_Create(lkForm, lkForm.FindComponent(obj_name_erp_pagecontroldetail), TERPForm_DataSetMain(lkForm));
+end.

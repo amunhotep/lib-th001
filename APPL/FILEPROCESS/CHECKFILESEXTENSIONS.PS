@@ -1,0 +1,397 @@
+    //==========================================================================
+    function IsFirstStart:Boolean;
+    {$IFDEF MSWINDOWS}
+    var
+      lkReg     :TxRegComponent;
+      lkAppPath :string;
+    {$ENDIF}
+    begin
+      Result := false;
+    {$IFDEF MSWINDOWS}
+      lkAppPath           := AnsiLowerCase(StrReplaceChar(Amunhotep.ExeName, '/', '\'));
+      lkReg               := TxRegComponent.Create(nil);
+      lkReg.RootKey       := xrgHKCU;
+      lkReg.CanCreateKeys := true;
+      lkReg.Key           := 'Software\PEAKTOP\AMUNHOTEP';
+      lkReg.Param         := 'ExeName';
+      if((lkReg.ReadString = '')or(lkReg.ReadString <> lkAppPath))then
+        try
+          lkReg.WriteString(lkAppPath);
+        finally
+          Result := true;
+        end;
+      lkReg.Free;
+    {$ENDIF}
+    end;
+    //==========================================================================
+    function GetIconPath(const IconName:string):String;
+    begin
+      Result := StrAbsolutePath('../conf/icons/'+IconName+'.ico,0', Amunhotep.ExeName);
+      {$IFDEF MSWINDOWS}
+      Result := StrReplaceChar(Result, '/', '\');
+      {$ENDIF}
+      {$IFDEF LINUX}
+      Result := StrReplaceChar(Result, '\', '/');
+      {$ENDIF}
+    end;
+    //==========================================================================
+    function GetAmunhotepCaption:string;
+    begin
+      Result := UpperCase(Amunhotep.Name)+'  '+IntToStrRoman(Trunc(Amunhotep.Version / 1000));
+    end;
+    //==========================================================================
+    function GetAmunhotepStartParamsEditor:string;
+    begin
+      Result := StrReplaceChar(StrAbsolutePath('./amunhotep.exe -editor "%1"', Amunhotep.ExeName), '/', '\');
+    end;
+    //==========================================================================
+    function GetAmunhotepStartParamsReport:string;
+    begin
+      Result := StrReplaceChar(StrAbsolutePath('./amunhotep.exe -report "%1"', Amunhotep.ExeName), '/', '\');
+    end;
+    //==========================================================================
+var
+  Keys, Values :TStringList;
+  i   :Integer;
+{$IFDEF MSWINDOWS}
+  Reg :TxRegComponent;
+{$ENDIF}
+begin
+//  IsFirstStart;
+  Keys   := TStringList.Create; Keys.Clear;
+  Values := TStringList.Create; Values.Clear;
+  Keys.Add('.asm');                                                Values.Add('AMUNHOTEP.ASMFile');
+  Keys.Add('AMUNHOTEP.ASMFile');                                   Values.Add('Assembler Source');
+  Keys.Add('AMUNHOTEP.ASMFile\DefaultIcon');                       Values.Add(GetIconPath('asm'));
+  Keys.Add('AMUNHOTEP.ASMFile\Shell\AMUNHOTEP');                   Values.Add(GetAmunhotepCaption);
+  Keys.Add('AMUNHOTEP.ASMFile\Shell\AMUNHOTEP\Command');           Values.Add(GetAmunhotepStartParamsEditor);
+  Keys.Add('.apkg');                                               Values.Add('AMUNHOTEP.UpdatePackage');
+  Keys.Add('AMUNHOTEP.UpdatePackage');                             Values.Add('AMUNHOTEP Update Package');
+  Keys.Add('AMUNHOTEP.UpdatePackage\DefaultIcon');                 Values.Add(GetIconPath('iss'));
+  Keys.Add('AMUNHOTEP.UpdatePackage\Shell\AMUNHOTEP');             Values.Add('Install package');
+  Keys.Add('AMUNHOTEP.UpdatePackage\Shell\AMUNHOTEP\Command');     Values.Add(StrReplaceChar(StrAbsolutePath('./amunhotep.exe -update "%1"', Amunhotep.ExeName), '/', '\'));
+  Keys.Add('.c'   );                                               Values.Add('AMUNHOTEP.CFile');
+  Keys.Add('AMUNHOTEP.CFile');                                     Values.Add('C Source File');
+  Keys.Add('AMUNHOTEP.CFile\DefaultIcon');                         Values.Add(GetIconPath('c'));
+  Keys.Add('AMUNHOTEP.CFile\Shell\AMUNHOTEP');                     Values.Add(GetAmunhotepCaption);
+  Keys.Add('AMUNHOTEP.CFile\Shell\AMUNHOTEP\Command');             Values.Add(GetAmunhotepStartParamsEditor);
+  Keys.Add('.cpp'   );                                             Values.Add('AMUNHOTEP.CPPFile');
+  Keys.Add('AMUNHOTEP.CPPFile');                                   Values.Add('C++ Source File');
+  Keys.Add('AMUNHOTEP.CPPFile\DefaultIcon');                       Values.Add(GetIconPath('cpp'));
+  Keys.Add('AMUNHOTEP.CPPFile\Shell\AMUNHOTEP');                   Values.Add(GetAmunhotepCaption);
+  Keys.Add('AMUNHOTEP.CPPFile\Shell\AMUNHOTEP\Command');           Values.Add(GetAmunhotepStartParamsEditor);
+  Keys.Add('.cs'   );                                         Values.Add('AMUNHOTEP.CSFile');
+  Keys.Add('AMUNHOTEP.CSFile');                                     Values.Add('C# Source File');
+  Keys.Add('AMUNHOTEP.CSFile\DefaultIcon');                         Values.Add(GetIconPath('cs'));
+  Keys.Add('AMUNHOTEP.CSFile\Shell\AMUNHOTEP');                     Values.Add(GetAmunhotepCaption);
+  Keys.Add('AMUNHOTEP.CSFile\Shell\AMUNHOTEP\Command');             Values.Add(GetAmunhotepStartParamsEditor);
+
+  Keys.Add('.h'   );                                          Values.Add('AMUNHOTEP.HFile');
+  Keys.Add('AMUNHOTEP.HFile');                                      Values.Add('C Header File');
+  Keys.Add('AMUNHOTEP.HFile\DefaultIcon');                          Values.Add(GetIconPath('h'));
+  Keys.Add('AMUNHOTEP.HFile\Shell\AMUNHOTEP');                      Values.Add(GetAmunhotepCaption);
+  Keys.Add('AMUNHOTEP.HFile\Shell\AMUNHOTEP\Command');              Values.Add(GetAmunhotepStartParamsEditor);
+
+  Keys.Add('.hpp'   );                                        Values.Add('AMUNHOTEP.HPPFile');
+  Keys.Add('AMUNHOTEP.HPPFile');                                    Values.Add('C++ Header File');
+  Keys.Add('AMUNHOTEP.HPPFile\DefaultIcon');                        Values.Add(GetIconPath('hpp'));
+  Keys.Add('AMUNHOTEP.HPPFile\Shell\AMUNHOTEP');                    Values.Add('AMUNHOTEP  IV');
+  Keys.Add('AMUNHOTEP.HPPFile\Shell\AMUNHOTEP\Command');            Values.Add(GetAmunhotepStartParamsEditor);
+
+  Keys.Add('.rc'   );                                         Values.Add('AMUNHOTEP.RCFile');
+  Keys.Add('AMUNHOTEP.RCFile');                                     Values.Add('Resource File');
+  Keys.Add('AMUNHOTEP.RCFile\DefaultIcon');                         Values.Add(GetIconPath('rc'));
+  Keys.Add('AMUNHOTEP.RCFile\Shell\AMUNHOTEP');                     Values.Add(GetAmunhotepCaption);
+  Keys.Add('AMUNHOTEP.RCFile\Shell\AMUNHOTEP\Command');             Values.Add(GetAmunhotepStartParamsEditor);
+  Keys.Add('AMUNHOTEP.RCFile\Shell\Compile');                       Values.Add('Compile resource');
+  Keys.Add('AMUNHOTEP.RCFile\Shell\Compile\Command');               Values.Add(StrReplaceChar('d:\appl\borland\delphi22\bin\brcc32.exe -32 "%1" 2>%1.log', '/', '\'));
+
+  Keys.Add('.res'   );                                        Values.Add('AMUNHOTEP.ResFile');
+  Keys.Add('AMUNHOTEP.ResFile');                                    Values.Add('Resource File');
+  Keys.Add('AMUNHOTEP.ResFile\DefaultIcon');                        Values.Add(GetIconPath('res'));
+
+  Keys.Add('.ps');                                            Values.Add('AMUNHOTEP.PsFile');
+  Keys.Add('AMUNHOTEP.PsFile');                               Values.Add('AMUNHOTEP PascalScript source file');
+  Keys.Add('AMUNHOTEP.PsFile\DefaultIcon');                   Values.Add(GetIconPath('ps'));
+  Keys.Add('AMUNHOTEP.PsFile\Shell\AMUNHOTEP');               Values.Add(GetAmunhotepCaption);
+  Keys.Add('AMUNHOTEP.PsFile\Shell\AMUNHOTEP\Command');       Values.Add(GetAmunhotepStartParamsEditor);
+  Keys.Add('.pp');                                                  Values.Add('AMUNHOTEP.PasFile');
+  Keys.Add('.pas');                                                 Values.Add('AMUNHOTEP.PasFile');
+  Keys.Add('AMUNHOTEP.PasFile');                                    Values.Add('Delphi Source File');
+  Keys.Add('AMUNHOTEP.PasFile\DefaultIcon');                        Values.Add(GetIconPath('pas'));
+  Keys.Add('AMUNHOTEP.PasFile\Shell\AMUNHOTEP');                    Values.Add(GetAmunhotepCaption);
+  Keys.Add('AMUNHOTEP.PasFile\Shell\AMUNHOTEP\Command');            Values.Add(GetAmunhotepStartParamsEditor);
+  Keys.Add('.dfm'   );                                        Values.Add('AMUNHOTEP.DfmFile');
+  Keys.Add('AMUNHOTEP.DfmFile');                                    Values.Add('Delphi Form');
+  Keys.Add('AMUNHOTEP.DfmFile\DefaultIcon');                        Values.Add(GetIconPath('dfm'));
+  Keys.Add('AMUNHOTEP.DfmFile\Shell\AMUNHOTEP');                    Values.Add(GetAmunhotepCaption);
+  Keys.Add('AMUNHOTEP.DfmFile\Shell\AMUNHOTEP\Command');            Values.Add(GetAmunhotepStartParamsEditor);
+  Keys.Add('.nfm'   );                                        Values.Add('AMUNHOTEP.NfmFile');
+  Keys.Add('AMUNHOTEP.NfmFile');                                    Values.Add('Delphi .Net Form');
+  Keys.Add('AMUNHOTEP.NfmFile\DefaultIcon');                        Values.Add(GetIconPath('dfm'));
+  Keys.Add('AMUNHOTEP.NfmFile\Shell\AMUNHOTEP');                    Values.Add(GetAmunhotepCaption);
+  Keys.Add('AMUNHOTEP.NfmFile\Shell\AMUNHOTEP\Command');            Values.Add(GetAmunhotepStartParamsEditor);
+  Keys.Add('.xfm'   );                                        Values.Add('AMUNHOTEP.XfmFile');
+  Keys.Add('AMUNHOTEP.XfmFile');                                    Values.Add('Delphi CLX Form');
+  Keys.Add('AMUNHOTEP.XfmFile\DefaultIcon');                        Values.Add(GetIconPath('xfm'));
+  Keys.Add('AMUNHOTEP.XfmFile\Shell\AMUNHOTEP');                    Values.Add(GetAmunhotepCaption);
+  Keys.Add('AMUNHOTEP.XfmFile\Shell\AMUNHOTEP\Command');            Values.Add(GetAmunhotepStartParamsEditor);
+  Keys.Add('.fmx'   );                                        Values.Add('AMUNHOTEP.FmxFile');
+  Keys.Add('AMUNHOTEP.FmxFile');                                    Values.Add('Delphi FireMonkey Form');
+  Keys.Add('AMUNHOTEP.FmxFile\DefaultIcon');                        Values.Add(GetIconPath('dfm'));
+  Keys.Add('AMUNHOTEP.FmxFile\Shell\AMUNHOTEP');                    Values.Add(GetAmunhotepCaption);
+  Keys.Add('AMUNHOTEP.FmxFile\Shell\AMUNHOTEP\Command');            Values.Add(GetAmunhotepStartParamsEditor);
+  Keys.Add('.lfm'   );                                        Values.Add('LazarusForm');
+  Keys.Add('LazarusForm');                                    Values.Add('Lazarus Form');
+  Keys.Add('LazarusForm\DefaultIcon');                        Values.Add(GetIconPath('lfm'));
+  Keys.Add('LazarusForm\Shell\AMUNHOTEP');                    Values.Add(GetAmunhotepCaption);
+  Keys.Add('LazarusForm\Shell\AMUNHOTEP\Command');            Values.Add(GetAmunhotepStartParamsEditor);
+
+  Keys.Add('.dcu'   );                                        Values.Add('AMUNHOTEP.DcuFile');
+  Keys.Add('AMUNHOTEP.DcuFile');                                    Values.Add('Delphi Compiled Unit');
+  Keys.Add('AMUNHOTEP.DcuFile\DefaultIcon');                        Values.Add(GetIconPath('dcu'));
+  Keys.Add('.o'   );                                         Values.Add('AMUNHOTEP.ObjFile');
+  Keys.Add('AMUNHOTEP.ObjFile');                                    Values.Add('Delphi Compiled Unit');
+  Keys.Add('AMUNHOTEP.ObjFile\DefaultIcon');                        Values.Add(GetIconPath('o'));
+
+  Keys.Add('.conf'   );                                       Values.Add('configfile');
+  Keys.Add('.cfg'   );                                        Values.Add('configfile');
+  Keys.Add('configfile');                                     Values.Add('Файл конфигурации');
+  Keys.Add('configfile\DefaultIcon');                         Values.Add(GetIconPath('conf'));
+  Keys.Add('configfile\Shell\Open');                          Values.Add('<notepad>');
+  Keys.Add('configfile\Shell\Open\Command');                  Values.Add('notepad.exe "%1"');
+  Keys.Add('configfile\Shell\AMUNHOTEP');                     Values.Add(GetAmunhotepCaption);
+  Keys.Add('configfile\Shell\AMUNHOTEP\Command');             Values.Add(GetAmunhotepStartParamsEditor);
+
+  Keys.Add('.css'   );                                        Values.Add('cssfile');
+  Keys.Add('cssfile');                                        Values.Add('Каскадная таблица стилей CSS');
+  Keys.Add('cssfile\DefaultIcon');                            Values.Add(GetIconPath('css'));
+  Keys.Add('cssfile\Shell\AMUNHOTEP');                        Values.Add(GetAmunhotepCaption);
+  Keys.Add('cssfile\Shell\AMUNHOTEP\Command');                Values.Add(GetAmunhotepStartParamsEditor);
+
+  Keys.Add('.fdb'   );                                        Values.Add('Firebird.Database');
+  Keys.Add('.fdb3'  );                                        Values.Add('Firebird.Database');
+  Keys.Add('Firebird.Database');                              Values.Add('Firebird Database');
+  Keys.Add('Firebird.Database\DefaultIcon');                  Values.Add(GetIconPath('fdb'));
+  Keys.Add('Firebird.Database\Shell\AMUNHOTEP');              Values.Add(GetAmunhotepCaption);
+  Keys.Add('Firebird.Database\Shell\AMUNHOTEP\Command');      Values.Add(Amunhotep.ExeName+' -database "%1"');
+
+  Keys.Add('.fbk'   );                                        Values.Add('Firebird.Backup');
+  Keys.Add('Firebird.Backup');                                Values.Add('Firebird Database Backup');
+  Keys.Add('Firebird.Backup\DefaultIcon');                    Values.Add(GetIconPath('fbk'));
+  Keys.Add('Firebird.Backup\Shell\AMUNHOTEP');                Values.Add(GetAmunhotepCaption);
+  Keys.Add('Firebird.Backup\Shell\AMUNHOTEP\Command');        Values.Add(Amunhotep.ExeName+' -databasebackup %1');
+
+  Keys.Add('.frm'   );                                        Values.Add('MySQL.Table');
+  Keys.Add('MySQL.Table');                                    Values.Add('MySQL Database Table');
+  Keys.Add('MySQL.Table\DefaultIcon');                        Values.Add(GetIconPath('frm'));
+  Keys.Add('.myi'   );                                        Values.Add('MySQL.TableIndex');
+  Keys.Add('MySQL.TableIndex');                               Values.Add('MySQL Database Index');
+  Keys.Add('MySQL.TableIndex\DefaultIcon');                   Values.Add(GetIconPath('frm'));
+  Keys.Add('.myd'   );                                        Values.Add('MySQL.File');
+  Keys.Add('MySQL.File');                                     Values.Add('MySQL Database File');
+  Keys.Add('MySQL.File\DefaultIcon');                         Values.Add(GetIconPath('frm'));
+
+
+  Keys.Add('.inc'   );                                        Values.Add('incfile');
+  Keys.Add('incfile');                                        Values.Add('Директивы препроцессора');
+  Keys.Add('incfile\DefaultIcon');                            Values.Add(GetIconPath('inc'));
+  Keys.Add('incfile\Shell\AMUNHOTEP');                        Values.Add(GetAmunhotepCaption);
+  Keys.Add('incfile\Shell\AMUNHOTEP\Command');                Values.Add(GetAmunhotepStartParamsEditor);
+
+  Keys.Add('.java');                                          Values.Add('javafile');
+  Keys.Add('javafile');                                       Values.Add('Java Source Code File');
+  Keys.Add('javafile\DefaultIcon');                           Values.Add(GetIconPath('java'));
+  Keys.Add('javafile\Shell\AMUNHOTEP');                       Values.Add(GetAmunhotepCaption);
+  Keys.Add('javafile\Shell\AMUNHOTEP\Command');               Values.Add(GetAmunhotepStartParamsEditor);
+
+  Keys.Add('.js')   ;                                         Values.Add('JSFile');
+  Keys.Add('.jscript');                                       Values.Add('JSFile');
+  Keys.Add('JSFile');                                         Values.Add('JavaScript Source');
+  Keys.Add('JSFile\DefaultIcon');                             Values.Add(GetIconPath('js'));
+  Keys.Add('JSFile\Shell\AMUNHOTEP');                         Values.Add(GetAmunhotepCaption);
+  Keys.Add('JSFile\Shell\AMUNHOTEP\Command');                 Values.Add(GetAmunhotepStartParamsEditor);
+
+  Keys.Add('.json')   ;                                       Values.Add('JSONFile');
+  Keys.Add('JSONFile');                                       Values.Add('JSON Config File');
+  Keys.Add('JSONFile\DefaultIcon');                           Values.Add(GetIconPath('json'));
+  Keys.Add('JSONFile\Shell\AMUNHOTEP');                       Values.Add(GetAmunhotepCaption);
+  Keys.Add('JSONFile\Shell\AMUNHOTEP\Command');               Values.Add(GetAmunhotepStartParamsEditor);
+
+  Keys.Add('.asp');                                           Values.Add('phpfile');
+  Keys.Add('.aspx');                                          Values.Add('phpfile');
+  Keys.Add('.php');                                           Values.Add('phpfile');
+  Keys.Add('.php3');                                          Values.Add('phpfile');
+  Keys.Add('.php4');                                          Values.Add('phpfile');
+  Keys.Add('.php5');                                          Values.Add('phpfile');
+  Keys.Add('phpfile');                                        Values.Add('PHP Source File');
+  Keys.Add('phpfile\DefaultIcon');                            Values.Add(GetIconPath('php'));
+  Keys.Add('phpfile\Shell\AMUNHOTEP');                        Values.Add(GetAmunhotepCaption+' - Editor');
+  Keys.Add('phpfile\Shell\AMUNHOTEP\Command');                Values.Add(GetAmunhotepStartParamsEditor);
+
+  Keys.Add('.py');                                            Values.Add('Python.Source');
+  Keys.Add('Python.Source');                                  Values.Add('Python Source File');
+  Keys.Add('Python.Source\DefaultIcon');                      Values.Add(GetIconPath('py'));
+  Keys.Add('Python.Source\Shell\AMUNHOTEP');                  Values.Add(GetAmunhotepCaption);
+  Keys.Add('Python.Source\Shell\AMUNHOTEP\Command');          Values.Add(GetAmunhotepStartParamsEditor);
+{
+  Keys.Add('Python.Source\Shell\Run262');                     Values.Add('Python 2.6.2');
+  Keys.Add('Python.Source\Shell\Run262\Command');             Values.Add(StrReplaceChar(StrAbsolutePath('../../python/2.6.2/python.exe "%1"', Amunhotep.ExeName), '/', '\'));
+  Keys.Add('Python.Source\Shell\Run311');                     Values.Add('Python 3.1.1');
+  Keys.Add('Python.Source\Shell\Run311\Command');             Values.Add(StrReplaceChar(StrAbsolutePath('../../python/3.1.1/python.exe "%1"', Amunhotep.ExeName), '/', '\'));
+}
+  Keys.Add('.pyc');                                           Values.Add('Python.Compiled');
+  Keys.Add('Python.Compiled');                                Values.Add('Python Compiled Source File');
+  Keys.Add('Python.Compiled\DefaultIcon');                    Values.Add(GetIconPath('pyc'));
+{
+  Keys.Add('Python.Compiled\Shell\Run262');                   Values.Add('Python 2.6.2');
+  Keys.Add('Python.Compiled\Shell\Run262\Command');           Values.Add(StrReplaceChar(StrAbsolutePath('../../python/2.6.2/python.exe "%1"', Amunhotep.ExeName), '/', '\'));
+  Keys.Add('Python.Compiled\Shell\Run311');                   Values.Add('Python 3.1.1');
+  Keys.Add('Python.Compiled\Shell\Run311\Command');           Values.Add(StrReplaceChar(StrAbsolutePath('../../python/3.1.1/python.exe "%1"', Amunhotep.ExeName), '/', '\'));
+}
+  Keys.Add('.pl');                                            Values.Add('plfile');
+  Keys.Add('plfile');                                         Values.Add('Perl Source File');
+  Keys.Add('plfile\DefaultIcon');                             Values.Add(GetIconPath('pl'));
+  Keys.Add('plfile\Shell\AMUNHOTEP');                         Values.Add(GetAmunhotepCaption);
+  Keys.Add('plfile\Shell\AMUNHOTEP\Command');                 Values.Add(GetAmunhotepStartParamsEditor);
+
+  Keys.Add('.ruby');                                          Values.Add('RubyFile');
+  Keys.Add('.rb');                                            Values.Add('RubyFile');
+  Keys.Add('.erb');                                           Values.Add('RubyFile');
+  Keys.Add('RubyFile');                                       Values.Add('Ruby Source File');
+  Keys.Add('RubyFile\DefaultIcon');                           Values.Add(GetIconPath('ruby'));
+  Keys.Add('RubyFile\Shell\AMUNHOTEP');                       Values.Add(GetAmunhotepCaption);
+  Keys.Add('RubyFile\Shell\AMUNHOTEP\Command');               Values.Add(GetAmunhotepStartParamsEditor);
+
+  Keys.Add('.rpm');                                           Values.Add('rpmfile');
+  Keys.Add('rpmfile');                                        Values.Add('LINUX runtime package');
+  Keys.Add('rpmfile\DefaultIcon');                            Values.Add(GetIconPath('rpm'));
+
+  Keys.Add('.pkg.zip');                                       Values.Add('MacOSInstall');
+  Keys.Add('.pkgzip');                                        Values.Add('MacOSInstall');
+  Keys.Add('MacOSInstall');                                   Values.Add('Установоный дистрибутив MacOS');
+  Keys.Add('MacOSInstall\DefaultIcon');                       Values.Add(GetIconPath('macos'));
+
+  Keys.Add('.sql');                                           Values.Add('sqlfile');
+  Keys.Add('sqlfile');                                        Values.Add('Structured Query Language');
+  Keys.Add('sqlfile\DefaultIcon');                            Values.Add(GetIconPath('sql'));
+  Keys.Add('sqlfile\Shell\AMUNHOTEP');                        Values.Add(GetAmunhotepCaption);
+  Keys.Add('sqlfile\Shell\AMUNHOTEP\Command');                Values.Add(GetAmunhotepStartParamsEditor);
+
+  Keys.Add('.xml');                                           Values.Add('xmlfile');
+  Keys.Add('xmlfile');                                        Values.Add('Документ XML');
+  Keys.Add('xmlfile\DefaultIcon');                            Values.Add(GetIconPath('xml'));
+  Keys.Add('xmlfile\Shell\AMUNHOTEP');                        Values.Add(GetAmunhotepCaption);
+  Keys.Add('xmlfile\Shell\AMUNHOTEP\Command');                Values.Add(GetAmunhotepStartParamsEditor);
+
+  Keys.Add('.xrp');                                           Values.Add('xreport');
+  Keys.Add('.xrpt');                                          Values.Add('xreport');
+  Keys.Add('xreport');                                        Values.Add('Файл отчета xReport');
+  Keys.Add('xreport\DefaultIcon');                            Values.Add(GetIconPath('xrp'));
+  Keys.Add('xreport\Shell\AMUNHOTEP');                        Values.Add(GetAmunhotepCaption);
+  Keys.Add('xreport\Shell\AMUNHOTEP\Command');                Values.Add(GetAmunhotepStartParamsReport);
+
+  Keys.Add('.dcr\DefaultIcon');                               Values.Add(GetIconPath('dcr'));
+
+  Keys.Add('.dof');                                           Values.Add('AMUNHOTEP.DofFile');
+  Keys.Add('AMUNHOTEP.DofFile');                                    Values.Add('Borland Delphi project compiler options');
+  Keys.Add('AMUNHOTEP.DofFile\DefaultIcon');                        Values.Add(GetIconPath('dof'));
+  Keys.Add('AMUNHOTEP.DofFile\Shell\AMUNHOTEP');                    Values.Add(GetAmunhotepCaption);
+  Keys.Add('AMUNHOTEP.DofFile\Shell\AMUNHOTEP\Command');            Values.Add(GetAmunhotepStartParamsEditor);
+  Keys.Add('AMUNHOTEP.DofFile\Shell\Open');                         Values.Add('notepad');
+  Keys.Add('AMUNHOTEP.DofFile\Shell\Open\Command');                 Values.Add('notepad.exe "%1"');
+  Keys.Add('.dsk');                                           Values.Add('AMUNHOTEP.DskFile');
+  Keys.Add('AMUNHOTEP.DskFile');                                    Values.Add('Borland Delphi project desktop');
+  Keys.Add('AMUNHOTEP.DskFile\DefaultIcon');                        Values.Add(GetIconPath('dsk'));
+  Keys.Add('AMUNHOTEP.DskFile\Shell\AMUNHOTEP');                    Values.Add(GetAmunhotepCaption);
+  Keys.Add('AMUNHOTEP.DskFile\Shell\AMUNHOTEP\Command');            Values.Add(GetAmunhotepStartParamsEditor);
+  Keys.Add('AMUNHOTEP.DskFile\Shell\Open');                         Values.Add('notepad');
+  Keys.Add('AMUNHOTEP.DskFile\Shell\Open\Command');                 Values.Add('notepad.exe "%1"');
+
+  Keys.Add('.dpr');                                           Values.Add('AMUNHOTEP.DprFile');
+  Keys.Add('AMUNHOTEP.DprFile');                                    Values.Add('Delphi project');
+  Keys.Add('AMUNHOTEP.DprFile\DefaultIcon');                        Values.Add(GetIconPath('dpr'));
+  Keys.Add('AMUNHOTEP.DprFile\Shell\AMUNHOTEP');                    Values.Add(GetAmunhotepCaption);
+  Keys.Add('AMUNHOTEP.DprFile\Shell\AMUNHOTEP\Command');            Values.Add(GetAmunhotepStartParamsEditor);
+  Keys.Add('AMUNHOTEP.DprFile\Shell\Open');                         Values.Add('notepad');
+  Keys.Add('AMUNHOTEP.DprFile\Shell\Open\Command');                 Values.Add('notepad.exe "%1"');
+  Keys.Add('AMUNHOTEP.DprFile\Shell\Delphi7');                      Values.Add('Borland Delphi 7');
+  Keys.Add('AMUNHOTEP.DprFile\Shell\Delphi7\Command');              Values.Add('D:\appl\borland\delphi7\Bin\delphi32.exe /np');
+  Keys.Add('AMUNHOTEP.DprFile\Shell\Delphi7\ddeexec');              Values.Add('[open("%1")]');
+  Keys.Add('AMUNHOTEP.DprFile\Shell\Delphi7\ddeexec\Application');  Values.Add('DELPHI32');
+  Keys.Add('AMUNHOTEP.DprFile\Shell\RSXE8');                        Values.Add('RAD Studio XE8');
+  Keys.Add('AMUNHOTEP.DprFile\Shell\RSXE8\Command');                Values.Add('"D:\appl\borland\delphi22\bin\bdsLauncher.exe" "D:\appl\borland\delphi22\bin\AMUNHOTEP.exe" /np');
+  Keys.Add('AMUNHOTEP.DprFile\Shell\RSXE8\ddeexec');                Values.Add('[open("%1")]');
+  Keys.Add('AMUNHOTEP.DprFile\Shell\RSXE8\ddeexec\Application');    Values.Add('bdslauncher');
+
+  Keys.Add('.bdsproj');                                       Values.Add('AMUNHOTEP.DprojFile');
+  Keys.Add('.dproj');                                         Values.Add('AMUNHOTEP.DprojFile');
+  Keys.Add('AMUNHOTEP.DprojFile');                                  Values.Add('Delphi project');
+  Keys.Add('AMUNHOTEP.DprojFile\DefaultIcon');                      Values.Add(GetIconPath('xml'));
+  Keys.Add('AMUNHOTEP.DprojFile\Shell\AMUNHOTEP');                  Values.Add(GetAmunhotepCaption);
+  Keys.Add('AMUNHOTEP.DprojFile\Shell\AMUNHOTEP\Command');          Values.Add(GetAmunhotepStartParamsEditor);
+  Keys.Add('AMUNHOTEP.DprojFile\Shell\Open');                       Values.Add('notepad');
+  Keys.Add('AMUNHOTEP.DprojFile\Shell\Open\Command');               Values.Add('notepad.exe "%1"');
+  Keys.Add('AMUNHOTEP.DprojFile\Shell\Delphi7');                    Values.Add('Borland Delphi 7');
+  Keys.Add('AMUNHOTEP.DprojFile\Shell\Delphi7\Command');            Values.Add('D:\appl\borland\delphi7\Bin\delphi32.exe /np');
+  Keys.Add('AMUNHOTEP.DprojFile\Shell\Delphi7\ddeexec');            Values.Add('[open("%1")]');
+  Keys.Add('AMUNHOTEP.DprojFile\Shell\Delphi7\ddeexec\Application');Values.Add('DELPHI32');
+  Keys.Add('AMUNHOTEP.DprojFile\Shell\RSXE8');                        Values.Add('RAD Studio XE8');
+  Keys.Add('AMUNHOTEP.DprojFile\Shell\RSXE8\Command');                Values.Add('"D:\appl\borland\delphi22\bin\bdsLauncher.exe" "D:\appl\borland\delphi22\bin\AMUNHOTEP.exe" /np');
+  Keys.Add('AMUNHOTEP.DprojFile\Shell\RSXE8\ddeexec');                Values.Add('[open("%1")]');
+  Keys.Add('AMUNHOTEP.DprojFile\Shell\RSXE8\ddeexec\Application');    Values.Add('bdslauncher');
+
+  Keys.Add('.groupproj');                                                Values.Add('AMUNHOTEP.GroupProjFile');
+  Keys.Add('AMUNHOTEP.GroupProjFile');                                   Values.Add('Delphi project group');
+  Keys.Add('AMUNHOTEP.GroupProjFile\DefaultIcon');                       Values.Add(GetIconPath('xml'));
+  Keys.Add('AMUNHOTEP.GroupProjFile\Shell\AMUNHOTEP');                   Values.Add(GetAmunhotepCaption);
+  Keys.Add('AMUNHOTEP.GroupProjFile\Shell\AMUNHOTEP\Command');           Values.Add(GetAmunhotepStartParamsEditor);
+  Keys.Add('AMUNHOTEP.GroupProjFile\Shell\Open');                        Values.Add('notepad');
+  Keys.Add('AMUNHOTEP.GroupProjFile\Shell\Open\Command');                Values.Add('notepad.exe "%1"');
+  Keys.Add('AMUNHOTEP.GroupProjFile\Shell\RSXE8');                       Values.Add('RAD Studio XE8');
+  Keys.Add('AMUNHOTEP.GroupProjFile\Shell\RSXE8\Command');               Values.Add('"D:\appl\borland\delphi22\bin\bdsLauncher.exe" "D:\appl\borland\delphi22\bin\AMUNHOTEP.exe" /np');
+  Keys.Add('AMUNHOTEP.GroupProjFile\Shell\RSXE8\ddeexec');               Values.Add('[open("%1")]');
+  Keys.Add('AMUNHOTEP.GroupProjFile\Shell\RSXE8\ddeexec\Application');   Values.Add('bdslauncher');
+
+  Keys.Add('.dbf');                                           Values.Add('DBaseTable');
+  Keys.Add('DBaseTable');                                     Values.Add('DBase Table');
+  Keys.Add('DBaseTable\DefaultIcon');                         Values.Add(GetIconPath('dbf'));
+  Keys.Add('.cdx');                                           Values.Add('DBaseIndex');
+  Keys.Add('DBaseIndex');                                     Values.Add('DBase Index File');
+  Keys.Add('DBaseIndex\DefaultIcon');                         Values.Add(GetIconPath('cdx'));
+
+  Keys.Add('.sqlite');                                        Values.Add('SQLiteDatabase');
+  Keys.Add('SQLiteDatabase');                                 Values.Add('SQLite Database File');
+  Keys.Add('SQLiteDatabase\DefaultIcon');                     Values.Add(GetIconPath('sqlite'));
+
+  Keys.Add('.iss'   );                                        Values.Add('ISSFile');
+  Keys.Add('ISSFile');                                        Values.Add('Проект инсталлятора');
+  Keys.Add('ISSFile\DefaultIcon');                            Values.Add(GetIconPath('iss'));
+  Keys.Add('ISSFile\Shell\InnoSetup');                        Values.Add('Inno Setup');
+  Keys.Add('ISSFile\Shell\InnoSetup\Command');                Values.Add('d:\appl\innosetup\compil32.exe "%1"');
+
+{$IFDEF MSWINDOWS}
+  Reg               := TxRegComponent.Create(nil);
+  Reg.RootKey       := xrgHKCR;
+  Reg.CanCreateKeys := true;
+  for i:=0 to Keys.Count-1 do
+    begin
+    if(xrgHKCR <> Reg.RootKey)then
+      Reg.Key   := '\SOFTWARE\Classes\' + Keys[i]
+    else 
+      Reg.Key   := Keys[i];
+    Reg.Param := '';
+    try
+      Reg.WriteString(Values[i]);
+    except
+      WriteLn(Reg.Key);
+    end;  
+    WriteLn( Keys[i] + ' = ' + Values[i] );
+    end; 
+  Reg.Free;
+{$ENDIF}
+{$IFDEF LINUX}
+{$ENDIF}
+  Keys.Free;
+  Values.Free;
+end.

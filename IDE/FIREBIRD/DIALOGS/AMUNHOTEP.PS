@@ -1,0 +1,29 @@
+{$DEFINE PEAKTOP:IDE/FIREBIRD/DIALOGS/AMUNHOTEP.PS}
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}                     {$I PEAKTOP:GLOBAL_VARIABLES.INC}     {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/FIREBIRD/DIALOGS/ERROR.INC}           {$I ./ERROR.INC}                      {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/FIREBIRD/DIALOGS/PASSWORD_PROMT.INC}  {$I ./PASSWORD_PROMT.INC}             {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/FIREBIRD/DIALOGS/DATABASE_SELECT.INC} {$I ./DATABASE_SELECT.INC}            {$ENDIF}
+  //============================================================================
+  function Amunhotep_MainForm_OnFirebirdDataBaseSelect(var DataBasePath:string):Boolean;
+  var
+    lkDummy1,lkDummy2,lkDummy3 :string; 
+  begin
+    Result := FirebirdDialog_DatabaseSelect_Execute(DataBasePath, lkDummy1, lkDummy2, lkDummy3, lkDummy3);  
+  end;
+  //============================================================================
+  function Amunhotep_MainForm_OnFirebirdError(const ErrorMessage:string):Boolean;
+  begin
+    Result := FirebirdDialog_Error_Execute(ErrorMessage);
+  end;
+  //============================================================================
+  function Amunhotep_MainForm_OnFirebirdPasswordPrompt(const LastUsers:string; var UserName, Password:string):Boolean;
+  begin
+    Result := FirebirdDialog_PasswordPromt_Execute(LastUsers, UserName, Password);
+  end;
+  //============================================================================
+begin
+  DontAutoFree;
+  Amunhotep.MainForm.OnFirebirdError         := @Amunhotep_MainForm_OnFirebirdError;
+  Amunhotep.MainForm.OnFirebirdPasswordPrompt:= @Amunhotep_MainForm_OnFirebirdPasswordPrompt;
+  Amunhotep.MainForm.OnFirebirdDataBaseSelect:= @Amunhotep_MainForm_OnFirebirdDataBaseSelect;
+end.

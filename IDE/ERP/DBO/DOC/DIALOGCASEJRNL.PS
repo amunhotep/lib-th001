@@ -1,0 +1,14 @@
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/DOC/DIALOGCASEJRNL.INC} {$I ./DIALOGCASEJRNL.INC} {$ENDIF}
+var
+  lkTYPE_ID  :string;  
+  lkSC_JRNL:string;  
+begin
+  if ERP_DialogCaseJrnl_Execute(lkTYPE_ID) then
+    begin
+    lkSC_JRNL := 'DB:CONFIG/DOC/'+lkTYPE_ID+'/DEFAULT.PS';
+    if not call(lkSC_JRNL)then
+      begin
+      
+      end;
+    end;
+end.

@@ -1,0 +1,16 @@
+{$DEFINE PEAKTOP:IDE/ERP/DBO/OPER/WIZARD.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/OPER/WIZARD.INC}  {$I ./WIZARD.INC} {$ENDIF}
+var 
+  lkGUID_       :TGUID;
+  lkGUID        :string; 
+  lkCaption     :string;
+  lkScriptName  :string;
+  lkParentTypeId:string;
+begin
+  lkParentTypeId := '3';
+  CoCreateGUID(lkGUID_);
+  lkGUID := GUIDToStr(lkGUID_);
+  if ERP_WizardOper_Execute(lkGUID, lkCaption, lkParentTypeId, lkScriptName)then
+    if ERP_ObjCreateOper(lkGUID, lkCaption, lkParentTypeId, lkScriptName) then
+      Amunhotep.MainForm.ProcessFile(lkScriptName);  
+end.

@@ -1,0 +1,193 @@
+object ReportD5C81261CCE0949B99274368E66BC883: TxReport
+  Left = 0
+  Top = 0
+  Width = 794
+  Height = 1123
+  Frame.Color = clBlack
+  Frame.Top = False
+  Frame.Bottom = False
+  Frame.Left = False
+  Frame.Right = False
+  Transparent = False
+  Color = clWhite
+  Font.Charset = RUSSIAN_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -9
+  Font.Name = 'Verdana'
+  Font.Style = []
+  ParentFont = False
+  AutoFree = True
+  DataBase = AmunhotepMainForm.FBDB
+  DataSets.DataBase = AmunhotepMainForm.FBDB
+  DataSets = <
+    item
+      Active = False
+      Name = 'qrMain'
+    end
+    item
+      Active = False
+      Name = 'qrEnt'
+    end>
+  DataSetIndex = 0
+  Functions.Strings = (
+    'PAGENUMBER'
+    'COLUMNNUMBER'
+    'REPORTTITLE')
+  Functions.DATA = (
+    '0'
+    '0'
+    #39#39)
+  StyleManager = AmunhotepMainForm.StyleManager
+  Options = [FirstPageHeader, LastPageFooter]
+  Page.Columns = 4
+  Page.Orientation = poPortrait
+  Page.PaperSize = A4
+  Page.Values = (
+    50.000000000000000000
+    2970.000000000000000000
+    50.000000000000000000
+    2100.000000000000000000
+    50.000000000000000000
+    50.000000000000000000
+    0.000000000000000000)
+  PrinterSettings.Copies = 1
+  PrinterSettings.OutputBin = Auto
+  PrinterSettings.Duplex = False
+  PrinterSettings.FirstPage = 0
+  PrinterSettings.LastPage = 0
+  PrinterSettings.ExtendedDuplex = 0
+  PrinterSettings.UseStandardPrinter = False
+  PrinterSettings.UseCustomBinCode = False
+  PrinterSettings.CustomBinCode = 0
+  PrinterSettings.UseCustomPaperCode = False
+  PrinterSettings.CustomPaperCode = 0
+  PrinterSettings.PrintMetaFile = False
+  PrintIfEmpty = True
+  SnapToGrid = True
+  Units = MM
+  Zoom = 100
+  PrevFormStyle = fsMDIChild
+  PreviewInitialState = wsNormal
+  object bndDetail: TxrBand
+    Left = 19
+    Top = 19
+    Width = 189
+    Height = 64
+    Frame.Color = clBlack
+    Frame.Top = True
+    Frame.Bottom = True
+    Frame.Left = True
+    Frame.Right = True
+    Transparent = False
+    Color = clWhite
+    AlignToBottom = False
+    ForceNewColumn = False
+    ForceNewPage = False
+    Size.Values = (
+      169.333333333333300000
+      500.062500000000000000)
+    BandType = rbDetail
+    object xrExpressionMemo3: TxrExpressionMemo
+      Left = 4
+      Top = 34
+      Width = 184
+      Height = 24
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        63.500000000000000000
+        10.583333333333330000
+        89.958333333333330000
+        486.833333333333300000)
+      Transparent = True
+      RemoveBlankLines = False
+      Alignment = taRightJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clBlack
+      Font.Height = -19
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{FORMATNUMERIC('#39'# ### ### ##0.00'#39',qrMain.PRICE)}')
+      ParentFont = False
+      WordWrap = True
+      FontSize = 14
+    end
+    object xrExpressionMemo1: TxrExpressionMemo
+      Left = 1
+      Top = 1
+      Width = 186
+      Height = 30
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        79.375000000000000000
+        2.645833333333333000
+        2.645833333333333000
+        492.125000000000000000)
+      Transparent = True
+      RemoveBlankLines = False
+      Alignment = taLeftJustify
+      AlignToBand = False
+      AutoSize = False
+      AutoStretch = False
+      Color = clWhite
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -8
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsBold]
+      Indent = 0
+      Layout = tlTop
+      Lines.Strings = (
+        '{qrMain.NAME}')
+      ParentFont = False
+      WordWrap = True
+      FontSize = 6
+    end
+    object xrDBBarcode1: TxrDBBarcode
+      Left = 4
+      Top = 28
+      Width = 104
+      Height = 32
+      Frame.Color = clBlack
+      Frame.Top = False
+      Frame.Bottom = False
+      Frame.Left = False
+      Frame.Right = False
+      Size.Values = (
+        84.666666666666670000
+        10.583333333333330000
+        74.083333333333330000
+        275.166666666666700000)
+      Transparent = False
+      BarType = xbcCodeEAN13
+      BarHeight = 0
+      Modul = 1
+      Ratio = 2.000000000000000000
+      CheckSum = xbccsModulo10
+      ColorSpc = clWhite
+      ColorBar = clBlack
+      Orientation = gdLeftToRight
+      TextShow = xbctsBarCode
+      TextPosition = xbctpBottomCenter
+      TextColor = clWhite
+      AutoWidth = False
+      HMargin = 0
+      DataField = 'BARCODE'
+      DataSetIndex = 0
+    end
+  end
+end

@@ -1,0 +1,211 @@
+{$DEFINE DB:CONFIG/RPTI/A5BEA906-314C-4378-96E6-B066A841688E/DEFAULT.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$I PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC} {$I PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}        {$I PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}        {$ENDIF}
+const
+  objname_datefrom    = 'dtpDateFrom';
+  objname_dateto      = 'dtpDateTo';
+  objname_countries   = 'gbCountries';
+  msg_input_countries = 'Выберите валюты';
+  //============================================================================
+  function TERPFormRpti_GetExportFilter(aOwner:TComponent):string;
+  begin
+    Result := 
+      'С "'+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+
+      '" ПО "'+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto))+
+      '" Валюты: "'+InputIntf_Ref_GetNames(aOwner.FindComponent(objname_countries))+
+      '"  ';//Виды залогов: "'+InputIntf_Ref_GetNames(aOwner.FindComponent(objname_tmcgroup))+'"';
+  end;
+  //============================================================================
+  function  TERPFormRpti_OnGetSQL(aOwner:TComponent;var aSQL:string):Boolean;
+  begin
+    Result := true;
+    aSQL :=  TxsStringsHolder(aOwner.FindComponent(obj_name_erp_data_settings)).Items[1].Strings.Text;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnGetSQLFileName(aOwner:TComponent;var aFileName:string);
+  begin
+     // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnProcessParams(aOwner:TComponent;aQr :TxFBQuery);
+  begin
+    with aQr do
+      begin
+      ParamByName('DATE_FROM').AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+' 00:00:00';
+      ParamByName('DATE_TO'  ).AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto)+1)+' 00:00:00';
+      end;  
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnChart(aOwner:TComponent; aParent:TWinControl);
+  var
+    lkChart :TDBChart;
+  begin
+    lkChart := Interface_TeeChart_Create(aOwner, aParent, 'DBChart');
+    with lkChart do
+      begin
+      Title.Text.Text := TForm(aOwner).Caption;
+      BottomAxis.LabelsAngle := 90;
+      end;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnTerms(aOwner:TComponent;aParent:TWinControl);
+  var
+    lkLastTop :Integer;
+  begin
+    lkLastTop := 4;
+    lkLastTop := lkLastTop + InputIntf_DatePeriod_Create(aOwner, aParent, 'gbDatePeriod', 'Укажите период', 4, lkLastTop, 44, 360,objname_datefrom,objname_dateto,StrToDate('01.01.2008'),Now).Height;
+    lkLastTop := lkLastTop + 4;
+    lkLastTop := lkLastTop + InputIntf_Ref_Create(aOwner,aParent,objname_countries,msg_input_countries,4,lkLastTop,480,360,'TABL$R_COUNTRIES',TERPForm_Settings(aOwner).Values[ERP_SETTINGS_TABLENAME]).Height;
+    lkLastTop := lkLastTop + 4;
+  end;
+  //============================================================================
+  function TERPFormRpti_OnColumnsCreate(aOwner:TComponent; aDBG:TDBGridEh):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsCreated(aOwner:TComponent; aDBG:TDBGridEh);
+  begin
+     // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsLoad(aOwner:TComponent; aDBG:TDBGridEh);
+  var
+    lkChart   :TDBChart;
+    lkSer     :TLineSeries;
+    i         :Integer;
+    lkTr      :TxFBTransaction;
+    lkQr      :TxFBQuery;
+    lkCol     :TColumnEh;
+    lkFld     :string;
+    lkSQL     :string;
+    lkSQLVars :string;
+    lkSQLBody :string;
+  begin
+    lkChart := TDBChart(aOwner.FindComponent('DBChart'));
+    lkChart.Title.Text.Text := TForm(aOwner).Caption+SQLCRLF+InputIntf_Ref_GetNames(aOwner.FindComponent(objname_countries));
+    i := lkChart.ComponentCount-1;
+    while(i > 0)do
+      begin
+      if ObjectInheritsFrom(lkChart.Components[i], 'TLineSeries') then
+        lkChart.Components[i].Free;
+      i := i - 1;  
+      end;  
+    aDBG.Columns.Clear;
+    lkCol := CreateTColumnEh(aDBG,'VALUE_DATE','dd.mm.yyyy','Дата', 96, taLeftJustify);
+    lkTr  := TxFBTransaction.Create(nil);
+    with lkTr do
+      begin
+      DefaultDataBase := FBDataBase;
+      with Params do
+        begin
+        Clear;
+        Add('isc_tpb_read_committed');
+        Add('isc_tpb_read');
+        Add('isc_tpb_rec_version');
+        Add('isc_tpb_nowait');
+        end;
+      end;
+    lkQr  := TxFBQuery.Create(lkTr);
+    lkQr.SQL.Text := 'SELECT C.ID, C.NAME, C.VALUTE FROM TABL$R_COUNTRIES C WHERE ('''+
+     InputIntf_Ref_GetIds(aOwner.FindComponent(objname_countries))+''' CONTAINING ''~''||C.ID||''~'') ORDER BY C.NAME ';
+    lkQr.Open;
+    lkSQLVars := '';
+    lkSQLBody := '';
+    lkQr.First;
+    while not lkQr.EOF do
+      begin
+      lkFld := 'C'+lkQr.FieldByName('ID').AsString;
+      lkCol := CreateTColumnEh(aDBG,lkFld,'# ### ### ##0.00',lkQr.FieldByName('NAME').AsString+'|'+lkQr.FieldByName('VALUTE').AsString,80,taRightJustify);
+      lkSQLVars := lkSQLVars + '  ,'+lkFld+'    TYPE OF COLUMN TABL$R_COUNTRIES_P.KURS '+SQLCRLF;
+      lkSQLBody := lkSQLBody +
+        '    -- "'+lkQr.FieldByName('VALUTE').AsString+'" '+SQLCRLF+
+        '    SELECT MAX(P2.VALUE_DATE) '+SQLCRLF+
+        '    FROM   TABL$R_COUNTRIES_P P2 '+SQLCRLF+
+        '    WHERE  (P2.VALUE_DATE >= :VALUE_DATE) '+SQLCRLF+
+        '      AND  (P2.VALUE_DATE <  (:VALUE_DATE + 1)) '+SQLCRLF+
+        '      AND  (P2.COUNTRY_ID = '''+lkQr.FieldByName('ID').AsString+''') '+SQLCRLF+
+        '    INTO   :P_DATE; '+SQLCRLF+
+        '    IF(NOT(:P_DATE IS NULL))THEN '+SQLCRLF+
+        '      BEGIN '+SQLCRLF+
+        '      SELECT FIRST 1 COALESCE(P.KURS,0) '+SQLCRLF+
+        '      FROM   TABL$R_COUNTRIES_P P '+SQLCRLF+
+        '      WHERE  ((P.VALUE_DATE = :P_DATE)AND(P.COUNTRY_ID = '''+lkQr.FieldByName('ID').AsString+''')) '+SQLCRLF+
+        '      INTO   :'+lkFld+'; '+SQLCRLF+
+        '      END '+SQLCRLF+
+        '';
+      if(lkChart.FindComponent(lkFld) <> nil)then
+        lkSer := TLineSeries(lkChart.FindComponent(lkFld))
+       else
+        lkSer := TLineSeries.Create(lkChart);
+      with lkSer do
+        begin
+        Name                := lkFld;
+        ParentChart         := lkChart;
+        ShowInLegend        := true;
+        Visible             := true;
+        ColorEachPoint      := false;
+        Marks.Visible       := false;
+        Pointer.HorizSize   := 1;
+        Pointer.VertSize    := 1;
+        Pointer.Visible     := true;
+        LinePen.Width       := 3;
+        Title               := lkQr.FieldByName('VALUTE').AsString;
+        DataSource          := aDBG.DataSource.DataSet;
+        YValues.Order       := loNone;
+        YValues.DateTime    := false;
+        YValues.ValueSource := lkFld;
+        XValues.Order       := loAscending;
+        XValues.DateTime    := true;
+        XValues.ValueSource := 'VALUE_DATE';
+        XLabelsSource       := 'VALUE_DATE';
+        end;
+      lkQr.Next;
+      end;
+    if lkTr.InTransaction then
+      lkTr.Commit;
+    lkTr.Free;
+    lkSQL := 
+      'EXECUTE BLOCK ( '+SQLCRLF+
+      '   Q_DATE_FROM TYPE OF COLUMN TABL$R_COUNTRIES_P.VALUE_DATE = ?DATE_FROM '+SQLCRLF+
+      '  ,Q_DATE_TO   TYPE OF COLUMN TABL$R_COUNTRIES_P.VALUE_DATE = ?DATE_TO '+SQLCRLF+
+      ')RETURNS( '+SQLCRLF+
+      '   DATE_FROM   TYPE OF COLUMN TABL$R_COUNTRIES_P.VALUE_DATE '+SQLCRLF+
+      '  ,DATE_TO     TYPE OF COLUMN TABL$R_COUNTRIES_P.VALUE_DATE '+SQLCRLF+
+      '  ,VALUE_DATE  TYPE OF COLUMN TABL$R_COUNTRIES_P.VALUE_DATE '+SQLCRLF+
+      lkSQLVars+
+      ')AS '+SQLCRLF+
+      '  DECLARE VARIABLE P_DATE TYPE OF COLUMN TABL$R_COUNTRIES_P.VALUE_DATE; '+SQLCRLF+
+      'BEGIN '+SQLCRLF+
+      '  DATE_FROM  = :Q_DATE_FROM; '+SQLCRLF+
+      '  DATE_TO    = :Q_DATE_TO; '+SQLCRLF+
+      '  VALUE_DATE = :DATE_FROM; '+SQLCRLF+
+      '  WHILE(:VALUE_DATE < :DATE_TO)DO '+SQLCRLF+
+      '    BEGIN '+SQLCRLF+
+      lkSQLBody+
+      '    SUSPEND; '+SQLCRLF+
+      '    VALUE_DATE = :VALUE_DATE + 1; '+SQLCRLF+
+      '    END '+SQLCRLF+
+      'END ';
+    with TxsStringsHolder(aOwner.FindComponent(obj_name_erp_data_settings)) do
+      begin
+      while(Items.Count < 2)do
+        Items.Add;
+      Items[1].Strings.Text := lkSQL;
+      end;
+  end;
+  //============================================================================
+  function  TERPFormRpti_OnPrint(aOwner:TComponent):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_BeforePreview(aOwner:TComponent; aRpt:TxReport);
+  begin
+
+  end;
+  //============================================================================
+begin
+  TERPFormRpti_Create('{A5BEA906-314C-4378-96E6-B066A841688E}');  
+end.   

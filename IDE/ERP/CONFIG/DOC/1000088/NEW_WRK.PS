@@ -1,0 +1,19 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC} {$I PEAKTOP:GLOBAL_VARIABLES.INC} {$ENDIF}  
+var
+  lkFirmId :string;
+  lkWrkId  :string;
+  lkS :string;
+begin
+  lkWrkId := GetGlobalVariable('WRK_ID');
+  lkFirmId := '0';
+  SetGlobalVariable('FIRM_ID', lkFirmId);
+  call(StrAbsolutePath('../../REF/FIRMS/DEFAULT_DLG.PS',ScriptName));
+  lkFirmId := GetGlobalVariable('FIRM_ID');
+  if((UpperCase(lkFirmId)<>'NULL')and(StrTrimAll(lkFirmId)<>''))then
+    if GetFieldCommit(FBDataBase, 'PROC$J_INS_1000088('''+lkFirmId+''', 0)', 'J_ID', '', lkS)then
+      begin
+      ExecSQL(FBDataBase, 'UPDATE TABL$J_1000087 J SET J.WRK_ID = '+lkWrkId+' WHERE (J.J_ID = '+lkS+')');
+      SetGlobalVariable('J_ID', lkS);
+      call(StrAbsolutePath('../1000087/EDIT.PS', ScriptName));  
+      end;                            
+end.

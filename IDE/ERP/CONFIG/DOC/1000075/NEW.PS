@@ -1,0 +1,18 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG/DOC/1000075/NEW.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/CONFIG/REF/FIRMS/DIALOGCASEITEM.INC}
+  {$I PEAKTOP:IDE/ERP/CONFIG/REF/FIRMS/DIALOGCASEITEM.INC}
+{$ENDIF}  
+var
+  lkFirmId :string;
+  lkDocIds :array of string;
+begin
+  if not ERPDialogCaseReferenceItem_Firm_Execute(lkFirmId) then exit;
+
+  SetLength(lkDocIds, 1)
+  if not TERPForm_SelectSQLParams([], 
+    'SELECT * FROM PROC$J_INS_1000075('''+lkFirmId+''', -2, NULL) ', [],[], 
+    ['J_ID'], lkDocIds)then exit;
+
+  SetGlobalVariable('J_ID', lkDocIds[0]);
+  call(StrAbsolutePath('./EDIT.PS', ScriptName));  
+end.

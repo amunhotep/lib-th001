@@ -1,0 +1,165 @@
+{$DEFINE DB:CONFIG/REF/TMC/NEW_ITEM_DLG_PS.PS}
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}{$I PEAKTOP:GLOBAL_VARIABLES.INC}{$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TLABEL.INC}      {$I PEAKTOP:OBJ/TLABEL.INC}      {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCEDITCALC.INC} {$I PEAKTOP:OBJ/TXCEDITCALC.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TEDIT.INC}       {$I PEAKTOP:OBJ/TEDIT.INC}       {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/FIREBIRD/DIALOGS/CUSTOM.INC}
+  {$I PEAKTOP:IDE/FIREBIRD/DIALOGS/CUSTOM.INC}
+{$ENDIF}
+  //============================================================================
+  function TMCNew_Insert(const aTMCGroupID, aTMCGroupName, aArticle, aCountryId, aProbe:string; 
+             const aMassa, aMassaIns, aDiam, aLgth:Extended; var a_TMCID :string):Boolean;
+  var
+    lkSQL :string;
+  begin
+    Result := false;
+    lkSQL := 
+      'EXECUTE BLOCK AS '+#13#10+
+      'BEGIN '+#13#10+
+      '  INSERT INTO TABL$R_TMC (NAME, NAME2, FLAG_DELETE, FLAG_LOCKED, ARTICLE, '+#13#10+
+      '    NUMSHOW, EDIZM_ID, TMC_GROUP_ID, TMC_TYPE_ID, TMC_LIST_ID, TMC_BRAND_ID, '+#13#10+
+      '    DEV_TMC_BRAND_ID, COUNTRY_ID, PROBE, LGTH, DIAM, MASSA, MASSA_NETTO, LIMIT '+#13#10+
+      '  )VALUES ('''+StrReplaceStr(aTMCGroupName, '''','"')+''', '''+StrReplaceStr(aTMCGroupName, '''','"')
+      +''', 0, 0, '''+StrReplaceStr(aArticle,'''','"')+''', '''+StrReplaceStr(aProbe,'''','"')+''', 1000000, '''+aTMCGroupID+''', '+#13#10+
+      '    1000000, 0, 0, 0, '''+aCountryId+''', '''+aProbe+''', '+
+      StrReplaceStr(FormatFloat('#0.00',aLgth),',','.')+', '+
+      StrReplaceStr(FormatFloat('#0.0' ,aDiam),',','.')+', '+
+      StrReplaceStr(FormatFloat('#0.000',aMassa),',','.')+', '+
+      StrReplaceStr(FormatFloat('#0.000',aMassa - aMassaIns),',','.')+', 0 '+#13#10+
+      '  ); '+#13#10+
+      'END';  
+    ExecSQL(FBDataBase, lkSQL);  
+    Result := GetField(FBDataBase, 'TABL$R_TMC', ' MAX(ID)', '', a_TMCID);
+  end;
+  //============================================================================
+  function TMCNewItemDlg_Execute(var aTMCID:string):Boolean;
+  var
+    lkForm        :TForm;
+    lkImg         :TImage;
+    lkPanelClient :TxcGradientPanel;
+    lkLabel       :TLabel;
+    lkCbxTmcGroup :TComboBox;
+    lkCbxTmcMat   :TComboBox;
+    lkCbxTmcProbe :TComboBox;
+    lkEdtMassa    :TxcEditCalc;
+    lkEdtMassaIns :TxcEditCalc;
+    lkEdtArticle  :TEdit;
+    lkEdtLgth     :TxcEditCalc;
+    lkEdtDiam     :TxcEditCalc;
+    lkStr         :string;
+    lkTMCGroupId  :string;
+    lkTMCGroupName:string;
+    lkCountryId   :string;
+  begin
+    Result := false;
+    lkForm        := FirebirdDialog_Create('Создать запись в справочнике ТМЦ','Создать', 'Отмена');
+    lkForm.Height := 200;
+    lkForm.Width  := 540;
+    lkPanelClient := TxcGradientPanel(lkForm.FindComponent('PanelClient'));
+    lkImg         := TImage(lkForm.FindComponent('ImageLogo'));
+    lkImg.Visible := false;
+    lkImg.Width   := 0;
+    lkLabel := CreateTLabel(lkForm, lkPanelClient, 'Группа ТМЦ', lkImg.Left + lkImg.Width+2, 8, 20, 72, alNone, taLeftJustify);
+    lkCbxTmcGroup := TComboBox.Create(lkForm);
+    with lkCbxTmcGroup do
+      begin
+      Parent     := lkPanelClient;
+      Ctl3d      := false;
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      Font.Style := [fsBold];
+      Font.Name  := 'Verdana';
+      Font.Size  := DefaultFirebirdDialogEditFontHeight;
+      Left       := lkLabel.Left + lkLabel.Width + 2;
+      Width      := 220;
+      Top        := lkLabel.Top; 
+      Height     := 20;
+      Items.Text := '';
+      if GetField(FBdataBase, 'TABL$R_TMC_GROUP', 'ID||''. ''||NAME', 'PARENT_ID = 150000', lkStr)then
+        Items.Text := lkStr;
+      ItemIndex  := 0;
+      Style      := csDropDownList;
+      end;
+    lkLabel := CreateTLabel(lkForm, lkPanelClient, 'Материал', lkCbxTmcGroup.Left + lkCbxTmcGroup.Width+2, 8, 20, 60, alNone, taLeftJustify);
+    lkCbxTmcMat := TComboBox.Create(lkForm);
+    with lkCbxTmcMat do
+      begin
+      Parent     := lkPanelClient;
+      Ctl3d      := false;
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      Font.Style := [fsBold];
+      Font.Name  := 'Verdana';
+      Font.Size  := DefaultFirebirdDialogEditFontHeight;
+      Left       := lkLabel.Left + lkLabel.Width + 2;
+      Width      := 160;
+      Top        := lkLabel.Top; 
+      Height     := 20;
+      Items.Text := '';
+      if GetField(FBDataBase, 'TABL$R_COUNTRIES', 'ID||''. ''||VALUTE', '(ID>=1000086) AND (ID <=1000089)', lkStr)then
+        Items.Text := lkStr;
+      ItemIndex  := 0;
+      Style      := csDropDownList;
+      end;
+    lkLabel := CreateTLabel(lkForm, lkPanelClient, 'Проба', lkImg.Left + lkImg.Width+2, lkCbxTmcMat.Top + lkCbxTmcMat.Height + 8, 20, 36, alNone, taLeftJustify);
+    lkCbxTmcProbe := TComboBox.Create(lkForm);
+    with lkCbxTmcProbe do
+      begin
+      Parent     := lkPanelClient;
+      Ctl3d      := false;
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      Font.Style := [fsBold];
+      Font.Name  := 'Verdana';
+      Font.Size  := DefaultFirebirdDialogEditFontHeight;
+      Left       := lkLabel.Left + lkLabel.Width + 2;
+      Width      := 64;
+      Top        := lkLabel.Top; 
+      Height     := 20;
+      Items.Text := '';
+      if GetField(FBDataBase, 'VIEW$R_PS_PROBE', 'PROBE', '', lkStr)then
+        Items.Text := lkStr;
+      ItemIndex  := 0;
+      Style      := csDropDownList;
+      end;
+    lkLabel := CreateTLabel(lkForm, lkPanelClient, 'Масса общая', lkCbxTmcProbe.Left + lkCbxTmcProbe.Width+2, lkCbxTmcProbe.Top, 20, 80, alNone, taLeftJustify);
+    lkEdtMassa := CreateTxcEditCalc(lkForm, lkPanelClient, 'edtMassa', lkLabel.Left + lkLabel.Width+2, lkLabel.Top, 20, 80);
+    lkEdtMassa.DecimalPlaces := 3;
+    lkEdtMassa.DisplayFormat := ',0.###'; 
+    lkLabel := CreateTLabel(lkForm, lkPanelClient, 'Масса вставок', lkEdtMassa.Left + lkEdtMassa.Width+2, lkCbxTmcProbe.Top, 20, 96, alNone, taLeftJustify);
+    lkEdtMassaIns := CreateTxcEditCalc(lkForm, lkPanelClient, 'edtMassaIns', lkLabel.Left + lkLabel.Width+2, lkLabel.Top, 20, 80); 
+    lkEdtMassaIns.DecimalPlaces := 3;
+    lkEdtMassaIns.DisplayFormat := ',0.###'; 
+    lkLabel := CreateTLabel(lkForm, lkPanelClient, 'Артикул', lkImg.Left + lkImg.Width+2, lkCbxTmcProbe.Top + lkCbxTmcProbe.Height + 8, 20, 60, alNone, taLeftJustify);
+    lkEdtArticle := CreateTEdit(lkForm, lkPanelClient, 'edtArticle', lkLabel.Left + lkLabel.Width+2, lkLabel.Top, 20, 200);
+    lkLabel := CreateTLabel(lkForm, lkPanelClient, 'Размер', lkEdtArticle.Left + lkEdtArticle.Width+2, lkEdtArticle.Top, 20, 40, alNone, taLeftJustify);
+    lkEdtDiam := CreateTxcEditCalc(lkForm, lkPanelClient, 'edtDiam', lkLabel.Left + lkLabel.Width+2, lkLabel.Top, 20, 72);
+    lkEdtDiam.DecimalPlaces := 1;
+    lkEdtDiam.DisplayFormat := ',0.#'; 
+    lkLabel := CreateTLabel(lkForm, lkPanelClient, 'Длина', lkEdtDiam.Left + lkEdtDiam.Width+2, lkEdtDiam.Top, 20, 40, alNone, taLeftJustify);
+    lkEdtLgth := CreateTxcEditCalc(lkForm, lkPanelClient, 'edtLgth', lkLabel.Left + lkLabel.Width+2, lkLabel.Top, 20, 72);
+    lkEdtLgth.DecimalPlaces := 2;
+    lkEdtLgth.DisplayFormat := ',0.##'; 
+    
+    Result := (lkForm.ShowModal = mrOk);
+    if Result then
+      begin
+      lkTMCGroupId := StrCiphersOnlyInt(Copy(lkCbxTmcGroup.Items[lkCbxTmcGroup.ItemIndex], 1, Pos('. ',lkCbxTmcGroup.Items[lkCbxTmcGroup.ItemIndex])));
+      lkTMCGroupName := Copy(lkCbxTmcGroup.Items[lkCbxTmcGroup.ItemIndex], Pos('. ',lkCbxTmcGroup.Items[lkCbxTmcGroup.ItemIndex])+2, 
+        Length(lkCbxTmcGroup.Items[lkCbxTmcGroup.ItemIndex]) - Pos('. ',lkCbxTmcGroup.Items[lkCbxTmcGroup.ItemIndex]) - 1 ); 
+      lkCountryId  := StrCiphersOnlyInt(Copy(lkCbxTmcMat.Items[lkCbxTmcMat.ItemIndex], 1, Pos('. ',lkCbxTmcMat.Items[lkCbxTmcMat.ItemIndex])));
+
+      Result := TMCNew_Insert(lkTMCGroupId, lkTMCGroupName, lkEdtArticle.Text, lkCountryId, lkCbxTmcProbe.Items[lkCbxTmcProbe.ItemIndex],
+                  lkEdtMassa.Value, lkEdtMassaIns.Value, lkEdtDiam.Value, lkEdtLgth.Value, aTMCID);   
+      end;                                                                           
+    lkForm.Free;
+  end;
+  //============================================================================
+var
+  lkTMCID :string;
+begin
+  if TMCNewItemDlg_Execute(lkTMCID)then
+    SetGlobalVariable('TMC_ID', lkTMCID)
+   else
+    SetGlobalVariable('TMC_ID', '0'); 
+end.

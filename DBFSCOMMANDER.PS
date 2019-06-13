@@ -1,0 +1,566 @@
+var
+  Form             :TAmunhotepForm;
+  Trans            :TxFBTransaction;
+  QueryPath        :TxFBQuery;
+  QueryLeft        :TxFBQuery;
+  QueryRight       :TxFBQuery;
+  DBGridLeft       :TDBGridEh;
+  DBGridRight      :TDBGridEh;
+  PanelLeft        :TxcPanel;
+  PanelRight       :TxcPanel;
+  CaptionPanelLeft :TxcGradientPanel;
+  CaptionPanelRight:TxcGradientPanel;
+  RecNoLeft        :Integer;
+  RecNoRight       :Integer;
+        //======================================================================
+        function CreateAction(Owner:TComponent; const Name, Caption, Hint:string; 
+                   const GroupIndex, ImageIndex:Integer; const ShortCut 
+                   :TShortCut; OnExecute:TNotifyEvent):TCustomAction;
+        begin
+          Result            := TCustomAction.Create(Owner);
+          Result.Caption    := Caption;
+          Result.Hint       := Hint;
+          Result.Name       := AnsiUpperCase(Name);
+          Result.GroupIndex := GroupIndex;
+          Result.ImageIndex := ImageIndex;
+          Result.ShortCut   := ShortCut;
+          Result.OnExecute  := OnExecute; 
+        end;
+        //======================================================================
+        function CreateMenuItem(ParentItem:TMenuItem; const Name:string):TMenuItem;
+        begin
+          Result            := TMenuItem.Create(ParentItem);
+          Result.Name       := AnsiUpperCase(Name);
+          Amunhotep_MainForm_xcMenu.AssignMethods(Result);
+          if(ParentItem<>nil)then
+            ParentItem.Add(Result)
+        end;
+        //======================================================================
+        function GetSQLQuery(const ParentId:string):string;
+        begin
+          Result := 
+            'SELECT FS.NAME, FS.EXT, FS.DATE_INS, FS.DATE_UPD, FS.PARENT_ID, '+
+            'FS.ID FROM TABL$_FS FS WHERE ((FS.EXT=''..'')AND(FS.PARENT_ID='''+
+            ParentId+''')) GROUP BY FS.NAME, FS.EXT, FS.DATE_INS, FS.DATE_UPD, '+
+            'FS.PARENT_ID, FS.ID '+
+            'UNION ALL '+
+            'SELECT FS.NAME, FS.EXT, FS.DATE_INS, FS.DATE_UPD, FS.PARENT_ID, '+
+            'FS.ID FROM TABL$_FS FS WHERE ((FS.EXT<>''..'')AND(FS.PARENT_ID='''+
+            ParentId+''')) GROUP BY FS.NAME, FS.EXT, FS.DATE_INS, FS.DATE_UPD, '+
+            'FS.PARENT_ID, FS.ID ';
+          if(ParentId<>'0')then
+            Result := 
+              'SELECT FS.NAME, FS.EXT, FS.DATE_INS, FS.DATE_UPD, (SELECT FIRST 1 '+ 
+              'FS2.PARENT_ID FROM TABL$_FS FS2 WHERE (FS2.ID = '''+ParentId+''')) '+
+              'AS PARENT_ID, (SELECT FIRST 1 FS3.ID FROM TABL$_FS FS3 WHERE (FS3.ID = '''+
+              ParentId+''') ) AS ID FROM TABL$_FS FS WHERE (FS.PARENT_ID=''-1'') '+
+              'GROUP BY FS.NAME, FS.EXT, FS.DATE_INS, FS.DATE_UPD, FS.PARENT_ID, '+
+              'FS.ID '+
+              'UNION ALL ' + Result;
+        end;
+        //======================================================================
+        function GetItemPath(const Id:string):string;
+        begin
+          Result := '/';
+          if Id='' then exit;
+          if(QueryPath=nil)then exit;
+          if QueryPath.Active then QueryPath.Close;
+          QueryPath.SQL.Text := 'SELECT * FROM PROC$_FS_PATH('''+Id+''', '''')';
+          try
+            QueryPath.Open;
+           finally
+            if QueryPath.RecordCount>0 then
+              Result := QueryPath.FieldByName('PATH').AsString;
+           end;
+          if QueryPath.Active then QueryPath.Close;
+        end;
+        //======================================================================
+        function CreateImageListFiles(aOwner :TComponent):TImageList;
+        var
+          Bimp   :TBitmap;
+          Indxs  :array[0..17]of Integer;
+          i      :Integer;
+          ImgLst :TImageList;
+        begin
+          ImgLst := Amunhotep_MainForm_ImageListMain;
+          Indxs[ 0] := 282; Indxs[ 1] := 88;  Indxs[ 2] := 296; Indxs[ 3] := 289;
+          Indxs[ 4] := 290; Indxs[ 5] := 293; Indxs[ 6] := 295; Indxs[ 7] := 291;
+          Indxs[ 8] := 284; Indxs[ 9] := 283; Indxs[10] := 288; Indxs[11] := 288;
+          Indxs[12] := 288; Indxs[13] := 288; Indxs[14] := 285; Indxs[15] := 294;
+          Indxs[16] := 351; Indxs[17] := 288;
+          Result := TImageList.Create(aOwner);
+          Result.Height := 16;
+          Result.Width  := 16;
+          Result.Clear;
+          for i:=0 to 17 do
+            Result.AddImage(ImgLst, Indxs[i]);
+        end;
+        //======================================================================
+        function GetFilesList:string;
+        begin
+          Result := '*'+#13#10+'..'+#13#10+'PS'+#13#10+'PAS'+#13#10+'SQL'+#13#10+
+            'XFM'+#13#10+'XRP'+#13#10+'TXT'+#13#10+'CONF'+#13#10+'BMP'+#13#10+
+            'HTML'+#13#10+'HTM'+#13#10+'SGML'+#13#10+'SHTML'+#13#10+'DOC'+#13#10+'XLS'+#13#10+'INC'+#13#10+'DHTML';   
+        end;
+        //======================================================================
+        procedure RefreshView(const SavePosLeft, SavePosRight:Boolean);
+        begin
+          RecNoLeft := 0;         
+          RecNoRight:= 0;
+          if SavePosLeft  then RecNoLeft  := QueryLeft.RecNo;
+          if SavePosRight then RecNoRight := QueryRight.RecNo;
+          if Trans.InTransaction then Trans.Rollback;
+          if not QueryLeft.Active  then QueryLeft.Open;
+          if not QueryRight.Active then QueryRight.Open;
+        end;
+        //======================================================================
+        procedure SetActivePanel;
+        begin
+          if(Form.ActiveControl = DBGridLeft)then
+            begin
+            CaptionPanelLeft.Colors.Foreground  := $FF0080;
+            CaptionPanelRight.Colors.Foreground := $CCCCCC;
+            end
+           else
+            begin
+            CaptionPanelLeft.Colors.Foreground  := $CCCCCC;
+            CaptionPanelRight.Colors.Foreground := $FF0080;
+            end;
+          CaptionPanelLeft.Repaint;  
+          CaptionPanelRight.Repaint;  
+        end;
+        //======================================================================
+        procedure QueryLeft_AfterOpen(DataSet :TDataSet);
+        begin
+          if(RecNoLeft>0)then DataSet.RecNo := RecNoLeft;
+        end;
+        //======================================================================
+        procedure QueryLeft_AfterScroll(DataSet :TDataSet);
+        begin
+          CaptionPanelLeft.Caption := '  DB:'+GetItemPath(DataSet.FieldByName('ID').AsString);
+        end;
+        //======================================================================
+        procedure QueryRight_AfterOpen(DataSet :TDataSet);
+        begin
+          if(RecNoRight>0)then DataSet.RecNo := RecNoRight;
+        end;
+        //======================================================================
+        procedure QueryRight_AfterScroll(DataSet :TDataSet);
+        begin
+          CaptionPanelRight.Caption := '  DB:'+GetItemPath(DataSet.FieldByName('ID').AsString);
+        end;
+        //======================================================================
+        procedure DBGrid_OnExit(Sender :TObject);
+        begin
+          SetActivePanel;
+        end;
+        //======================================================================
+        procedure actF01_OnExecute(Sender :TObject);
+        begin
+          Dialogs.MessageDlg('No help avaible', mtInformation, [mbOk]);
+        end;
+        //======================================================================
+        procedure actF02_OnExecute(Sender :TObject);
+        begin
+        
+        end;
+        //======================================================================
+        procedure actF03_OnExecute(Sender :TObject);
+        var
+          id       :string;
+          parent_id:string; 
+          name     :string;
+          ext      :string;
+          Qr       :TxFBQuery;
+          SaveLeft :Boolean;
+          SaveRight:Boolean; 
+        begin
+          if(Form.ActiveControl=DBGridLeft)then
+            begin
+            Qr  := QueryLeft;
+            SaveLeft := false;
+            SaveRight:= true; 
+            end
+           else
+            begin
+            Qr  := QueryRight;
+            SaveLeft := true;
+            SaveRight:= false; 
+            end;
+          id        := Qr.FieldByName('ID').AsString;
+          parent_id := Qr.FieldByName('PARENT_ID').AsString;
+          name      := Qr.FieldByName('NAME').AsString;
+          ext       := Qr.FieldByName('EXT').AsString;
+          if(parent_id='')then exit;
+          if(ext<>'..')then
+            begin
+            //Dialogs.MessageDlg('DB:'+GetItemPath(id), mtInformation, [mbOk]);
+            Amunhotep_MainForm_ProcessFile('DB:'+GetItemPath(id));
+            exit;
+            end;
+          RecNoLeft  := 0;  
+          RecNoRight := 0;  
+          if SaveLeft  then RecNoLeft  := QueryLeft.RecNo;
+          if SaveRight then RecNoRight := QueryRight.RecNo;
+          if Trans.InTransaction then Trans.Rollback;
+          if(name='..')then
+            Qr.SQL.Text := GetSQLQuery(parent_id)
+           else
+            Qr.SQL.Text := GetSQLQuery(id);
+          if not Trans.InTransaction then Trans.StartTransaction;
+          if not QueryLeft.Active    then QueryLeft.Open;
+          if not QueryRight.Active   then QueryRight.Open;
+        end;
+        //======================================================================
+        procedure actF04_OnExecute(Sender :TObject);
+        var
+          id, nam :string;
+          Qr      :TxFBQuery;
+        begin
+          if(Form.ActiveControl=DBGridLeft)then
+            Qr  := QueryLeft
+           else
+            Qr  := QueryRight;
+          id  := Qr.FieldByName('ID').AsString;
+          nam := Qr.FieldByName('NAME').AsString;
+          if(nam='..')then exit;
+          if(Dialogs.InputQueryString('Изменить запись', 'Введите новое имя', nam))then
+            begin
+            ExecSQL(FBDatabase, 'UPDATE TABL$_FS SET NAME = '''+nam+''' WHERE (ID='''+id+''')');
+            RefreshView(true, true);  
+            end;
+        end;
+        //======================================================================
+        procedure actF05_OnExecute(Sender :TObject);
+        var
+          id, parent, nam, toname :string;
+          Path, Src :string;
+          SaveLeft :Boolean;
+          SaveRight:Boolean;
+          i, total :LongInt; 
+          Tr :TxFBTransaction;
+          Qr :TxFBQuery;
+        begin
+          if(Form.ActiveControl=DBGridLeft)then
+            begin
+            if(QueryLeft.FieldByName('NAME').AsString='..')then exit;
+            id  := QueryLeft.FieldByName('ID').AsString;
+            nam := GetItemPath(id);
+            if QueryRight.FieldByName('NAME').AsString='..' then
+              parent := QueryRight.FieldByName('ID').AsString
+             else
+              parent := QueryRight.FieldByName('PARENT_ID').AsString;
+            toname := GetItemPath(parent);
+            SaveLeft := true;
+            SaveRight:= false; 
+            end
+           else
+            begin
+            if(QueryRight.FieldByName('NAME').AsString='..')then exit;
+            id  := QueryRight.FieldByName('ID').AsString;
+            nam := GetItemPath(id);
+            if QueryLeft.FieldByName('NAME').AsString='..' then
+              parent := QueryLeft.FieldByName('ID').AsString
+             else
+              parent := QueryLeft.FieldByName('PARENT_ID').AsString;
+            toname := GetItemPath(parent);
+            SaveLeft := false;
+            SaveRight:= true; 
+            end;
+          if(Dialogs.MessageDlg('Копировать '+#13#10+'DB:'+nam+#13#10+'в каталог '+#13#10+'DB:'+toname, mtConfirmation, [mbYes, mbNo]) = mrYes)then
+            begin
+            Tr := TxFBTransaction.Create(nil);
+            Tr.DefaultDataBase := FBDataBase;
+            Qr := TxFBQuery.Create(Tr);
+            Qr.SQL.Text := 'SELECT * FROM PROC$_FS PR WHERE(PR.PATH STARTING WITH '''+nam+''') ORDER BY PR.PATH';
+            if((nam[Length(nam)]='/')or(nam[Length(nam)]='\'))then Delete(nam, Length(nam), 1);
+            for i:=Length(nam) downto 1 do
+              if((nam[i]='/')or(nam[i]='\')or(nam[i]=':'))then
+                break
+               else
+                Delete(nam, i, 1);
+            if not Qr.Active then Qr.Open;
+            Qr.FetchAll;
+            total := Qr.RecordCount;
+            i := 0;
+            Qr.First;
+            Dialogs.ProgressDlgShow('Копирование файлов ...');
+            while not Qr.Eof do
+              begin
+              i := i + 1;
+              Path := Qr.FieldByName('PATH').AsString;
+              Delete(Path, 1, Length(nam));
+              if((Path[1]='/')or(Path[1]='\'))then
+                Delete(Path, 1, 1);
+              Path := StrAbsolutePath('./'+Path, 'DB:'+toname);
+              if(Path[Length(Path)]='/')then
+                begin
+                //WriteLn(Path+'  --path');
+                DBCreatePath(FBDataBase, Path);
+                end
+               else
+                begin
+                //WriteLn(Path+'  --file');
+                DBCreateFile(FBDataBase, Path);
+                Src := StringsLoadFromDB(FBDataBase, 'DB:'+Qr.FieldByName('PATH').AsString);
+                StringsSaveToDB(FBDataBase, Path, Src);
+                end; 
+              Dialogs.ProgressDlgSetProgress(Round(i / total * 100 ));
+              Amunhotep.ProcessMessages;
+              Qr.Next;
+              end;
+            Dialogs.ProgressDlgHide;
+            if Qr.Active then Qr.Close;
+            Qr.Free;
+            Tr.Free;  
+            RefreshView(SaveLeft, SaveRight);  
+            end;
+        end;
+        //======================================================================
+        procedure actF06_OnExecute(Sender :TObject);
+        var
+          id, parent, nam, toname :string;
+          SaveLeft :Boolean;
+          SaveRight:Boolean; 
+        begin
+          if(Form.ActiveControl=DBGridLeft)then
+            begin
+            if(QueryLeft.FieldByName('NAME').AsString='..')then exit;
+            id  := QueryLeft.FieldByName('ID').AsString;
+            nam := 'DB:'+GetItemPath(id);
+            if QueryRight.FieldByName('NAME').AsString='..' then
+              parent := QueryRight.FieldByName('ID').AsString
+             else
+              parent := QueryRight.FieldByName('PARENT_ID').AsString;
+            toname := 'DB:'+GetItemPath(parent);
+            SaveLeft := false;
+            SaveRight:= true; 
+            end
+           else
+            begin
+            if(QueryRight.FieldByName('NAME').AsString='..')then exit;
+            id  := QueryRight.FieldByName('ID').AsString;
+            nam := 'DB:'+GetItemPath(id);
+            if QueryLeft.FieldByName('NAME').AsString='..' then
+              parent := QueryLeft.FieldByName('ID').AsString
+             else
+              parent := QueryLeft.FieldByName('PARENT_ID').AsString;
+            toname := 'DB:'+GetItemPath(parent);
+            SaveLeft := true;
+            SaveRight:= false; 
+            end;
+          if(id=parent)then
+            begin
+            Dialogs.MessageDlg('Нельзя перенести каталог в самого себя !', mtWarning, [mbOk]);
+            exit;
+            end;
+          if(Dialogs.MessageDlg('Пенести '+#13#10+nam+#13#10+'в каталог '+#13#10+toname, mtConfirmation, [mbYes, mbNo]) = mrYes)then
+            begin
+            ExecSQL(FBDatabase, 'UPDATE TABL$_FS FS SET FS.PARENT_ID = '''+parent+''' WHERE (FS.ID='''+id+''')');
+            RefreshView(SaveLeft, SaveRight);  
+            end;
+        end;
+        //======================================================================
+        procedure actF07_OnExecute(Sender :TObject);
+        var
+          name     :string;
+          parent   :string;
+          Qr       :TxFBQuery;
+        begin
+          if not(Dialogs.InputQueryString('Создать каталог', 'Введите имя каталога', name))then exit;
+          if(Form.ActiveControl=DBGridLeft)then
+            Qr  := QueryLeft
+           else
+            Qr  := QueryRight;
+          if Qr.FieldByName('NAME').AsString='..' then
+            parent := Qr.FieldByName('ID').AsString
+           else
+            parent := Qr.FieldByName('PARENT_ID').AsString;
+          if parent='' then parent := '0';
+          ExecSQL(FBDatabase, 'INSERT INTO TABL$_FS("ID", "PARENT_ID", "NAME", '+
+            '"EXT") VALUES (''-1'', '''+parent+''', '''+name+''', ''..'')');
+          RefreshView(true, true);  
+        end;
+        //======================================================================
+        procedure actCtrlF07_OnExecute(Sender :TObject);
+        var
+          name     :string;
+          ext      :string;
+          parent   :string;
+          Qr       :TxFBQuery;
+        begin
+          if not(Dialogs.InputQueryString('Создать файл', 'Введите имя файла', name))then exit;
+          if not(Dialogs.InputQueryString('Создать файл', 'Введите тип (расширение) файла', ext ))then exit;
+          if(Form.ActiveControl=DBGridLeft)then
+            Qr  := QueryLeft
+           else
+            Qr  := QueryRight;
+          if Qr.FieldByName('NAME').AsString='..' then
+            parent := Qr.FieldByName('ID').AsString
+           else
+            parent := Qr.FieldByName('PARENT_ID').AsString;
+          if parent='' then parent := '0';
+          ExecSQL(FBDatabase, 'INSERT INTO TABL$_FS("ID", "PARENT_ID", "NAME", '+
+            '"EXT") VALUES (''-1'', '''+parent+''', '''+name+''', '''+ext+''')');
+          RefreshView(true, true);  
+        end;
+        //======================================================================
+        procedure actF08_OnExecute(Sender :TObject);
+        var
+          id, nam  :string;
+          Qr       :TxFBQuery;
+          SaveLeft :Boolean;
+          SaveRight:Boolean; 
+        begin
+          if(Form.ActiveControl=DBGridLeft)then
+            begin
+            Qr  := QueryLeft;
+            SaveLeft := false;
+            SaveRight:= true; 
+            end
+           else
+            begin
+            Qr  := QueryRight;
+            SaveLeft := true;
+            SaveRight:= false; 
+            end;
+          if(Qr.FieldByName('NAME').AsString='..')then exit;
+          id  := Qr.FieldByName('ID').AsString;
+          nam := 'DB:'+GetItemPath(id);
+          if(Dialogs.MessageDlg('Удалить запись '+#13#10+nam, mtConfirmation, [mbYes, mbNo]) = mrYes)then
+            begin
+            ExecSQL(FBDatabase, 'DELETE FROM TABL$_FS WHERE (ID='''+id+''')');
+            RefreshView(SaveLeft, SaveRight);  
+            end;
+        end;
+        //======================================================================
+        procedure DBGrid_OnDblClick(Sender :TObject);
+        begin
+          actF03_OnExecute(nil);  
+        end;
+        //======================================================================
+        procedure DBGrid_OnKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+        begin
+          if(Key = $0D)then actF03_OnExecute(nil);// VK_RETURN
+        end;
+        //======================================================================
+        procedure Form_OnClose(Sender :TObject; var Action :TCloseAction);
+        begin
+          if Trans<>nil then  
+            if Trans.InTransaction then
+              Trans.Rollback;
+          Action := caFree;
+        end;
+        //======================================================================
+        procedure Form_OnResize(Sender :TObject);
+        begin
+          PanelLeft.Width := (Form.ClientWidth div 2) - 2;
+        end;
+        //======================================================================
+var
+  ImgListFiles     :TImageList;
+  i                :Integer;
+  S, xfm_body      :string;
+  Actn             :TCustomAction;
+  PopupMenuGrid    :TPopupMenu; 
+begin
+  if not FBDataBase.Connected then exit;
+  for i:=0 to Amunhotep_MainForm.MDIChildCount-1 do
+    if(Amunhotep_MainForm.MDIChildren[i].Name='DBFSCOMMANDER')then
+      begin
+      Amunhotep_MainForm.MDIChildren[i].BringToFront;
+      exit;
+      end;
+  S        := StrAbsolutePath('./DBFSCOMMANDER.XFM', ScriptName);
+  if(Pos('DB:', AnsiUpperCase(S))=1)then
+    xfm_body := StringsLoadFromDB(FBDataBase, S)
+   else
+    xfm_body := StringsLoadFromFile(S);
+  if(xfm_body='')then
+    begin
+    Dialogs.MessageDlg('Неверный файл ресурсов'+#13#10+S, mtError, [mbOK]);
+    exit;
+    end;
+  Form            := TAmunhotepForm(StrToComponent(xfm_body));
+  if(Form=nil)then
+    begin
+    Dialogs.MessageDlg('Не удалось загрузить ресурс'+#13#10+S, mtError, [mbOK]);
+    exit;
+    end; 
+  Form.Name       := 'DBFSCOMMANDER';
+  Form.OnClose    := @Form_OnClose;
+  Form.OnResize   := @Form_OnResize;
+  Form.SetCaption('Файловая система');
+  DontAutoFree;
+  ImgListFiles          := CreateImageListFiles(Form);
+  PopupMenuGrid         := TPopupMenu.Create(Form); 
+  PopupMenuGrid.Images  := Amunhotep_MainForm_ImageListMain;
+  Actn := CreateAction(Form,'act_F01','Помощь'    ,'Помощь'         ,0,137,TextToShortCut('F1'),@actF01_OnExecute);
+  CreateMenuItem(PopupMenuGrid.Items, 'mi_F01').Action := Actn;
+  TxcToolBarButton(Form.FindComponent('btnF1')).Action := Actn;
+  Actn := CreateAction(Form,'act_F02','Меню'      ,'Меню'           ,0,144,TextToShortCut('F2'),@actF02_OnExecute);
+  CreateMenuItem(PopupMenuGrid.Items, 'mi_F02').Action := Actn;
+  TxcToolBarButton(Form.FindComponent('btnF2')).Action := Actn;
+  Actn := CreateAction(Form,'act_F03','Просмотр'  ,'Просмотр'       ,0,105,TextToShortCut('F3'),@actF03_OnExecute);
+  CreateMenuItem(PopupMenuGrid.Items, 'mi_F03').Action := Actn;
+  TxcToolBarButton(Form.FindComponent('btnF3')).Action := Actn;
+  Actn := CreateAction(Form,'act_F04','Правка'    ,'Переименовать'  ,0,178,TextToShortCut('F4'),@actF04_OnExecute);
+  CreateMenuItem(PopupMenuGrid.Items, 'mi_F04').Action := Actn;
+  TxcToolBarButton(Form.FindComponent('btnF4')).Action := Actn;
+  Actn := CreateAction(Form,'act_F05','Копировать','Копировать'     ,0, 68,TextToShortCut('F5'),@actF05_OnExecute);
+  CreateMenuItem(PopupMenuGrid.Items, 'mi_F05').Action := Actn;
+  TxcToolBarButton(Form.FindComponent('btnF5')).Action := Actn;
+  Actn := CreateAction(Form,'act_F06','Перенести' ,'Перенести'      ,0, 81,TextToShortCut('F6'),@actF06_OnExecute);
+  CreateMenuItem(PopupMenuGrid.Items, 'mi_F06').Action := Actn;
+  TxcToolBarButton(Form.FindComponent('btnF6')).Action := Actn;
+  Actn := CreateAction(Form,'act_F07','Каталог'   ,'Создать каталог',0, 82,TextToShortCut('F7'),@actF07_OnExecute);
+  CreateMenuItem(PopupMenuGrid.Items, 'mi_F07').Action := Actn;
+  TxcToolBarButton(Form.FindComponent('btnF7')).Action := Actn;
+  Actn := CreateAction(Form,'act_CtrlF07','Создать файл','Создать файл',0, 103,TextToShortCut('Ctrl+F7'),@actCtrlF07_OnExecute);
+  CreateMenuItem(PopupMenuGrid.Items, 'mi_CtrlF07').Action := Actn;
+  Actn := CreateAction(Form,'act_F08','Удалить'   ,'Удалить'        ,0, 96,TextToShortCut('F8'),@actF08_OnExecute);
+  CreateMenuItem(PopupMenuGrid.Items, 'mi_F08').Action := Actn;
+  TxcToolBarButton(Form.FindComponent('btnF8')).Action := Actn;
+  Amunhotep_MainForm_xcMenu.AddMenu(PopupMenuGrid);
+  PopupMenuGrid.OwnerDraw := true;
+  Trans                 := TxFBTransaction(Form.FindComponent('Trans'));
+  Trans.Params.Text     :='isc_tpb_concurrency'+#13#10+
+                          'isc_tpb_read'+#13#10+
+                          'isc_tpb_nowait';
+  QueryPath             := TxFBQuery(Form.FindComponent('QueryPath'));
+  QueryLeft             := TxFBQuery(Form.FindComponent('QueryLeft'));
+  QueryLeft.SQL.Text    := GetSQLQuery('0');
+  QueryLeft.AfterOpen   := @QueryLeft_AfterOpen;
+  QueryLeft.AfterScroll := @QueryLeft_AfterScroll;
+  QueryRight            := TxFBQuery(Form.FindComponent('QueryRight'));
+  QueryRight.SQL.Text   := GetSQLQuery('0');
+  QueryRight.AfterOpen  := @QueryRight_AfterOpen;
+  QueryRight.AfterScroll:= @QueryRight_AfterScroll;
+  PanelLeft             := TxcPanel(Form.FindComponent('PanelLeft'));
+  PanelRight            := TxcPanel(Form.FindComponent('PanelRight'));
+  CaptionPanelLeft      := TxcGradientPanel(Form.FindComponent('CaptionPanelLeft'));
+  CaptionPanelRight     := TxcGradientPanel(Form.FindComponent('CaptionPanelRight'));
+  DBGridLeft                               := TDBGridEh(Form.FindComponent('DBGridLeft'));
+  DBGridLeft.Color                         := Amunhotep_MainForm_StyleManager.Colors.Window;
+  DBGridLeft.FixedColor                    := Amunhotep_MainForm_StyleManager.Colors.Foreground;
+  DBGridLeft.OnDblClick                    := @DBGrid_OnDblClick;
+  DBGridLeft.OnExit                        := @DBGrid_OnExit;
+  DBGridLeft.OnKeyDown                     := @DBGrid_OnKeyDown;
+  DBGridLeft.PopupMenu                     := PopupMenuGrid;
+  DBGridLeft.Columns[0].ImageList          := ImgListFiles;
+  DBGridLeft.Columns[0].KeyList.Text       := GetFilesList;
+  DBGridLeft.Columns[0].NotInKeyListIndex  := 0;
+  DBGridRight                              := TDBGridEh(Form.FindComponent('DBGridRight'));
+  DBGridRight.Color                        := Amunhotep_MainForm_StyleManager.Colors.Window;
+  DBGridRight.FixedColor                   := Amunhotep_MainForm_StyleManager.Colors.Foreground;
+  DBGridRight.PopupMenu                    := PopupMenuGrid;
+  DBGridRight.OnDblClick                   := @DBGrid_OnDblClick; 
+  DBGridRight.OnExit                       := @DBGrid_OnExit;
+  DBGridRight.OnKeyDown                    := @DBGrid_OnKeyDown;  
+  DBGridRight.Columns[0].ImageList         := ImgListFiles;
+  DBGridRight.Columns[0].KeyList.Text      := GetFilesList;   
+  DBGridRight.Columns[0].NotInKeyListIndex := 0;
+  RefreshView(false, false); 
+  Form_OnResize(Form);
+  Amunhotep_MainForm_TaskBar.ButtonByForm(Form).Down := true; 
+end.

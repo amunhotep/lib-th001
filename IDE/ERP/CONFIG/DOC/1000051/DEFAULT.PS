@@ -1,0 +1,10 @@
+{*******************************************************************************
+ 
+  1000051         Полис 
+ 
+********************************************************************************}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/DOC/FORMJRNL.INC}         {$I PEAKTOP:IDE/ERP/DBO/DOC/FORMJRNL.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/CONFIG/DOC/EXTRACTTYPEID.INC} {$I PEAKTOP:IDE/ERP/CONFIG/DOC/EXTRACTTYPEID.INC} {$ENDIF}
+begin
+  Journal_Create( ExtractTypeIdFromCurrentScript );
+end.

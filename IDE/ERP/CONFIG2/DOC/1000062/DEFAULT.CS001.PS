@@ -1,0 +1,16 @@
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/DOC/FORMJRNL.INC} {$I PEAKTOP:IDE/ERP/DBO/DOC/FORMJRNL.INC} {$ENDIF} 
+var 
+  JrnlForm :TAmunhotepForm; 
+  lkCsName :string;
+begin
+  lkCsName := '';
+  GetField(FBDataBase, 'TABL$R_CS', 'NAME', 'ID = '''+GetGlobalVariable('CS_ID')+''' ', lkCsName);
+  TERPFormGrid_DataSetFilter_DateInit := true; 
+  TERPFormGrid_DataSetFilter_DateFrom := StrToDate('01.04.2010');  
+  TERPFormGrid_DataSetFilter_DateTo   := Now;  
+  TERPFormGrid_DataSetFilter_Add('CS_ID', 'CS_ID = '''+GetGlobalVariable('CS_ID')+''' '); 
+  JrnlForm := TAmunhotepForm(Journal_Create('1000062')); 
+  JrnlForm.SetCaption(JrnlForm.Caption+' ('+lkCsName+')'); 
+  TxcGradientPanelVista(JrnlForm.FindComponent(obj_name_erp_topbar)).Caption := #$20#$20#$20#$20#$20#$20+JrnlForm.Caption; 
+end.
+

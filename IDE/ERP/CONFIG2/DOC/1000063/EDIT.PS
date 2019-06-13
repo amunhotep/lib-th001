@@ -1,0 +1,195 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}          {$I PEAKTOP:GLOBAL_VARIABLES.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCBUTTON.INC}             {$I PEAKTOP:OBJ/TXCBUTTON.INC}            {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANEL.INC}      {$I PEAKTOP:OBJ/TXCGRADIENTPANEL.INC}     {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC} {$I PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}{$ENDIF}
+{$IFNDEF DB:CONFIG/OPER/GET_PIN.INC}
+  {$I DB:CONFIG/OPER/GET_PIN.INC}
+{$ENDIF} 
+{$DEFINE PEAKTOP:OBJ/TLABEL.INC}
+  //============================================================================
+  function CreateTLabel(a_Owner :TComponent; a_Parent:TWinControl; 
+    const a_Name, a_Caption:string;
+    const a_Left, a_Top, a_Height, a_Width:Integer):TLabel;
+  var
+    lkCmp :TComponent;
+  begin
+    lkCmp := a_Owner.FindComponent(a_Name);
+    if(lkCmp <> nil)then
+      Result := TLabel(lkCmp)
+     else 
+      Result := TLabel.Create(a_Owner);
+    with Result do
+      begin
+      Name       := a_Name;
+      Parent     := a_Parent;
+      Caption    := a_Caption;
+      AutoSize   := false;
+      Font.Color := Amunhotep_MainForm_StyleManager.Colors.Border;
+      Transparent:= true;
+      Left       := a_Left;
+      Top        := a_Top;
+      Height     := a_Height;
+      Width      := a_Width;
+      Align      := alNone;
+      Alignment  := taLeftJustify;
+      Layout     := taMiddle;
+      end; 
+  end;
+{$DEFINE PEAKTOP:OBJ/TXCEDITCALC.INC}
+  //============================================================================
+  function CreateTxcEditCalc(a_Owner :TComponent; a_Parent:TWinControl; 
+    const a_Name:string;
+    const a_Left, a_Top, a_Height, a_Width:Integer;
+    const a_Enabled:Boolean;
+    const a_Value :Extended):TxcEditCalc;
+  var
+    lkCmp :TComponent;
+  begin
+    lkCmp := a_Owner.FindComponent(a_Name);
+    if(lkCmp <> nil)then
+      Result := TxcEditCalc(lkCmp)
+     else 
+      Result := TxcEditCalc.Create(a_Owner);
+    with Result do
+      begin
+      Name         := a_Name;
+      Parent       := a_Parent;
+      Ctl3d        := false;
+      Color        := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color   := Amunhotep.MainForm.StyleManager.Colors.Border;
+      Font.Style   := [fsBold];
+      Font.Name    := 'Verdana';
+      Font.Size    := 8;
+      Left         := a_Left;
+      Top          := a_Top;
+      Height       := a_Height;
+      Width        := a_Width;
+      Enabled      := a_Enabled;
+      Value        := a_Value;
+      end; 
+  end;
+  //============================================================================
+  procedure DialogDoc1000063_RecalcValues(aOwner :TComponent);
+  begin
+    TxcEditCalc(aOwner.FindComponent('EDTSUMBODY')).Value := 
+      TxcEditCalc(aOwner.FindComponent('EDTDOCSUM')).Value -
+      TxcEditCalc(aOwner.FindComponent('EDTSUMPC')).Value;
+    if(TxcEditCalc(aOwner.FindComponent('EDTSUMBODY')).Value < 0)then
+      TxcEditCalc(aOwner.FindComponent('EDTDOCSUM')).Color := $008000FF
+     else 
+      TxcEditCalc(aOwner.FindComponent('EDTDOCSUM')).Color  := Amunhotep.MainForm.StyleManager.Colors.Window;
+  end;
+  //============================================================================
+  procedure DialogDoc1000063_OnChange(Sender :TObject);
+  begin
+    DialogDoc1000063_RecalcValues(TComponent(Sender).Owner);
+  end;
+  //============================================================================
+  function DialogDoc1000063Execute(const aJ_ID:string; var aDocSum, aSumPC :Extended):Boolean;
+  var
+    lkForm        :TForm;
+    lkPanelClient :TxcGradientPanel;
+    lkTopBar      :TxcGradientPanelVista;
+    lkPanelBottom :TxcStdPanel;
+    lkBtnOk       :TxcButton; 
+    lkBtnCancel   :TxcButton;
+    lkLabel       :TLabel;
+    lkEdtDocSum   :TxcEditCalc;
+    lkEdtSumBody  :TxcEditCalc;
+    lkEdtSumPC    :TxcEditCalc;
+  label 
+    loop_invalid;  
+  begin
+    lkForm := TForm.Create(nil);
+    with lkForm do
+      begin
+      Caption         := Amunhotep.Title;
+      Color           := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      BorderStyle     := bsDialog;
+      BorderIcons     := [biSystemMenu];
+      Position        := poDesktopCenter;
+      Width           := 300;
+      Height          := 210;
+      Font.Size       := 8;
+      end;
+    lkTopBar      := CreateTxcGradientPanelVista(lkForm, lkForm,'PanelTop', #$20+'Ордер продления залога',alTop,0,0,34,98,xbsRaized);  
+    lkPanelClient := CreateTxcGradientPanel(lkForm, lkForm,'PanelClient','',alClient,0,0,200,98,xbsNone  ,gdTopToBottom);  
+    lkPanelBottom := TxcStdPanel.Create(lkForm);
+    with lkPanelBottom do
+      begin
+      Name         := 'PanelBottom';
+      Parent       := lkForm;
+      Height       := 24;
+      Width        := lkForm.ClientWidth;
+      Align        := alBottom;
+      BorderStyle  := xbsNone;
+      StyleManager := Amunhotep.MainForm.StyleManager;
+      Color        := Amunhotep.MainForm.StyleManager.Colors.Window;
+      end;
+    lkBtnCancel := CreateTxcButton(lkForm,lkPanelBottom,'btnCancel','Отмена',lkPanelBottom.Width - 74,2,lkPanelBottom.Height-4,72,mrCancel,false,true );
+    lkBtnCancel.Font.Style := [fsBold];
+    lkBtnCancel.TabOrder   := 2;
+    lkBtnCancel.Anchors    := [akRight, akBottom]  
+    lkBtnOk     := CreateTxcButton(lkForm,lkPanelBottom,'btnOk'    ,'OK'    ,lkBtnCancel.Left - 74   ,2,lkPanelBottom.Height-4,72,mrOk    ,true ,false);
+    lkBtnOk.Font.Style     := [fsBold];
+    lkBtnOk.TabOrder       := 1;
+    lkBtnOk.Anchors        := [akRight, akBottom]
+    lkLabel      := CreateTLabel(lkForm, lkPanelClient,'lblDocSum', 'Сумма документа: ',2,4,16,lkForm.Width - 4);
+    lkEdtDocSum  := CreateTxcEditCalc(lkForm, lkPanelClient, 'EDTDOCSUM', 8, lkLabel.Top + lkLabel.Height, 20, lkForm.Width - 16, true, aDocSum);
+    lkEdtDocSum.OnChange := @DialogDoc1000063_OnChange;
+    lkLabel      := CreateTLabel(lkForm, lkPanelClient,'lblSumBody', '    погашено тела кредита',2,lkEdtDocSum.Top+lkEdtDocSum.Height+2,16,lkForm.Width - 4);
+    lkEdtSumBody := CreateTxcEditCalc(lkForm, lkPanelClient, 'EDTSUMBODY', 40, lkLabel.Top + lkLabel.Height, 20, lkForm.Width - 48, false, aDocSum - aSumPC);
+    lkLabel      := CreateTLabel(lkForm, lkPanelClient,'lblSumPC', '    погашено процентов',2,lkEdtSumBody.Top+lkEdtSumBody.Height+2,16,lkForm.Width - 4);
+    lkEdtSumBody := CreateTxcEditCalc(lkForm, lkPanelClient, 'EDTSUMPC', 40, lkLabel.Top + lkLabel.Height, 20, lkForm.Width - 48, false, aSumPC);
+
+  loop_invalid:
+    Result := (lkForm.ShowModal = mrOk);
+    if Result then
+      begin
+      aDocSum := lkEdtDocSum.Value;
+      if(aDocSum < aSumPC)then
+        begin
+        Dialogs.MessageDlg('Введенная сумма меньше необходимой для погашения процентов !', mtWarning, [mbOk]);
+        goto loop_invalid;
+        end;
+      end;
+    lkForm.Free;  
+  end;
+  //============================================================================
+var
+  lkJ_ID   :string;
+  lkDocSum :Extended;
+  lkSumPC  :Extended;
+  lkSQL    :string;
+begin
+  if not System_UserHasAdminRights then
+    begin               
+    Dialogs.MessageDlg('Недостаточно прав для выполнения операции !', mtWarning, [mbOk]);
+    exit;
+    end;
+  lkJ_ID := GetGlobalVariable('J_ID');
+  if GetField(FBDataBase, 'TABL$J_4', 'DOCSUM', 'ID = '+lkJ_ID, lkSQL) then
+    try
+      lkDocSum := StrToFloat(lkSQL);
+    except
+      WriteLn('Invalid format '+lkSQL);
+    end;      
+  if GetField(FBDataBase, 'TABL$J_1000063', 'PCSUM', 'J_ID = '+lkJ_ID, lkSQL) then
+    try
+      lkSumPC := StrToFloat(lkSQL);
+    except
+      WriteLn('Invalid format '+lkSQL);
+    end;      
+  if DialogDoc1000063Execute(lkJ_ID, lkDocSum, lkSumPC) then
+    begin
+    lkSQL := 
+      'EXECUTE BLOCK AS '+#13#10+
+      'BEGIN '+#13#10+
+      '  UPDATE TABL$J_4 J1 SET J1.FLAG_COMMIT = 0 WHERE J1.ID = '''+lkJ_ID+'''; '+#13#10+
+      '  UPDATE TABL$J_4 J2 SET J2.DOCSUMVAL   = '''+StrReplaceStr(FormatFloat('#0.000',lkDocSum),',','.')+''' WHERE J2.ID = '''+lkJ_ID+'''; '+#13#10+
+      '  UPDATE TABL$J_4 J3 SET J3.FLAG_COMMIT = 1 WHERE J3.ID = '''+lkJ_ID+'''; '+#13#10+
+      'END'
+//    Dialogs.MessageDlg(lkSQL, mtWarning, [mbOk]);
+    ExecSQL(FBDataBase, lkSQL);
+    end;  
+end.

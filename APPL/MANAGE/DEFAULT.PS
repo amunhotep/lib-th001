@@ -1,0 +1,17 @@
+{$IFNDEF PEAKTOP:APPL/MANAGE/DEFAULT.INC}  {$I ./DEFAULT.INC} {$ENDIF}
+var
+  lkForm :TAmunhotepForm;
+  lkPnl  :TxcPanel;
+  lkStrm :TMemoryStream;
+begin
+  lkForm := TAmunhotepForm.Create(nil);
+  try
+    lkStrm := TMemoryStream.Create;
+    if StreamLoadFromFile(StrAbsolutePath('./DEFAULT_ICON.ICO', ScriptName),lkStrm)then
+      lkForm.Icon.LoadFromStream(lkStrm);
+  finally    
+    lkStrm.Free;
+  end;  
+  lkForm.SetCaption(msg_manageinterface_caption);
+  lkPnl  := ManageInterface_Create(lkForm, lkForm);
+end.

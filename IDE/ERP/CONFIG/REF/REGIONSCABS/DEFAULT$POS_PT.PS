@@ -1,0 +1,269 @@
+{$DEFINE DB:CONFIG/REF/REGIONSCABS/DEFAULT$POS_PT.PS}
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}                    {$I PEAKTOP:GLOBAL_VARIABLES.INC}                    {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXFBDATASETS.INC}                    {$I PEAKTOP:OBJ/TXFBDATASETS.INC}                    {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TACTION.INC}                         {$I PEAKTOP:OBJ/TACTION.INC}                         {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TIMAGELIST.INC}                      {$I PEAKTOP:OBJ/TIMAGELIST.INC}                      {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TCOLUMNEH.INC}                       {$I PEAKTOP:OBJ/TCOLUMNEH.INC}                       {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TDBGRIDEH.INC}                       {$I PEAKTOP:OBJ/TDBGRIDEH.INC}                       {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANEL.INC}                {$I PEAKTOP:OBJ/TXCGRADIENTPANEL.INC}                {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}           {$I PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}           {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGROUPBAR.INC}                     {$I PEAKTOP:OBJ/TXCGROUPBAR.INC}                     {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCTOOLBARBUTTON.INC}                {$I PEAKTOP:OBJ/TXCTOOLBARBUTTON.INC}                {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCPAGECONTROLEX.INC}                {$I PEAKTOP:OBJ/TXCPAGECONTROLEX.INC}                {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCTABSHEET.INC}                     {$I PEAKTOP:OBJ/TXCTABSHEET.INC}                     {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/$COMMON/FORMERPGRID.INC}     {$I PEAKTOP:IDE/ERP/DBO/$COMMON/FORMERPGRID.INC}     {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/DBGRID/GETCELLPARAMS_REF.INC}{$I PEAKTOP:IDE/ERP/DBO/DBGRID/GETCELLPARAMS_REF.INC}{$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/REF/FORMREF$LOADATTRS.INC}   {$I PEAKTOP:IDE/ERP/DBO/REF/FORMREF$LOADATTRS.INC}   {$ENDIF}
+  //=============== PEAKTOP:IDE/ERP/DBO/OPER/ATTACHMENTS.INC ===================
+  function TERPForm_DataSetMain_Insert(aOwner :TComponent):Boolean;
+  var
+    lkValues :array of string;
+    lkSQL    :string;
+  begin
+    Result := true; // override handler
+    SetLength(lkValues, 1);
+    lkSQL := 
+      'EXECUTE BLOCK RETURNS( '+SQLCRLF+
+      '  ID TYPE OF COLUMN TABL$R_REGIONSCABS.ID '+SQLCRLF+
+      ')AS '+SQLCRLF+
+      'BEGIN '+SQLCRLF+
+      '  INSERT INTO TABL$R_REGIONSCABS(HOUSE_ID, CAB) '+SQLCRLF+
+      '    VALUES(1000001, ''0'') '+SQLCRLF+
+      '    RETURNING ID INTO :ID; '+SQLCRLF+
+      '  SUSPEND; '+SQLCRLF+
+      'END';
+    if GetSQLFields(FBDataBase, lkSQL, ['ID'], lkValues)then
+      begin
+      SetGlobalVariable(TERPForm_Settings(aOwner).Values[ERP_SETTINGS_BUFFERVAR], lkValues[0]);
+      call(StrAbsolutePath('./DEFAULT_ITEM.PS', ScriptName));
+      TERPFormGrid_RefreshView(aOwner);  
+      end;  
+  end;
+  //============================================================================
+  function TERPForm_DataSetMain_Update(aOwner :TComponent):Boolean;
+  begin
+    Result := false; // default handler  
+  end;
+  //============================================================================
+  function TERPForm_DataSetMain_Edit(aOwner :TComponent):Boolean;
+  begin
+    Result := true; // override handler
+    with TERPForm_DBGridMain(aOwner).DataSource.DataSet do
+      begin
+      if(not Active)then exit;
+      if(not(RecordCount>0))then exit;  
+      SetGlobalVariable(TERPForm_Settings(aOwner).Values[ERP_SETTINGS_BUFFERVAR], FieldByName(ERP_DATASET_DBKEY).AsString);
+      call(StrAbsolutePath('./DEFAULT_ITEM.PS', ScriptName));
+      end;
+  end;
+  //============================================================================
+  function TERPForm_DataSetMain_Delete(aOwner :TComponent):Boolean;
+  begin
+    Result := true; // override handler
+    with TERPForm_DBGridMain(aOwner).DataSource.DataSet do
+      begin
+      if(not Active)then exit;
+      if( not(RecordCount>0) )then exit;
+      if(Dialogs.MessageDlg(msg_erp_actdel+' ?', mtConfirmation, [mbYes, mbNo]) <> mrYes)then exit;
+      ExecSQL(FBDataBase, 'DELETE FROM TABL$R_REGIONSCABS RC WHERE (RC.ID = '''+FieldByName(ERP_DATASET_DBKEY).AsString+''')');
+      TERPFormGrid_RefreshView(aOwner);  
+      end;
+  end;
+  //============================================================================
+  function TERPFormGrid_PrintGrid(aOwner :TComponent):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  function TERPFormGrid_PrintItem(aOwner :TComponent):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormGrid_RefreshView(aOwner :TComponent);
+  var
+    lkSaveRecNo :Integer;
+  begin
+    lkSaveRecNo := 0;
+    with TERPForm_DBGridMain(aOwner).DataSource.DataSet do
+      if Active then
+        if(RecordCount > 0)then
+          lkSaveRecNo := RecNo;
+    TERPFormGrid_CloseDataSets(aOwner);
+    with TERPForm_DataSetMain(aOwner) do
+      begin
+      SelectSQL.Text :=  
+        'SELECT RC.HOUSE_ID, RC.ID AS RC_ID, RC.ID AS '+ERP_DATASET_DBKEY+' '+SQLCRLF+
+        '      ,RC.WRK_ID , (SELECT FIRST 1 W.NAME FROM TABL$R_WRK W WHERE (W.ID = RC.WRK_ID)) AS WRK_NAME '+SQLCRLF+
+        '      ,(SELECT COUNT(DISTINCT P1.WRK_ID) FROM TABL$P_REGIONSCABS_QUANT P1 WHERE (P1.CAB_ID = RC.ID)) AS WRK_COUNT '+SQLCRLF+
+        '      ,RC.FIRM_ID, (SELECT FIRST 1 F.NAME FROM TABL$R_FIRMS F WHERE (F.ID = RC.FIRM_ID)) AS FIRM_NAME '+SQLCRLF+
+        '      ,RC.NAME AS RC_NAME, RC.FLAG_DELETE AS RC_FLAG_DELETE, RC.DESCR AS RC_DESCR '+SQLCRLF+
+        '      ,RC.CORP AS RC_CORP, RC.CAB AS RC_CAB, RC.SQUARE AS RC_SQUARE, RC.ACCNUMBER AS RC_ACCNUMBER '+SQLCRLF+
+        '      ,RH.STREET_ID, RH.NAME AS RH_NAME, RH.HOUSE AS RH_HOUSE, RH.LONGITUDE AS RH_LONGITUDE '+SQLCRLF+
+        '      ,RH.ATTITUDE AS RH_ATTITUDE, RH.ZIP AS RH_ZIP, RH.DESCR AS RH_DESCR, RS.TOWN_ID, RS.NAME AS RS_NAME '+SQLCRLF+
+        '      ,RT.REGION_ID, RT.NAME AS RT_NAME, RT.PHONE_PREFIX AS RT_PHONE_PREFIX '+SQLCRLF+
+        '      ,R.COUNTRY_ID, R.NAME AS REGION_NAME, C.NAME AS COUNTRY_NAME '+SQLCRLF+
+        'FROM   TABL$R_REGIONSCABS RC, TABL$R_REGIONSHOUSES RH, TABL$R_REGIONSSTREETS RS '+SQLCRLF+
+        '      ,TABL$R_REGIONSTOWNS RT, TABL$R_REGIONS R, TABL$R_COUNTRIES C '+SQLCRLF+
+        'WHERE (RH.ID = RC.HOUSE_ID) '+SQLCRLF+
+        '  AND (RS.ID = RH.STREET_ID) '+SQLCRLF+
+        '  AND (RT.ID = RS.TOWN_ID) '+SQLCRLF+
+        '  AND (R.ID  = RT.REGION_ID) '+SQLCRLF+
+        '  AND (C.ID  = R.COUNTRY_ID) '+SQLCRLF+
+        'ORDER BY RS.NAME, RH.HOUSE, RC.ID ';
+      DeleteSQL.Text := 'DELETE FROM TABL$R_REGIONSCABS RC WHERE (RC.ID = ?'+ERP_DATASET_DBKEY+')';  
+      Open;
+      end;
+    with TERPForm_DBGridMain(aOwner).DataSource.DataSet do
+      if( Active and (lkSaveRecNo>0) )then
+        RecNo := lkSaveRecNo;       
+  end;
+  //============================================================================
+  procedure TERPFormGrid_PanelLeft_OnShowHide(aOwner :TComponent);
+  begin
+  
+  end;
+  //============================================================================
+  procedure TERPForm_DataSetMain_AfterScroll(DataSet :TDataSet);
+  begin
+  end;
+  //============================================================================
+  procedure TERPForm_DataSetMain_OnNewRecord(DataSet :TDataSet);
+  begin
+  end;
+  //============================================================================
+  function TERPFormGrid_ExportGetCaption(aOwner :TComponent):string;
+  begin
+    Result := TERPForm_Settings(aOwner).Values[ERP_SETTINGS_TABLECAPTION];
+  end;
+  //============================================================================
+  function TERPFormGrid_ExportGetFilter(aOwner :TComponent):string;
+  begin
+    Result := '';
+  end;
+  //============================================================================
+  function TERPFormGrid_ExportGetFileName(aOwner :TComponent):string;
+  begin
+    Result := TERPForm_Settings(aOwner).Values[ERP_SETTINGS_TABLECAPTION];
+  end;                   
+  //============================================================================
+  procedure TERPFormRef_RegionCabs_dbgMain_OnDblClick(Sender :TObject);
+  begin
+    TERPForm_DataSetMain_Edit(TComponent(Sender).Owner);
+  end;              
+  //============================================================================
+  function TERPFormRef_RegionCabs_Create:TAmunhotepForm;
+  var
+    lkStr          :string; 
+    lkSettings     :TStrings;
+    lkCreateParams :TFormERPParams;
+    lkDBG          :TDBGridEh;
+    lkCol          :TColumnEh;
+    lkAct          :TCustomAction;
+    lkMainMenu     :TMainMenu;
+    lkMIMenuMain   :TMenuItem;
+    lkMIView       :TMenuItem;
+    lkMIObj        :TMenuItem;
+    lkMIItem       :TMenuItem;
+    lkPanelClient  :TxcPanel;
+    lkToolBar      :TxcGradientPanelVista;
+    lkPC           :TxcPageControlEx;
+    lkTS           :TxcTabSheet;
+
+    lkSQLSelect  :string; 
+    lkSQLRefresh :string; 
+    lkSQLUpdate  :string;  
+    lkSQLDelete  :string;
+    lkTr         :TxFBTransaction;
+    lkQr         :TxFBQuery;
+    lkDS         :TDataSource;
+  begin
+    DontAutoFree;
+    lkCreateParams := [erpGrid, erpGridGroup, erpGridNavigation, erpGridEdit, erpGridEditIns, erpGridEditEdt, erpGridEditDel, erpGridNoCopy, erpGridExport, erpGridPrint, erpGridPrintItem,erpDetail,erpEvents];
+    Result := TAmunhotepForm(TERPFormGrid_Create('Адресы', 'Адресы', ERP_ObjectIcon(ERP_OBJECTTYPE_REF), 'PEAKTOP:IMG/CONFIG/PT/HOUSE0032X0032.BMP', false, lkCreateParams));
+    lkSettings := TERPForm_Settings(Result);
+    with lkSettings do
+      begin
+      Values[ERP_SETTINGS_BUFFERVAR       ] := 'REGIONSCAB_ID';
+      Values[ERP_SETTINGS_TABLENAME       ] := 'TABL$R_REGIONSCABS';
+      Values[ERP_SETTINGS_TABLECAPTION    ] := Result.Caption;
+      Values[ERP_SETTINGS_REF_TREE        ] := '0';
+      Values[ERP_SETTINGS_REF_TREEORGROUP ] := '0';
+      Values[ERP_SETTINGS_REF_TREEFIELD   ] := '';
+      Values[ERP_SETTINGS_BASETYPE        ] := '2';
+      Values[ERP_SETTINGS_FOOTERCOUNT     ] := '1';
+      //Values[ERP_DATASET_DBKEY            ] := 'RC_ID';
+      end;
+    lkMainMenu   := TMainMenu(Result.FindComponent(obj_name_erp_mainmenu)); 
+    lkMIMenuMain := TMenuItem(lkMainMenu.Items.FindComponent(obj_name_erp_mimainmenu));
+    lkMIItem     := TMenuItem(lkMIMenuMain.FindComponent(obj_name_erp_mimainitem));
+    lkMIObj      := TMenuItem(lkMIMenuMain.FindComponent(obj_name_erp_mimainobj)); lkMIObj.ImageIndex := 44; 
+    lkMIView     := TMenuItem(lkMIMenuMain.FindComponent(obj_name_erp_mimainview));
+    lkAct := TCustomAction(Result.FindComponent(obj_name_erp_actprintitem));lkAct.ImageIndex := 178;
+    lkAct := TCustomAction(Result.FindComponent(obj_name_erp_actprintgrid));lkAct.ImageIndex := 234;
+    CreateTMenuItem(lkMIMenuMain,obj_name_erp_mimaindb,msg_erp_mimaindb,'','',ERP_ObjectImageIndex(ERP_OBJECTTYPE_REFS),  0);
+    ERP_DBMenuItems_Build(lkMIMenuMain, UpperCase(GetGlobalVariable(ERP_GLOBALVARIABLE_USER_CURRENT)),'TABL$R_REGIONSCABS', '0', @TERPFormGrid_DatabaseMenuItem_OnClick);
+
+    lkPanelClient:= TxcPanel(Result.FindComponent(obj_name_erp_panelclient));
+    lkToolBar    := TxcGradientPanelVista(Result.FindComponent(obj_name_erp_toolbar));
+    lkPC         := TxcPageControlEx(Result.FindComponent(obj_name_erp_pagecontroldetail));
+    lkTS := CreateTxcTabSheet(lkPC,'tsForm','Данные',103,clSilver);
+    TxcPageControlEx_ActivateDefaultPage(lkPC);
+    lkDBG        := TERPForm_DBGridMain(Result);
+    with lkDBG do
+      begin
+      Options         := Options + [dgRowSelect, dgAlwaysShowSelection] - [dgMultiSelect];
+      OptionsEh       := OptionsEh + [dghFixed3D, dghFrozen3D, dghFooter3D, dghAutoSortMarking, dghMultiSortMarking, dghIncSearch, dghRowHighlight, dghColumnResize, dghColumnMove,dghExtendVertLines];
+      FooterRowCount  := 0;
+      SortLocal       := true;
+      ReadOnly        := true;
+      OnGetCellParams := @ERP_DBGridEh_OnGetCellParams_Ref;
+      OnDblClick      := @TERPFormRef_RegionCabs_dbgMain_OnDblClick;
+      end;
+    lkCol := CreateTColumnEh(lkdbg,'RC_ID'       ,'# ### ### ##0','Код'             , 60,taRightJustify); lkCol.Title.SortMarker := smDownEh;
+    with lkCol.Footer do
+      begin
+      DisplayFormat := lkCol.DisplayFormat;
+      Alignment     := lkCol.Alignment;
+      FieldName     := lkCol.FieldName;
+      ValueType     := fvtCount;
+      end;
+    lkCol := CreateTColumnEh(lkdbg,'COUNTRY_NAME',''             ,'Страна'                  , 60,taLeftJustify ); lkCol.Visible := false;
+    lkCol := CreateTColumnEh(lkdbg,'REGION_NAME' ,''             ,'Регион'                  ,120,taLeftJustify ); lkCol.Visible := false;
+    lkCol := CreateTColumnEh(lkdbg,'RT_NAME'     ,''             ,'Город'                   , 80,taLeftJustify );
+    lkCol := CreateTColumnEh(lkdbg,'RS_NAME'     ,''             ,'Улица'                   ,120,taLeftJustify );
+    lkCol := CreateTColumnEh(lkdbg,'RH_HOUSE'    ,''             ,'дом'                     , 48,taRightJustify);
+    lkCol := CreateTColumnEh(lkdbg,'RC_CORP'     ,''             ,'корп.'                   , 24,taRightJustify);
+    lkCol := CreateTColumnEh(lkdbg,'RC_CAB'      ,''             ,'квартира'                , 48,taRightJustify);
+    lkCol := CreateTColumnEh(lkdbg,'RC_SQUARE'   ,'# ### ##0.000','площадь'                 , 60,taRightJustify);
+    lkCol := CreateTColumnEh(lkdbg,'WRK_COUNT'   ,'# ### ##0'    ,'жителей'                 , 24,taRightJustify);
+    lkCol := CreateTColumnEh(lkdbg,'RC_ACCNUMBER',''             ,'№ лицевого счета'        , 80,taLeftJustify );
+    lkCol := CreateTColumnEh(lkdbg,'FIRM_NAME'   ,''             ,'Обслуживающая компания'  , 96,taLeftJustify );
+    lkCol := CreateTColumnEh(lkdbg,'WRK_NAME'    ,''             ,'Наниматель'              , 96,taLeftJustify );
+    lkCol := CreateTColumnEh(lkdbg,'RC_DESCR'    ,''             ,'Примечание к квартире'   ,220,taLeftJustify );
+    lkCol := CreateTColumnEh(lkdbg,'RH_DESCR'    ,''             ,'Примечание ко всему дому',220,taLeftJustify );
+    {
+    CreateTxFBTransQuery(nil, '', '', '', ['isc_tpb_read_committed', 'isc_tpb_read', 'isc_tpb_rec_version', 'isc_tpb_nowait'], lkTr, lkQR, lkDS)  
+    TERPFormRefItem_LoadAttrs(Result, CreateTScrollBox(lkTS,lkTS,obj_name_erp_scrollboxmain,1,1,600,800,alClient), lkDBG.DataSource, 'TABL$R_REGIONSCABS', lkQr, false, lkSQLSelect, lkSQLRefresh, lkSQLUpdate, lkSQLDelete);
+    lkTr.Free;
+    }
+    TERPFormGrid_RefreshView(Result);
+    with TxFBEvents(Result.FindComponent(obj_name_erp_data_evmain)) do
+      begin
+      with Events do
+        begin
+        Clear;
+        Add('TABL$R_REGIONSCABS');
+        Add('TABL$R_REGIONSHOUSES');
+        Add('TABL$R_REGIONSTOWNS');
+        Add('TABL$R_REGIONS');
+        end;
+      WriteLn('Ok')  
+      if not Registered then
+        RegisterEvents;
+      end;     
+  end;
+  
+begin
+  TERPFormRef_RegionCabs_Create;
+end.

@@ -1,0 +1,10 @@
+{$DEFINE PEAKTOP:IDE/ERP/DBO/$CONFIG/EXPORT.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/$CONFIG/EXPORT.INC}    {$I ./EXPORT.INC}   {$ENDIF}
+var
+  lkFolder :string;
+begin
+  lkFolder := ERP_ConfigExport_CreateTempPath;
+  
+  ERP_ConfigExport_Types(lkFolder, true);
+//  ERP_ConfigExport_ObjReports(lkFolder, true);
+end.

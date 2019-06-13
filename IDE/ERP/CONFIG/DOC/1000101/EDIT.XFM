@@ -1,0 +1,884 @@
+object DocForm: TAmunhotepForm
+  Left = 8
+  Top = 8
+  Width = 919
+  Height = 375
+  ActiveControl = PCDoc
+  Caption = 'DB:CONFIG/DOC/1000101/EDIT.XFM'
+  Color = 13615039
+  Font.Charset = RUSSIAN_CHARSET
+  Font.Color = clBlack
+  Font.Height = -9
+  Font.Name = 'Verdana'
+  Font.Style = []
+  FormStyle = fsMDIChild
+  Icon.Data = {
+    0000010001002020040000000000E80200001600000028000000200000004000
+    0000010004000000000000020000000000000000000000000000000000000000
+    000000008000008000000080800080000000800080008080000080808000C0C0
+    C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF000000
+    0000000000000000000000000000000000000000000000000000000000000000
+    0004440000444400004440000000000004777700047777400077774000000000
+    078FF870078FF870078FF8700000000477888777778888777788887740000047
+    8877777888777777887777887400004788774788887777788874778874000447
+    F87407888774478F8770478F7440044788777788777777887777777874400004
+    7788777777888777778887774000000447888777478888747788887440004004
+    4788F87447888874477888744444444477788877777888777777887744444447
+    88777778887777788877778874444447F8774788887447888874778F74444447
+    F87747888874478F8874778F7444444788777788877777888777778874444444
+    7788877777888777778887774444444447888877478F8874778F887444444444
+    4788887777888877778888744444744477788877777888777778887744447447
+    88777778887777788877788874477778F8774788F8744788F874778F87777747
+    F8777788887777888877778F7477774788877888877778888877788874777447
+    78888887778888877788888774477444478FF874478FF874478FF87444477744
+    4778877447788774477887744477774444777744447777444477774444774477
+    777777777777777777777777774404777777777777777777777777777740C000
+    0003C00000030000000000000000000000000000000000000000000000000000
+    0000000000000000000000000000000000000000000000000000000000000000
+    0000000000000000000000000000000000000000000000000000000000000000
+    00000000000000000000000000000000000000000000C0000003C0000003}
+  OldCreateOrder = False
+  Visible = True
+  PixelsPerInch = 96
+  TextHeight = 12
+  object Splitter1: TSplitter
+    Left = 0
+    Top = 104
+    Width = 903
+    Height = 4
+    Cursor = crVSplit
+    Align = alTop
+  end
+  object TopBar: TxcGradientPanelVista
+    Left = 0
+    Top = 0
+    Width = 903
+    Height = 34
+    Align = alTop
+    Colors.Background = 8413280
+    Colors.Border = clBlack
+    Colors.Error = 8388863
+    Colors.Foreground = 13615039
+    Colors.Window = 16775416
+    Colors.Highlight = 15769760
+    Colors.HotTrack = 15769760
+    Colors.HotTrackBorder = 10502208
+    Font.Charset = RUSSIAN_CHARSET
+    Font.Color = clWhite
+    Font.Height = -19
+    Font.Name = 'Verdana'
+    Font.Style = [fsBold]
+    ParentFont = False
+    StyleManager = AmunhotepMainForm.StyleManager
+    ViewStyle = vsOFF03
+    Alignment = taLeftJustify
+    ShowCaption = True
+    Caption = '      '#1044#1086#1082#1091#1084#1077#1085#1090
+    BorderStyle = xbsRaized
+    GradientDirect = gdTopToBottom
+    object ImgLogo: TImage
+      Left = 1
+      Top = 1
+      Width = 33
+      Height = 32
+      Align = alLeft
+      Center = True
+      Proportional = True
+      Stretch = True
+      Transparent = True
+    end
+  end
+  object ToolBar: TxcGradientPanelVista
+    Left = 0
+    Top = 34
+    Width = 903
+    Height = 22
+    Align = alTop
+    Colors.Background = 13615039
+    Colors.Border = 13615039
+    Colors.Error = 8388863
+    Colors.Foreground = 13615039
+    Colors.Window = 16775416
+    Colors.Highlight = 16775416
+    Colors.HotTrack = 16775416
+    Colors.HotTrackBorder = 16775416
+    ViewStyle = vsOFF03
+    Alignment = taLeftJustify
+    ShowCaption = True
+    BorderStyle = xbsNone
+    GradientDirect = gdTopToBottom
+    object tbbactRefresh: TxcToolBarButton
+      Left = 1
+      Top = 1
+      Width = 100
+      Height = 20
+      Align = alLeft
+      Colors.Background = 8413280
+      Colors.Border = clBlack
+      Colors.Error = 8388863
+      Colors.Foreground = 13615039
+      Colors.Window = 16775416
+      Colors.Highlight = 15769760
+      Colors.HotTrack = 15769760
+      Colors.HotTrackBorder = 10502208
+      ParentShowHint = False
+      ShowHint = True
+      StyleManager = AmunhotepMainForm.StyleManager
+      ViewStyle = vsOFF03
+      Action = actRefresh
+      Gradient = True
+      Down = False
+      Margin = 2
+      ImageIndex = -1
+      ImagesSmall = AmunhotepMainForm.ImageListMain
+      ShowCaption = True
+      Style = bstSmall
+    end
+    object tbbactPrint: TxcToolBarButton
+      Left = 301
+      Top = 1
+      Width = 100
+      Height = 20
+      Align = alLeft
+      Colors.Background = 8413280
+      Colors.Border = clBlack
+      Colors.Error = 8388863
+      Colors.Foreground = 13615039
+      Colors.Window = 16775416
+      Colors.Highlight = 15769760
+      Colors.HotTrack = 15769760
+      Colors.HotTrackBorder = 10502208
+      ParentShowHint = False
+      ShowHint = True
+      StyleManager = AmunhotepMainForm.StyleManager
+      ViewStyle = vsOFF03
+      Action = actPrint
+      Gradient = True
+      Down = False
+      Margin = 2
+      ImageIndex = -1
+      ImagesSmall = AmunhotepMainForm.ImageListMain
+      ShowCaption = True
+      Style = bstSmall
+    end
+    object tbbactUnCommit: TxcToolBarButton
+      Left = 201
+      Top = 1
+      Width = 100
+      Height = 20
+      Align = alLeft
+      Colors.Background = 8413280
+      Colors.Border = clBlack
+      Colors.Error = 8388863
+      Colors.Foreground = 13615039
+      Colors.Window = 16775416
+      Colors.Highlight = 15769760
+      Colors.HotTrack = 15769760
+      Colors.HotTrackBorder = 10502208
+      ParentShowHint = False
+      ShowHint = True
+      StyleManager = AmunhotepMainForm.StyleManager
+      ViewStyle = vsOFF03
+      Action = actUnCommit
+      Gradient = True
+      Down = False
+      Margin = 2
+      ImageIndex = -1
+      ImagesSmall = AmunhotepMainForm.ImageListMain
+      ShowCaption = True
+      Style = bstSmall
+    end
+    object tbbactCommit: TxcToolBarButton
+      Left = 101
+      Top = 1
+      Width = 100
+      Height = 20
+      Align = alLeft
+      Colors.Background = 8413280
+      Colors.Border = clBlack
+      Colors.Error = 8388863
+      Colors.Foreground = 13615039
+      Colors.Window = 16775416
+      Colors.Highlight = 15769760
+      Colors.HotTrack = 15769760
+      Colors.HotTrackBorder = 10502208
+      ParentShowHint = False
+      ShowHint = True
+      StyleManager = AmunhotepMainForm.StyleManager
+      ViewStyle = vsOFF03
+      Action = actCommit
+      Gradient = True
+      Down = False
+      Margin = 2
+      ImageIndex = -1
+      ImagesSmall = AmunhotepMainForm.ImageListMain
+      ShowCaption = True
+      Style = bstSmall
+    end
+    object tbbactCalcWrk: TxcToolBarButton
+      Left = 401
+      Top = 1
+      Width = 100
+      Height = 20
+      Align = alLeft
+      Colors.Background = 8413280
+      Colors.Border = clBlack
+      Colors.Error = 8388863
+      Colors.Foreground = 13615039
+      Colors.Window = 16775416
+      Colors.Highlight = 15769760
+      Colors.HotTrack = 15769760
+      Colors.HotTrackBorder = 10502208
+      ParentShowHint = False
+      ShowHint = True
+      StyleManager = AmunhotepMainForm.StyleManager
+      ViewStyle = vsOFF03
+      Action = actCalcWrk
+      Gradient = True
+      Down = False
+      Margin = 2
+      ImageIndex = -1
+      ImagesSmall = AmunhotepMainForm.ImageListMain
+      ShowCaption = True
+      Style = bstSmall
+    end
+  end
+  object PanelTop: TxcGradientPanel
+    Left = 0
+    Top = 56
+    Width = 903
+    Height = 48
+    Align = alTop
+    Colors.Background = 8413280
+    Colors.Border = clBlack
+    Colors.Error = 8388863
+    Colors.Foreground = 13615039
+    Colors.Window = 16775416
+    Colors.Highlight = 15769760
+    Colors.HotTrack = 15769760
+    Colors.HotTrackBorder = 10502208
+    StyleManager = AmunhotepMainForm.StyleManager
+    ViewStyle = vsOFF03
+    Alignment = taLeftJustify
+    ShowCaption = True
+    BorderStyle = xbsLowered
+    GradientDirect = gdRightToLeft
+    object lblCS_NAME: TLabel
+      Left = 4
+      Top = 4
+      Width = 96
+      Height = 16
+      AutoSize = False
+      Caption = #1053#1086#1084#1077#1088' '#1076#1086#1082#1091#1084#1077#1085#1090#1072
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clBlack
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      ParentFont = False
+      Transparent = True
+      Layout = tlCenter
+    end
+    object lblDATE_COMMIT: TLabel
+      Left = 192
+      Top = 4
+      Width = 97
+      Height = 16
+      AutoSize = False
+      Caption = #1044#1072#1090#1072' '#1087#1088#1086#1074#1077#1076#1077#1085#1080#1103
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clBlack
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      ParentFont = False
+      Transparent = True
+    end
+    object Label3: TLabel
+      Left = 608
+      Top = 24
+      Width = 81
+      Height = 16
+      AutoSize = False
+      Caption = #1055#1086#1083#1100#1079#1086#1074#1072#1090#1077#1083#1100
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clBlack
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      ParentFont = False
+      Transparent = True
+    end
+    object Label4: TLabel
+      Left = 456
+      Top = 4
+      Width = 41
+      Height = 16
+      AutoSize = False
+      Caption = #1060#1080#1088#1084#1072
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clBlack
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      ParentFont = False
+      Transparent = True
+    end
+    object Label5: TLabel
+      Left = 640
+      Top = 4
+      Width = 49
+      Height = 16
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = #1060#1080#1083#1080#1072#1083' '
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clBlack
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      ParentFont = False
+      Transparent = True
+    end
+    object lblCS_ADDR_NAME: TLabel
+      Left = 4
+      Top = 24
+      Width = 72
+      Height = 16
+      AutoSize = False
+      Caption = #1055#1088#1080#1084#1077#1095#1072#1085#1080#1077
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clBlack
+      Font.Height = -9
+      Font.Name = 'Verdana'
+      Font.Style = [fsBold]
+      ParentFont = False
+      Transparent = True
+      Layout = tlCenter
+    end
+    object dbeDOCNUMBER: TDBEditEh
+      Left = 96
+      Top = 4
+      Width = 92
+      Height = 16
+      Ctl3D = False
+      Color = 13615039
+      DataField = 'DOCNUMBER'
+      DataSource = DSdtsJrnl
+      EditButtons = <>
+      Flat = True
+      ParentCtl3D = False
+      ReadOnly = True
+      TabOrder = 0
+      Visible = True
+    end
+    object dbdtpDATE_COMMIT: TDBDateTimeEditEh
+      Left = 288
+      Top = 4
+      Width = 160
+      Height = 16
+      Ctl3D = False
+      Color = 16775416
+      DataField = 'DATE_COMMIT'
+      DataSource = DSdtsJrnl
+      EditButtons = <>
+      Flat = True
+      Kind = dtkDateTimeEh
+      ParentCtl3D = False
+      TabOrder = 1
+      Visible = True
+    end
+    object dbeUSER_NAME: TDBEditEh
+      Left = 689
+      Top = 24
+      Width = 132
+      Height = 16
+      Ctl3D = False
+      Color = 13615039
+      DataField = 'USER_NAME'
+      DataSource = DSdtsJrnl
+      EditButtons = <>
+      Flat = True
+      ParentCtl3D = False
+      ReadOnly = True
+      TabOrder = 2
+      Visible = True
+    end
+    object dbeFIRM_NAME: TDBEditEh
+      Left = 497
+      Top = 4
+      Width = 140
+      Height = 16
+      Ctl3D = False
+      Color = 13615039
+      DataField = 'FIRM_NAME'
+      DataSource = DSdtsJrnl
+      EditButtons = <>
+      Flat = True
+      ParentCtl3D = False
+      ReadOnly = True
+      TabOrder = 3
+      Visible = True
+    end
+    object dbeFILIAL_NAME: TDBEditEh
+      Left = 689
+      Top = 4
+      Width = 132
+      Height = 16
+      Ctl3D = False
+      Color = 13615039
+      DataField = 'FILIAL_NAME'
+      DataSource = DSdtsJrnl
+      EditButtons = <>
+      Flat = True
+      ParentCtl3D = False
+      ReadOnly = True
+      TabOrder = 4
+      Visible = True
+    end
+    object dbeNAME: TDBEditEh
+      Left = 72
+      Top = 24
+      Width = 532
+      Height = 16
+      Ctl3D = False
+      Color = 16775416
+      DataField = 'NAME'
+      DataSource = DSdtsJrnl
+      EditButtons = <>
+      Flat = True
+      ParentCtl3D = False
+      TabOrder = 5
+      Visible = True
+    end
+  end
+  object PCDoc: TxcPageControlEx
+    Left = 0
+    Top = 108
+    Width = 903
+    Height = 229
+    Align = alClient
+    Colors.Background = 8413280
+    Colors.Border = clBlack
+    Colors.Error = 8388863
+    Colors.Foreground = 13615039
+    Colors.Window = 16775416
+    Colors.Highlight = 15769760
+    Colors.HotTrack = 15769760
+    Colors.HotTrackBorder = 10502208
+    StyleManager = AmunhotepMainForm.StyleManager
+    ViewStyle = vsOFF03
+    ActivePage = tsDocWrk
+    FlatColor = 8413280
+    Images = AmunhotepMainForm.ImageListMain
+    TabIndex = 1
+    TabOrder = 3
+    Gradient = True
+    FixedDimension = 18
+    object tsDoc: TxcTabSheet
+      Color = 13615039
+      Caption = ' '#1044#1086#1082#1091#1084#1077#1085#1090#1099
+      object ToolBarDoc: TxcGradientPanelVista
+        Left = 0
+        Top = 0
+        Width = 899
+        Height = 22
+        Align = alTop
+        Colors.Background = 13615039
+        Colors.Border = 13615039
+        Colors.Error = 8388863
+        Colors.Foreground = 13615039
+        Colors.Window = 16775416
+        Colors.Highlight = 16775416
+        Colors.HotTrack = 16775416
+        Colors.HotTrackBorder = 16775416
+        ViewStyle = vsOFF03
+        Alignment = taLeftJustify
+        ShowCaption = True
+        BorderStyle = xbsNone
+        GradientDirect = gdTopToBottom
+        object tbbactDocDocScan: TxcToolBarButton
+          Left = 1
+          Top = 1
+          Width = 100
+          Height = 20
+          Align = alLeft
+          Colors.Background = 8413280
+          Colors.Border = clBlack
+          Colors.Error = 8388863
+          Colors.Foreground = 13615039
+          Colors.Window = 16775416
+          Colors.Highlight = 15769760
+          Colors.HotTrack = 15769760
+          Colors.HotTrackBorder = 10502208
+          ParentShowHint = False
+          ShowHint = True
+          StyleManager = AmunhotepMainForm.StyleManager
+          ViewStyle = vsOFF03
+          Action = actDocDocScan
+          Gradient = True
+          Down = False
+          Margin = 2
+          ImageIndex = -1
+          ImagesSmall = AmunhotepMainForm.ImageListMain
+          ShowCaption = True
+          Style = bstSmall
+        end
+        object tbbactDocDocDel: TxcToolBarButton
+          Left = 101
+          Top = 1
+          Width = 100
+          Height = 20
+          Align = alLeft
+          Colors.Background = 8413280
+          Colors.Border = clBlack
+          Colors.Error = 8388863
+          Colors.Foreground = 13615039
+          Colors.Window = 16775416
+          Colors.Highlight = 15769760
+          Colors.HotTrack = 15769760
+          Colors.HotTrackBorder = 10502208
+          ParentShowHint = False
+          ShowHint = True
+          StyleManager = AmunhotepMainForm.StyleManager
+          ViewStyle = vsOFF03
+          Action = actDocDocDel
+          Gradient = True
+          Down = False
+          Margin = 2
+          ImageIndex = -1
+          ImagesSmall = AmunhotepMainForm.ImageListMain
+          ShowCaption = True
+          Style = bstSmall
+        end
+      end
+      object dbgDoc: TDBGridEh
+        Left = 0
+        Top = 22
+        Width = 899
+        Height = 185
+        Align = alClient
+        Color = 16775416
+        DataGrouping.GroupLevels = <>
+        DataSource = DSdtsDoc
+        FixedColor = 13615039
+        Flat = True
+        Font.Charset = RUSSIAN_CHARSET
+        Font.Color = clBlack
+        Font.Height = -9
+        Font.Name = 'Verdana'
+        Font.Style = []
+        FooterColor = 16775416
+        FooterFont.Charset = RUSSIAN_CHARSET
+        FooterFont.Color = clBlack
+        FooterFont.Height = -9
+        FooterFont.Name = 'Verdana'
+        FooterFont.Style = []
+        FooterRowCount = 1
+        IndicatorOptions = [gioShowRowIndicatorEh]
+        ParentFont = False
+        TabOrder = 1
+        TitleFont.Charset = RUSSIAN_CHARSET
+        TitleFont.Color = clBlack
+        TitleFont.Height = -9
+        TitleFont.Name = 'Verdana'
+        TitleFont.Style = [fsBold]
+        UseMultiTitle = True
+        VTitleMargin = 4
+        Columns = <
+          item
+            Checkboxes = True
+            EditButtons = <>
+            FieldName = 'FLAG_COMMIT'
+            Footers = <>
+            KeyList.Strings = (
+              '1'
+              '0')
+            PickList.Strings = (
+              '!!!'
+              '  ')
+            Title.Caption = #1044#1086#1082#1091#1084#1077#1085#1090'|!!!'
+            Width = 16
+          end
+          item
+            Alignment = taRightJustify
+            DisplayFormat = '# ### ### ##0'
+            EditButtons = <>
+            FieldName = 'ID'
+            Footer.DisplayFormat = '# ### ### ##0'
+            Footer.FieldName = 'ID'
+            Footer.ValueType = fvtCount
+            Footers = <>
+            Title.Caption = #1044#1086#1082#1091#1084#1077#1085#1090'|'#1050#1086#1076
+            Width = 60
+          end
+          item
+            EditButtons = <>
+            FieldName = 'TYPE_NAME'
+            Footers = <>
+            Title.Caption = #1044#1086#1082#1091#1084#1077#1085#1090'|'#1058#1080#1087
+            Width = 150
+          end
+          item
+            EditButtons = <>
+            FieldName = 'DOCNUMBERSTR'
+            Footers = <>
+            Title.Caption = #1044#1086#1082#1091#1084#1077#1085#1090'|'#1055#1086#1083#1085'.'#1085#1086#1084#1077#1088
+            Width = 67
+          end
+          item
+            Alignment = taRightJustify
+            DisplayFormat = '# ### ##0.00'
+            EditButtons = <>
+            FieldName = 'DOCSUM'
+            Footer.DisplayFormat = '# ### ##0.00'
+            Footer.ValueType = fvtSum
+            Footers = <>
+            Title.Caption = #1044#1086#1082#1091#1084#1077#1085#1090'|'#1057#1091#1084#1084#1072
+            Width = 60
+          end
+          item
+            EditButtons = <>
+            FieldName = 'NAME'
+            Footers = <>
+            Title.Caption = #1044#1086#1082#1091#1084#1077#1085#1090'|'#1055#1088#1080#1084#1077#1095#1072#1085#1080#1077
+            Width = 191
+          end
+          item
+            DisplayFormat = 'dd.mm.yyyy hh:nn:ss'
+            EditButtons = <>
+            FieldName = 'DATE_COMMIT'
+            Footers = <>
+            Title.Caption = #1057#1080#1089#1090#1077#1084#1085#1099#1077' '#1076#1072#1085#1085#1099#1077'|'#1044#1072#1090#1072
+            Width = 71
+          end
+          item
+            EditButtons = <>
+            FieldName = 'FIRM_NAME'
+            Footers = <>
+            Title.Caption = #1057#1080#1089#1090#1077#1084#1085#1099#1077' '#1076#1072#1085#1085#1099#1077'|'#1060#1080#1088#1084#1072
+            Width = 142
+          end
+          item
+            EditButtons = <>
+            FieldName = 'FILIAL_NAME'
+            Footers = <>
+            Title.Caption = #1057#1080#1089#1090#1077#1084#1085#1099#1077' '#1076#1072#1085#1085#1099#1077'|'#1060#1080#1083#1080#1072#1083
+            Width = 96
+          end
+          item
+            EditButtons = <>
+            FieldName = 'USER_NAME'
+            Footers = <>
+            Title.Caption = #1057#1080#1089#1090#1077#1084#1085#1099#1077' '#1076#1072#1085#1085#1099#1077'|'#1055#1086#1083#1100#1079#1086#1074#1072#1090#1077#1083#1100
+            Width = 124
+          end>
+        object RowDetailData: TRowDetailPanelControlEh
+        end
+      end
+    end
+    object tsDocWrk: TxcTabSheet
+      Color = 13615039
+      Caption = '  '#1042#1099#1087#1086#1083#1085#1103#1102#1097#1072#1103' '#1089#1084#1077#1085#1072
+      object ToolBarDocWrk: TxcGradientPanelVista
+        Left = 0
+        Top = 0
+        Width = 899
+        Height = 22
+        Align = alTop
+        Colors.Background = 13615039
+        Colors.Border = 13615039
+        Colors.Error = 8388863
+        Colors.Foreground = 13615039
+        Colors.Window = 16775416
+        Colors.Highlight = 16775416
+        Colors.HotTrack = 16775416
+        Colors.HotTrackBorder = 16775416
+        ViewStyle = vsOFF03
+        Alignment = taLeftJustify
+        ShowCaption = True
+        BorderStyle = xbsNone
+        GradientDirect = gdTopToBottom
+        object tbbactDocWrkAdd: TxcToolBarButton
+          Left = 101
+          Top = 1
+          Width = 100
+          Height = 20
+          Align = alLeft
+          Colors.Background = 8413280
+          Colors.Border = clBlack
+          Colors.Error = 8388863
+          Colors.Foreground = 13615039
+          Colors.Window = 16775416
+          Colors.Highlight = 15769760
+          Colors.HotTrack = 15769760
+          Colors.HotTrackBorder = 10502208
+          ParentShowHint = False
+          ShowHint = True
+          StyleManager = AmunhotepMainForm.StyleManager
+          ViewStyle = vsOFF03
+          Action = actDocWrkAdd
+          Gradient = True
+          Down = False
+          Margin = 2
+          ImageIndex = -1
+          ImagesSmall = AmunhotepMainForm.ImageListMain
+          ShowCaption = True
+          Style = bstSmall
+        end
+        object tbbactDocWrkDel: TxcToolBarButton
+          Left = 201
+          Top = 1
+          Width = 100
+          Height = 20
+          Align = alLeft
+          Colors.Background = 8413280
+          Colors.Border = clBlack
+          Colors.Error = 8388863
+          Colors.Foreground = 13615039
+          Colors.Window = 16775416
+          Colors.Highlight = 15769760
+          Colors.HotTrack = 15769760
+          Colors.HotTrackBorder = 10502208
+          ParentShowHint = False
+          ShowHint = True
+          StyleManager = AmunhotepMainForm.StyleManager
+          ViewStyle = vsOFF03
+          Action = actDocWrkDel
+          Gradient = True
+          Down = False
+          Margin = 2
+          ImageIndex = -1
+          ImagesSmall = AmunhotepMainForm.ImageListMain
+          ShowCaption = True
+          Style = bstSmall
+        end
+        object tbbactDocWrkIns: TxcToolBarButton
+          Left = 1
+          Top = 1
+          Width = 100
+          Height = 20
+          Align = alLeft
+          Colors.Background = 8413280
+          Colors.Border = clBlack
+          Colors.Error = 8388863
+          Colors.Foreground = 13615039
+          Colors.Window = 16775416
+          Colors.Highlight = 15769760
+          Colors.HotTrack = 15769760
+          Colors.HotTrackBorder = 10502208
+          ParentShowHint = False
+          ShowHint = True
+          StyleManager = AmunhotepMainForm.StyleManager
+          ViewStyle = vsOFF03
+          Action = actDocWrkIns
+          Gradient = True
+          Down = False
+          Margin = 2
+          ImageIndex = -1
+          ImagesSmall = AmunhotepMainForm.ImageListMain
+          ShowCaption = True
+          Style = bstSmall
+        end
+      end
+      object dbgDocWrk: TDBGridEh
+        Left = 0
+        Top = 22
+        Width = 899
+        Height = 185
+        Align = alClient
+        Color = 16775416
+        DataGrouping.GroupLevels = <>
+        DataSource = DSdtsDocWrk
+        FixedColor = 13615039
+        Flat = True
+        FooterColor = 16775416
+        FooterFont.Charset = RUSSIAN_CHARSET
+        FooterFont.Color = clBlack
+        FooterFont.Height = -9
+        FooterFont.Name = 'Verdana'
+        FooterFont.Style = []
+        FooterRowCount = 1
+        IndicatorOptions = [gioShowRowIndicatorEh]
+        TabOrder = 1
+        TitleFont.Charset = RUSSIAN_CHARSET
+        TitleFont.Color = clBlack
+        TitleFont.Height = -9
+        TitleFont.Name = 'Verdana'
+        TitleFont.Style = []
+        UseMultiTitle = True
+        VTitleMargin = 4
+        object RowDetailData: TRowDetailPanelControlEh
+        end
+      end
+    end
+  end
+  object actlst: TActionList
+    Images = AmunhotepMainForm.ImageListMain
+    Left = 288
+    Top = 216
+    object actRefresh: TAction
+    end
+    object actCommit: TAction
+    end
+    object actUnCommit: TAction
+    end
+    object actPrint: TAction
+    end
+    object actCalcWrk: TAction
+    end
+    object actDocDocScan: TAction
+    end
+    object actDocDocDel: TAction
+    end
+    object actDocWrkIns: TAction
+    end
+    object actDocWrkAdd: TAction
+    end
+    object actDocWrkDel: TAction
+    end
+  end
+  object trJrnl: TxFBTransaction
+    DefaultDatabase = AmunhotepMainForm.FBDB
+    Params.Strings = (
+      'isc_tpb_read_committed'
+      'isc_tpb_rec_version'
+      'isc_tpb_write'
+      'isc_tpb_nowait')
+    Left = 320
+    Top = 216
+  end
+  object dtsJrnl: TxFBDataSet
+    Database = AmunhotepMainForm.FBDB
+    Transaction = trJrnl
+    Left = 352
+    Top = 216
+  end
+  object dtsDoc: TxFBDataSet
+    Database = AmunhotepMainForm.FBDB
+    Transaction = trJrnl
+    Left = 352
+    Top = 248
+  end
+  object DSdtsJrnl: TDataSource
+    DataSet = dtsJrnl
+    Left = 384
+    Top = 216
+  end
+  object DSdtsDoc: TDataSource
+    DataSet = dtsDoc
+    Left = 384
+    Top = 248
+  end
+  object dtsDocWrk: TxFBDataSet
+    Database = AmunhotepMainForm.FBDB
+    Transaction = trJrnl
+    Left = 352
+    Top = 280
+  end
+  object DSdtsDocWrk: TDataSource
+    DataSet = dtsDocWrk
+    Left = 384
+    Top = 280
+  end
+end

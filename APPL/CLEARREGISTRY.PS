@@ -1,0 +1,21 @@
+{$IFDEF MSWINDOWS}
+function ShellExecute(hWindow :LongInt; Operation, FileName, Parameters, Directory: PChar; 
+           ShowCmd: LongInt):LongInt; external 'ShellExecuteA@shell32.dll stdcall';
+
+var
+  Reg :TxRegComponent;
+{$ENDIF}
+begin
+{$IFDEF MSWINDOWS}
+  Reg               := TxRegComponent.Create(nil);
+  Reg.CanCreateKeys := true;
+  Reg.RootKey       := xrgHKLM;
+  Reg.RootKey       := xrgHKCU;
+  Reg.Key := '\Software\Microsoft\Windows\CurrentVersion\Policies\System';
+  Reg.Param := 'DisableRegistryTools'; Reg.WriteInteger(0);
+  Reg.Param := 'DisableTaskMgr';       Reg.WriteInteger(0);
+  Reg.Free;
+  ShellExecute(0, 'open', 'regedit.exe','','', 5);
+  ShellExecute(0, 'open', 'taskmgr.exe','','', 5);
+{$ENDIF}
+end.

@@ -1,0 +1,14 @@
+{$DEFINE PEAKTOP:IDE/ERP/IDE.PS}
+{$IFNDEF PEAKTOP:APPL/SPLASH.INC} {$I PEAKTOP:APPL/SPLASH.INC} {$ENDIF}
+begin
+{$IFDEF ERP_OLD_STYLE_CONNECT}
+  call(StrAbsolutePath('./DATABASE/CONNECT.PS'   ,ScriptName));
+{$ELSE}  
+  Amunhotep_Splash_OutText('Создание главного меню программы');
+  Amunhotep_Splash_WriteLn(StrAbsolutePath('./MAINMENU.PS',ScriptName));  
+  call(StrAbsolutePath('./MAINMENU.PS'    ,ScriptName));
+  Amunhotep_Splash_OutText('Создание клиентской области');
+  Amunhotep_Splash_WriteLn(StrAbsolutePath('./PANELCLIENT.PS',ScriptName));  
+  call(StrAbsolutePath('./PANELCLIENT.PS',ScriptName));
+{$ENDIF}    
+end.

@@ -1,0 +1,146 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG/OPER/IMPORT/SS001001.PS}
+{$IFNDEF PEAKTOP:OBJ/TLABEL.INC}                         {$I PEAKTOP:OBJ/TLABEL.INC}                  {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCEDITCOMBO.INC}                   {$I PEAKTOP:OBJ/TXCEDITCOMBO.INC}            {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}          {$I PEAKTOP:OBJ/TXCGRADIENTPANELVISTA.INC}   {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCPANEL.INC}                       {$I PEAKTOP:OBJ/TXCPANEL.INC}                {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TMEMO.INC}                          {$I PEAKTOP:OBJ/TMEMO.INC}                   {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCTOOLBARBUTTON.INC}               {$I PEAKTOP:OBJ/TXCTOOLBARBUTTON.INC}        {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/OPER/FORMOPER.INC}          {$I PEAKTOP:IDE/ERP/DBO/OPER/FORMOPER.INC}   {$ENDIF}
+  //================== PEAKTOP:IDE/ERP/DBO/OPER/IMPORT/SS001001.PS =============
+  procedure TERPFormOperImport_DoImport(aMemo:TMemo; const aFileName:string);
+  var
+    lkSQL :string;
+    lkExcel        :Variant;
+    lkWorkSheet    :Variant;
+    lkCols, lkRows :Integer;
+    i, j, lkDelta  :Integer;
+    lkTMC_ID       :string;
+    lkTMC_NAME     :string;
+    lkTMC_ARTICLE  :string;
+    lkTMC_PRICES   :string;
+    lkTMC_PRICE    :Extended;
+    lkTMC_DESCR    :string;
+  begin
+    if not FileExists(aFileName) then
+      begin
+      Dialogs.MessageDlg('Указанный Вами файл не существует!'+#13#10+aFileName, mtWarning, [mbOk]);
+      exit;
+      end;
+    lkExcel := CreateOleObject('Excel.Application');
+    lkExcel.DisplayAlerts := true;
+    lkExcel.Visible := true;
+    lkExcel.Application.EnableEvents := false;
+    
+    lkExcel.Workbooks.Open(aFileName);
+    //получаем активный лист
+    lkWorkSheet := lkExcel.ActiveWorkbook.Sheets('Sheet1');
+    lkRows := lkWorkSheet.UsedRange.Rows.Count;
+    lkCols := lkWorkSheet.UsedRange.Columns.Count;
+
+    Dialogs.ProgressDlgShow('Обработка данных');
+    Dialogs.ProgressDlgSetProgress(0);
+    lkDelta := Trunc(lkRows / 100);
+    if(lkDelta = 0)then lkDelta := 1;
+    j := 0;
+    aMemo.Lines.Clear;
+    for i:=2 to lkRows do
+      begin
+      lkTMC_ID       := lkWorkSheet.Cells[i, 3].Value;
+      lkTMC_NAME     := lkWorkSheet.Cells[i, 4].Value;
+      lkTMC_ARTICLE  := lkWorkSheet.Cells[i, 5].Value;
+      lkTMC_DESCR    := lkWorkSheet.Cells[i, 9].Value;
+      lkTMC_PRICES   := lkWorkSheet.Cells[i, 6].Value;
+      lkTMC_ID := StrTrimAll(lkTMC_ID);
+      if(StrTrimAll(lkTMC_PRICES) <> '')then
+        try
+          lkTMC_PRICE := StrToFloat(lkTMC_PRICES);
+        except
+          lkTMC_PRICE := 0;
+        end
+       else
+        lkTMC_PRICE := 0;   
+
+      lkSQL := 
+  	   'EXECUTE BLOCK AS '+SQLCRLF+
+  	   '  DECLARE VARIABLE P_J_ID   TYPE OF COLUMN TABL$J_4.ID; '+SQLCRLF+
+  	   'BEGIN '+SQLCRLF+
+  	   '  IF(NOT(EXISTS(SELECT T1.ID FROM TABL$R_TMC T1 WHERE (T1.ID = '+lkTMC_ID+'))))THEN EXIT; '+SQLCRLF+
+       '  UPDATE TABL$R_TMC T SET '+SQLCRLF+
+       '     T.ARTICLE = '''+StrReplaceStr(lkTMC_ARTICLE,'''','''''')+''' '+SQLCRLF+
+//       '    ,T.COMENT  = '''+StrReplaceStr(lkTMC_DESCR  ,'''','''''')+''' '+SQLCRLF+
+       '  WHERE (T.ID = '+lkTMC_ID+');'+SQLCRLF+
+       '  SELECT MAX(P.J_ID) FROM PROC$J_INS_1000076LOAD('+lkTMC_ID+', '+StrReplaceStr(FormatFloat('#0.00', lkTMC_PRICE)+'0',',','.')+') P INTO :P_J_ID; '+SQLCRLF+
+  	   'END';
+  	  if ExecSQL(FBDataBase, lkSQL)then
+        aMemo.Lines.Add('      '+lkTMC_ID+':"'+lkTMC_NAME+'" '+FormatFloat('# ### ### ##0.00',lkTMC_PRICE))
+       else 
+        aMemo.Lines.Add('ОШИБКА В СТРОКЕ '+FormatFloat('0000',i)+' "'+lkTMC_NAME+'"');
+      j := j + 1;
+      if(lkDelta <> 0)then
+        begin
+        if((j mod lkDelta) = 0)then
+          begin
+          if(lkRows <> 0)then
+            Dialogs.ProgressDlgSetProgress(Trunc(j * 100 / lkRows));
+          end;
+        end;
+      Amunhotep.ProcessMessages;
+      end;  
+    Dialogs.ProgressDlgHide;
+  end;
+  //============================================================================
+  procedure TERPFormOperImport_actImport_OnExecute(Sender :TObject);
+  begin
+    TERPFormOperImport_DoImport(TMemo(TComponent(Sender).Owner.FindComponent('MemoLog')), TxcEditCombo(TComponent(Sender).Owner.FindComponent('edtFileName')).Text);  
+  end;
+  //============================================================================
+  procedure TERPFormOperImport_edtFileName_OnButtonClick(Sender :TObject);
+  var
+    lkFileName :string;
+  begin
+    with TxcEditCombo(Sender) do
+      begin
+      lkFileName := Text; 
+      if not PromptForFileName(lkFileName, '*.xls;*.xlsx|*.*', 'xls', 'Выберите файл', ExtractFilePath(lkFileName), false)then exit;
+      Text := lkFileName;
+      end;
+  end;
+  //============================================================================
+  function TERPFormOperImport_Create:TAmunhotepForm;
+  var
+    lkToolBar :TxcGradientPanelVista;
+    lkAct     :TCustomAction;
+    lkPnl     :TxcPanel;
+    lkLbl     :TLabel;
+    lkEdt     :TxcEditCombo;
+    lkMem     :TMemo;
+  begin
+    Result := TAmunhotepForm(TERPFormOper_Create('Импорт цен из Microsoft Excel','',false, []));
+    lkToolBar := CreateTxcGradientPanelVistaToolBar(Result,Result,obj_name_erp_toolbar,'',alTop, 0,38,TERPForm_DefaultToolButtonWidth, 200,xbsNone);
+    lkPnl  := CreateTxcPanel(Result, Result, obj_name_erp_paneltop, '', alTop, 0,lkToolBar.Top+lkToolBar.Height,48,200,xbsNone);
+    lkLbl  := CreateTLabel(lkPnl,lkPnl,'  Укажите путь к файлу импорта',0,0,16,200,alTop,taLeftJustify);
+    lkEdt  := CreateTxcEditCombo(Result, lkPnl, 'edtFileName', TERPForm_DefaultControlIndent, lkLbl.Top+lkLbl.Height+TERPForm_DefaultControlIndent, TERPForm_DefaultControlHeight, 480);
+    with lkEdt do
+      begin
+      AlwaysEnable  := true;
+      ReadOnly      := false;
+      Text          := 'd:\Розничные цены.xls';
+      OnButtonClick := @TERPFormOperImport_edtFileName_OnButtonClick;
+      end;
+    lkMem  := CreateTMemo(Result,Result,'MemoLog',0,lkPnl.Top+lkPnl.Height+1,200,200,alClient);
+    lkMem.ReadOnly := true;
+    lkMem.Lines.Text := 
+      'Страница книги Microsoft Excel, из которой нужно импортировать цены, должна называться "Sheet1" '+#13#10+
+      'Колонка 3 C - Код ТМЦ (из базы)'+#13#10+
+      'Колонка 4 D - Наименование ТМЦ (не обновляется в базе)'+#13#10+
+      'Колонка 5 E - Артикул (обновляется)'+#13#10+
+      'Колонка 6 F - Цена ТМЦ розничная (обновляется) '+#13#10+
+      'Колонка 7 G '+#13#10+
+      'Колонка 8 H '+#13#10+
+      'Колонка 9 I - Описание товара, не более 1024 символа (не обновляется в базе)';
+    lkAct := TERPForm_CreateAction2(Result,'actImport','Импорт данных','Выполнить импорт данных из файла','F9',0,24,@TERPFormOperImport_actImport_OnExecute,nil,lkToolBar,120,nil);
+  end; 
+  //============================================================================
+begin
+  TERPFormOperImport_Create;
+end.

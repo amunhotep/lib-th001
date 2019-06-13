@@ -1,0 +1,29 @@
+  //============================================================================
+  function DisplayXML(const FileName:string):Boolean;
+  var
+    lkXMLDoc    :Variant;
+    lkXMLError  :Variant;
+    lkXMLNode   :Variant;
+  begin
+    Result := false;
+    lkXMLDoc := CreateOleObject('Msxml2.DOMDocument.3.0');
+    lkXMLDoc.ValidateOnParse := true;
+    lkXMLDoc.Async := false;
+    lkXMLDoc.Load(FileName);
+    if(lkXMLDoc.ParseError.ErrorCode <> 0)then
+      begin
+      lkXMLError := lkXMLDoc.ParseError;
+      Dialogs.MessageDlg('XML parse error: '+#13#10+'  '+lkXMLError.Reason, mtWarning, [mbOk]);
+      WriteLn('XML parse error: '+lkXMLError.Reason);
+      exit;
+      end;
+  
+  end;
+  //============================================================================
+var
+  FileName :string;
+begin
+  FileName := StrReplaceStr(StrAbsolutePath('./TEST.XML', ScriptName), '/', '\');
+  WriteLn('Loading XML data from file "'+FileName+'"');
+  DisplayXML(FileName);
+end.

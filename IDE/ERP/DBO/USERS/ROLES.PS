@@ -1,0 +1,303 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}{$I PEAKTOP:GLOBAL_VARIABLES.INC}{$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TACTION.INC}     {$I PEAKTOP:OBJ/TACTION.INC}     {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TCOLUMNEH.INC}   {$I PEAKTOP:OBJ/TCOLUMNEH.INC}   {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TIMAGELIST.INC}  {$I PEAKTOP:OBJ/TIMAGELIST.INC}  {$ENDIF}
+{$IFNDEF DB:CONFIG/OPER/SYSTEM/POLICE/USERS_DLG_LIST.INC}
+  {$I ./USERS_DLG_LIST.INC}
+{$ENDIF}
+const
+  msg_invalid_resource  = 'Неверный файл ресурсов'; 
+  msg_caption           = 'Настройка ролей доступа';
+  msg_actusersins       = 'Добавить'; 
+  msg_actusersins_hint  = 'Добавить пользователей к роли'; 
+  msg_actusersdel       = 'Удалить'; 
+  msg_actusersdel_hint  = 'Удалить пользователей из роли'; 
+  msg_actusersclr       = 'Очистить'; 
+  msg_actusersclr_hint  = 'Удалить всех пользователей из роли'; 
+var 
+  AmunhotepForm :TAmunhotepForm; 
+  TopPanel      :TxcGradientPanelVista;
+  PanelToolBar  :TxcGradientPanel; 
+  DBNav         :TxcDBNavigator; 
+  dbgRef        :TDBGridEh; 
+  dbgUsers      :TDBGridEh; 
+  trRef         :TxFBTransaction; 
+  dtsRef        :TxFBDataSet; 
+  dtsUsers      :TxFBDataSet; 
+  dsdtsRef      :TDataSource; 
+  dsdtsUsers    :TDataSource; 
+  //============================================================================
+  procedure RefreshView;
+  var
+    i :Integer;
+    lkFldName :string;
+  begin
+    if(dtsRef.Active)then
+      begin
+      if(dtsRef.State = dsEdit)then
+        try
+          dtsRef.Post;
+        except
+          dtsRef.Cancel;
+        end;
+      dtsRef.Close;
+      end; 
+    if trRef.InTransaction then 
+      trRef.Commit;
+    lkFldName := 'ID';
+    for i:=0 to dbgRef.Columns.Count-1 do
+      if(dbgRef.Columns[i].Title.SortMarker = smDownEh)then
+        begin
+        lkFldName := dbgRef.Columns[i].FieldName;
+        break;
+        end;   
+    dtsRef.SelectSQL.Text  := 'SELECT R.* FROM TABL$_USERS_ROLES R ORDER BY R.'+lkFldName; 
+    dtsRef.RefreshSQL.Text := 'SELECT FIRST 1 R.* FROM TABL$_USERS_ROLES R WHERE (R.ID = ?ID) '; 
+    dtsRef.ModifySQL.Text := 
+      'UPDATE TABL$_USERS_ROLES R SET '+#13#10+
+      '   R.NAME = ?NAME '+#13#10+
+      '  ,R.FLAG_DELETE = ?FLAG_DELETE '+#13#10+
+      'WHERE (R.ID = ?ID) ';
+    dtsRef.InsertSQL.Text := 'INSERT INTO TABL$_USERS_ROLES(NAME, FLAG_DELETE) VALUES (?NAME, ?FLAG_DELETE);';
+    dtsRef.DeleteSQL.Text := 'DELETE FROM TABL$_USERS_ROLES R WHERE (R.ID = ?ID);';
+    dtsUsers.DataSource   := dsdtsRef;
+    dtsUsers.SelectSQL.Text := 
+      'SELECT UA.ID, UA.NAME, UA.ROLE_ID, UA.USER_ID, U.NAME AS USER_NAME, '+#13#10+
+      '       U.FLAG_DELETE AS USER_FLAG_DELETE, UG.NAME AS GROUP_NAME '+#13#10+
+      'FROM   TABL$_USERS_ACCS UA, TABL$_USERS U, TABL$_USERS_GROUP UG '+#13#10+
+      'WHERE  (UA.ROLE_ID = ?ID) '+#13#10+
+      '  AND  (U.ID       = UA.USER_ID) '+#13#10+
+      '  AND  (UG.ID      = U.GROUP_ID) '+#13#10+      
+      'ORDER BY UG.NAME, UA.USER_ID ';
+    dtsUsers.RefreshSQL.Text := 
+      'SELECT FIRST 1 UA.ID, UA.NAME, UA.ROLE_ID, UA.USER_ID, U.NAME AS USER_NAME, '+#13#10+
+      '       U.FLAG_DELETE AS USER_FLAG_DELETE, UG.NAME AS GROUP_NAME '+#13#10+
+      'FROM   TABL$_USERS_ACCS UA, TABL$_USERS U, TABL$_USERS_GROUP UG '+#13#10+
+      'WHERE  (UA.ID      = ?ID) '+#13#10+
+      '  AND  (U.ID       = UA.USER_ID) '+#13#10+
+      '  AND  (UG.ID      = U.GROUP_ID)';
+    dtsUsers.ModifySQL.Text := 
+      'UPDATE TABL$_USERS_ACCS UA SET '+#13#10+
+      '  UA.NAME = ?NAME '+#13#10+
+      'WHERE  (UA.ID      = ?ID) ';
+    dtsUsers.DeleteSQL.Text := 
+      'DELETE FROM TABL$_USERS_ACCS UA WHERE (UA.ID = ?ID)';
+    try 
+      dtsRef.Open; 
+    except 
+      // Dialogs.MessageDlg(qrRef.SQL.Text, mtError, [mbOk]);
+    end; 
+  end;
+  //============================================================================
+  procedure dbgRef_OnGetCellParams(Sender: TObject; Column: TColumnEh; 
+              AFont: TFont; var Background: TColor; State: TGridDrawState);
+  begin
+   if(Column.Tag=666)then exit;
+   if(not(Column.Field.DataSet.Active))then exit;
+   if(Column.Field.DataSet.RecordCount=0)then exit;
+   if(Column.Field.DataSet.FieldByName('FLAG_DELETE').AsInteger=1)then
+     begin
+     aFont.Style := aFont.Style + [fsStrikeOut];
+     aFont.Color := Amunhotep_MainForm_StyleManager.Colors.Error;
+     end
+  end;
+  //============================================================================
+  procedure dbgUsers_OnGetCellParams(Sender: TObject; Column: TColumnEh; 
+              AFont: TFont; var Background: TColor; State: TGridDrawState);
+  begin
+    if(Column.Tag=666)then 
+      exit;
+    if(not(Column.Field.DataSet.Active))then exit;
+    if(Column.Field.DataSet.RecordCount=0)then exit;  
+    if not(Column.Field.DataSet.FieldByName('USER_FLAG_DELETE').AsInteger=0)then
+      begin
+      aFont.Style:= aFont.Style + [fsStrikeOut];
+      aFont.Color:= Amunhotep.MainForm.StyleManager.Colors.Error;
+      end;
+  end;
+  //============================================================================
+  procedure dtsRef_AfterOpen(DataSet :TDataSet);
+  begin
+    if not dtsUsers.Active then
+      try
+        dtsUsers.Open;
+      except
+      
+      end;
+  end;
+  //============================================================================
+  procedure dtsRef_BeforeClose(DataSet :TDataSet);
+  begin
+    if dtsUsers.Active then
+      dtsUsers.Close;
+  end;
+  //============================================================================
+  procedure dtsRef_AfterScroll(DataSet :TDataSet);
+  begin
+  end;
+  //============================================================================
+  procedure actUsersIns_OnExecute(Sender :TObject);
+  var
+    lkUsersList :TStringList;
+    i           :Integer;
+  begin
+    lkUsersList := TStringList.Create;
+    lkUsersList.Text := '';
+    SetGlobalVariable(BufferVariableUserIdsList, lkUsersList.Text);
+    call(StrAbsolutePath('./USERS_DLG_LIST.PS', ScriptName));
+    lkUsersList.Text := StrReplaceStr(GetGlobalVariable(BufferVariableUserIdsList), ',', #13#10);
+    if((StrTrimAll(lkUsersList.Text)='')or(lkUsersList.Count <= 0))then 
+      begin
+      lkUsersList.Free;
+      exit;
+      end;
+    for i:=0 to lkUsersList.Count-1 do
+      if(StrTrimAll(lkUsersList[i])<>'')then
+        ExecSQL(FBDataBase, 'INSERT INTO TABL$_USERS_ACCS(USER_ID, ROLE_ID)VALUES('''+
+          lkUsersList[i]+''', '''+dtsRef.FieldByName('ID').AsString+''')');
+    lkUsersList.Free;
+    dbgUsers.SaveBookMark;
+    RefreshView;
+    dbgUsers.RestoreBookMark;
+  end;
+  //============================================================================
+  procedure actUsersIns_OnUpdate(Sender :TObject);
+  var
+    lk_Enabled :Boolean;
+  begin
+    lk_Enabled := dtsRef.Active;
+    if lk_Enabled then
+      lk_Enabled := (dtsRef.RecordCount >0); 
+    TCustomAction(Sender).Enabled := lk_Enabled;
+  end;
+  //============================================================================
+  procedure actUsersDel_OnExecute(Sender :TObject);
+  begin
+    if(Dialogs.MessageDlg(msg_actusersdel_hint+' ?'+#13#10+' ['+dtsUsers.FieldByName('USER_ID').AsString+']', mtConfirmation, [mbNo, mbYes])=mrYes)then
+      begin
+      if(dtsUsers.State = dsEdit)then
+        dtsUsers.Post;
+      dtsUsers.Delete;
+      end;
+  end;
+  //============================================================================
+  procedure actUsersDel_OnUpdate(Sender :TObject);
+  var
+    lk_Enabled :Boolean;
+  begin
+    lk_Enabled := dtsUsers.Active;
+    if lk_Enabled then
+      lk_Enabled := (dtsUsers.RecordCount >0); 
+    TCustomAction(Sender).Enabled := lk_Enabled;
+  end;
+  //============================================================================
+  procedure actUsersClr_OnExecute(Sender :TObject);
+  begin
+    if(Dialogs.MessageDlg(msg_actusersclr_hint+' ?', mtConfirmation, [mbNo, mbYes])=mrYes)then
+      begin
+      ExecSQL(FBDataBase, 'DELETE FROM TABL$_USERS_ACCS UA WHERE (UA.ROLE_ID = '''+dtsRef.FieldByName('ID').AsString+''')');
+      dbgUsers.SaveBookMark;
+      RefreshView;
+      dbgUsers.RestoreBookMark;
+      end;
+  end;
+  //============================================================================
+  procedure AmunhotepForm_OnClose(Sender :TObject; var Action :TCloseAction);
+  begin
+    Action := caFree;
+    if(dtsRef.Active)then
+      begin
+      if(dtsRef.State = dsEdit)then
+        try
+          dtsRef.Post;
+        except
+          dtsRef.Cancel;
+        end;
+      dtsRef.Close;
+      end; 
+    if trRef.InTransaction then 
+      trRef.Commit; 
+    Amunhotep.MainForm.TaskBar.ButtonByForm(TForm(Sender)).Free; 
+    AutoFree; 
+  end; 
+  //============================================================================
+  function AmunhotepForm_Create:TAmunhotepForm;
+  var
+    lk_FileName :string;
+    lk_ResBody  :string;
+    lk_act      :TAction;
+    lk_PM       :TPopupMenu;
+    lk_Col      :TColumnEh;
+    i           :Integer;
+  begin
+    lk_FileName := StrAbsolutePath('./USERS_ROLES.XFM', ScriptName);
+    lk_ResBody  := StringsLoadFromFile(lk_FileName);
+    if(lk_ResBody='')then 
+      begin
+      Dialogs.MessageDlg(msg_invalid_resource+#13#10+lk_FileName, mtWarning, [mbOK]);
+      exit;
+      end;
+    Result          := TAmunhotepForm(StrToComponent(lk_ResBody));
+    DontAutoFree;
+    Result.OnClose  := @AmunhotepForm_OnClose;
+    Result.SetCaption(msg_caption);
+    TopPanel                         := TxcGradientPanelVista(Result.FindComponent('TopPanel'));
+    TopPanel.Caption                 := '      '+msg_caption;
+    PanelToolBar                     := TxcGradientPanel(Result.FindComponent('PanelToolBar'));
+    DBNav                            := TxcDBNavigator(Result.FindComponent('DBNav'));
+    SetDBNavigatorHints(DBNav);
+    dbgRef                           := TDBGridEh(Result.FindComponent('dbgRef'));
+    dbgRef.Color                     := Amunhotep.MainForm.StyleManager.Colors.Window;
+    dbgRef.Font.Color                := Amunhotep.MainForm.StyleManager.Colors.Border;
+    dbgRef.FixedColor                := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    dbgRef.TitleFont.Color           := Amunhotep.MainForm.StyleManager.Colors.Border;
+    dbgRef.TitleFont.Style           := [fsBold];
+    dbgRef.UseMultiTitle             := true;
+    dbgRef.OnGetCellParams           := @dbgRef_OnGetCellParams;
+    lk_Col := CreateTColumnEh(dbgRef,'ID'         ,'#0','Роль|Код'          , 60,taRightJustify); lk_Col.Font.Style := [fsBold];
+    lk_Col.Title.SortMarker := smDownEh;
+    lk_Col.Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lk_Col.ReadOnly := true;
+    lk_Col := CreateTColumnEh(dbgRef,'NAME'       ,''  ,'Роль|Название роли',280,taLeftJustify); lk_Col.Font.Style := [fsBold];
+    lk_Col := CreateTColumnEh(dbgRef,'FLAG_DELETE',''  ,'Роль|Активна'      , 80,taLeftJustify); lk_Col.Font.Style := [fsBold];
+    lk_Col.KeyList.Text  := '0'+#13#10+'1'; lk_Col.PickList.Text := 'Активна'+#13#10+'Заблокирована';
+    dbgUsers                         := TDBGridEh(Result.FindComponent('dbgUsers'));
+    dbgUsers.Color                   := Amunhotep.MainForm.StyleManager.Colors.Window;
+    dbgUsers.Font.Color              := Amunhotep.MainForm.StyleManager.Colors.Border;
+    dbgUsers.FixedColor              := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    dbgUsers.TitleFont.Color         := Amunhotep.MainForm.StyleManager.Colors.Border;
+    dbgUsers.TitleFont.Style         := [fsBold];
+    dbgUsers.UseMultiTitle           := true;
+    dbgUsers.AllowedOperations       := [alopUpdateEh, alopDeleteEh];
+    dbgUsers.OnGetCellParams         := @dbgUsers_OnGetCellParams;
+    lk_Col          := CreateTColumnEh(dbgUsers,'GROUP_NAME','','Пользователь|Группа', 120,taLeftJustify);
+    lk_Col.Color    := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lk_Col.ReadOnly := true;
+    lk_Col          := CreateTColumnEh(dbgUsers,'USER_ID','','Пользователь|Логин', 120,taLeftJustify);
+    lk_Col.Color    := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lk_Col.ReadOnly := true;
+    lk_Col          := CreateTColumnEh(dbgUsers,'USER_NAME','','Пользователь|Имя пользователя', 120,taLeftJustify);
+    lk_Col.Color    := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lk_Col.ReadOnly := true;
+    lk_Col          := CreateTColumnEh(dbgUsers,'NAME','','Примечания', 240,taLeftJustify);
+
+    trRef                            := TxFBTransaction(Result.FindComponent('trRef'));
+    trRef.DefaultDataBase            := FBDataBase; 
+    trRef.Params.Text                := 'isc_tpb_read_committed'+#13#10+'isc_tpb_write'+#13#10+'isc_tpb_rec_version'+#13#10+'isc_tpb_wait'; 
+    dtsRef                           := TxFBDataSet(Result.FindComponent('dtsRef'));
+    dtsRef.AfterOpen                 := @dtsRef_AfterOpen;
+    dtsRef.AfterScroll               := @dtsRef_AfterScroll;
+    dtsRef.BeforeClose               := @dtsRef_BeforeClose;
+    dtsUsers                         := TxFBDataSet(Result.FindComponent('dtsUsers'));
+    dsdtsRef                         := TDataSource(Result.FindComponent('dsdtsRef'));
+    dsdtsUsers                       := TDataSource(Result.FindComponent('dsdtsUsers'));
+    lk_act := FindTAction(Result,'actUsersIns',msg_actusersins,msg_actusersins_hint,'Ctrl+I' ,0,416); lk_act.OnExecute:=@actUsersIns_OnExecute;  lk_act.OnUpdate:=@actUsersIns_OnUpdate; 
+    lk_act := FindTAction(Result,'actUsersDel',msg_actusersdel,msg_actusersdel_hint,'Ctrl+D' ,0,419); lk_act.OnExecute:=@actUsersDel_OnExecute;  lk_act.OnUpdate:=@actUsersDel_OnUpdate; 
+    lk_act := FindTAction(Result,'actUsersClr',msg_actusersclr,msg_actusersclr_hint,'Ctrl+K' ,0, 67); lk_act.OnExecute:=@actUsersClr_OnExecute;  lk_act.OnUpdate:=@actUsersIns_OnUpdate; 
+    RefreshView;
+    Amunhotep_MainForm_TaskBar.ButtonByForm(Result).Down := true;
+  end;
+  //============================================================================
+begin
+  AmunhotepForm := AmunhotepForm_Create;
+end.

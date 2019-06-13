@@ -1,0 +1,21 @@
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/$COMMON/DIALOG_CASEOBJECT.INC} 
+  {$I ../$COMMON/DIALOG_CASEOBJECT.INC} 
+{$ENDIF}
+var
+  lkTB_ID  :string;  
+  lkSC_REF :string;  
+begin
+  if ERPDialogCaseObj_Execute(ERP_OBJECTTYPE_REF, lkTB_ID) then
+    begin
+    GetField(FBDataBase, 'TABL$_TB','SC_REF',' ID ='''+lkTB_ID+''' ', lkSC_REF);
+    if(StrTrimAll(lkSC_REF)='')then
+      begin
+      Dialogs.MessageDlg('В настройках программы не укзан скрипт для этого справочника.', mtWarning, [mbOk]);
+      exit;
+      end;
+    if not call(lkSC_REF)then
+      begin
+      
+      end;
+    end;
+end.

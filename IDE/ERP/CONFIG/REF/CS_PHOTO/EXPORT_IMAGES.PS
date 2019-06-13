@@ -1,0 +1,49 @@
+var
+  lkTrRead  :TxFBTransaction;
+  lkQrRead  :TxFBQuery;
+  i, cnt    :Integer;
+  lkStream  :TMemoryStream;
+  lkFileName:string;
+begin
+//  exit;
+  lkTrRead := TxFBTransaction.Create(nil);
+  with lkTrRead do
+    begin
+    DefaultDatabase := FBDataBase;
+    with Params do
+      begin
+      Clear;
+      Add('isc_tpb_read_committed');
+      Add('isc_tpb_read');
+      Add('isc_tpb_rec_version');
+      Add('isc_tpb_nowait');
+      end;
+    end;
+  lkQrRead  := TxFBQuery.Create(lkTrRead);
+  lkQrRead.SQL.Text := StringsLoadFromFile(StrAbsolutePath('./CONVERT_IMAGES.SQL',ScriptName));
+  lkQrRead.Open;
+  lkQrRead.FetchAll;
+  lkQrRead.First;
+  i := 0;
+  cnt := lkQrRead.RecordCount;
+  Dialogs.ProgressDlgShow('');
+  while not lkQrRead.EOF do
+    begin
+    lkFileName := 'd:\photo\'+lkQrRead.FieldByName('CS_ID').AsString+'_'+FormatDateTime('yyyymmdd_hhnnss', lkQrRead.FieldByName('DATE_COMMIT').AsDateTime)+'.jpg';
+    
+    lkStream := TMemoryStream.Create;
+    TBlobField(lkQrRead.FieldByName('PHOTO')).SaveToStream(lkStream);
+    lkStream.Seek(0, soFromBeginning);
+    lkStream.SaveToFile(lkFileName);
+    lkStream.Free;
+
+    i := i + 1; 
+    Dialogs.ProgressDlgSetProgress(Trunc(i * 100 / cnt));
+    lkQrRead.Next;
+    Amunhotep.ProcessMessages;
+    end;
+  Dialogs.ProgressDlgHide;
+  if lkTrRead.InTransaction then
+    lkTrRead.Commit;
+  lkTrRead.Free;    
+end.

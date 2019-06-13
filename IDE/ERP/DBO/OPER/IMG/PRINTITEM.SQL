@@ -1,0 +1,4 @@
+SELECT   I1.* 
+FROM     TABL$_IMG I1
+WHERE    (I1.ID = ?ID)
+ORDER BY I1.ID

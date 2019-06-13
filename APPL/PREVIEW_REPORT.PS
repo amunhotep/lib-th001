@@ -1,0 +1,37 @@
+{$IFNDEF PEAKTOP:SYSUTILS/GET_PARAM_FILE_NAME.INC}{$I PEAKTOP:SYSUTILS/GET_PARAM_FILE_NAME.INC}{$ENDIF}  
+{$IFNDEF PEAKTOP:SYSUTILS/PREVIEW_REPORT.INC}     {$I PEAKTOP:SYSUTILS/PREVIEW_REPORT.INC}     {$ENDIF}  
+var
+  OpenTimer    :TxsTimer;
+  OpenCounter  :Integer;
+  OpenFileName :string;
+    //==========================================================================
+    procedure OpenTimer_OnTimer(Sender :TObject);
+    begin
+      OpenCounter := OpenCounter + 1;
+      if(OpenCounter > 0)then
+        begin
+        TxsTimer(Sender).Enabled := false;
+        PreviewReportByFileName(OpenFileName);
+        end;
+    end;
+    //==========================================================================
+begin
+  if(Amunhotep.ParamCount > 0)then
+    begin
+    if(LowerCase(Amunhotep.ParamStr[1])='-report')then
+      begin
+      DontAutoFree;
+      Amunhotep.MainForm.WindowState := wsMaximized;
+      OpenCounter        := 0;
+      OpenFileName       := GetParamFileName(2);
+      if(StrTrimAll(OpenFileName) <> '')then
+        begin
+        WriteLn('OpenFileName='+OpenFileName+'<<');
+        OpenTimer          := TxsTimer.Create(nil);
+        OpenTimer.Interval := 200;
+        OpenTimer.OnTimer  := @OpenTimer_OnTimer;
+        OpenTimer.Enabled  := true;
+        end;
+      end;
+    end;
+end.

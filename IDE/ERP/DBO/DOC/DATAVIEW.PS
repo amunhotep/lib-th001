@@ -1,0 +1,42 @@
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/DOC/DATAVIEW.INC}  {$I ./DATAVIEW.INC} {$ENDIF}
+var
+  lkMasterTable :string;
+  lkObj         :TObject;
+  lkOwner       :TComponent;
+  lkParent      :TWinControl;
+  lkTrans       :TxFBTransaction;
+  lkDataSource  :TDataSource;
+  lkQuery       :TxFBQuery;
+begin
+  lkMasterTable := GetGlobalVariable(ERP_GLOBALVARIABLE_DOC_DATAVIEW_MASTERTABLE);
+  if(StrTrimAll(lkMasterTable) = '')then exit;
+  
+  lkObj := GlobalObjects_Find(ERP_GLOBALVARIABLE_DOC_DATAVIEW_OBJOWNER);
+  if(lkObj = nil)then exit; if not ObjectInheritsFrom(lkObj, 'TComponent')then exit;
+  lkOwner := TComponent(lkObj);
+  
+  lkObj := GlobalObjects_Find(ERP_GLOBALVARIABLE_DOC_DATAVIEW_OBJPARENT);
+  if(lkObj = nil)then exit; if not ObjectInheritsFrom(lkObj, 'TWinControl')then exit;
+  lkParent := TWinControl(lkObj);
+
+  lkObj := GlobalObjects_Find(ERP_GLOBALVARIABLE_DOC_DATAVIEW_OBJTRANSACTION);
+  if(lkObj = nil)then exit;if not ObjectInheritsFrom(lkObj, 'TxFBTransaction')then exit;
+  lkTrans := TxFBTransaction(lkObj);
+
+  lkObj := GlobalObjects_Find(ERP_GLOBALVARIABLE_DOC_DATAVIEW_OBJDATASOURCE);
+  if(lkObj = nil)then exit;if not ObjectInheritsFrom(lkObj, 'TDataSource')then exit;
+  lkDataSource := TDataSource(lkObj);
+  
+  lkObj := GlobalObjects_Find(ERP_GLOBALVARIABLE_DOC_DATAVIEW_QUERY);
+  if(lkObj = nil)then exit;if not ObjectInheritsFrom(lkObj, 'TxFBQuery')then exit;
+  lkQuery := TxFBQuery(lkObj);
+
+  GlobalObjects_Delete(ERP_GLOBALVARIABLE_DOC_DATAVIEW_OBJOWNER      );
+  GlobalObjects_Delete(ERP_GLOBALVARIABLE_DOC_DATAVIEW_OBJPARENT     );
+  GlobalObjects_Delete(ERP_GLOBALVARIABLE_DOC_DATAVIEW_OBJTRANSACTION);
+  GlobalObjects_Delete(ERP_GLOBALVARIABLE_DOC_DATAVIEW_OBJDATASOURCE );
+  GlobalObjects_Delete(ERP_GLOBALVARIABLE_DOC_DATAVIEW_QUERY         );
+  SetGlobalVariable(ERP_GLOBALVARIABLE_DOC_DATAVIEW_MASTERTABLE,   '');
+
+  DocDataIntf_Create(lkOwner, lkParent, lkMasterTable, lkTrans, lkDataSource, lkQuery);
+end.

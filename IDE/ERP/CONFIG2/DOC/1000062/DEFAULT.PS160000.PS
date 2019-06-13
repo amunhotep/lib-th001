@@ -1,0 +1,6 @@
+{$I ../$COMMON.INC}
+begin
+  JrnlCaptionAdd := 'Бытовая техника';
+  Jrnl_HardFilter_Add('TMC_GROUP_ID', 'TMC_GROUP_ID = 160000');
+  JrnlForm := JtnlForm_Create('1000062');
+end.

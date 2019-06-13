@@ -1,0 +1,208 @@
+{$DEFINE PEAKTOP:IDE/ERP/DBO/OPER/RECENT.INC}
+{$IFNDEF PEAKTOP:OBJ/TXCCHECKBOX.INC}                  {$I PEAKTOP:OBJ/TXCCHECKBOX.INC}                       {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TLABEL.INC}                       {$I PEAKTOP:OBJ/TLABEL.INC}                            {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCEDITCOMBO.INC}                 {$I PEAKTOP:OBJ/TXCEDITCOMBO.INC}                      {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TMEMO.INC}                        {$I PEAKTOP:OBJ/TMEMO.INC}                             {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCBUTTON.INC}                    {$I PEAKTOP:OBJ/TXCBUTTON.INC}                         {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/OBJECTNAMES.INC}          {$I PEAKTOP:IDE/ERP/DBO/OBJECTNAMES.INC}               {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/$COMMON/FORMERP.INC}      {$I PEAKTOP:IDE/ERP/DBO/$COMMON/FORMERP.INC}           {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/IMAGELISTCONFIG.INC}      {$I PEAKTOP:IDE/ERP/DBO/IMAGELISTCONFIG.INC}           {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/USERS/GLOBALVARIABLES.INC}{$I PEAKTOP:IDE/ERP/DBO/USERS/GLOBALVARIABLES.INC}     {$ENDIF}
+const 
+  ERP_OBJNAME_OPER_SYNC001 = 'SYNC001';
+  //============================================================================
+  function ExecuteScriptFromFile(aDataBase:TxFBDataBase; aLines:TStrings; const aName:string):Boolean;
+  var
+    lkFileName :string;
+    lkSQL      :string;
+  begin
+    aLines.Add('  SQL:'+aName+' - update begin');
+    lkFileName := StrAbsolutePath('./SQL001/'+aName+'.SQL', ScriptName);
+    lkSQL := StringsLoadFromFile(lkFileName);
+    try
+      ExecSQL(aDataBase, lkSQL);
+    except
+      aLines.Add('    cannot to update object '+aName+' from file "'+lkFileName+'"');
+    end;  
+    aLines.Add('    updated '+aName+' from file "'+lkFileName+'"');
+  end;
+  //============================================================================
+  procedure PatchDataBase(aDataBase:TxFBDataBase; aLines:TStrings);
+  begin
+    ExecuteScriptFromFile(aDataBase, aLines, 'PROC$_EXCHANGE_R_CS_ARC');
+    ExecuteScriptFromFile(aDataBase, aLines, 'PROC$_EXCHANGE_R_CS_ADDR_ARC');
+    ExecuteScriptFromFile(aDataBase, aLines, 'PROC$_EXCHANGE_R_CS_DOCS_ARC');
+    ExecuteScriptFromFile(aDataBase, aLines, 'PROC$_EXCHANGE_R_CS_PHONES_ARC');
+    ExecuteScriptFromFile(aDataBase, aLines, 'PROC$_EXCHANGE_R_CS_LINKS_ARC');
+    ExecuteScriptFromFile(aDataBase, aLines, 'PROC$_EXCHANGE_R_TMC_ARC');
+    ExecuteScriptFromFile(aDataBase, aLines, 'PROC$_EXCHANGE_J_CHILDS_ARC');
+    ExecuteScriptFromFile(aDataBase, aLines, 'PROC$_EXCHANGE_D_1000014_ARC');
+    ExecuteScriptFromFile(aDataBase, aLines, 'PROC$_EXCHANGE_J_1000014_ARC');
+    ExecuteScriptFromFile(aDataBase, aLines, 'PROC$_EXCHANGE_J_1000016_ARC');
+    ExecuteScriptFromFile(aDataBase, aLines, 'PROC$_EXCHANGE_J_1000062_ARC');
+    ExecuteScriptFromFile(aDataBase, aLines, 'PROC$_EXCHANGE_J_1000063_ARC');
+    ExecuteScriptFromFile(aDataBase, aLines, 'PROC$_EXCHANGE_J_1000067_ARC');
+    ExecuteScriptFromFile(aDataBase, aLines, 'PROC$_EXCHANGE_J_1000069_ARC');
+    ExecuteScriptFromFile(aDataBase, aLines, 'PROC$_EXCHANGE_J_4_ARC');
+    ExecuteScriptFromFile(aDataBase, aLines, 'PROC$_EXCHANGE_J_COMENTS_ARC');
+    ExecuteScriptFromFile(aDataBase, aLines, 'PROC$_EXCHANGE_PS_ARC001');
+  end;
+  //============================================================================
+  procedure TERPFormOperSync001_btnExecute_OnClick(Sender :TObject);
+  var
+    lkMem :TMemo;
+    lkEdt :TxcEditCombo;
+    lkTr  :TxFBTransaction;
+    lkQr  :TxFBQuery;
+  begin
+    lkMem := TMemo(TComponent(Sender).Owner.FindComponent('memLog'));
+    lkEdt := TxcEditCombo(TComponent(Sender).Owner.FindComponent('edtDataBase'));
+    lkMem.Lines.Clear;
+    if( (lkEdt.Text = FBDataBase.DataBaseName) or ('127.0.0.1/3050'+lkEdt.Text = FBDataBase.DataBaseName) )then
+      begin
+      lkMem.Lines.Add('Нельзя загружать базу данных саму в себя');
+      exit;
+      end;
+    if( not FBDataBase.Connected )then
+      begin
+      lkMem.Lines.Add('Нет текущего подключения к базе данных');
+      exit;
+      end;
+    lkMem.Lines.Add('Проверка существования объектов в базе данных');
+    PatchDataBase(FBDataBase, lkMem.Lines);
+    lkMem.Lines.Add('Выполнение загрузки');
+    lkTr  := TxFBTransaction.Create(nil);
+    with lkTr do
+      begin
+      DefaultDataBase := FBDataBase;
+      Params.Clear;
+      Params.Add('isc_tpb_read_committed');
+      Params.Add('isc_tpb_write');
+      Params.Add('isc_tpb_rec_version');
+      Params.Add('isc_tpb_nowait');
+      end;
+    lkQr := TxFBQuery.Create(lkTr);
+    with lkQr do
+      begin
+      SQL.Text := 'SELECT P.* FROM PROC$_EXCHANGE_PS_ARC001(''127.0.0.1/3050:'+lkEdt.Text+''', ''SYSDBA'', ''masterkey'') P';
+      try
+        Open;
+      except
+      end;
+      if not Active then
+        begin
+        lkMem.Lines.Add('не удалось выполнить загрузкy');
+        if lkTr.InTransaction then
+          lkTr.Commit;
+         lkTr.Free;  
+        exit;
+        end;
+      First;
+      while not EOF do
+        begin
+        lkMem.Lines.Add('  '+StrEndSpaces(FieldByName('NAME').AsString, 80)+' - '+FormatFloat('000000',FieldByName('CNT').AsInteger) );
+        Next;
+        end; 
+      Close;   
+      end;
+    if lkTr.InTransaction then
+      lkTr.Commit;
+     lkTr.Free;  
+    lkMem.Lines.Add('загрузка выполнена');
+  end;
+  //============================================================================
+  procedure TERPFormOperSync001_OnClose(Sender :TObject; var Action :TCloseAction);
+  begin
+    Action := caFree;
+  end; 
+  //============================================================================
+  const lkDefaultWidth = 800;
+  //============================================================================
+  function TERPFormOperSync001_Create(const aModalForm :Boolean):TForm;
+  var
+    lkLatTop :Integer;
+    lkLbl    :TLabel;
+    lkEdt    :TxcEditCombo;
+    lkMem    :TMemo;
+    lkBtn    :TxcButton;
+  begin
+    Result := TERPForm_Create('Синхронизация базы данных', ERP_ObjectIcon(ERP_OBJECTTYPE_OPERS), ERP_ObjectBitmap(ERP_OBJECTTYPE_OPERS), aModalForm, @TERPFormOperSync001_OnClose);
+    with Result do
+      begin
+      
+      end;
+    lkLatTop := 0;  
+    with TxcGradientPanelVista(Result.FindComponent(obj_name_erp_topbar)) do
+      begin
+      StyleManager          := nil;
+      Colors.HotTrack       := ERP_ObjectColorLight(ERP_OBJECTTYPE_OPER);
+      Colors.HotTrackBorder := ERP_ObjectColor(ERP_OBJECTTYPE_OPER);
+      lkLatTop := Top + Height + 4;
+      end;  
+    with TERPForm_Settings(Result) do
+      begin
+      Values[ERP_SETTINGS_BUFFERVAR      ] := '';
+      Values[ERP_SETTINGS_TABLENAME      ] := '';
+      Values[ERP_SETTINGS_TABLECAPTION   ] := Result.Caption;
+      Values[ERP_SETTINGS_BASETYPE       ] := IntToStr(ERP_OBJECTTYPE_OPER);
+      Values[ERP_SETTINGS_TEMPFILENAME   ] := ERP_ObjectTempFileName(ERP_OBJECTTYPE_OPER,ERP_OBJECTTYPE_OPER, ERP_OBJNAME_OPER_SYNC001,GetGlobalVariable(ERP_GLOBALVARIABLE_USER_CURRENT));
+      end;
+    lkLbl := CreateTLabel(Result, Result, 'Текущая база данных', 8, lkLatTop, 24, lkDefaultWidth, alNone, taLeftJustify);
+    with lkLbl do
+      begin
+      Font.Size  := 10;
+      Font.Style := [fsBold];
+      lkLatTop   := Top + Height + 4;
+      end;
+    lkEdt := CreateTxcEditCombo(Result, Result, 'edtDataBaseCurr', 32, lkLatTop, 20, lkDefaultWidth - 40);
+    with lkEdt do
+      begin
+      Font.Style := [fsBold];
+      ReadOnly := True;
+      Text     := FBDataBase.DataBaseName;
+      lkLatTop := Top + Height + 4;
+      end;
+    lkLbl := CreateTLabel(Result, Result, 'Загружаемая база данных', 8, lkLatTop, 24, lkDefaultWidth, alNone, taLeftJustify);
+    with lkLbl do
+      begin
+      Font.Size  := 10;
+      Font.Style := [fsBold];
+      lkLatTop   := Top + Height + 4;
+      end;
+    lkEdt := CreateTxcEditCombo(Result, Result, 'edtDataBase', 32, lkLatTop, 20, lkDefaultWidth-40);
+    with lkEdt do
+      begin
+      Font.Style := [fsBold];
+      Text       := 'd:\appl\peaktop\data\PS_001PHARMACIA_FILIAL_01_ARC.FDB';
+      lkLatTop   := Top + Height + 4;
+      end;
+    lkBtn := CreateTxcButton(Result, Result, 'btnExecute', 'Выполнить загрузку', 20, lkLatTop, 24, lkDefaultWidth-40, mrNone, false, false);  
+    with lkBtn do
+      begin
+      Font.Style := [fsBold];
+      OnClick    := @TERPFormOperSync001_btnExecute_OnClick;
+      lkLatTop   := Top + Height + 4;
+      end;
+    lkLbl := CreateTLabel(Result, Result, 'Протокол выполнения операции', 8, lkLatTop, 24, lkDefaultWidth, alNone, taLeftJustify);
+    with lkLbl do
+      begin
+      Font.Size  := 10;
+      Font.Style := [fsBold];
+      lkLatTop   := Top + Height + 4;
+      end;
+    lkMem := CreateTMemo(Result, Result, 'memLOG', 32, lkLatTop, 320, lkDefaultWidth-40, alNone);
+    with lkMem do
+      begin
+      Font.Size  := 8;
+      Font.Style := [fsBold];
+      Font.Name  := 'Courier New';
+      lkLatTop   := Top + Height + 4;
+      end;
+
+    if not aModalForm then
+      Result.WindowState := wsMaximized; 
+  end;
+
+begin
+  TERPFormOperSync001_Create(false);
+end.  

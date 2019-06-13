@@ -1,0 +1,30 @@
+{$DEFINE PEAKTOP:OBJ/INTERFACE/TEECHART/DEFAULT.PS}
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}                      {$I PEAKTOP:GLOBAL_VARIABLES.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:GLOBAL_OBJECTS.INC}                        {$I PEAKTOP:GLOBAL_OBJECTS.INC}   {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/INTERFACE/TEECHART/GLOBALVARIABLES.INC}{$I ./GLOBALVARIABLES.INC}        {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/INTERFACE/TEECHART/DEFAULT.INC}        {$I ./DEFAULT.INC}                {$ENDIF}
+var
+  lkIndx      :Integer;
+  lkObj       :TObject;
+  lkOwner     :TComponent;
+  lkParent    :TWinControl;
+  lkName      :string;
+begin
+  if not GlobalObjects_Exists(INTF_TEECHART_OBJNAME_OWNER, lkIndx)then exit;
+  lkObj := GlobalObjects_Find(INTF_TEECHART_OBJNAME_OWNER);
+  if(lkObj = nil)then exit; if not ObjectInheritsFrom(lkObj, 'TComponent') then exit;
+  lkOwner := TComponent(lkObj);
+
+  if not GlobalObjects_Exists(INTF_TEECHART_OBJNAME_PARENT, lkIndx)then exit;
+  lkObj := GlobalObjects_Find(INTF_TEECHART_OBJNAME_PARENT);
+  if(lkObj = nil)then exit; if not ObjectInheritsFrom(lkObj, 'TWinControl') then exit;
+  lkParent := TWinControl(lkObj);
+
+  lkName := GetGlobalVariable(INTF_TEECHART_OBJNAME);
+
+  Interface_TeeChart_Create(lkOwner, lkParent, lkName);
+
+  GlobalObjects_Delete(INTF_TEECHART_OBJNAME_OWNER );
+  GlobalObjects_Delete(INTF_TEECHART_OBJNAME_PARENT);
+  SetGlobalVariable(INTF_TEECHART_OBJNAME    ,'');
+end.

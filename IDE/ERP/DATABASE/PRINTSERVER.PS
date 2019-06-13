@@ -1,0 +1,14 @@
+{$DEFINE PRINTSERVER}
+{$IFNDEF PEAKTOP:COM/MICROSOFT/WINDOWS/USER32.DLL.INC} {$I PEAKTOP:COM/MICROSOFT/WINDOWS/USER32.DLL.INC}  {$ENDIF}  
+{$IFNDEF PEAKTOP:SYSUTILS/GET_PARAM_FILE_NAME.INC}     {$I PEAKTOP:SYSUTILS/GET_PARAM_FILE_NAME.INC}      {$ENDIF}  
+{$IFNDEF PEAKTOP:APPL/SPLASH.INC}                      {$I PEAKTOP:APPL/SPLASH.INC}                       {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DATABASE/CONNECT2.INC}        {$I ./CONNECT2.INC}                                {$ENDIF}
+begin
+  if not(Amunhotep.ParamCount>0)then exit;
+  if(LowerCase(Amunhotep.ParamStr[1]) <> '-printserver')then exit;
+  Amunhotep_Splash_OutText('Запуск PRINT SERVER');
+  SetGlobalVariable(ERP_GLOBALVARIABLE_USER_CURRENT, 'PRINTSERVER');
+  if not ConnectToDataBaseByFileName('127.0.0.1/3056:RASTIPUZZO') then exit;
+  call('DB:CONFIG/START/PRINTSERVER.PS');
+  ShowWindow(Amunhotep.Handle, 0);
+end.

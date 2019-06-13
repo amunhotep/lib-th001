@@ -1,0 +1,260 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC} {$I PEAKTOP:GLOBAL_VARIABLES.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TCOLUMNEH.INC}    {$I PEAKTOP:OBJ/TCOLUMNEH.INC}    {$ENDIF}
+{$IFNDEF PEAKTOP:DBFS_DLG.INC}         {$I ./DBFS_DLG.INC}               {$ENDIF}
+const
+  msg_caption           = 'Выбирите файл';
+  msg_toppanel_caption  = 'Выбирите файл из базы данных';
+  msg_dbg_file_ext      = 'Файл|..'   ;
+  msg_dbg_file_name     = 'Файл|Название';
+  msg_dbg_file_date1    = 'Дата|Создания';
+  msg_dbg_file_date2    = 'Дата|Изменения';
+  msg_btnok_caption     = 'Выбрать';
+  msg_btncancel_caption = 'Отмена';
+  //============================================================================
+  function GetQuerySQL(const ParentId:string):string;
+  begin
+    Result := 
+      'SELECT FS.NAME, FS.EXT, FS.DATE_INS, FS.DATE_UPD, FS.PARENT_ID, '+
+      'FS.ID FROM TABL$_FS FS WHERE ((FS.EXT=''..'')AND(FS.PARENT_ID='''+
+      ParentId+''')) GROUP BY FS.NAME, FS.EXT, FS.DATE_INS, FS.DATE_UPD, '+
+      'FS.PARENT_ID, FS.ID '+
+      'UNION ALL '+
+      'SELECT FS.NAME, FS.EXT, FS.DATE_INS, FS.DATE_UPD, FS.PARENT_ID, '+
+      'FS.ID FROM TABL$_FS FS WHERE ((FS.EXT<>''..'')AND(FS.PARENT_ID='''+
+      ParentId+''')) GROUP BY FS.NAME, FS.EXT, FS.DATE_INS, FS.DATE_UPD, '+
+      'FS.PARENT_ID, FS.ID ';
+    if(ParentId<>'0')then
+      Result := 
+        'SELECT FS.NAME, FS.EXT, FS.DATE_INS, FS.DATE_UPD, (SELECT FIRST 1 '+ 
+        'FS2.PARENT_ID FROM TABL$_FS FS2 WHERE (FS2.ID = '''+ParentId+''')) '+
+        'AS PARENT_ID, (SELECT FIRST 1 FS3.ID FROM TABL$_FS FS3 WHERE (FS3.ID = '''+
+        ParentId+''') ) AS ID FROM TABL$_FS FS WHERE (FS.PARENT_ID=''-1'') '+
+        'GROUP BY FS.NAME, FS.EXT, FS.DATE_INS, FS.DATE_UPD, FS.PARENT_ID, '+
+        'FS.ID '+
+        'UNION ALL ' + Result;
+  end;
+  //============================================================================
+  function GetItemPath(const Id:string):string;
+  begin
+    Result := '/';
+    if Id='' then exit;
+    GetField(FBDataBase, 'PROC$_FS_PATH('''+Id+''', '''')', 'PATH', '', Result);
+  end;
+  //============================================================================
+  function CreateImageListFiles(aOwner :TComponent):TImageList;
+  var
+    Indxs  :array[0..16]of Integer;
+    i        :Integer;
+  begin
+    Indxs[ 0] := 282; Indxs[ 1] := 88;  Indxs[ 2] := 289; Indxs[ 3] := 289;
+    Indxs[ 4] := 290; Indxs[ 5] := 293; Indxs[ 6] := 295; Indxs[ 7] := 291;
+    Indxs[ 8] := 284; Indxs[ 9] := 283; Indxs[10] := 288; Indxs[11] := 288;
+    Indxs[12] := 288; Indxs[13] := 288; Indxs[14] := 285; Indxs[15] := 294;
+    Indxs[16] := 351;
+    Result        := TImageList.Create(aOwner);
+    Result.Height := 16;
+    Result.Width  := 16;
+    Result.Clear;
+    for i:=0 to 16 do
+      Result.AddImage(Amunhotep.MainForm.ImageListMain, Indxs[i]);
+  end;
+  //============================================================================
+  function GetFilesList:string;
+  begin
+    Result := '*'+#13#10+'..'+#13#10+'PS'+#13#10+'PAS'+#13#10+'SQL'+#13#10+
+      'XFM'+#13#10+'XRP'+#13#10+'TXT'+#13#10+'CONF'+#13#10+'BMP'+#13#10+
+      'HTML'+#13#10+'HTM'+#13#10+'SGML'+#13#10+'SHTML'+#13#10+'DOC'+#13#10+
+      'XLS'+#13#10+'INC';   
+  end;
+  //======================================================================
+  procedure qr_AfterScroll(DataSet :TDataSet);
+  begin
+    //CaptionPanelLeft.Caption := '  DB:'+GetItemPath(DataSet.FieldByName('ID').AsString);
+  end;
+  //======================================================================
+  procedure dbg_OnDblClick(Sender :TObject);
+  var
+    id       :string;
+    parent_id:string; 
+    name     :string;
+    ext      :string;
+    lkQr     :TxFBQuery;
+  begin
+    lkQr      := TxFBQuery(TDBGridEh(Sender).DataSource.DataSet);
+    id        := lkQr.FieldByName('ID').AsString;
+    parent_id := lkQr.FieldByName('PARENT_ID').AsString;
+    name      := lkQr.FieldByName('NAME').AsString;
+    ext       := lkQr.FieldByName('EXT').AsString;
+    if(parent_id='')then exit;
+    if(ext<>'..')then
+      begin
+      TForm(TDBGridEh(Sender).Parent).ModalResult := mrOk;
+      exit;
+      end;
+    if lkQr.Active then 
+      lkQr.Close;
+    if(name='..')then
+      lkQr.SQL.Text := GetQuerySQL(parent_id)
+     else
+      lkQr.SQL.Text := GetQuerySQL(id);
+    if not lkQr.Active then 
+      try
+        lkQr.Open;
+      except
+      end;  
+  end;
+  //============================================================================
+  procedure dbg_OnKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+  begin
+    if(Key = $0D)then dbg_OnDblClick(Sender);// VK_RETURN
+  end;
+  //============================================================================
+  function FSDLGExecute(var aFSID, aFSPATH:string):Boolean;
+  var
+    lkDlg        :TForm;
+    lkTopPanel   :TxcGradientPanelVista;
+    lkCaptPanel  :TxcGradientPanel;
+    lkBottomPanel:TxcGradientPanel;
+    lkBtnOk      :TxcButton;
+    lkBtnCancel  :TxcButton;
+    lkTr         :TxFBTransaction;
+    lkQr         :TxFBQuery;
+    lkDS         :TDataSource;
+    lkdbg        :TDBGridEh;
+    lkCol        :TColumnEh;
+    lkMr         :TModalResult;
+  begin
+    aFSID   := '';
+    aFSPath := '';
+    Result  := false;
+    lkDlg             := TForm.Create(nil);
+    lkDlg.BorderStyle := bsSizeable;
+    lkDlg.BorderIcons := [biSystemMenu, biMaximize];
+    lkDlg.Caption     := msg_caption;
+    lkDlg.Width       := 520;
+    lkDlg.Height      := Screen.Height - 100;
+    lkDlg.Color       := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lkDlg.Font.Color  := Amunhotep.MainForm.StyleManager.Colors.Border;
+    lkDlg.Font.Name   := 'Verdana';
+    lkDlg.Font.Size   := 7;
+    lkDlg.Font.Style  := [fsBold];
+    lkDlg.Position    := poDesktopCenter;
+    lkTr                    := TxFBTransaction.Create(lkDlg);
+    lkTr.DefaultDataBase    := FBDataBase;
+    lkTr.Params.Text        :='isc_tpb_read_committed'+#13#10+
+                              'isc_tpb_read'+#13#10+
+                              'isc_tpb_rec_version'+#13#10+
+                              'isc_tpb_nowait';
+    lkQr                    := TxFBQuery.Create(lkTr);
+    lkQr.Transaction        := lkTr;
+    lkQr.SQL.Text           := GetQuerySQL('0');
+    lkQr.AfterScroll        := @qr_AfterScroll;
+    lkDS                    := TDataSource.Create(lkQr);
+    lkDS.DataSet            := lkQr;
+    lkTopPanel              := TxcGradientPanelVista.Create(lkDlg);
+    lkTopPanel.Parent       := lkDlg;
+    lkTopPanel.Left         := 0;
+    lkTopPanel.Top          := 0;
+    lkTopPanel.Height       := 32;
+    lkTopPanel.Align        := alTop;
+    lkTopPanel.Caption      := msg_toppanel_caption;
+    lkTopPanel.StyleManager := Amunhotep.MainForm.StyleManager;
+    lkTopPanel.Font.Color   := Amunhotep.MainForm.StyleManager.Colors.Window;
+    lkTopPanel.Font.Name    := 'Verdana';
+    lkTopPanel.Font.Size    := 12;
+    lkTopPanel.Font.Style   := [fsBold];
+    lkTopPanel.BorderStyle  := xbsRaized;
+    lkdbg                   := TDBGridEh.Create(lkDlg);
+    lkdbg.Parent            := lkDlg;
+    lkdbg.Align             := alClient;
+    lkdbg.Color             := Amunhotep.MainForm.StyleManager.Colors.Window;
+    lkdbg.Font.Color        := Amunhotep.MainForm.StyleManager.Colors.Border;
+    lkdbg.FixedColor        := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lkdbg.TitleFont.Color   := Amunhotep.MainForm.StyleManager.Colors.Border;
+    lkdbg.TitleFont.Style   := [fsBold];
+    lkdbg.UseMultiTitle     := true;
+    lkdbg.Ctl3D             := false;
+    lkdbg.Flat              := true;
+    lkdbg.DataSource        := lkDS;
+    lkdbg.AllowedOperations := [alopUpdateEh];
+    lkdbg.Options           := [dgTitles,dgIndicator,dgColumnResize,dgColLines,dgRowLines,
+                dgTabs,dgRowSelect,dgAlwaysShowSelection,dgConfirmDelete,dgCancelOnExit];
+    lkdbg.OnKeyDown         := @dbg_OnKeyDown;
+    lkdbg.OnDblClick        := @dbg_OnDblClick;
+    lkdbg.Columns.Clear;
+    lkCol               := CreateTColumnEh(lkdbg,'EXT'     ,''                   ,msg_dbg_file_ext  , 20,taLeftJustify);
+    lkCol.KeyList.Text  := GetFilesList;
+    lkCol.PickList.Text := GetFilesList;
+    lkCol.ImageList     := CreateImageListFiles(lkDlg);
+    lkCol               := CreateTColumnEh(lkdbg,'NAME'    ,''                   ,msg_dbg_file_name ,200,taLeftJustify);
+    lkCol               := CreateTColumnEh(lkdbg,'DATE_INS','yyyy.mm.dd hh:nn:ss',msg_dbg_file_date1,120,taLeftJustify);
+    lkCol               := CreateTColumnEh(lkdbg,'DATE_UPD','yyyy.mm.dd hh:nn:ss',msg_dbg_file_date2,120,taLeftJustify);
+    lkBottomPanel              := TxcGradientPanel.Create(lkDlg);
+    lkBottomPanel.Parent       := lkDlg;
+    lkBottomPanel.Left         := 0;
+    lkBottomPanel.Height       := 20;
+    lkBottomPanel.Top          := lkDlg.Height - lkBottomPanel.Height;
+    lkBottomPanel.Align        := alBottom;
+    lkBottomPanel.Caption      := '';
+    lkBottomPanel.StyleManager := Amunhotep.MainForm.StyleManager;
+    lkBottomPanel.BorderStyle  := xbsNone;
+    lkBottomPanel.GradientDirect := gdLeftToRight;
+    lkBtnCancel                := TxcButton.Create(lkDlg);
+    lkBtnCancel.Parent         := lkBottomPanel;
+    lkBtnCancel.Top            := 0;
+    lkBtnCancel.Width          := 96;
+    lkBtnCancel.Left           := lkBottomPanel.Width - lkBtnCancel.Width;
+    lkBtnCancel.Align          := alRight;
+    lkBtnCancel.StyleManager   := Amunhotep.MainForm.StyleManager;
+    lkBtnCancel.Cancel         := true;
+    lkBtnCancel.Caption        := msg_btncancel_caption;
+    lkBtnCancel.ModalResult    := mrCancel;  
+    lkBtnOK                := TxcButton.Create(lkDlg);
+    lkBtnOK.Parent         := lkBottomPanel;
+    lkBtnOK.Top            := 0;
+    lkBtnOK.Width          := 96;
+    lkBtnOK.Left           := lkBottomPanel.Width - lkBtnCancel.Width - lkBtnOK.Width;
+    lkBtnOK.Align          := alRight;
+    lkBtnOK.StyleManager   := Amunhotep.MainForm.StyleManager;
+    lkBtnOK.Default        := true;
+    lkBtnOK.Caption        := msg_btnok_caption;
+    lkBtnOK.ModalResult    := mrOk;  
+    if not lkQr.Active then
+      try
+        lkQr.Open;
+      except
+      end;
+    lkMr   := lkDlg.ShowModal;  
+    Result := (lkMr = mrOk);
+    if Result then
+      begin
+      if(lkQr.Active)then
+        begin
+        aFSID   := lkQr.FieldByName('ID').AsString;
+        aFSPath := 'DB:'+GetItemPath(aFSID);
+        end
+       else
+        Result := false; 
+      end;
+    if lkQr.Active then
+      lkQr.Close;
+    if(lkTr.InTransaction)then
+      lkTr.Commit;  
+    lkDlg.Free;
+  end;
+  //============================================================================
+var
+  FSID   :string;
+  FSPath :string;
+begin
+  if FSDLGExecute(FSID, FSPath) then
+    begin
+    SetGlobalVariable(BufferVariableDBFSId  ,FSID  );
+    SetGlobalVariable(BufferVariableDBFSPath,FSPath);
+    end
+   else
+    begin
+    SetGlobalVariable(BufferVariableDBFSId  ,'');
+    SetGlobalVariable(BufferVariableDBFSPath,'');
+    end; 
+end.

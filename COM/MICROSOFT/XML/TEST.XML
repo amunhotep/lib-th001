@@ -1,0 +1,16 @@
+<?xml version="1.0" standalone="yes"?>
+<DATAPACKET Version="2.0">
+  <METADATA>
+    <FIELDS>
+      <FIELD attrname="ID" fieldtype="string" WIDTH="20"/>
+      <FIELD attrname="NAME" fieldtype="string" WIDTH="80"/>
+      <FIELD attrname="FILEPATH" fieldtype="string" WIDTH="512"/>
+    </FIELDS>
+  </METADATA>
+  <ROWDATA>
+    <ROW ID="OKNAPLUS" NAME="Окна Плюс"/>
+    <ROW ID="FBCONSOLE" NAME="Консоль FireBird SQL Server" FILEPATH="PEAKTOP:IDE/FB/CONSOLE.PS"/>
+    <ROW ID="IDEPHP" NAME="Среда разработки PHP" FILEPATH="PEAKTOP:IDE/PHP/IDE.PS"/>
+    <ROW ID="EDITOR" NAME="Редактор кода" FILEPATH="PEAKTOP:IDE/EDITOR/IDE.PS"/>
+  </ROWDATA>
+</DATAPACKET>

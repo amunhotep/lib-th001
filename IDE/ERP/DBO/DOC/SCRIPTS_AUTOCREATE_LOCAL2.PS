@@ -1,0 +1,73 @@
+{$I PEAKTOP:GLOBAL_VARIABLES.INC}
+{.$DEFINE SAVETOLOCAL}
+const
+  SQLCRLF = #13#10;
+var
+  lkDBFolderName    :string;
+  lkLocalFolderName :string;
+  lkFileName        :string;
+  lkFolder          :string;
+  lkSource          :string;
+  lkTrans           :TxFBTransaction;
+  lkQuery           :TxFBQuery;
+  lkQueryFS         :TxFBQuery;
+begin
+  lkLocalFolderName := 'PEAKTOP:IDE/ERP/CONFIG/';
+  lkFolder := ExtractFilePath(PrepareAbsoleteFileName(lkLocalFolderName + 'dummy.file'));
+  ChDir(lkFolder);
+  if not DirectoryExists('DOC') then CreateDir('DOC');  
+
+  lkTrans   := TxFBTransaction.Create(nil);
+  lkTrans.DefaultDataBase := FBDataBase;
+  {$IFDEF SAVETOLOCAL}
+  lkQueryFS   := TxFBQuery.Create(lkTrans);
+  lkQueryFS.SQL.Text :=     
+    'WITH RECURSIVE FS AS( '+SQLCRLF+
+    '  SELECT F1.ID, F1.PARENT_ID, F1.NAME, F1.EXT, F1.SRC '+SQLCRLF+
+    '        ,CASE F1.EXT WHEN ''..'' THEN F1.NAME||''/'' ELSE F1.NAME||''.''||F1.EXT END AS PATH '+SQLCRLF+
+    '  FROM   TABL$_FS F1 WHERE (F1.PARENT_ID = 0) '+SQLCRLF+
+    '  UNION ALL '+SQLCRLF+
+    '  SELECT F2.ID, F2.PARENT_ID, F2.NAME, F2.EXT, F2.SRC '+SQLCRLF+
+    '        ,CASE F2.EXT WHEN ''..'' THEN F3.PATH||F2.NAME||''/'' ELSE F3.PATH||F2.NAME||''.''||F2.EXT END AS PATH '+SQLCRLF+
+    '  FROM   TABL$_FS F2, FS F3 WHERE (F2.PARENT_ID = F3.ID) '+SQLCRLF+
+    ')SELECT F.PATH, F.SRC FROM FS F WHERE (F.PATH LIKE ?PATH) AND (F.EXT <> ''..'')';
+  {$ENDIF}     
+  lkQuery   := TxFBQuery.Create(lkTrans);
+  lkQuery.SQL.Text := 
+      'WITH RECURSIVE TTT AS( '+SQLCRLF+
+      '  SELECT T1.ID, T1.PARENT_ID, T1.NAME2 AS NAME '+SQLCRLF+
+      '  FROM   TABL$_TB_TYPES T1 WHERE  (T1.ID = 4) '+SQLCRLF+
+      '  UNION ALL '+SQLCRLF+
+      '  SELECT T2.ID, T2.PARENT_ID, T2.NAME2 AS NAME '+SQLCRLF+
+      '  FROM   (SELECT TM.ID, TM.PARENT_ID, TM.NAME2 FROM TABL$_TB_TYPES TM ORDER BY TM.NAME2) T2, TTT T3 WHERE (T2.PARENT_ID = T3.ID) '+SQLCRLF+
+      ')SELECT T.ID, T.PARENT_ID, T.NAME FROM TTT T WHERE (T.ID > 4)';    
+  lkQuery.Open;
+  lkQuery.First;
+  while not lkQuery.EOF do
+    begin
+    WriteLn(lkQuery.FieldByName('ID').AsString+'.'+lkQuery.FieldByName('NAME').AsString);
+
+    if(  (lkQuery.FieldByName('ID').AsInteger > 1000159)
+       or(lkQuery.FieldByName('ID').AsInteger = 1000144)
+       or(lkQuery.FieldByName('ID').AsInteger = 1000145)
+    )then
+      begin
+      lkSource := StringsLoadFromFile('PEAKTOP:IDE/ERP/DBO/DOC/TEMPLATE_NEW.PS');
+      lkSource := StrReplaceStr(lkSource, '<%OBJECT_TYPE%>', lkQuery.FieldByName('ID').AsString);
+      lkSource := 
+          '{*******************************************************************************'+#13#10+
+          ' '+#13#10+
+          '  '+lkQuery.FieldByName('ID').AsString+'         '+lkQuery.FieldByName('NAME').AsString+' '+#13#10+
+          ' '+#13#10+
+          '********************************************************************************}'+#13#10+
+          lkSource;
+      StringsSaveToFile( PrepareAbsoleteFileName('PEAKTOP:IDE/ERP/CONFIG/DOC/'+lkQuery.FieldByName('ID').AsString+'/NEW.PS'), lkSource);
+      end;
+
+    Amunhotep.ProcessMessages;
+    lkQuery.Next;
+    end;
+  if lkTrans.InTransaction then
+    lkTrans.Commit;
+  lkTrans.Free;
+end.

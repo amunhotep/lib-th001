@@ -1,0 +1,8 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}             {$I PEAKTOP:GLOBAL_VARIABLES.INC}              {$ENDIF}
+{$IFNDEF PEAKTOP:APPL/SPLASH.INC}                  {$I PEAKTOP:APPL/SPLASH.INC}                   {$ENDIF}
+{$IFNDEF PEAKTOP:SYSUTILS/FILES/SEARCH_UTILS.INC}  {$I PEAKTOP:SYSUTILS/FILES/SEARCH_UTILS.INC}   {$ENDIF}
+{$IFNDEF PEAKTOP:SYSUTILS/FILES/LOADIMAGELIST.INC} {$I PEAKTOP:SYSUTILS/FILES/LOADIMAGELIST.INC}  {$ENDIF}
+begin
+  Files_LoadImagesToImageList(Amunhotep.MainForm.ImageListMain, 
+    Files_FindFiles(ExtractFilePath(PrepareAbsoleteFileName('PEAKTOP:IMG/DUMMY.TXT')), '*.BMP', false), true, true, true );
+end.

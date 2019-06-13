@@ -1,0 +1,9 @@
+{$IFNDEF DB:CONFIG/REF/TMC_GROUP/DLG_PS.INC} {$I ./DLG_PS.INC} {$ENDIF}
+var
+  lkTmcGroupId :string;
+begin
+  if(DialogTMCGroup_Execute('Выберите группу ТМЦ', '150000', lkTMCGroupId))then
+    SetGlobalVariable('TMC_GROUP_ID', lkTmcGroupId)
+   else
+    SetGlobalVariable('TMC_GROUP_ID', '0');
+end.  

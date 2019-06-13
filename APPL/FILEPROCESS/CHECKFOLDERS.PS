@@ -1,0 +1,51 @@
+{$DEFINE PEAKTOP:APPL/FILEPROCESS/CHECKFOLDERS.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/FILENAMES.INC}          {$I PEAKTOP:IDE/ERP/DBO/FILENAMES.INC} {$ENDIF}
+  //============================================================================
+  function CheckFoldersArray(const aRootFolder:string; const aFolders :array of string):Boolean;
+  var
+    i :Integer;
+  begin
+    Result := false;
+    ChDir(aRootFolder);
+    for i:=0 to Length(aFolders)-1 do
+      if not DirectoryExists(aFolders[i])then 
+        CreateDir(aFolders[i]);  
+    Result := true;
+  end;
+  //============================================================================
+var
+  SavedCurrentDirectory :string;
+begin
+  // saving information about current directory
+  SavedCurrentDirectory := GetCurrentDir();
+  // checking filders
+  CheckFoldersArray(StrAbsolutePath('../'          ,Amunhotep.ExeName), [
+     'data'            // need for store local databases
+    ,'fonts'           // need for custom user fonts
+    ,'lib'             // need for standard library
+    ,'tmp'             // need for temp files (reports, erp.congif, etc.)
+  ]);
+  CheckFoldersArray(StrAbsolutePath('../data/'     ,Amunhotep.ExeName), [
+     'backup'          // need for local database backups
+    ,'sql'             // need for sql files for update
+    ,'logs'            // need for logging data manipulation in local databases
+  ]);
+  CheckFoldersArray(StrAbsolutePath('../data/logs/',Amunhotep.ExeName), [
+     'backup'          // need for logging backups
+    ,'reindex'         // need for logging reindex
+    ,'restore'         // need for logging restore
+    ,'update'          // need for logging updates
+  ]);
+  CheckFoldersArray(StrAbsolutePath('../lib/'      ,Amunhotep.ExeName), [
+    'amunhotep'        // need for stadartd library
+  ]);
+  CheckFoldersArray(StrAbsolutePath('../tmp/'      ,Amunhotep.ExeName), [
+     'bank.gov.ua'      // need for getting valute cource from National Bank of Ukraine 
+    ,ERP_DIRECTORY_CFG  // need for store configuration of ERP-objects 
+    ,'console'          // need for run captured applications
+    ,'maps.google.com'  // need for working with google maps
+    ,'svn'              // need for fixin svn version updates
+  ]);
+  // restoring current directory for application
+  ChDir(SavedCurrentDirectory);  
+end.

@@ -1,0 +1,355 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG/RPTI/8771B68C-3BC9-465A-A6AF-DFD47EE6120D/DEFAULT.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$I PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC} {$I PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}        {$I PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}        {$ENDIF}
+const
+  objname_datefrom   = 'dtpDateFrom';
+  objname_dateto     = 'dtpDateTo';
+  objname_firms      = 'gbFirms';
+  msg_input_firms    = 'Выберите фирмы учета';
+var
+  GlobalSQL :string;  
+  //============================================================================
+  function TERPFormRpti_GetExportFilter(aOwner:TComponent):string;
+  begin
+    Result := 
+      msg_erp_lbldatefrom+' "'+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+'" '+
+      msg_erp_lbldateto  +' "'+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto))+'" '+
+      'Фирмы учета: "'+InputIntf_Ref_GetNames(aOwner.FindComponent(objname_firms))+'" ';
+  end;
+  //============================================================================
+  function TERPFormRpti_OnGetSQL(aOwner:TComponent;var aSQL:string):Boolean;
+  begin
+    Result := True;
+    aSQL   := GlobalSQL;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnGetSQLFileName(aOwner:TComponent;var aFileName:string);
+  begin
+     // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnProcessParams(aOwner:TComponent;aQr :TxFBQuery);
+  begin
+    with aQr do
+      begin
+      ParamByName('FIRM_IDS' ).AsString := InputIntf_Ref_GetIds(aOwner.FindComponent(objname_firms));
+      ParamByName('DATE_FROM').AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+' 00:00:00';
+      ParamByName('DATE_TO'  ).AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto)+1)+' 00:00:00';
+      end;  
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnChart(aOwner:TComponent; aParent:TWinControl);
+  var
+    lkPC :TxcPageControlEx;
+    lkTS :TxcTabSheet;
+  begin
+    aParent.Free;
+    exit;
+    lkPC := CreateTxcPageControlEx(aOwner, aParent, 'PCCharts', 0,0,600,600, alClient);
+    lkPC.MultiLine := false;
+    TxcPageControlEx_ActivateDefaultPage(lkPC);
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnTerms(aOwner:TComponent;aParent:TWinControl);
+  var
+    lkLastTop :Integer;
+  begin
+    lkLastTop := 4;
+    lkLastTop := lkLastTop + InputIntf_DatePeriod_Create(aOwner, aParent, 'gbDatePeriod', 'Укажите период', 4, lkLastTop, 44, 360,objname_datefrom,objname_dateto,StartOfTheMonth(Now),EndOfTheMonth(Now)).Height;
+    lkLastTop := lkLastTop + 4;
+    lkLastTop := lkLastTop + InputIntf_Ref_Create(aOwner,aParent,objname_firms   ,msg_input_firms   ,4,lkLastTop, 0,360,'TABL$R_FIRMS',TERPForm_Settings(aOwner).Values[ERP_SETTINGS_TABLENAME]).Height;
+    lkLastTop := lkLastTop + 4;
+  end;
+  //============================================================================
+  function TERPFormRpti_OnColumnsCreate(aOwner:TComponent; aDBG:TDBGridEh):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_Columns_OnEditButtonClick(Sender :TObject; var Handled :Boolean);
+  var
+    lkDBG    :TDBGridEh;
+    lkTypes  :string;
+    lkPlace  :string;
+    lkScript :string;
+  begin
+    Handled := true;
+    lkDBG   := TDBGridEh(TComponent(Sender).Owner.Owner);
+    if not lkDBG.DataSource.DataSet.Active then exit;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_DBGridEh_OnGetCellParams(Sender: TObject; Column: TColumnEh; 
+              AFont: TFont; var Background: TColor; State: TGridDrawState);
+  begin
+   if(not Column.Field.DataSet.Active)then exit;
+   if(Column.Field.DataSet.RecordCount = 0)then exit;
+   if(Column.Field.DataSet.FieldByName('EXPENSE_FLAG').AsInteger = 1)then
+     aFont.Style:= aFont.Style + [fsBold];
+  end;   
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsCreated(aOwner:TComponent; aDBG:TDBGridEh);
+  begin
+    aDBG.Font.Size       := 8;
+    aDBG.OnGetCellParams := @TERPFormRpti_DBGridEh_OnGetCellParams;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsLoad(aOwner:TComponent; aDBG:TDBGridEh);
+  var
+    lkFld     :string;
+    lkSQLFlds :string;
+    lkSQLSum  :string;
+    lkSQLBody :string;
+    lkSQLBody0:string;
+    lkSQLBody1:string;
+    lkSQLBody2:string;
+    lkSQLBody3:string;
+    lkSQLBody4:string;
+    lkCol     :TColumnEh;
+    lkTr      :TxFBTransaction;
+    lkQr      :TxFBQuery;
+    i         :Integer;
+  begin
+    i := aDBG.Columns.Count-1;
+    while(i >= 0)do
+      begin
+      if(Pos('EXPENSE_FILIAL', aDBG.Columns[i].FieldName) = 1)then
+        aDBG.Columns.Delete(i)
+       else 
+        i := i - 1;
+      end;
+      
+    lkFld     := '';
+    lkSQLFlds := '';
+    lkSQLBody := '';
+    lkSQLBody0:= '';
+    lkSQLBody1:= '';
+    lkSQLBody2:= '';
+    lkSQLBody3:= '';
+    lkSQLBody4:= '';
+    lkTr := TxFBTransaction.Create(nil);
+    with lkTr do 
+      begin 
+      DefaultDataBase := FBDataBase; 
+      Params.Clear; 
+      Params.Add('isc_tpb_read_committed'); 
+      Params.Add('isc_tpb_read'); 
+      Params.Add('isc_tpb_rec_version'); 
+      Params.Add('isc_tpb_nowait'); 
+      end; 
+    lkQr := TxFBQuery.Create(lkTr);
+    lkQr.Transaction := lkTr;
+    lkQr.SQL.Text    := 
+      'SELECT DISTINCT C.FILIAL_ID AS ID, F.NAME '+SQLCRLF+
+      'FROM   TABL$P_CND C, TABL$R_FILIALS F '+SQLCRLF+
+      'WHERE  (C.DATE_COMMIT BETWEEN  '''+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+' 00:00:00'' AND '''+
+        FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto))+' 23:59:59'') '+SQLCRLF+
+      '  AND  ('''+InputIntf_Ref_GetIds(aOwner.FindComponent(objname_firms))+''' CONTAINING ''~''||C.FIRM_ID||''~'') '+SQLCRLF+
+      '  AND  (F.ID = C.FILIAL_ID) '+SQLCRLF+
+      'ORDER BY 1 ';
+    lkQr.Open;
+    lkQr.First;
+    while not lkQr.EOF do
+      begin
+      lkFld      := 'EXPENSE_FILIAL'+lkQr.FieldByName('ID').AsString;
+      lkSQLFlds  := lkSQLFlds  + ' ,'   + lkFld + ' TYPE OF COLUMN TABL$J_4.DOCSUM '+SQLCRLF;
+      lkSQLBody0 := lkSQLBody0 + '                ' + lkFld + ' = 0; '+SQLCRLF;
+      lkSQLBody1 := lkSQLBody1 +
+      '      SELECT COALESCE(SUM(C.CND_VALUE),0) '+SQLCRLF+
+      '      FROM   TABL$P_CND C '+SQLCRLF+
+      '      WHERE  (C.DATE_COMMIT BETWEEN :DATE_FROM AND :DATE_TO) '+SQLCRLF+
+      '        AND  (:FIRM_IDS CONTAINING ''~''||C.FIRM_ID||''~'') '+SQLCRLF+
+      '        AND  ((C.ACC_ID_DEB+0) = :ACC_ID) '+SQLCRLF+
+      '        AND  ((C.FILIAL_ID+0) = '+lkQr.FieldByName('ID').AsString+') '+SQLCRLF+
+      '        AND  (:P_EXPENSE_IDS NOT CONTAINING  ''~''||C.SUBKONTO_ID_DEB||''~'') '+SQLCRLF+
+      '      INTO   :'+lkFld+'; '+SQLCRLF;
+      lkSQLBody2 := lkSQLBody2 +
+      '          SELECT COALESCE(SUM(C.CND_VALUE),0) '+SQLCRLF+
+      '          FROM   TABL$P_CND C '+SQLCRLF+
+      '          WHERE  (C.DATE_COMMIT BETWEEN :DATE_FROM AND :DATE_TO) '+SQLCRLF+
+      '            AND  (:FIRM_IDS CONTAINING ''~''||C.FIRM_ID||''~'') '+SQLCRLF+
+      '            AND  ((C.ACC_ID_DEB+0) = :ACC_ID) '+SQLCRLF+
+      '            AND  (:P_EXPENSE_IDS NOT CONTAINING  ''~''||C.SUBKONTO_ID_DEB||''~'') '+SQLCRLF+
+      '            AND  ((C.FILIAL_ID+0) = '+lkQr.FieldByName('ID').AsString+') '+SQLCRLF+
+      '            AND  (C.NAME = :EXPENSE_NAME) '+SQLCRLF+
+      '          INTO   :'+lkFld+'; '+SQLCRLF;
+      lkSQLBody3 := lkSQLBody3 +
+      '    SELECT COALESCE(SUM(C.CND_VALUE),0) '+SQLCRLF+
+      '    FROM   TABL$P_CND C '+SQLCRLF+
+      '    WHERE  (C.DATE_COMMIT BETWEEN :DATE_FROM AND :DATE_TO) '+SQLCRLF+
+      '      AND  (:FIRM_IDS CONTAINING ''~''||C.FIRM_ID||''~'') '+SQLCRLF+
+      '      AND  ((C.ACC_ID_DEB+0) = :ACC_ID) '+SQLCRLF+
+      '      AND  ((C.FILIAL_ID+0) = '+lkQr.FieldByName('ID').AsString+') '+SQLCRLF+
+      '      AND  (:P_EXPENSE_IDS CONTAINING  ''~''||C.SUBKONTO_ID_DEB||''~'') '+SQLCRLF+
+      '    INTO   :'+lkFld+'; '+SQLCRLF;
+      lkSQLBody4 := lkSQLBody4 +
+      '          SELECT COALESCE(SUM(C.CND_VALUE),0) '+SQLCRLF+
+      '          FROM   TABL$P_CND C '+SQLCRLF+
+      '          WHERE  (C.DATE_COMMIT BETWEEN :DATE_FROM AND :DATE_TO) '+SQLCRLF+
+      '            AND  (:FIRM_IDS CONTAINING ''~''||C.FIRM_ID||''~'') '+SQLCRLF+
+      '            AND  ((C.ACC_ID_DEB+0) = :ACC_ID) '+SQLCRLF+
+      '            AND  (:P_EXPENSE_IDS CONTAINING  ''~''||C.SUBKONTO_ID_DEB||''~'') '+SQLCRLF+
+      '            AND  ((C.FILIAL_ID+0) = '+lkQr.FieldByName('ID').AsString+') '+SQLCRLF+
+      '            AND  (C.NAME = :EXPENSE_NAME) '+SQLCRLF+
+      '          INTO   :'+lkFld+'; '+SQLCRLF;
+      lkCol := CreateTColumnEh(aDBG,lkFld,'# ### ### ##0.00', 'В разрезе по филиалам|'+lkQr.FieldByName('NAME').AsString, 80, taRightJustify );
+      with lkCol do
+        begin
+        Color                := $FFE8E8;
+        Footer.Color         := Color;
+        Footer.Alignment     := Alignment;
+        Footer.DisplayFormat := DisplayFormat;
+        Footer.FieldName     := FieldName;
+        Footer.ValueType     := fvtSum;
+        end;
+      lkQr.Next;
+      end;
+    if lkQr.Active then
+      lkQr.Close;
+    if lkTr.InTransaction then
+      lkTr.Commit;
+    lkTr.Free;
+        
+    GlobalSQL :=
+      'EXECUTE BLOCK ( '+SQLCRLF+
+      '  Q_DATE_FROM TYPE OF COLUMN TABL$J_4.DATE_COMMIT = ?DATE_FROM '+SQLCRLF+
+      ' ,Q_DATE_TO   TYPE OF COLUMN TABL$J_4.DATE_COMMIT = ?DATE_TO '+SQLCRLF+
+      ' ,Q_FIRM_IDS  TYPE OF COLUMN TABL$J_4.DOCSTR      = ?FIRM_IDS '+SQLCRLF+
+      ')RETURNS ( '+SQLCRLF+ 
+      '  DATE_FROM         TYPE OF COLUMN TABL$J_4.DATE_COMMIT '+SQLCRLF+
+      ' ,DATE_TO           TYPE OF COLUMN TABL$J_4.DATE_COMMIT '+SQLCRLF+
+      ' ,FIRM_IDS          TYPE OF COLUMN TABL$J_4.DOCSTR '+SQLCRLF+
+      ' ,FIRM_NAMES        TYPE OF COLUMN TABL$J_4.DOCSTR '+SQLCRLF+
+      ' ,ACC_ID            TYPE OF COLUMN TABL$R_BUHG_ACCS.ID '+SQLCRLF+
+      ' ,ACC_NAME          TYPE OF COLUMN TABL$R_BUHG_ACCS.NAME '+SQLCRLF+
+      ' ,EXPENSE_ID        TYPE OF COLUMN TABL$R_EXPENSES.ID '+SQLCRLF+
+      ' ,EXPENSE_PARENT_ID TYPE OF COLUMN TABL$R_EXPENSES.PARENT_ID '+SQLCRLF+
+      ' ,EXPENSE_FLAG      TYPE OF COLUMN TABL$R_EXPENSES.FLAG_DELETE '+SQLCRLF+
+      ' ,EXPENSE_NAME      TYPE OF COLUMN TABL$R_EXPENSES.NAME '+SQLCRLF+
+      ' ,EXPENSE_INDENT    TYPE OF COLUMN TABL$R_EXPENSES.NAME '+SQLCRLF+
+      ' ,EXPENSE_SUM       TYPE OF COLUMN TABL$J_4.DOCSUM '+SQLCRLF+
+      lkSQLFlds+
+      ')AS '+SQLCRLF+
+      '  DECLARE VARIABLE P_EXPENSE_IDS  TYPE OF COLUMN TABL$J_4.DOCSTR; '+SQLCRLF+
+      '  DECLARE VARIABLE P_EXPENSE_NAME TYPE OF COLUMN TABL$R_EXPENSES.NAME; '+SQLCRLF+
+      'BEGIN '+SQLCRLF+ 
+      '  DATE_FROM = :Q_DATE_FROM; '+SQLCRLF+
+      '  DATE_TO   = :Q_DATE_TO; '+SQLCRLF+
+      '  FIRM_IDS  = :Q_FIRM_IDS; '+SQLCRLF+
+      '  SELECT LIST(F.NAME,''; '') FROM TABL$R_FIRMS F WHERE (:FIRM_IDS CONTAINING ''~''||F.ID||''~'') INTO :FIRM_NAMES; '+SQLCRLF+
+      ' '+SQLCRLF+
+      '  FOR SELECT B.ID, B.NAME FROM TABL$R_BUHG_ACCS B WHERE(''~91~92~93~'' CONTAINING ''~''||B.ID||''~'') ORDER BY B.ID INTO :ACC_ID, :ACC_NAME DO '+SQLCRLF+
+      '  FOR '+SQLCRLF+
+      '    SELECT FL.ID, FL.PARENT_ID, FL.NAME, FL.INDENT '+SQLCRLF+
+      '    FROM   (WITH RECURSIVE EEE AS( '+SQLCRLF+
+      '              SELECT E1.ID, E1.PARENT_ID, E1.NAME, CAST('''' AS DOMN$PSTRING) AS INDENT '+SQLCRLF+
+      '              FROM   TABL$R_EXPENSES E1 '+SQLCRLF+
+      '              WHERE  (E1.PARENT_ID = 0) '+SQLCRLF+
+      '                AND  (E1.ACC_ID = :ACC_ID) '+SQLCRLF+
+      '              UNION ALL '+SQLCRLF+
+      '              SELECT E2.ID, E2.PARENT_ID, E2.NAME, CAST( (''  ''||E3.INDENT) AS DOMN$PSTRING) AS INDENT '+SQLCRLF+
+      '              FROM   TABL$R_EXPENSES E2, EEE E3 '+SQLCRLF+
+      '              WHERE  (E2.PARENT_ID = E3.ID) '+SQLCRLF+
+      '            )SELECT E.ID, E.PARENT_ID, E.INDENT||E.NAME AS NAME, E.INDENT FROM EEE E '+SQLCRLF+
+      '            )FL '+SQLCRLF+
+      '    INTO   :EXPENSE_ID, :EXPENSE_PARENT_ID, :P_EXPENSE_NAME, :EXPENSE_INDENT '+SQLCRLF+
+      '  DO '+SQLCRLF+ 
+      '    BEGIN '+SQLCRLF+ 
+      '    P_EXPENSE_IDS = ''''; '+SQLCRLF+
+      '    WITH RECURSIVE EEE AS( '+SQLCRLF+
+      '      SELECT E1.ID, E1.PARENT_ID FROM TABL$R_EXPENSES E1 WHERE (E1.ID = :EXPENSE_ID) '+SQLCRLF+
+      '      UNION ALL '+SQLCRLF+
+      '      SELECT E2.ID, E2.PARENT_ID FROM TABL$R_EXPENSES E2, EEE E3 WHERE (E2.PARENT_ID = E3.ID) '+SQLCRLF+
+      '    )SELECT ''~''||LIST(E.ID,''~'')||''~'' FROM EEE E INTO :P_EXPENSE_IDS; '+SQLCRLF+
+      ' '+SQLCRLF+
+      '    IF(:EXPENSE_PARENT_ID = 0)THEN '+SQLCRLF+
+      '      BEGIN '+SQLCRLF+
+      lkSQLBody0+
+      '      EXPENSE_FLAG  = 1; '+SQLCRLF+
+      '      EXPENSE_SUM   = 0; '+SQLCRLF+
+      '      EXPENSE_NAME  = :P_EXPENSE_NAME||'' другое [''||:ACC_ID||'']''; '+SQLCRLF+
+      '      SELECT COALESCE(SUM(C.CND_VALUE),0) '+SQLCRLF+
+      '      FROM   TABL$P_CND C '+SQLCRLF+
+      '      WHERE  (C.DATE_COMMIT BETWEEN :DATE_FROM AND :DATE_TO) '+SQLCRLF+
+      '        AND  (:FIRM_IDS CONTAINING ''~''||C.FIRM_ID||''~'') '+SQLCRLF+
+      '        AND  ((C.ACC_ID_DEB+0) = :ACC_ID) '+SQLCRLF+
+      '        AND  (:P_EXPENSE_IDS NOT CONTAINING  ''~''||C.SUBKONTO_ID_DEB||''~'') '+SQLCRLF+
+      '      INTO   :EXPENSE_SUM; '+SQLCRLF+
+      lkSQLBody1+
+      '      SUSPEND; '+SQLCRLF+
+      '      IF(:EXPENSE_SUM <> 0)THEN '+SQLCRLF+
+      '        BEGIN '+SQLCRLF+
+      lkSQLBody0+
+      '        EXPENSE_FLAG = 0; '+SQLCRLF+
+      '        EXPENSE_NAME = ''''; '+SQLCRLF+
+      '        FOR '+SQLCRLF+
+      '          SELECT C.NAME, COALESCE(SUM(C.CND_VALUE),0) '+SQLCRLF+
+      '          FROM   TABL$P_CND C '+SQLCRLF+
+      '          WHERE  (C.DATE_COMMIT BETWEEN :DATE_FROM AND :DATE_TO) '+SQLCRLF+
+      '            AND  (:FIRM_IDS CONTAINING ''~''||C.FIRM_ID||''~'') '+SQLCRLF+
+      '            AND  ((C.ACC_ID_DEB+0) = :ACC_ID) '+SQLCRLF+
+      '            AND  (:P_EXPENSE_IDS NOT CONTAINING  ''~''||C.SUBKONTO_ID_DEB||''~'') '+SQLCRLF+
+      '          GROUP BY 1 '+SQLCRLF+
+      '          INTO   :EXPENSE_NAME, :EXPENSE_SUM '+SQLCRLF+
+      '        DO '+SQLCRLF+
+      '          BEGIN '+SQLCRLF+
+      lkSQLBody2+
+      '          EXPENSE_NAME = :EXPENSE_INDENT||''  --''||:EXPENSE_NAME; '+SQLCRLF+
+      '          SUSPEND; '+SQLCRLF+
+      '          END '+SQLCRLF+
+      '        END '+SQLCRLF+
+      '      END '+SQLCRLF+
+      ' '+SQLCRLF+
+      lkSQLBody0+
+      '    EXPENSE_FLAG  = 1; '+SQLCRLF+
+      '    EXPENSE_SUM   = 0; '+SQLCRLF+
+      '    EXPENSE_NAME  = :P_EXPENSE_NAME; '+SQLCRLF+
+      '    SELECT COALESCE(SUM(C.CND_VALUE),0) '+SQLCRLF+
+      '    FROM   TABL$P_CND C '+SQLCRLF+
+      '    WHERE  (C.DATE_COMMIT BETWEEN :DATE_FROM AND :DATE_TO) '+SQLCRLF+
+      '      AND  (:FIRM_IDS CONTAINING ''~''||C.FIRM_ID||''~'') '+SQLCRLF+
+      '      AND  ((C.ACC_ID_DEB+0) = :ACC_ID) '+SQLCRLF+
+      '      AND  (:P_EXPENSE_IDS CONTAINING  ''~''||C.SUBKONTO_ID_DEB||''~'') '+SQLCRLF+
+      '    INTO   :EXPENSE_SUM; '+SQLCRLF+
+      lkSQLBody3+
+      '    SUSPEND; '+SQLCRLF+
+      '    IF( (:EXPENSE_SUM <> 0) AND (CHAR_LENGTH(:P_EXPENSE_IDS) <= 9) )THEN '+SQLCRLF+
+      '      BEGIN '+SQLCRLF+
+      '      EXPENSE_FLAG = 0; '+SQLCRLF+
+      '      EXPENSE_NAME = ''''; '+SQLCRLF+
+      lkSQLBody0+
+      '      FOR '+SQLCRLF+
+      '        SELECT C.NAME, COALESCE(SUM(C.CND_VALUE),0) '+SQLCRLF+
+      '        FROM   TABL$P_CND C '+SQLCRLF+
+      '        WHERE  (C.DATE_COMMIT BETWEEN :DATE_FROM AND :DATE_TO) '+SQLCRLF+
+      '          AND  (:FIRM_IDS CONTAINING ''~''||C.FIRM_ID||''~'') '+SQLCRLF+
+      '          AND  ((C.ACC_ID_DEB+0) = :ACC_ID) '+SQLCRLF+
+      '          AND  (:P_EXPENSE_IDS CONTAINING  ''~''||C.SUBKONTO_ID_DEB||''~'') '+SQLCRLF+
+      '        GROUP BY 1 '+SQLCRLF+
+      '        INTO   :EXPENSE_NAME, :EXPENSE_SUM '+SQLCRLF+
+      '      DO '+SQLCRLF+
+      '        BEGIN '+SQLCRLF+
+      lkSQLBody4+
+      '        EXPENSE_NAME = :EXPENSE_INDENT||''  --''||:EXPENSE_NAME; '+SQLCRLF+
+      '        SUSPEND; '+SQLCRLF+
+      '        END '+SQLCRLF+
+      '      END '+SQLCRLF+
+      '    END '+SQLCRLF+
+      'END';    
+  end;
+  //============================================================================
+  function TERPFormRpti_OnPrint(aOwner:TComponent):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_BeforePreview(aOwner:TComponent; aRpt:TxReport);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  
+
+begin
+  TERPFormRpti_Create('{8771B68C-3BC9-465A-A6AF-DFD47EE6120D}');
+end.

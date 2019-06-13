@@ -1,0 +1,11 @@
+{$DEFINE PEAKTOP:IDE/ERP/DBO/OPER/EXTERNAL/DEFAULT_PANEL.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/OPER/EXTERNAL/DEFAULT_PANEL.INC} {$I ./DEFAULT_PANEL.INC} {$ENDIF}
+var
+  aOwner, aParent, aDataSet :TComponent;
+begin
+  if ERP_ObjectExtension_GetObjects(aOwner, aParent, aDataSet)then
+    begin
+    TERPForm_CreateExternalInterface(aOwner, aParent, aDataSet);
+    TERPForm_OpenDataSetsChilds(TDataSet(aDataSet));
+    end;  
+end.

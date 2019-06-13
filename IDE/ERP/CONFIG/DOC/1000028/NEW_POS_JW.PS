@@ -1,0 +1,23 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}
+  {$I PEAKTOP:GLOBAL_VARIABLES.INC}
+{$ENDIF}  
+var
+  lkFirmId :string;
+  lkS :string;
+begin
+  lkFirmId := '3';
+
+  SetGlobalVariable('FIRM_ID', lkFirmId);
+  call(StrAbsolutePath('../../REF/FIRMS/DEFAULT_DLG.PS',ScriptName));
+  lkFirmId := GetGlobalVariable('FIRM_ID');
+  if((UpperCase(lkFirmId) = 'NULL') or (StrTrimAll(lkFirmId)= ''))then exit;
+
+  if GetFieldCommit(FBDataBase, 'PROC$J_INS_1000028_PS001('''+lkFirmId+''', -2)', 'J_ID', '', lkS)then
+    begin
+    ExecSQL(FBDataBase, 'UPDATE TABL$J_4 J SET J.NAME = ''Розничная продажа ювелирных изделий'' WHERE (J.ID = '''+lkS+''');');
+    SetGlobalVariable('J_ID', lkS);
+    call(StrAbsolutePath('./EDIT_POS_JW.PS', ScriptName));  
+    end;  
+  lkFirmId := 'NULL';
+  SetGlobalVariable('FIRM_ID', lkFirmId);
+end.

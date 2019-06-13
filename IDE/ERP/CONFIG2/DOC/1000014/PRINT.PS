@@ -1,0 +1,167 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG2/DOC/1000014/PRINT.PS}
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}                       {$I PEAKTOP:GLOBAL_VARIABLES.INC}                       {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/$COMMON/DIALOG_CASELISTTEM.INC} {$I PEAKTOP:IDE/ERP/DBO/$COMMON/DIALOG_CASELISTTEM.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/REF/DIALOGCASEREFITEM.02.INC}   {$I PEAKTOP:IDE/ERP/DBO/REF/DIALOGCASEREFITEM.02.INC}   {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/CONFIG2/DOC/EXTRACT_TYPE.INC}       {$I ../EXTRACT_TYPE.INC}                                {$ENDIF} 
+    //==========================================================================
+    function PreviewReport(const ID, ResName:string):Boolean;
+    var
+      lkRpt :TxReport;
+      lkRes :string;
+      lkCmp :TComponent;
+      lkImg :TxrImage;
+    begin
+      Result := false;
+      lkRes := StringsLoadFromFile(ResName);
+      if(StrTrimAll(lkRes) = '')then
+        begin
+        Dialogs.MessageDlg('Неверный файл ресурсов '+#13#10+ResName, mtError, [mbOk]);
+        exit;
+        end;
+      lkRpt := TxReport(StrToComponent(lkRes));  
+      lkRpt.DataBase := FBDataBase;
+      if(lkRpt.DataSets.Count < 4)then
+        while(lkRpt.DataSets.Count < 4)do
+          lkRpt.DataSets.Add;
+      lkRpt.DataSets[0].Name     := 'qrDoc';    
+      lkRpt.DataSets[0].SQL.Text := StringsLoadFromFile( StrAbsolutePath('../1000014/EDITFULL_D1000014S.SQL', ScriptName) );
+      lkRpt.DataSets[0].Query.Prepare;
+      lkRpt.DataSets[0].Query.ParamByName('J_ID').AsString := ID;
+      lkRpt.DataSets[1].Name          := 'qrJrnl';    
+      lkRpt.DataSets[1].MasterDataSet := 'qrDoc';    
+      lkRpt.DataSets[1].SQL.Text := StringsLoadFromFile( StrAbsolutePath('../1000014/EDITFULL_JRNL0001.SQL', ScriptName) );
+      lkRpt.DataSets[2].Name          := 'qrEnt';    
+      lkRpt.DataSets[2].MasterDataSet := 'qrDoc';    
+      lkRpt.DataSets[2].SQL.Text := StringsLoadFromFile( StrAbsolutePath('../4/RPT_DEFAULT02.SQL', ScriptName) );
+      lkRpt.DataSets[3].Name          := 'qrTMC';    
+      lkRpt.DataSets[3].MasterDataSet := 'qrDoc';    
+      lkRpt.DataSets[3].SQL.Text := StringsLoadFromFile( StrAbsolutePath('../../REF/TMC/RPT0000.SQL', ScriptName) );
+      lkCmp := lkRpt.FindComponent('ImgLogo');
+      if(lkCmp <> nil)then
+        begin
+        lkImg := TxrImage(lkCmp);
+        lkRes := StrAbsolutePath('../conf/ent/logo.bmp', Amunhotep.ExeName);
+        if FileExists(lkRes)then
+          lkImg.Picture.LoadFromFile(lkRes);
+        end;
+      lkCmp := lkRpt.FindComponent('ImgLogoFilial');
+      if(lkCmp <> nil)then
+        begin
+        lkImg := TxrImage(lkCmp);
+        lkRes := StrAbsolutePath('../conf/ent/logo_filial.bmp', Amunhotep.ExeName);
+        if FileExists(lkRes)then
+          lkImg.Picture.LoadFromFile(lkRes);
+        end;
+      lkRpt.Prepare;
+      lkRpt.Preview;
+    end;
+    //==========================================================================
+    function GetJSONTemplate(const aConfigFileName:string; var aTemplateFileName:string):Boolean;
+    var
+      lkJSONLoader :TlkJSONstreamed;
+      lkJSONObj    :TlkJSONbase;
+      lkJSONArr    :TlkJSONbase;
+      lkJSONList   :TlkJSONList;
+      lkJSONObj    :TlkJSONObject;
+      i, lkIndx    :Integer;
+      lkNames      :TStringList;
+      lkFiles      :TStringList;
+    begin
+      Result := False;
+      aTemplateFileName := '';
+      lkJSONLoader := TlkJSONstreamed.Create;
+      lkJSONObj    := lkJSONLoader.LoadFromFile( aConfigFileName );
+      lkJSONLoader.Free;
+      
+      lkJSONArr  := TlkJSONObject(lkJSONObj).Child[0];
+      lkJSONList := TlkJSONList( TlkJSONobjectmethod(lkJSONArr).ObjValue );
+      lkNames    := TStringList.Create;
+      lkFiles    := TStringList.Create;
+      for i:=0 to lkJSONList.Count-1 do
+        begin
+        lkJSONObj := TlkJSONObject( lkJSONList.Child[i] );
+        lkNames.Add( lkJSONObj.Field['CAPTION' ].Value );
+        lkFiles.Add( lkJSONObj.Field['FILENAME'].Value );
+        end; 
+      lkJSONObj.Free;
+      
+      lkIndx := 0;
+      Result := ERPDialogCaseListItemInteger_Execute('Печать документа', 'Выберите шаблон печати', ERP_ObjectBitmap(ERP_OBJECTTYPE_DOC), lkNames.Text, lkIndx);
+      if Result then 
+        aTemplateFileName := lkFiles[lkIndx];
+
+      lkNames.Free;
+      lkFiles.Free;  
+    end;
+    //==========================================================================
+var
+  lkSQLPrint   :string;
+  lkTypeId     :string;
+  lkJ_ID       :string;
+  lkConfigName :string;
+  lkFileName   :string;
+begin
+  lkJ_ID := GetGlobalVariable('J_ID');
+  if( (StrCiphersOnlyInt(lkJ_ID)='') or (UpperCase(lkJ_ID)='NULL') )then exit;
+  if not GetField(FBDataBase, 'TABL$J_4', 'TYPE_ID', 'ID = '+lkJ_ID+' ', lkTypeId)then exit;
+  lkSQLPrint := 
+    'EXECUTE BLOCK RETURNS( '+SQLCRLF+
+    '   ID   TYPE OF COLUMN TABL$_TB_TYPES.ID '+SQLCRLF+
+    '  ,NAME TYPE OF COLUMN TABL$_TB_TYPES.NAME2 '+SQLCRLF+
+    ')AS '+SQLCRLF+
+    '  DECLARE VARIABLE P_TYPE_ID   TYPE OF COLUMN TABL$_TB_TYPES.ID; '+SQLCRLF+
+    '  DECLARE VARIABLE P_TYPE_NAME TYPE OF COLUMN TABL$_TB_TYPES.NAME2; '+SQLCRLF+
+    'BEGIN '+SQLCRLF+
+    '  SELECT FIRST 1 COALESCE(J.TYPE_ID, 4) '+SQLCRLF+
+    '  FROM   TABL$J_4 J '+SQLCRLF+
+    '  WHERE  (J.ID = '''+lkJ_ID+''') '+SQLCRLF+
+    '  INTO   :P_TYPE_ID; '+SQLCRLF+
+    '  FOR '+SQLCRLF+
+    '    SELECT TMP.ID, TMP.NAME2 '+SQLCRLF+
+    '    FROM   ( '+SQLCRLF+
+    '              WITH RECURSIVE TTT AS( '+SQLCRLF+
+    '                SELECT TT1.ID, TT1.PARENT_ID, TT1.NAME2 '+SQLCRLF+
+    '                FROM   TABL$_TB_TYPES TT1 '+SQLCRLF+
+    '                WHERE  (TT1.ID = :P_TYPE_ID) '+SQLCRLF+
+    '                UNION ALL '+SQLCRLF+
+    '                SELECT TT2.ID, TT2.PARENT_ID, TT2.NAME2 '+SQLCRLF+
+    '                FROM   TABL$_TB_TYPES TT2, TTT TT3 '+SQLCRLF+
+    '                WHERE  (TT2.ID = TT3.PARENT_ID) '+SQLCRLF+
+    '              )SELECT T.ID, T.NAME2 FROM TTT T '+SQLCRLF+
+    '           )TMP '+SQLCRLF+
+    '    INTO    :ID, :P_TYPE_NAME '+SQLCRLF+
+    '  DO '+SQLCRLF+
+    '    BEGIN '+SQLCRLF+
+    '    NAME = :P_TYPE_NAME; '+SQLCRLF+
+    '    SELECT FIRST 1 COALESCE(P.MESSAGESTR, :P_TYPE_NAME) '+SQLCRLF+
+    '    FROM   PROC$_LOCAL(''TABL$_TB_TYPES'', ''NAME2'', :ID) P '+SQLCRLF+
+    '    INTO   :NAME; '+SQLCRLF+
+    '    IF(:ID <> 4)THEN SUSPEND; '+SQLCRLF+
+    '    END '+SQLCRLF+
+    'END';    
+//  if not ERPDialogCaseItem02_Execute(lkSQLPrint, 'Печать документа', 'Выберите шаблон печати', ERP_ObjectIcon(ERP_OBJECTTYPE_DOC), ERP_ObjectBitmap(ERP_OBJECTTYPE_DOC), lkTypeId) then exit;
+
+  lkConfigName := PrepareAbsoleteFileName( StrAbsolutePath('../'+lkTypeId+'/PRINT.JSON', ScriptName) );
+  if FileExists(lkConfigName)then
+    begin
+    lkFileName := '';
+    if GetJSONTemplate(lkConfigName, lkFileName) then
+      begin
+      lkFileName := PrepareAbsoleteFileName( StrAbsolutePath(lkFileName, ScriptName) );
+      if FileExists(lkFileName) then
+        PreviewReport(lkJ_ID, lkFileName)
+       else 
+        Dialogs.MessageDlg('Не удаётся загрузить шаблон печати: '+SQLCRLF+lkFileName, mtWarning,[mbOk]);
+      end;
+    exit;
+    end;
+
+  lkFileName := PrepareAbsoleteFileName( StrAbsolutePath('../'+lkTypeId+'/RPT000.1000071.XFM', ScriptName) );
+  if not FileExists(lkFileName) then
+    begin
+    Dialogs.MessageDlg('Не удаётся загрузить шаблон печати: '+SQLCRLF+lkFileName, mtWarning,[mbOk]);
+    exit;
+    end;
+
+  PreviewReport(lkJ_ID, lkFileName);
+end.

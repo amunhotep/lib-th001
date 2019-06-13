@@ -1,0 +1,64 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}          {$I PEAKTOP:GLOBAL_VARIABLES.INC}           {$ENDIF}
+{$IFNDEF PEAKTOP:SYSUTILS/IMG/DIALOG_WEBCAM.INC}{$I PEAKTOP:SYSUTILS/IMG/DIALOG_WEBCAM.INC} {$ENDIF}
+var
+  lkCS_ID    :string;
+  lkCS_Name  :string;
+  lkFileName :string;
+  lkTr       :TxFBTransaction;
+  lkTB       :TxFBTable;
+  lkStream   :TMemoryStream;
+begin
+  lkCS_ID    := GetGlobalVariable('CS_ID');
+  lkCS_NAME  := ''; GetField(FBDataBase, 'TABL$R_CS','NAME', 'ID = '''+lkCS_ID+''' ', lkCS_NAME);
+  lkFileName := PrepareAbsoleteFileName(DialogWebCam_FileNameImage+FormatDateTime(DialogWebCam_FileNameImageFormat,Now)+'_'+RandomHexStr(8)+'.JPG');
+  if not DialogWebCam_Execute_GetFileName(lkFileName)then
+    begin
+    DeleteFile(lkFileName);
+    exit;
+    end;
+  
+  lkStream := TMemoryStream.Create;
+  if not StreamLoadFromFile(lkFileName, lkStream)then exit;
+  lkStream.Seek(0, soFromBeginning);
+  DeleteFile(lkFileName);
+  SetGlobalVariable(DialogWebCam_FileNameBufferVar, '');
+
+  lkTr := TxFBTransaction.Create(nil);
+  with lkTr do
+    begin
+    DefaultDatabase := FBDataBase;
+    Params.Clear;
+    Params.Add('isc_tpb_read_committed');
+    Params.Add('isc_tpb_write');
+    Params.Add('isc_tpb_rec_version');
+    Params.Add('isc_tpb_nowait');
+    end;
+  lkTB := TxFBTable.Create(lkTr);
+  with lkTB do
+    begin
+    Database    := lkTr.DefaultDatabase;
+    Transaction := lkTr;
+    TableName   := 'TABL$R_CS_PHOTO';
+    try
+      Open;
+      try
+        Insert;
+        FieldByName('CS_ID').AsString         := lkCS_ID;
+        FieldByName('ID').AsString            := '-1';
+        FieldByName('NAME').AsString          := lkCS_NAME+'-'+FormatDateTime('yyyy.mm.dd hh:nn:ss',Now);
+        FieldByName('FLAG_DELETE').AsString   := '0';
+        FieldByName('DATE_COMMIT').AsDateTime := Now;
+        TBlobField(FieldByName('PHOTO')).LoadFromStream(lkStream);
+      finally
+        Post;
+      end;
+    finally
+      if Active then Close;
+    end;
+    end;
+  if lkTr.InTransaction then
+    lkTr.Commit;
+  lkTr.Free;
+  
+  lkStream.Free;
+end.

@@ -1,0 +1,43 @@
+{$I PEAKTOP:GLOBAL_VARIABLES.INC}
+    //==========================================================================
+    function PreviewReport(const ID, ResName:string):Boolean;
+    var
+      lkRpt :TxReport;
+      lkRes :string;
+      lkImg :TxrImage;
+    begin
+      Result := false;
+      lkRes := StringsLoadFromFile(ResName);
+      if(StrTrimAll(lkRes) = '')then
+        begin
+        Dialogs.MessageDlg('Неверный файл ресурсов '+#13#10+ResName, mtError, [mbOk]);
+        exit;
+        end;
+      lkRpt := TxReport(StrToComponent(lkRes));  
+      lkRpt.DataBase := FBDataBase;
+      if(lkRpt.DataSets.Count < 2)then
+        while(lkRpt.DataSets.Count < 2)do
+          lkRpt.DataSets.Add;
+      lkRpt.DataSets[0].SQL.Text := 'SELECT P1.* FROM PROC$D_1000069('''+ID+''') P1 ';
+      lkRpt.DataSets[1].SQL.Text := 'SELECT P1.* FROM PROC$D_1000069('''+ID+''') P1 ';
+      lkRpt.DataSets[2].SQL.Text := 'SELECT P2.* FROM PROC$D_ENT_CONST('''+ID+''') P2 ' 
+      lkImg := TxrImage(lkRpt.FindComponent('ImgLogo'));
+      lkRes := StrAbsolutePath('../conf/ent/logo.bmp', Amunhotep.ExeName);
+      if FileExists(lkRes)then
+        try
+          lkImg.Picture.LoadFromFile(lkRes);
+        except
+        end;
+      lkRpt.Prepare;
+      lkRpt.Preview;
+    end;
+    //==========================================================================
+var
+  J_ID      :string;
+  J_TYPE_ID :string;
+begin
+  J_ID := GetGlobalVariable('J_ID');
+  if((StrTrimAll(J_ID)='')or(UpperCase(J_ID)='NULL'))then exit;
+  if GetField(FBDataBase, 'TABL$J_4', 'TYPE_ID', 'ID = '''+J_ID+''' ', J_TYPE_ID)then
+    PreviewReport(J_ID, StrAbsolutePath('./RPT.XFM', ScriptName));  
+end.

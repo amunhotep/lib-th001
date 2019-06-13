@@ -1,0 +1,16 @@
+{$DEFINE PEAKTOP:IDE/ERP/DBO/OPER/CFGTR/TRIGGERS_CHECK_FOR_EVENTS.PS}
+{$I PEAKTOP:GLOBAL_VARIABLES.INC}
+var
+  lkMsg :string;
+begin
+  lkMsg := 
+    'Create triggers for automatically refreshing exchange tables ?'+#13#10+
+    'Создать автоматически триггеры для внешнего обмена ?';
+  if(Dialogs.MessageDlg(lkMsg, mtConfirmation, [mbYes, mbNo]) <> mrYes)then exit;
+  lkMsg := PrepareAbsoleteFileName(StrAbsolutePath('../../SQL/TRIGGERS/CHECK_FOR_EXCHANGE.SQL', ScriptName));
+  if FileExists(lkMsg)then
+    begin
+    if ExecSQL(FBDataBase, StringsLoadFromFile(lkMsg)) then
+      Dialogs.MessageDlg('Триггеры созданы.', mtInformation, [mbOK]);
+    end;  
+end.

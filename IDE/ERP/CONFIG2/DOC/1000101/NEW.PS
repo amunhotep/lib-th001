@@ -1,0 +1,18 @@
+var
+  lkS :string;
+begin
+  if(Dialogs.MessageDlg('Сгенерировать автоматически Производственные программы ?', mtConfirmation,[mbYes, mbNo]) = mrYes)then  
+    if GetFieldCommit(FBDataBase, 'PROC$J_INS_1000101', 'CNT', '', lkS)then
+      begin
+      if(lkS = '-1')then
+        begin
+        lkS := 
+          'Не удается обработать счета за '+#13#10+
+          'Производственная программа за эту дату проведена. '+#13#10+
+          'Отмените проведение производственной программы за эту дату и запустите обработку накладных снова.';
+        Dialogs.MessageDlg(lkS, mtWarning,[mbOk]);
+        end
+      else
+        Dialogs.MessageDlg('Обработано "'+lkS+'" счетов.', mtInformation,[mbOk]);
+      end;  
+end.

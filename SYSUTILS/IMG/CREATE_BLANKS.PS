@@ -1,0 +1,20 @@
+{$I PEAKTOP:GLOBAL_VARIABLES.INC}
+var
+  i :Integer;
+  lkBmp :TBitmap;
+  lkFileName :string;
+begin
+  for i:=538 to 600 do
+    begin
+    lkFileName := PrepareAbsoleteFileName('PEAKTOP:IMG/'+FormatFloat('0000',i)+'.BMP');
+    WriteLn(lkFileName);
+    lkBmp := TBitmap.Create;
+    lkBmp.Height := 16;
+    lkBmp.Width  := 16;
+    lkBmp.Canvas.Brush.Color := clFuchsia;
+    lkBmp.Canvas.Brush.Style := bsSolid;
+    lkBmp.Canvas.FillRect(Rect(0,0,16,16));
+    lkBmp.SaveToFile(lkFileName);
+    lkBmp.Free;
+    end;  
+end.

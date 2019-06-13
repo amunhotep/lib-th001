@@ -1,0 +1,442 @@
+{$DEFINE DB:CONFIG/RPTI/EBB2E207-5147-4634-B734-44FA92B1C147/DEFAULT.PS}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$I PEAKTOP:IDE/ERP/DBO/RPTI/FORMRPTI.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC} {$I PEAKTOP:IDE/ERP/DBO/INPUT/DATEPERIOD/INTF.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}        {$I PEAKTOP:IDE/ERP/DBO/INPUT/REF/INTF.INC}        {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCEDITCOMBO.INC}                  {$I PEAKTOP:OBJ/TXCEDITCOMBO.INC}                  {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TCOMBOBOX.INC}                     {$I PEAKTOP:OBJ/TCOMBOBOX.INC}                     {$ENDIF}
+const
+  objname_datefrom   = 'dtpDateFrom';
+  objname_dateto     = 'dtpDateTo';
+  objname_firms      = 'edtFirm';
+  objname_type       = 'cbxType';
+  objname_acc        = 'edtAccount';
+  msg_input_firms    = 'Выберите фирму учета';
+  msg_input_type     = 'Выберите тип шахматки';
+  msg_input_acc      = 'Выберите счет И.Д.С.';
+  mgs_filials        = 'Филиалы';
+const
+  FIELD_PREFIX       = 'PS'; 
+  FIELD_SUFFIX       = '_'; 
+  DefaultColumnWidth = 96;  
+  //============================================================================
+  function TERPFormRpti_GetExportFilter(aOwner:TComponent):string;
+  begin
+    Result := '';{ 
+      msg_erp_lbldatefrom+' "'+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+'" '+
+      msg_erp_lbldateto  +' "'+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto))+'" '+
+      'Фирмы учета: "'+InputIntf_Ref_GetNames(aOwner.FindComponent(objname_firms))+'" ';}
+  end;
+  //============================================================================
+  procedure TERPFormRpti_Columns_OnEditButtonClick(Sender :TObject; var Handled :Boolean);
+  var
+    lkDBG    :TDBGridEh;
+    lkCmp    :TComponent;
+    lkCol    :TColumnEh;
+    lkSubkonto:string;
+    lkScript :string;
+  begin
+    Handled := true;
+    lkDBG   := TDBGridEh(TComponent(Sender).Owner.Owner);
+    if not lkDBG.DataSource.DataSet.Active then exit;
+    lkCol   := lkDBG.Columns[lkDBG.SelectedIndex];
+    if(lkCol=nil)then exit;
+    lkSubkonto := '';
+    if(lkDBG.DataSource.DataSet.FieldByName('FLAG').AsInteger = 0)then
+      begin
+      lkSubkonto := lkDBG.DataSource.DataSet.FieldByName('NAME').AsString;
+      Delete(lkSubkonto,1,4);
+      lkSubkonto := StrReplaceStr(lkSubkonto, '''', '''''');
+      lkSubkonto := '  TERPFormGrid_DataSetFilter_Add(''NAME'', ''NAME = '''''+lkSubkonto+'''''''); '+#13#10;
+      end; 
+    lkScript := 
+      '{$IFNDEF PEAKTOP:IDE/ERP/DBO/DOC/FORMJRNL.INC}{$I PEAKTOP:IDE/ERP/DBO/DOC/FORMJRNL.INC}{$ENDIF} '+#13#10+
+      'var '+#13#10+
+      '  JrnlForm :TForm; '+#13#10+
+      'begin '+#13#10+
+      '  TERPFormGrid_DataSetFilter_DateInit := true; '+#13#10+
+      '  TERPFormGrid_DataSetFilter_DateFrom := StrToDate('''+FormatDateTime('dd.mm.yyyy',lkDBG.DataSource.DataSet.FieldByName('DATE_FROM').AsDateTime)+'''); '+#13#10+ 
+      '  TERPFormGrid_DataSetFilter_DateTo   := StrToDate('''+FormatDateTime('dd.mm.yyyy',lkDBG.DataSource.DataSet.FieldByName('DATE_TO').AsDateTime)+'''); '+#13#10+
+      '  TERPFormGrid_DataSetFilter_Add(''FIRM_ID''    , ''FIRM_ID   = '+lkDBG.DataSource.DataSet.FieldByName('FIRM_ID').AsString+' ''); '+#13#10+
+      '  TERPFormGrid_DataSetFilter_Add(''FLAG_COMMIT'', ''FLAG_COMMIT = 1''); '+#13#10+
+//      '  TERPFormGrid_DataSetFilter_Add(''ACC_ID''     , ''ACC_ID = '+lkDBG.DataSource.DataSet.FieldByName('ACC_ID').AsString+' ''); '+#13#10+
+      '  TERPFormGrid_DataSetFilter_Add(''PAYSRC_ID''  , ''PAYSRC_ID = '+lkCol.ColParams[1]+' ''); '+#13#10+
+      lkSubkonto+
+      '  JrnlForm := Journal_Create('''+lkCol.ColParams[0]+'''); '+#13#10+
+      '  TERPForm_SetCaption(JrnlForm, JrnlForm.Caption+'': '+lkCol.ColParams[2]+''');'+#13#10+
+      'end.'+#13#10;
+    run(lkScript, 'DB:CONFIG/DOC/'+lkCol.ColParams[0]+'/DEFAULT.PS');
+  end;
+  //============================================================================
+  function TERPFormRpti_OnGetSQL(aOwner:TComponent;var aSQL:string):Boolean;
+  var
+    lkFld     :string;
+    lkSQLFlds :string;
+    lkSQLSum  :string;
+    lkSQLBody :string;
+    lkSQLBody2:string;
+    lkDocType :string;
+    lkDBG     :TDBGridEh;
+    lkCol     :TColumnEh;
+    lkTr      :TxFBTransaction;
+    lkQr      :TxFBQuery;
+  begin
+    Result := true;
+    if(TComboBox(aOwner.FindComponent(objname_type)).ItemIndex = 0)then
+      lkDocType := '1000021'
+     else
+      lkDocType := '1000020'; 
+    lkDBG  := TERPForm_DBGridMain(aOwner);
+    lkDBG.FrozenCols := 0;
+    lkDBG.Columns.Clear;
+    lkCol := CreateTColumnEh(lkDBG,'ACC_ID','# ### ##0','Счет'     , 48,taRightJustify);
+    lkCol.Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+    lkCol.Tag   := 666;
+    lkCol := CreateTColumnEh(lkDBG,'NAME'  ,''         ,'Основание',220,taLeftJustify );
+    with lkCol do
+      begin
+      Tag                  := 666;
+      Color                := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      Footer.Color         := Color;
+      Footer.Alignment     := Alignment;
+      Footer.DisplayFormat := DisplayFormat;
+      Footer.ValueType     := fvtStaticText;
+      Footer.Value         := 'ИТОГО';  
+      end;
+    lkTr := TxFBTransaction.Create(nil);
+    with lkTr do 
+      begin 
+      DefaultDataBase := FBDataBase; 
+      Params.Clear; 
+      Params.Add('isc_tpb_read_committed'); 
+      Params.Add('isc_tpb_read'); 
+      Params.Add('isc_tpb_rec_version'); 
+      Params.Add('isc_tpb_nowait'); 
+      end; 
+    lkQr := TxFBQuery.Create(lkTr);
+    lkQr.Transaction := lkTr;
+    lkQr.SQL.Text := 
+      'SELECT DISTINCT PM.PAYSRC_ID, PSRC.NAME AS PAYSRC_NAME, PSRC.FILIAL_ID, '+SQLCRLF+
+      '       (SELECT FIRST 1 FL.NAME FROM TABL$R_FILIALS FL WHERE (FL.ID = PSRC.FILIAL_ID)) AS FILIAL_NAME '+SQLCRLF+
+      'FROM   TABL$P_PAYSRC_MOVE PM, TABL$R_PAYSRC PSRC '+SQLCRLF+
+      'WHERE  (PM.DATE_COMMIT BETWEEN '''+FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+' 00:00:00'' AND '''+
+        FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto))+' 23:59:59'') '+SQLCRLF+
+      '  AND  ((PM.FIRM_ID+0)= '+IntToStr(aOwner.FindComponent(objname_firms).Tag)+') '+SQLCRLF+
+      '  AND  (PM.FLAG_DEBET = '+IntToStr(TComboBox(aOwner.FindComponent(objname_type)).ItemIndex)+') '+SQLCRLF+
+      '  AND  (PSRC.ID = PM.PAYSRC_ID) '+SQLCRLF+
+//      '  AND  ((PSRC.ACC_ID+0) = '+IntToStr(aOwner.FindComponent(objname_acc).Tag)+') '+SQLCRLF+
+      'ORDER BY 2';
+    //Dialogs.MessageDlg(lkQr.SQL.Text, mtInformation, [mbOk]);  
+    lkQr.Open;
+    lkQr.First;
+    lkSQLFlds  := '';
+    lkSQLBody  := '';
+    lkSQLBody2 := '';
+    lkSQLSum   := '    -- CALCULATING SUM '+SQLCRLF+'    '+FIELD_PREFIX+'TOTAL = :'+FIELD_PREFIX+'TOTAL';
+    while not lkQr.EOF do
+      begin
+      lkFld     := FIELD_PREFIX+lkQr.FieldByName('PAYSRC_ID').AsString;
+      lkSQLFlds := lkSQLFlds +'  ,'+lkFld+' TYPE OF COLUMN TABL$J_4.DOCSUM, '+lkFld+FIELD_SUFFIX+' TYPE OF COLUMN TABL$J_4.DOCSUM '+SQLCRLF;
+      lkSQLSum  := lkSQLSum  + ' + :'+lkFld;
+      lkSQLBody := lkSQLBody +
+        '    SELECT COALESCE(SUM(PM.PAYSRC_VALUE),0) '+SQLCRLF+
+        '    FROM   TABL$P_PAYSRC_MOVE PM '+SQLCRLF+
+        '    WHERE  (PM.DATE_COMMIT BETWEEN :DATE_FROM AND :DATE_TO) '+SQLCRLF+
+        '      AND  (PM.PAYSRC_ID  = '+lkQr.FieldByName('PAYSRC_ID').AsString+') '+SQLCRLF+
+        '      AND  ((PM.FIRM_ID+0)= :FIRM_ID) '+SQLCRLF+
+        '      AND  (PM.FLAG_DEBET = :TYPE_ID) '+SQLCRLF+
+        '      AND  ((PM.ACC_ID+0) = :ACC_ID) '+SQLCRLF+
+        '    INTO   :'+lkFld+'; '+SQLCRLF+
+        '    SELECT COALESCE(SUM(PM.PAYSRC_VALUE),0) '+SQLCRLF+
+        '    FROM   TABL$P_PAYSRC_MOVE PM '+SQLCRLF+
+        '    WHERE  (PM.DATE_COMMIT BETWEEN :DATE_FROM AND :DATE_TO) '+SQLCRLF+
+        '      AND  (PM.PAYSRC_ID = '+lkQr.FieldByName('PAYSRC_ID').AsString+') '+SQLCRLF+
+        '      AND  ((PM.FIRM_ID+0)= :FIRM_ID) '+SQLCRLF+
+        '      AND  (PM.FLAG_DEBET = :TYPE_ID) '+SQLCRLF+
+        '    INTO   :'+lkFld+FIELD_SUFFIX+'; '+SQLCRLF;
+      lkSQLBody2 := lkSQLBody2 +
+        '      -- '+lkQr.FieldByName('PAYSRC_NAME').AsString+' '+SQLCRLF+
+        '      SELECT COALESCE(SUM(PM.PAYSRC_VALUE),0) '+SQLCRLF+
+        '      FROM   TABL$P_PAYSRC_MOVE PM, TABL$J_4 J '+SQLCRLF+
+        '      WHERE  (PM.DATE_COMMIT BETWEEN :DATE_FROM AND :DATE_TO) '+SQLCRLF+
+        '        AND  (PM.PAYSRC_ID = '+lkQr.FieldByName('PAYSRC_ID').AsString+') '+SQLCRLF+
+        '        AND  ((PM.FIRM_ID+0)= :FIRM_ID) '+SQLCRLF+
+        '        AND  (PM.FLAG_DEBET = :TYPE_ID) '+SQLCRLF+
+        '        AND  ((PM.ACC_ID+0) = :ACC_ID) '+SQLCRLF+
+        '        AND  (J.ID = PM.J_ID) '+SQLCRLF+
+        '        AND  (J.NAME = :NAME) '+SQLCRLF+
+        '      INTO   :'+lkFld+'; '+SQLCRLF;
+      lkCol := CreateTColumnEh(lkDBG,FIELD_PREFIX+'TOTAL','# ### ### ##0.00','ВСЕГО', DefaultColumnWidth+16,taRightJustify);
+      with lkCol do
+        begin
+        Index := 2;
+        Color := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+        Footer.Alignment     := Alignment;
+        Footer.DisplayFormat := DisplayFormat;
+        Footer.ValueType     := fvtFieldValue;
+        Footer.FieldName     := FIELD_PREFIX+'TOTAL'+FIELD_SUFFIX;
+        AlwaysShowEditButton := true;
+        if(EditButtons.Count = 0)then
+          with EditButtons.Add do
+            begin
+            Visible := true;
+            Style   := ebsEllipsisEh;
+            OnClick := @TERPFormRpti_Columns_OnEditButtonClick;
+            end; 
+        ColParams.Clear;
+        ColParams.Add(lkDocType);  
+        ColParams.Add(lkQr.FieldByName('PAYSRC_ID'  ).AsString);  
+        ColParams.Add(lkQr.FieldByName('PAYSRC_NAME').AsString);  
+        end;
+      lkCol := CreateTColumnEh(lkDBG,lkFld,'# ### ### ##0.00',mgs_filials+'|'+lkQr.FieldByName('FILIAL_NAME').AsString+'|'+lkQr.FieldByName('PAYSRC_NAME').AsString, DefaultColumnWidth, taRightJustify);
+      with lkCol do
+        begin
+        Footer.Alignment     := Alignment;
+        Footer.DisplayFormat := DisplayFormat;
+        Footer.ValueType     := fvtFieldValue;
+        Footer.FieldName     := lkFld+FIELD_SUFFIX;  
+        AlwaysShowEditButton := true;
+        with EditButtons.Add do
+          begin
+          Visible := true;
+          Style   := ebsEllipsisEh;
+          OnClick := @TERPFormRpti_Columns_OnEditButtonClick;
+          end; 
+        ColParams.Clear;
+        ColParams.Add(lkDocType);  
+        ColParams.Add(lkQr.FieldByName('PAYSRC_ID'  ).AsString);  
+        ColParams.Add(lkQr.FieldByName('PAYSRC_NAME').AsString);  
+        end;
+      lkQr.Next;
+      end;
+    if lkTr.InTransaction then
+      lkTr.Commit;
+    lkTr.Free;  
+    lkDBG.FrozenCols     := 3;
+    lkDBG.SumList.Active := true;
+    lkDBG.FooterRowCount := 1;  
+    aSQL :=  
+      'EXECUTE BLOCK ( '+SQLCRLF+
+      '   Q_DATE_FROM TYPE OF COLUMN TABL$J_4.DATE_COMMIT = ?DATE_FROM '+SQLCRLF+
+      '  ,Q_DATE_TO   TYPE OF COLUMN TABL$J_4.DATE_COMMIT = ?DATE_TO '+SQLCRLF+
+      '  ,Q_FIRM_ID   TYPE OF COLUMN TABL$J_4.FIRM_ID     = ?FIRM_ID '+SQLCRLF+
+      '  ,Q_TYPE_ID   TYPE OF COLUMN TABL$J_4.FLAG_COMMIT = ?TYPE_ID '+SQLCRLF+
+      ')RETURNS( '+SQLCRLF+
+      '   DATE_FROM TYPE OF COLUMN TABL$J_4.DATE_COMMIT '+SQLCRLF+
+      '  ,DATE_TO   TYPE OF COLUMN TABL$J_4.DATE_COMMIT '+SQLCRLF+
+      '  ,FIRM_ID   TYPE OF COLUMN TABL$J_4.FIRM_ID     '+SQLCRLF+
+      '  ,TYPE_ID   TYPE OF COLUMN TABL$J_4.FLAG_COMMIT '+SQLCRLF+
+      '  ,FLAG      TYPE OF COLUMN TABL$J_4.FLAG_COMMIT '+SQLCRLF+
+      '  ,ACC_ID    TYPE OF COLUMN TABL$J_1000016.ACC_ID '+SQLCRLF+
+      '  ,NAME      TYPE OF COLUMN TABL$J_4.NAME '+SQLCRLF+
+      '  ,'+FIELD_PREFIX+'TOTAL   TYPE OF COLUMN TABL$J_4.DOCSUM, '+FIELD_PREFIX+'TOTAL'+FIELD_SUFFIX+'   TYPE OF COLUMN TABL$J_4.DOCSUM '+SQLCRLF+
+      lkSQLFlds+
+      ')AS '+SQLCRLF+
+      'BEGIN '+SQLCRLF+
+      '  DATE_FROM = :Q_DATE_FROM; '+SQLCRLF+
+      '  DATE_TO   = :Q_DATE_TO; '+SQLCRLF+
+      '  FIRM_ID   = :Q_FIRM_ID; '+SQLCRLF+
+      '  TYPE_ID   = :Q_TYPE_ID; '+SQLCRLF+
+      '  SELECT COALESCE(SUM(PM.PAYSRC_VALUE),0) '+SQLCRLF+
+      '  FROM   TABL$P_PAYSRC_MOVE PM '+SQLCRLF+
+      '  WHERE  (PM.DATE_COMMIT BETWEEN :DATE_FROM AND :DATE_TO) '+SQLCRLF+
+      '    AND  ((PM.FIRM_ID+0)= :FIRM_ID) '+SQLCRLF+
+      '    AND  (PM.FLAG_DEBET = :TYPE_ID) '+SQLCRLF+
+      '  INTO   :'+FIELD_PREFIX+'TOTAL'+FIELD_SUFFIX+'; '+SQLCRLF+
+      '  FOR '+SQLCRLF+
+      '    SELECT DISTINCT PM.ACC_ID '+SQLCRLF+
+      '    FROM   TABL$P_PAYSRC_MOVE PM '+SQLCRLF+
+      '    WHERE  (PM.DATE_COMMIT BETWEEN :DATE_FROM AND :DATE_TO) '+SQLCRLF+
+      '      AND  ((PM.FIRM_ID+0) = :FIRM_ID) '+SQLCRLF+
+      '      AND  (PM.FLAG_DEBET  = :TYPE_ID) '+SQLCRLF+
+      '    INTO   :ACC_ID '+SQLCRLF+
+      '  DO '+SQLCRLF+
+      '    BEGIN '+SQLCRLF+
+      '    NAME = ''ОБЩИЙ ОБОРОТ ПО СЧЕТУ''; '+FIELD_PREFIX+'TOTAL = 0;  '+SQLCRLF+
+      lkSQLBody+
+      '    FLAG = 1; '+SQLCRLF+
+      lkSQLSum+'; '+SQLCRLF+
+      '    IF(:'+FIELD_PREFIX+'TOTAL <> 0)THEN SUSPEND; '+SQLCRLF+
+      '    FOR '+SQLCRLF+
+      '      SELECT DISTINCT J.NAME '+SQLCRLF+
+      '      FROM   TABL$P_PAYSRC_MOVE PM, TABL$J_4 J '+SQLCRLF+
+      '      WHERE  (PM.DATE_COMMIT BETWEEN :DATE_FROM AND :DATE_TO) '+SQLCRLF+
+      '        AND  ((PM.FIRM_ID+0) = :FIRM_ID) '+SQLCRLF+
+      '        AND  (PM.FLAG_DEBET  = :TYPE_ID) '+SQLCRLF+
+      '        AND  ((PM.ACC_ID+0)  = :ACC_ID) '+SQLCRLF+
+      '        AND  (J.ID = PM.J_ID) '+SQLCRLF+
+      '      INTO   :NAME '+SQLCRLF+
+      '    DO '+SQLCRLF+
+      '      BEGIN '+SQLCRLF+
+      '      '+FIELD_PREFIX+'TOTAL = 0; '+SQLCRLF+
+      lkSQLBody2+
+      '      FLAG = 0; '+SQLCRLF+
+      lkSQLSum+'; '+SQLCRLF+
+      '      NAME = ''    ''||:NAME; '+SQLCRLF+
+      '      IF(:'+FIELD_PREFIX+'TOTAL <> 0)THEN SUSPEND; '+SQLCRLF+
+      '      END '+SQLCRLF+
+      '    END '+SQLCRLF+
+      'END';
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnGetSQLFileName(aOwner:TComponent;var aFileName:string);
+  begin
+     // do nothing, default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnProcessParams(aOwner:TComponent;aQr :TxFBQuery);
+  begin
+    with aQr do
+      begin
+      ParamByName('DATE_FROM').AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_datefrom))+' 00:00:00';
+      ParamByName('DATE_TO'  ).AsString := FormatDateTime('dd.mm.yyyy', InputIntf_DatePeriod_Date(aOwner, objname_dateto)+1)+' 00:00:00';
+      ParamByName('FIRM_ID'  ).AsString := IntToStr(aOwner.FindComponent(objname_firms).Tag);
+      ParamByName('TYPE_ID'  ).AsString := IntToStr(TComboBox(aOwner.FindComponent(objname_type)).ItemIndex);
+      end;  
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnChart(aOwner:TComponent; aParent:TWinControl);
+  var
+    lkPC :TxcPageControlEx;
+    lkTS :TxcTabSheet;
+  begin
+    aParent.Free;
+    exit;
+    lkPC := CreateTxcPageControlEx(aOwner, aParent, 'PCCharts', 0,0,600,600, alClient);
+    lkPC.MultiLine := false;
+    TxcPageControlEx_ActivateDefaultPage(lkPC);
+  end;
+  //============================================================================
+  procedure TERPFormRpti_edtFirm_OnButtonClick(Sender :TObject);
+  var
+    lkStr :string;
+  begin
+    with TxcEditCombo(Sender) do
+      begin
+      SetGlobalVariable('FIRM_ID', IntToStr(Tag));
+      call('DB:CONFIG/REF/FIRMS/DEFAULT_DLG.PS');
+      lkStr := GetGlobalVariable('FIRM_ID');
+      if( (UpperCase(lkStr) = 'NULL') or (StrTrimAll(lkStr)='') )then exit;
+      Tag := StrToInt(lkStr);
+      GetField(FBDataBase, 'TABL$R_FIRMS', 'NAME', 'ID = '+lkStr, lkStr);
+      Text := lkStr;
+      end;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_edtAcc_OnButtonClick(Sender :TObject);
+  var
+    lkStr :string;
+  begin
+    with TxcEditCombo(Sender) do
+      begin
+      SetGlobalVariable('ACC_ID', IntToStr(Tag));
+      call('DB:CONFIG/REF/BUHG_ACCS/DEFAULT_DLG.PS');
+      lkStr := GetGlobalVariable('ACC_ID');
+      if( (UpperCase(lkStr) = 'NULL') or (StrTrimAll(lkStr)='') )then exit;
+      Tag := StrToInt(lkStr);
+      GetField(FBDataBase, 'TABL$R_BUHG_ACCS', 'ID||''.''||NAME', 'ID = '+lkStr, lkStr);
+      Text := lkStr;
+      end;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnTerms(aOwner:TComponent;aParent:TWinControl);
+  var
+    lkLastTop :Integer;
+    lkGrb     :TxcGroupBox;
+    lkEdt     :TxcEditCombo;
+    lkCbx     :TComboBox;
+    lkStr     :string;
+  begin
+    lkLastTop := 4;
+    lkLastTop := lkLastTop + InputIntf_DatePeriod_Create(aOwner, aParent, 'gbDatePeriod', 'Укажите период', 4, lkLastTop, 44, 360,objname_datefrom,objname_dateto,StartOfTheMonth(Now),EndOfTheMonth(Now)).Height;
+    lkLastTop := lkLastTop + 4;
+    lkGrb     := CreateTxcGroupBox(aOwner, aParent, '',msg_input_firms,alNone,4,lkLastTop,48,360);
+    lkLastTop := lkLastTop + lkGrb.Height + 4;
+    lkStr     := '0'; 
+    lkEdt := CreateTxcEditCombo(aOwner,lkGrb,objname_firms,TERPForm_DefaultControlIndent,20,20,lkGrb.Width-(TERPForm_DefaultControlIndent*2));
+    with lkEdt do
+      begin
+      Color         := Amunhotep.MainForm.StyleManager.Colors.Window;
+      GlyphKind     := gkEllipsis;
+      ReadOnly      := true;
+      AlwaysEnable  := true;
+      Font.Style    := [fsBold];
+      Tag           := StrToInt(lkStr);
+      GetField(FBDataBase, 'TABL$R_FIRMS', 'NAME', 'ID = '+lkStr, lkStr);
+      Text          := lkStr;
+      OnButtonClick := @TERPFormRpti_edtFirm_OnButtonClick;
+      end;
+    lkGrb     := CreateTxcGroupBox(aOwner, aParent, '',msg_input_type,alNone,4,lkLastTop,48,360);
+    lkLastTop := lkLastTop + lkGrb.Height + 4;
+    lkCbx := CreateTComboBox(aOwner,lkGrb,'Кредитовая шахматка',TERPForm_DefaultControlIndent,20,24,lkGrb.Width-(TERPForm_DefaultControlIndent*2),
+               'Кредитовая шахматка'+SQLCRLF+'Дебетовая шахматка',0);
+    with lkCbx do
+      begin
+      Name       := objname_type;
+      Font.Style := [fsBold];
+      Style      := csDropDownList;
+      end;           
+    lkGrb     := CreateTxcGroupBox(aOwner, aParent, '',msg_input_acc,alNone,4,lkLastTop,48,360);
+    lkLastTop := lkLastTop + lkGrb.Height + 4;
+    lkStr     := '1000050'; 
+    lkEdt := CreateTxcEditCombo(aOwner,lkGrb,objname_acc,TERPForm_DefaultControlIndent,20,20,lkGrb.Width-(TERPForm_DefaultControlIndent*2));
+    with lkEdt do
+      begin
+      Color         := Amunhotep.MainForm.StyleManager.Colors.Window;
+      GlyphKind     := gkEllipsis;
+      ReadOnly      := true;
+      AlwaysEnable  := true;
+      Font.Style    := [fsBold];
+      Tag           := StrToInt(lkStr);
+      GetField(FBDataBase, 'TABL$R_BUHG_ACCS', 'ID||''.''||NAME', 'ID = '+lkStr, lkStr);
+      Text          := lkStr;
+      OnButtonClick := @TERPFormRpti_edtAcc_OnButtonClick;
+      end;
+  end;
+  //============================================================================
+  function TERPFormRpti_OnColumnsCreate(aOwner:TComponent; aDBG:TDBGridEh):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_DBGridEhMain_OnGetCellParams(Sender: TObject; Column: TColumnEh; 
+              AFont: TFont; var Background: TColor; State: TGridDrawState);
+  begin
+   if(not(Column.Field.DataSet.Active))then exit;
+   if(not(Column.Field.DataSet.RecordCount > 0))then exit;
+//   if(Column.Tag=666)then exit;
+   if(Column.Field.DataSet.FieldByName('FLAG').AsInteger = 1)then 
+     begin
+     aFont.Style:= aFont.Style + [fsBold];
+     Background := $FFA0C0;
+     end
+    else
+     begin
+     aFont.Style:= aFont.Style - [fsBold];
+     end; 
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsCreated(aOwner:TComponent; aDBG:TDBGridEh);
+  begin
+    aDBG.OnGetCellParams := @TERPFormRpti_DBGridEhMain_OnGetCellParams;
+  end;
+  //============================================================================
+  procedure TERPFormRpti_OnColumnsLoad(aOwner:TComponent; aDBG:TDBGridEh);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  function TERPFormRpti_OnPrint(aOwner:TComponent):Boolean;
+  begin
+    Result := false; // default handler
+  end;
+  //============================================================================
+  procedure TERPFormRpti_BeforePreview(aOwner:TComponent; aRpt:TxReport);
+  begin
+    // do nothing, default handler
+  end;
+  //============================================================================
+  
+
+begin
+  TERPFormRpti_Create('{EBB2E207-5147-4634-B734-44FA92B1C147}');
+end.

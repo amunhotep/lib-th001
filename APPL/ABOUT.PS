@@ -1,0 +1,84 @@
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}               {$I PEAKTOP:GLOBAL_VARIABLES.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TIMAGE.INC}                     {$I PEAKTOP:OBJ/TIMAGE.INC}               {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCPAGECONTROLEX.INC}           {$I PEAKTOP:OBJ/TXCPAGECONTROLEX.INC}     {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCTABSHEET.INC}                {$I PEAKTOP:OBJ/TXCTABSHEET.INC}          {$ENDIF}
+  //============================================================================
+  procedure ShowAbout;
+  var
+    lkVer      :string;
+    lkStr      :string;
+    lkForm     :TForm;
+    lkImgClient:TImage;
+    lkFileName :string;
+    lkPC       :TxcPageControlEx; 
+    lkTS       :TxcTabSheet;  
+    lkMem      :TMemo; 
+  begin
+    lkVer := IntToStr(Trunc(Amunhotep.Version / 1000))+'.'+                        // major
+             FormatFloat('0'   ,Trunc(Frac(Amunhotep.Version / 1000) *  10) )+'.'+ // minor
+             FormatFloat('00'  ,     (Frac(Amunhotep.Version /  100) * 100) )+'.'+ // patch
+             FormatFloat('0000',Amunhotep.Version);
+    lkStr := UpperCase(Amunhotep.Name)+' '+IntToStrRoman(Trunc(Amunhotep.Version / 1000))+'  ['+lkVer+']';
+    lkForm := TForm.Create(nil);
+    with lkForm do
+      begin
+      BorderStyle := bsDialog;
+      Height      := 480 + 64;
+      Width       := 540 + 18;
+      Caption     := lkStr;
+      Position    := poScreenCenter;
+      Color       := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      Font.Color  := Amunhotep.MainForm.StyleManager.Colors.Border;
+      Font.Name   := 'Verdana';
+      Font.Size   := 7;
+      Font.Style  := [fsBold];
+      end;
+    lkPC := CreateTxcPageControlEx(lkForm,lkForm,'PC',0,0,lkForm.ClientHeight, lkForm.ClientWidth, alClient);
+    lkPC.TabStyle      := tsSquareCorners;
+    lkPC.TextAlignment := taCenter;
+    lkTS := CreateTxcTabSheet(lkPC,'tsLogo'   ,UpperCase(Amunhotep.Name),263,Amunhotep.MainForm.StyleManager.Colors.Window);
+    lkTS.ParentFont := false;
+    lkTS.Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+    lkImgClient := CreateTImage(lkForm, lkTS, 'ImgCleint', alClient, 0, 0, 33, 34); lkImgClient.Transparent := false;
+    lkFileName := PrepareAbsoleteFileName('PEAKTOP:IMG/SPLASH/AMUNHOTEP1000.BMP');
+    if FileExists(lkFileName)then
+      lkImgClient.Picture.LoadFromFile(lkFileName);
+    with lkImgClient.Picture.Bitmap.Canvas do
+      begin
+      Brush.Style := bsClear;
+      Font.Color  := Amunhotep.MainForm.StyleManager.Colors.Border;
+      Font.Name   := 'Impact';
+      Font.Size   := 36;
+      Font.Style  := [];
+      TextOut(540 - TextWidth(lkVer) - 4, 0, lkVer);
+      end;  
+    lkTS := CreateTxcTabSheet(lkPC,'tsCopyright',#$A9' Copyright',103,Amunhotep.MainForm.StyleManager.Colors.Foreground);
+    lkTS := CreateTxcTabSheet(lkPC,'tsLicense'  ,'Соглашение'    ,103,Amunhotep.MainForm.StyleManager.Colors.Window);
+    lkMem := TMemo.Create(lkForm);
+    with lkMem do
+      begin
+      Parent     := lkTS;
+      Left       := 0;
+      Top        := 0;
+      Align      := alClient;
+      ScrollBars := ssVertical;
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      Font.Name  := 'Courier New';
+      Font.Size  := 10;
+      Font.Style := [fsBold];
+      WordWrap   := true;
+      Lines.Text := '';
+      lkFileName := PrepareAbsoleteFileName('PEAKTOP:APPL\AMUNHOTEP_LICENSE.TXT');
+      if FileExists( lkFileName )then
+        Lines.LoadFromFile( lkFileName );
+      ReadOnly   := True;  
+      end; 
+    TxcPageControlEx_ActivateDefaultPage( lkPC );  
+    lkForm.ShowModal;
+    lkForm.Free;
+  end;
+  //============================================================================
+begin
+  ShowAbout;
+end.

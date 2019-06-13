@@ -1,0 +1,57 @@
+{$DEFINE PEAKTOP:IDE/REGEDIT/MAINMENU/CREATE.PS}
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}               {$I PEAKTOP:GLOBAL_VARIABLES.INC}           {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TACTION.INC}                    {$I PEAKTOP:OBJ/TACTION.INC}                {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TMENUITEM.INC}                  {$I PEAKTOP:OBJ/TMENUITEM.INC}              {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/REGEDIT/MAINMENU/OBJNAMES.INC}  {$I ./OBJNAMES.INC}                         {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/REGEDIT/MAINMENU/LANG.INC}      {$I ./LANG.INC}                             {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/REGEDIT/MAINMENU/ACTIONS.INC}   {$I ./ACTIONS.INC}                          {$ENDIF}
+  //============================================================================
+  function CreateComplexAction(aOwner :TComponent; const aName, aCaption, aHint, aShortCut:string;
+             const aGroupIndex, aImageIndex :Integer; aOnExecute, aOnUpdate:TNotifyEvent; aParentMenuItem :TMenuItem):TCustomAction;
+  var
+    lkMI :TMenuItem;           
+  begin
+    Result := CreateTAction(aOwner, aName, aCaption, aHint, aShortCut, aGroupIndex, aImageIndex);
+    with Result do
+      begin
+      OnExecute := aOnExecute;
+      OnUpdate  := aOnUpdate;
+      end;
+    if(aParentMenuItem <> nil)then
+      lkMI := CreateTMenuItem2(aParentMenuItem, Result);
+    if(aName = obj_name_regide_actwndlist)then
+      begin
+      Amunhotep.MainForm.TaskBar.WindowsMenuItem   := lkMI;
+      Amunhotep.MainForm.TaskBar.WindowsImageIndex := 256;
+      end;  
+  end;
+  //============================================================================
+  procedure Amunhotep_MainMenu_Create;
+  var
+    lkAct    :TCustomAction;
+    lkMIWnd  :TMenuItem;
+    lkMIHelp :TMenuItem;
+    lkMI     :TMenuItem;           
+  begin
+    lkMIWnd  := CreateTMenuItem(Amunhotep.MainForm.Menu.Items,obj_name_regide_mimainwindow,msg_regide_mimainwindow,msg_regide_mimainwindow,'',-1,120);
+    lkMIHelp := CreateTMenuItem(Amunhotep.MainForm.Menu.Items,obj_name_regide_mimainhelp  ,msg_regide_mimainhelp  ,msg_regide_mimainhelp  ,'',-1,125);
+    lkAct := CreateComplexAction(Amunhotep.MainForm,obj_name_regide_actwndlist    ,msg_regide_actwndlist    ,msg_regide_actwndlist_hint    ,''             ,0,161,@actWndList_OnExecute    ,@actWndList_OnUpdate   ,lkMIWnd);
+    lkMI  := CreateTMenuItemLine(lkMIWnd, 'miWndN001');
+    lkAct := CreateComplexAction(Amunhotep.MainForm,obj_name_regide_actwndcascade ,msg_regide_actwndcascade ,msg_regide_actwndcascade_hint ,''             ,0,157,@actWndCascade_OnExecute ,@actWndList_OnUpdate   ,lkMIWnd);
+    lkAct := CreateComplexAction(Amunhotep.MainForm,obj_name_regide_actwndtilehor ,msg_regide_actwndtilehor ,msg_regide_actwndtilehor_hint ,''             ,0,163,@actWndTileHor_OnExecute ,@actWndList_OnUpdate   ,lkMIWnd);
+    lkAct := CreateComplexAction(Amunhotep.MainForm,obj_name_regide_actwndtilever ,msg_regide_actwndtilever ,msg_regide_actwndtilever_hint ,''             ,0,164,@actWndTileVer_OnExecute ,@actWndList_OnUpdate   ,lkMIWnd);
+    lkMI  := CreateTMenuItemLine(lkMIWnd, 'miWndN002');
+    lkAct := CreateComplexAction(Amunhotep.MainForm,obj_name_regide_actwndprev    ,msg_regide_actwndprev    ,msg_regide_actwndprev_hint    ,'Ctrl+Shift+F6',0,160,@actWndPrev_OnExecute    ,@actWndList_OnUpdate   ,lkMIWnd);
+    lkAct := CreateComplexAction(Amunhotep.MainForm,obj_name_regide_actwndnext    ,msg_regide_actwndnext    ,msg_regide_actwndnext_hint    ,'Ctrl+F6'      ,0,159,@actWndPrev_OnExecute    ,@actWndList_OnUpdate   ,lkMIWnd);
+    lkMI  := CreateTMenuItemLine(lkMIWnd, 'miWndN003');
+    lkAct := CreateComplexAction(Amunhotep.MainForm,obj_name_regide_actwndclose   ,msg_regide_actwndclose   ,msg_regide_actwndclose_hint   ,'Ctrl+F4'      ,0,158,@actWndClose_OnExecute   ,@actWndList_OnUpdate   ,lkMIWnd);
+    lkAct := CreateComplexAction(Amunhotep.MainForm,obj_name_regide_actwndcloseall,msg_regide_actwndcloseall,msg_regide_actwndcloseall_hint,''             ,0, -1,@actWndCloseAll_OnExecute,@actWndList_OnUpdate   ,lkMIWnd);
+    lkMI  := CreateTMenuItemLine(lkMIWnd, 'miWndN004');
+    lkAct := CreateComplexAction(Amunhotep.MainForm,obj_name_regide_actwndtaskbar ,msg_regide_actwndtaskbar ,msg_regide_actwndtaskbar_hint ,''             ,0,174,@actWndTaskBar_OnExecute ,@actWndTaskBar_OnUpdate,lkMIWnd);
+    lkMI  := CreateTMenuItemLine(lkMIHelp,'miHelpN001');
+    lkAct := CreateComplexAction(Amunhotep.MainForm,obj_name_regide_acthelpabout  ,msg_regide_acthelpabout  ,msg_regide_acthelpabout_hint  ,'Alt+BkSp'     ,0,263,@actHelpAbout_OnExecute  ,nil                    ,lkMIHelp);
+  end;
+begin
+  DontAutoFree;
+  Amunhotep_MainMenu_Create;  
+end.

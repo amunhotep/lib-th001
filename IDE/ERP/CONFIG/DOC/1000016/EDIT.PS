@@ -1,0 +1,889 @@
+{$DEFINE PEAKTOP:IDE/ERP/CONFIG/DOC/1000014/EDIT.PS}
+{$IFNDEF PEAKTOP:GLOBAL_VARIABLES.INC}        {$I PEAKTOP:GLOBAL_VARIABLES.INC}        {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TCOLUMNEH.INC}           {$I PEAKTOP:OBJ/TCOLUMNEH.INC}           {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TCOLUMNEH_KEYLST.INC}    {$I PEAKTOP:OBJ/TCOLUMNEH_KEYLST.INC}    {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TIMAGELIST.INC}          {$I PEAKTOP:OBJ/TIMAGELIST.INC}          {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TACTION.INC}             {$I PEAKTOP:OBJ/TACTION.INC}             {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCPAGECONTROLEX.INC}    {$I PEAKTOP:OBJ/TXCPAGECONTROLEX.INC}    {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/TXCTABSHEET.INC}         {$I PEAKTOP:OBJ/TXCTABSHEET.INC}         {$ENDIF}
+{$IFNDEF PEAKTOP:OBJ/DBINTERFACE/TEXT.INC}    {$I PEAKTOP:OBJ/DBINTERFACE/TEXT.INC}    {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/OBJECTNAMES.INC} {$I PEAKTOP:IDE/ERP/DBO/OBJECTNAMES.INC} {$ENDIF}
+{$IFNDEF PEAKTOP:IDE/ERP/DBO/SHORTCUTS.INC}   {$I PEAKTOP:IDE/ERP/DBO/SHORTCUTS.INC}   {$ENDIF}
+const
+  msg_invalid_resource       = 'Неверный файл ресурсов'; 
+  msg_lblid                  = 'Код'; 
+  msg_lblnumber              = 'Номер'; 
+  msg_lblnumberfull          = 'Полный номер'; 
+  msg_lblnumberin            = 'Входящий номер'; 
+  msg_lbldate                = 'Дата'; 
+  msg_lblname                = 'Примечание к документу'; 
+  msg_lblfirm                = 'Фирма'; 
+  msg_lblfilial              = 'Филиал'; 
+  msg_lbluser                = 'Пользователь'; 
+  msg_lbluserwrk             = 'Сотрудник'; 
+  msg_actrefresh             = 'Обновить'; 
+  msg_actrefresh_hint        = 'Сохранить и обновить документ'; 
+  msg_actprint               = 'Печать'; 
+  msg_actprint_hint          = 'Печать документа'; 
+  msg_actcommit              = 'Провести'; 
+  msg_actcommit_hint         = 'Провести документ'; 
+  msg_actuncommit            = 'Отменить'; 
+  msg_actuncommit_hint       = 'Отменить проведение докумнта'; 
+  msg_actdocdelete           = 'Удалить'; 
+  msg_actdocdelete_hint      = 'Удалить позицию из документа'; 
+  msg_actdocinsert           = 'Добавить'; 
+  msg_actdocinsert_hint      = 'Добавить позицию в документ'; 
+var 
+  DocForm             :TAmunhotepForm; 
+  TopBar              :TxcGradientPanelVista; 
+  ImageLogo           :TImage; 
+  ToolBar             :TxcGradientPanelVista; 
+  PanelDoc            :TxcPanel; 
+  PanelClient         :TxcGradientPanel; 
+  PanelToolBarDoc     :TxcGradientPanelVista; 
+  dbeID               :TDBEditEh; 
+  dbeDOCNUMBER        :TDBEditEh; 
+  dbeDOCNUMBERSTR     :TDBEditEh; 
+  dbeDOCNUMBERIN      :TDBEditEh; 
+  dbcbxNAME           :TDBComboBoxEh; 
+  dbdtpDATE_COMMIT    :TDBDateTimeEditEh; 
+  dbeFILIAL_ID_       :TDBEditEh; 
+  dbeUSER_ID          :TDBEditEh; 
+  dbeFIRM_ID_         :TDBEditEh; 
+  dbeWRK_NAME         :TDBEditEh; 
+  dbePAYSRC_ID_       :TDBEditEh;
+  dbeACC_ID           :TDBEditEh;
+  dbeACC_NAME         :TDBEditEh;
+  dbneDOCSUMVAL       :TDBNumberEditEh;
+  dbeSUBKONTO_NAME    :TDBEditEh;
+  dbeEXPTYPE_ID_      :TDBEditEh;
+  dbeDOC_ID_          :TDBEditEh;
+  PCDoc               :TxcPageControlEx;
+  trJournal           :TxFBTransaction; 
+  dtsJournal          :TxFBDataSet; 
+  DSdtsJournal        :TDataSource; 
+  evDoc               :TxFBEvents; 
+var
+  OsnovanieStrings       :TStrings;
+  OsnovanieAccounts      :TStrings;
+  //============================================================================
+  procedure CloseDataSets;
+  begin
+    if(dtsJournal.State = dsEdit)then
+      try
+        dtsJournal.Post;
+      except
+        dtsJournal.Cancel;
+      end;
+    if trJournal.InTransaction then 
+      trJournal.Commit; 
+  end;
+  //============================================================================
+  procedure RefreshView;
+  begin 
+    CloseDataSets;
+    dtsJournal.Prepare;
+    dtsJournal.ParamByName('ID').AsString := DocForm.HelpKeyWord; 
+    try 
+      dtsJournal.Open;
+    except 
+      // Dialogs.MessageDlg(dtsJournal.SelectSQL.Text, mtError, [mbOk]);
+    end; 
+  end;
+  //============================================================================
+  procedure dbcbxNAME_OnCloseUp(Sender :TObject; Accept : Boolean);
+  var
+    acc_id :integer;
+    exp_id :Integer;
+    lk_sql :string;
+  begin
+    if not Accept then exit;
+    if not dtsJournal.Active then exit;
+    if not(dtsJournal.State = dsEdit) then dtsJournal.Edit;
+    if( (dbcbxNAME.ItemIndex>-1) and (dbcbxNAME.ItemIndex<OsnovanieAccounts.Count) )then
+      acc_id := StrToInt(OsnovanieAccounts[dbcbxNAME.ItemIndex]);
+    if(dtsJournal.FieldByName('TYPE_ID').AsString = '1000020')then  
+      begin
+      if(dtsJournal.FieldByName('ACC_ID').AsInteger = 361)then
+        exp_id := 1000027
+       else
+        exp_id := 1000003;
+      end
+     else
+      exp_id := 1000003;
+    lk_sql := 'UPDATE TABL$J_1000016 C SET C.ACC_ID = '+IntToStr(acc_id)+', EXPTYPE_ID = '+IntToStr(exp_id)+
+      ', SUBKONTO_ID = 0 WHERE (C.J_ID = '''+dtsJournal.FieldByName('ID').AsString+''')';
+    CloseDataSets;  
+    ExecSQL(FBDataBase, lk_SQL);
+    RefreshView;  
+  end;
+  //============================================================================
+  procedure dbeSUBKONTO_NAME_OnEditButtonClick(Sender :TObject; var Handled : Boolean);
+  var
+    lkObjectId     :string;
+    lkScriptName   :string;
+    lkVariableName :string;
+    lkBUFFER_ID    :string;
+    lkSQL          :string;
+  begin
+    Handled := true;
+    if not dtsJournal.Active then exit;
+    if not(dtsJournal.RecordCount>0)then exit; 
+    lkObjectId   := '';
+    GetField(dtsJournal.DataBase, 'TABL$R_BUHG_ACCS', 'SUBKONTO', ' ID = '+dtsJournal.FieldByName('ACC_ID').AsString, lkObjectId);
+    lkObjectId := StrTrimAll(lkObjectId);
+    if(lkObjectId = '')then
+      begin
+      Dialogs.MessageDlg('У счета нет субконто.', mtInformation, [mbOk]);
+      exit;
+      end;
+    lkScriptName := '';
+    GetField(dtsJournal.DataBase, 'TABL$_TB', 'SC_REF_DLG','ID = '''+lkObjectId+''' ', lkScriptName);
+    if(StrTrimAll(lkScriptName) = '')then exit;
+    GetField(dtsJournal.DataBase, 'TABL$_TB', 'BUFFER_VAR','ID = '''+lkObjectId+''' ', lkVariableName);
+    lkBUFFER_ID := dtsJournal.FieldByName('SUBKONTO_ID').AsString;
+    if(StrTrimAll(lkBUFFER_ID) = '')then lkBUFFER_ID := '0';
+    SetGlobalVariable(lkVariableName, lkBUFFER_ID);
+    if not call(lkScriptName) then exit;
+    lkBUFFER_ID := GetGlobalVariable(lkVariableName);
+    if( (UpperCase(lkBUFFER_ID)='NULL') or (StrTrimAll(lkBUFFER_ID)='') )then exit;
+    lkSQL := 'UPDATE TABL$J_1000016 TB SET TB.SUBKONTO_ID = '''+lkBUFFER_ID+''' WHERE(TB.J_ID = '''+dtsJournal.FieldByName('ID').AsString+''')';
+    CloseDataSets;
+    ExecSQL(dtsJournal.DataBase, lkSQL);
+    RefreshView;
+  end;
+  //============================================================================
+  procedure dbeACC_ID_OnEditButtonClick(Sender :TObject; var Handled : Boolean);
+  var
+    lkVariableName :string;
+    lkBUFFER_ID    :string;
+    lkSQL          :string;
+  begin
+    Handled := true;
+    if not dtsJournal.Active then exit;
+    if not(dtsJournal.RecordCount>0)then exit; 
+    lkVariableName := 'ACC_ID';
+    lkBUFFER_ID := dtsJournal.FieldByName('ACC_ID').AsString;
+    SetGlobalVariable(lkVariableName, lkBUFFER_ID);
+    call('DB:CONFIG/REF/BUHG_ACCS/DEFAULT_DLG.PS');
+    lkBUFFER_ID := GetGlobalVariable(lkVariableName);
+    if( (UpperCase(lkBUFFER_ID)='NULL') or (StrTrimAll(lkBUFFER_ID)='') )then exit;
+    lkSQL := 'UPDATE TABL$J_1000016 TB SET TB.ACC_ID = '''+lkBUFFER_ID+''' WHERE(TB.J_ID = '''+dtsJournal.FieldByName('ID').AsString+''')';
+    CloseDataSets;
+    ExecSQL(dtsJournal.DataBase, lkSQL);
+    RefreshView;
+  end;
+  //============================================================================
+  procedure dbeEXPTYPE_ID__OnEditButtonClick(Sender :TObject; var Handled : Boolean);
+  var
+    lkVariableName :string;
+    lkBUFFER_ID    :string;
+    lkSQL          :string;
+  begin
+    Handled := true;
+    if not dtsJournal.Active then exit;
+    if not(dtsJournal.RecordCount>0)then exit; 
+    lkVariableName := 'EXPTYPE_ID';
+    lkBUFFER_ID := dtsJournal.FieldByName('EXPTYPE_ID').AsString;
+    SetGlobalVariable(lkVariableName, lkBUFFER_ID);
+    call('DB:CONFIG/REF/EXPTYPES/DEFAULT_DLG.PS');
+    lkBUFFER_ID := GetGlobalVariable(lkVariableName);
+    if( (UpperCase(lkBUFFER_ID)='NULL') or (StrTrimAll(lkBUFFER_ID)='') )then exit;
+    lkSQL := 'UPDATE TABL$J_1000016 TB SET TB.EXPTYPE_ID = '''+lkBUFFER_ID+''' WHERE(TB.J_ID = '''+dtsJournal.FieldByName('ID').AsString+''')';
+    CloseDataSets;
+    ExecSQL(dtsJournal.DataBase, lkSQL);
+    RefreshView;
+  end;
+  //============================================================================
+  procedure dbeDOC_ID__OnEditButtonClick(Sender :TObject; var Handled : Boolean);
+  var
+    lkSQL          :string;
+    lkObjectId     :string;
+    lkVariableName :string;
+    lkBUFFER_ID    :string;
+    lkTypeId       :string;
+    lkScript       :string;
+  begin
+    Handled := true;
+    if not dtsJournal.Active then exit;
+    if not(dtsJournal.RecordCount>0)then exit; 
+
+    GetField(dtsJournal.DataBase, 'TABL$R_BUHG_ACCS', 'SUBKONTO', ' ID = '+dtsJournal.FieldByName('ACC_ID').AsString, lkObjectId);
+    lkObjectId := StrTrimAll(lkObjectId);
+    lkVariableName := 'J_ID';
+    lkBUFFER_ID := dtsJournal.FieldByName('DOC_ID').AsString;
+    if(StrTrimAll(lkBUFFER_ID) = '')then lkBUFFER_ID := '0';
+    SetGlobalVariable(lkVariableName, lkBUFFER_ID);
+    if(UpperCase(lkObjectId) = 'TABL$R_CS')then
+      begin
+      lkTypeId := '1000014';  
+      lkScript := 
+        '{$IFNDEF PEAKTOP:IDE/ERP/DBO/DOC/FORMJRNL.INC} {$I PEAKTOP:IDE/ERP/DBO/DOC/FORMJRNL.INC} {$ENDIF} '+SQLCRLF+
+        'begin '+SQLCRLF+
+        '  TERPFormGrid_DataSetFilter_DateInit := true; '+#13#10+
+        '  TERPFormGrid_DataSetFilter_DateFrom := StrToDate(''01.12.2013''); '+#13#10+ 
+        '  TERPFormGrid_DataSetFilter_DateTo   := StrToDate('''+FormatDateTime('dd.mm.yyyy',dtsJournal.FieldByName('DATE_COMMIT').AsDateTime)+'''); '+#13#10+
+        '  TERPFormGrid_DataSetFilter_Add(''FIRM_ID'', ''FIRM_ID = '''''+dtsJournal.FieldByName('FIRM_ID').AsString+''''' ''); '+SQLCRLF+ 
+        '  TERPFormGrid_DataSetFilter_Add(''CS_ID''  , ''CS_ID   = '''''+dtsJournal.FieldByName('SUBKONTO_ID').AsString+''''' ''); '+SQLCRLF+ 
+        '  TERPFormGrid_DataSetFilter_Add(''TYPE_ID'', '' ''''~1000071~1000135~1000026~1000078~1000128~1000075~1000136~1000028~1000079~1000127~'''' CONTAINING ''''~''''||TYPE_ID||''''~'''' ''); '+SQLCRLF+ 
+        '  Journal_Execute(''1000014''); '+SQLCRLF+
+        'end. '+SQLCRLF;
+      run(lkScript, 'DB:CONFIG/DOC/'+lkTypeId+'/DEFAULT_DLG.PS');
+      end
+     else if(UpperCase(lkObjectId) = 'TABL$R_WRK')then
+      begin
+      lkTypeId := '1000046';
+      lkScript := 
+        '{$IFNDEF PEAKTOP:IDE/ERP/DBO/DOC/FORMJRNL.INC} {$I PEAKTOP:IDE/ERP/DBO/DOC/FORMJRNL.INC} {$ENDIF} '+SQLCRLF+
+        'begin '+SQLCRLF+
+        '  TERPFormGrid_DataSetFilter_DateInit := true; '+#13#10+
+        '  TERPFormGrid_DataSetFilter_DateFrom := StrToDate(''01.11.2012''); '+#13#10+ 
+        '  TERPFormGrid_DataSetFilter_DateTo   := StrToDate('''+FormatDateTime('dd.mm.yyyy',dtsJournal.FieldByName('DATE_COMMIT').AsDateTime)+'''); '+#13#10+
+        '  TERPFormGrid_DataSetFilter_Add(''FIRM_ID''    , ''FIRM_ID = '''''+dtsJournal.FieldByName('FIRM_ID').AsString+''''' ''); '+SQLCRLF+ 
+        '  TERPFormGrid_DataSetFilter_Add(''FLAG_DELETE'', ''EXISTS(SELECT D.ID FROM TABL$D_1000046 D WHERE (D.J_ID = R0000.ID)AND(D.WRK_ID = '''''+dtsJournal.FieldByName('SUBKONTO_ID').AsString+'''''))''); '+SQLCRLF+ 
+        '  Journal_Execute('''+lkTypeId+'''); '+SQLCRLF+
+        'end. '+SQLCRLF;
+      run(lkScript, 'DB:CONFIG/DOC/'+lkTypeId+'/DEFAULT_DLG.PS');
+      end;
+    lkBUFFER_ID := GetGlobalVariable(lkVariableName);
+    if( (UpperCase(lkBUFFER_ID)='NULL') or (StrTrimAll(lkBUFFER_ID)='') )then exit;
+    lkSQL := 'UPDATE TABL$J_1000016 TB SET TB.DOC_ID = '''+lkBUFFER_ID+''' WHERE(TB.J_ID = '''+dtsJournal.FieldByName('ID').AsString+''')';
+    CloseDataSets;
+    ExecSQL(dtsJournal.DataBase, lkSQL);
+    RefreshView;
+  end;
+  //============================================================================
+  procedure dbeDOC_ID__Clear_OnEditButtonClick(Sender :TObject; var Handled : Boolean);
+  var
+    lkSQL :string;
+  begin
+    Handled := true; 
+    if not dtsJournal.Active then exit;
+    if not(dtsJournal.RecordCount>0)then exit; 
+    lkSQL := 'UPDATE TABL$J_1000016 TB SET TB.DOC_ID = 0 WHERE(TB.J_ID = '''+dtsJournal.FieldByName('ID').AsString+''')';
+    CloseDataSets;
+    ExecSQL(dtsJournal.DataBase, lkSQL);
+    RefreshView;
+  end;
+  //============================================================================
+  procedure dbePAYSRC_ID__OnEditButtonClick(Sender :TObject; var Handled : Boolean);
+  var
+    lkVariableName :string;
+    lkBUFFER_ID    :string;
+    lkSQL          :string;
+    lkScript       :string;
+  begin
+    Handled := true;
+    if not dtsJournal.Active then exit;
+    if not(dtsJournal.RecordCount>0)then exit; 
+    lkVariableName := 'PAYSRC_ID';
+    lkBUFFER_ID := dtsJournal.FieldByName('PAYSRC_ID').AsString;
+    SetGlobalVariable(lkVariableName, lkBUFFER_ID);
+    lkScript := 
+      '{$IFNDEF PEAKTOP:IDE/ERP/DBO/REF/FORMREF.INC}  {$I PEAKTOP:IDE/ERP/DBO/REF/FORMREF.INC}{$ENDIF} '+SQLCRLF+
+      'begin '+SQLCRLF+
+      '  TERPFormGrid_DataSetFilter_Add(''FIRM_ID'', ''FIRM_ID = '''''+dtsJournal.FieldByName('FIRM_ID').AsString+''''' ''); '+SQLCRLF+ 
+      '  Reference_Execute(''TABL$R_PAYSRC''); '+SQLCRLF+
+      'end. '+SQLCRLF;
+    run(lkScript, 'DB:CONFIG/REF/PAYSRC/DEFAULT_DLG.PS');
+    lkBUFFER_ID := GetGlobalVariable(lkVariableName);
+    if( (UpperCase(lkBUFFER_ID)='NULL') or (StrTrimAll(lkBUFFER_ID)='') )then exit;
+    lkSQL := 'UPDATE TABL$J_1000016 TB SET TB.PAYSRC_ID = '''+lkBUFFER_ID+''' WHERE(TB.J_ID = '''+dtsJournal.FieldByName('ID').AsString+''')';
+    CloseDataSets;
+    ExecSQL(dtsJournal.DataBase, lkSQL);
+    RefreshView;
+  end;
+  //============================================================================
+  procedure dbeFILIAL_ID__OnEditButtonClick(Sender :TObject; var Handled : Boolean);
+  var
+    lkVariableName :string;
+    lkBUFFER_ID    :string;
+    lkSQL          :string;
+  begin
+    Handled := true;
+    if not dtsJournal.Active then exit;
+    if not(dtsJournal.RecordCount>0)then exit; 
+    lkVariableName := 'FILIAL_ID';
+    lkBUFFER_ID := dtsJournal.FieldByName('FILIAL_ID').AsString;
+    SetGlobalVariable(lkVariableName, lkBUFFER_ID);
+    call('DB:CONFIG/REF/FILIALS/DEFAULT_DLG.PS');
+    lkBUFFER_ID := GetGlobalVariable(lkVariableName);
+    if( (UpperCase(lkBUFFER_ID)='NULL') or (StrTrimAll(lkBUFFER_ID)='') )then exit;
+    lkSQL := 'UPDATE TABL$J_4 TB SET TB.FILIAL_ID = '''+lkBUFFER_ID+''' WHERE(TB.ID = '''+dtsJournal.FieldByName('ID').AsString+''')';
+    CloseDataSets;
+    ExecSQL(dtsJournal.DataBase, lkSQL);
+    RefreshView;
+  end;
+  //============================================================================
+  procedure dbeUSER_ID_OnEditButtonClick(Sender :TObject; var Handled : Boolean);
+  var
+    lkVariableName :string;
+    lkBUFFER_ID    :string;
+    lkSQL          :string;
+  begin
+    Handled := true;
+    if not dtsJournal.Active then exit;
+    if not(dtsJournal.RecordCount>0)then exit; 
+    lkVariableName := 'USER_ID';
+    lkBUFFER_ID := dtsJournal.FieldByName('USER_ID').AsString;
+    SetGlobalVariable(lkVariableName, lkBUFFER_ID);
+    call('DB:CONFIG/REF/_USERS/DEFAULT_DLG.PS');
+    lkBUFFER_ID := GetGlobalVariable(lkVariableName);
+    if( (UpperCase(lkBUFFER_ID)='NULL') or (StrTrimAll(lkBUFFER_ID)='') )then exit;
+    lkSQL := 'UPDATE TABL$J_4 TB SET TB.USER_ID = '''+lkBUFFER_ID+''' WHERE(TB.ID = '''+dtsJournal.FieldByName('ID').AsString+''')';
+    CloseDataSets;
+    ExecSQL(dtsJournal.DataBase, lkSQL);
+    RefreshView;
+  end;
+  //============================================================================
+  procedure dbeDOCNUMBER_OnEditButtonClick(Sender :TObject; var Handled : Boolean);
+  var
+    lkNumber :string;
+    lkTr     :TxFBTransaction;
+    lkQr     :TxFBQuery;
+  begin
+    Handled := true;
+    if not dtsJournal.Active then exit;
+    if not(dtsJournal.RecordCount>0)then exit; 
+    lkNumber := '';
+    lkTr := TxFBTransaction.Create(nil);
+    with lkTr do
+      begin
+      DefaultDataBase := dtsJournal.DataBase;
+      with Params do
+        begin
+        Clear;
+        Add('isc_tpb_write');
+        Add('isc_tpb_consistency');
+        end;
+      end;
+    lkQr := TxFBQuery.Create(lkTr);
+    with lkQr do
+      begin
+      Transaction := lkTr;
+      SQL.Text := 'SELECT FIRST 1 P.NEW_NUMBER FROM PROC$J_GEN_4('+dtsJournal.FieldByName('TYPE_ID').AsString+', '+dtsJournal.FieldByName('FIRM_ID').AsString+') P ';
+      try
+        Open;
+      except 
+        if lkTr.InTransaction then lkTr.Rollback;
+        lkTr.Free;
+        exit;
+      end;
+      if Active then
+        begin
+        First;
+        lkNumber := FieldByName('NEW_NUMBER').AsString;
+        end;
+      end;
+    if lkTr.InTransaction then 
+      lkTr.Commit;
+    lkTr.Free;
+    lkNumber := StrCiphersOnlyInt(lkNumber);
+    if(StrTrimAll(lkNumber) = '')then exit;
+    with dtsJournal do
+      begin
+      Edit;
+      FieldByName('DOCNUMBER').AsString := lkNumber;
+      try Post; except Cancel end;
+      end;
+  end;
+  //============================================================================
+  procedure dtsJournal_AfterOpen(DataSet :TDataSet);
+  begin
+  end;
+  //============================================================================
+  procedure dtsJournal_BeforeClose(DataSet :TDataSet);
+  begin
+  end;
+  //============================================================================
+  procedure dtsJournal_AfterScroll(DataSet :TDataSet);
+  var 
+    i:Integer;
+  begin
+    DocForm.Caption := DataSet.FieldByName('TYPE_ID_').AsString+' '+DataSet.FieldByName('DOCNUMBERSTR').AsString;
+    DocForm.SetCaption(DocForm.Caption);
+    TopBar.Caption := #$20#$20#$20#$20#$20#$20+DocForm.Caption;
+    PanelClient.Colors.Window := DataSet.FieldByName('COLOR_BGR').AsInteger;
+    PanelClient.Font.Color    := DataSet.FieldByName('COLOR_FRG').AsInteger;
+    PanelClient.Enabled := not (DataSet.FieldByName('FLAG_COMMIT').AsInteger = 1);
+    PCDoc.Enabled := PanelClient.Enabled;
+    for i:=0 to PCDoc.PageCount-1 do
+      begin
+      PCDoc.Pages[i].Color      := DataSet.FieldByName('COLOR_BGR').AsInteger;
+      PCDoc.Pages[i].Font.Color := DataSet.FieldByName('COLOR_FRG').AsInteger;
+      end;
+    OsnovanieStrings.Clear;
+    OsnovanieAccounts.Clear;
+    if(DataSet.FieldByName('TYPE_ID').AsString = '1000020')then
+      begin
+      OsnovanieAccounts.Add('0'); OsnovanieStrings.Add('Ввод начальных остатков');
+      OsnovanieAccounts.Add('373'); OsnovanieStrings.Add('Ввод начальных остатков по процентам');
+      OsnovanieAccounts.Add('301'); OsnovanieStrings.Add('Поступление средств из кассы отделения');
+      OsnovanieAccounts.Add('301'); OsnovanieStrings.Add('Поступление средств из кассы предприятия');
+      OsnovanieAccounts.Add('361'); OsnovanieStrings.Add('Оплата за товар або надання послуг');
+      OsnovanieAccounts.Add('372'); OsnovanieStrings.Add('Возврат подотчета');
+      OsnovanieAccounts.Add('3771'); OsnovanieStrings.Add('Возврат залога');
+      OsnovanieAccounts.Add('6852'); OsnovanieStrings.Add('Поступление денег от Аптеки');
+     end
+     else
+      begin
+      OsnovanieAccounts.Add('631'); OsnovanieStrings.Add('Оплата постачальнику за товар або надання послуг');
+      OsnovanieAccounts.Add('91');  OsnovanieStrings.Add('Оплата готівкою виробничих витрат');
+      OsnovanieAccounts.Add('92');  OsnovanieStrings.Add('Оплата готівкою адміністративних витрат');
+      OsnovanieAccounts.Add('93');  OsnovanieStrings.Add('Оплата витрат, пов''язаних з доставкою, відвантаженням або реалізацією продукції');
+      OsnovanieAccounts.Add('301'); OsnovanieStrings.Add('Выручка в кассу предприятия');
+      OsnovanieAccounts.Add('301'); OsnovanieStrings.Add('Пополнение кассы отделения');
+      OsnovanieAccounts.Add('311'); OsnovanieStrings.Add('Выручка в банк');
+      OsnovanieAccounts.Add('311'); OsnovanieStrings.Add('Оплата за дебетование счета');
+      OsnovanieAccounts.Add('311'); OsnovanieStrings.Add('Комиссия банка');
+      OsnovanieAccounts.Add('6852'); OsnovanieStrings.Add('Повернення фiнансових коштiв до Аптеки');
+      OsnovanieAccounts.Add('3771'); OsnovanieStrings.Add('Выдача залога');
+      OsnovanieAccounts.Add('372'); OsnovanieStrings.Add('Выдача подотчет');
+      OsnovanieAccounts.Add('641'); OsnovanieStrings.Add('Оплата державних податків та обов''язкових зборів');
+      OsnovanieAccounts.Add('6411'); OsnovanieStrings.Add('Оплата прибуткового податку працiвникiв');
+      OsnovanieAccounts.Add('6414'); OsnovanieStrings.Add('Оплата мiсцевих податкiв');
+      OsnovanieAccounts.Add('6414'); OsnovanieStrings.Add('Оплата комунальних платежiв');
+      OsnovanieAccounts.Add('6416'); OsnovanieStrings.Add('Оплата податку на прибуток пiдприемства');
+      OsnovanieAccounts.Add('651'); OsnovanieStrings.Add('Оплата соцiального та пенсiйного сбору працiвникiв');
+      OsnovanieAccounts.Add('951'); OsnovanieStrings.Add('Погашення кредитів та процентів по кредитам');
+      OsnovanieAccounts.Add('6852'); OsnovanieStrings.Add('Оплата оренди приміщення');
+      OsnovanieAccounts.Add('375'); OsnovanieStrings.Add('Списання недостачі в касі');
+      OsnovanieAccounts.Add('-71'); OsnovanieStrings.Add('Списание безнадежной дебиторской задолженности');
+      OsnovanieAccounts.Add('661'); OsnovanieStrings.Add('Виплата готівкою заробітної плати');
+      OsnovanieAccounts.Add('6611');OsnovanieStrings.Add('Виплата авансу заробітної платі');
+      OsnovanieAccounts.Add('6612');OsnovanieStrings.Add('Виплата отпускных');
+      OsnovanieAccounts.Add('-3'); OsnovanieStrings.Add('Изьятие прибыли из оборота');
+      end;
+    dbcbxNAME.Items.Text := OsnovanieStrings.Text;  
+  end;
+  //============================================================================
+  procedure actRefresh_OnExecute(Sender :TObject);
+  begin
+    RefreshView;
+  end;
+  //============================================================================
+  procedure actPrint_OnExecute(Sender :TObject);
+  var
+    lkScName:string;
+  begin
+    if not dtsJournal.Active then exit;
+    if(not(dtsJournal.RecordCount>0))then exit;
+    lkScName := 'DB:CONFIG/DOC/'+dtsJournal.FieldByName('TYPE_ID').AsString+'/PRINT.PS';
+    SetGlobalVariable('J_ID', dtsJournal.FieldByName('ID').AsString);
+    if not call(lkScName)then
+      Dialogs.MessageDlg('Ошибка в вызове скрипта '+#13#10+lkScName, mtError, [mbOk]);
+  end;
+  //============================================================================
+  procedure actPrint_OnUpdate(Sender :TObject);
+  var
+    lkEnabled :Boolean;
+  begin
+    lkEnabled := dtsJournal.Active;
+    if(lkEnabled)then lkEnabled := (dtsJournal.RecordCount > 0);
+    TCustomAction(Sender).Enabled := lkEnabled;
+  end;
+  //============================================================================
+  procedure actCommit_OnExecute(Sender :TObject);
+  var
+    lkSQL :string;
+  begin
+    if not(Dialogs.MessageDlg('Провести документ ?', mtConfirmation, [mbYes, mbNo])=mrYes)then exit;
+    lkSQL := 'UPDATE TABL$J_4 J SET J.FLAG_COMMIT = 1 WHERE (J.ID = '''+dtsJournal.FieldByName('ID').AsString+''')';
+    CloseDataSets;
+    ExecSQL(dtsJournal.DataBase, lkSQL);
+    RefreshView;
+  end;
+  //============================================================================
+  procedure actCommit_OnUpdate(Sender :TObject);
+  var
+    lk_Enabled :Boolean;
+  begin
+    lk_Enabled := dtsJournal.Active;
+    if(lk_Enabled)then lk_Enabled := (dtsJournal.RecordCount>0);
+    if(lk_Enabled)then lk_Enabled := (dtsJournal.FieldByName('FLAG_COMMIT').AsInteger = 0);
+    TCustomAction(Sender).Enabled := lk_Enabled;
+  end;
+  //============================================================================
+  procedure actUnCommit_OnExecute(Sender :TObject);
+  var
+    lkSQL :string;
+  begin
+    if not(Dialogs.MessageDlg('Отменить проведение документа ?', mtConfirmation, [mbYes, mbNo])=mrYes)then exit;
+    lkSQL := 'UPDATE TABL$J_4 J SET J.FLAG_COMMIT = 0 WHERE (J.ID = '''+dtsJournal.FieldByName('ID').AsString+''')';
+    CloseDataSets;
+    ExecSQL(dtsJournal.DataBase, lkSQL);
+    RefreshView;
+  end;
+  //============================================================================
+  procedure actUnCommit_OnUpdate(Sender :TObject);
+  var
+    lk_Enabled :Boolean;
+  begin
+    lk_Enabled := dtsJournal.Active;
+    if(lk_Enabled)then lk_Enabled := (dtsJournal.RecordCount>0);
+    if(lk_Enabled)then lk_Enabled := (dtsJournal.FieldByName('FLAG_COMMIT').AsInteger <> 0);
+    TCustomAction(Sender).Enabled := lk_Enabled;
+  end;
+  //============================================================================
+  procedure evDoc_OnEventAlert(Sender :TObject; EventName: string; EventCount: LongInt; var CancelAlerts: Boolean);
+  begin
+    RefreshView; 
+    CancelAlerts := false;
+  end;
+  //============================================================================
+  procedure DocForm_OnClose(Sender :TObject; var Action :TCloseAction);
+  begin
+    CloseDataSets;
+    Action := caFree;
+    OsnovanieStrings.Free;
+    OsnovanieAccounts.Free;
+    if evDoc.Registered then evDoc.UnRegisterEvents;
+  end; 
+  //============================================================================
+  function DocForm_Create:TAmunhotepForm;
+  var
+    lkJ_ID     :string;
+    lkFileName :string;
+    lkResBody  :string;
+    lkStrm     :TMemoryStream;
+    lkImgLogo  :TImage;
+    lkLbl      :TLabel;
+    lkAct      :TAction;
+    lkTS       :TxcTabSheet;
+    lkPM       :TPopupMenu;
+    lkMM       :TMainMenu;
+    lkCol      :TColumnEh;
+    i          :Integer;
+  begin
+    lkJ_ID := GetGlobalVariable('J_ID');
+    with Amunhotep.MainForm do
+      for i:=0 to MDIChildCount-1 do
+        if(MDIChildren[i].HelpKeyWord = lkJ_ID)then
+          begin
+          MDIChildren[i].BringToFront;
+          exit;
+          end;
+    DontAutoFree;
+    OsnovanieStrings              := TStringList.Create;
+    OsnovanieAccounts             := TStringList.Create;
+    lkFileName := StrAbsolutePath('./EDIT.XFM', ScriptName);
+    lkResBody  := StringsLoadFromFile(lkFileName);
+    if(lkResBody = '')then 
+      begin
+      Dialogs.MessageDlg(msg_invalid_resource+SQLCRLF+lkFileName, mtWarning, [mbOK]);
+      exit;
+      end;
+    Result             := TAmunhotepForm(StrToComponent(lkResBody));
+    Result.HelpKeyWord := lkJ_ID;
+    Result.OnClose     := @DocForm_OnClose;
+    try
+      lkStrm := TMemoryStream.Create;
+      if StreamLoadFromFile(PrepareAbsoleteFileName(ERP_ObjectIcon(ERP_OBJECTTYPE_DOC)),lkStrm)then
+        Result.Icon.LoadFromStream(lkStrm);
+    finally
+     lkStrm.Free;
+    end;
+    TopBar := TxcGradientPanelVista(Result.FindComponent('TopBar')); 
+    with TopBar do 
+      begin 
+      Caption    := #$20#$20#$20#$20#$20#$20; 
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Window; 
+      Font.Name  := 'Verdana'; 
+      Font.Size  := 14; 
+      Font.Style := [fsBold]; 
+      StyleManager          := nil;
+      Colors.HotTrack       := ERP_ObjectColorLight(ERP_OBJECTTYPE_DOC);
+      Colors.HotTrackBorder := ERP_ObjectColor(ERP_OBJECTTYPE_DOC);
+      end; 
+    lkImgLogo := TImage(Result.FindComponent('ImgLogo')); 
+    try 
+      lkStrm  := TMemoryStream.Create; 
+      if StreamLoadFromFile(PrepareAbsoleteFileName(ERP_ObjectBitmap(ERP_OBJECTTYPE_DOC)), lkStrm)then 
+        lkImgLogo.Picture.Bitmap.LoadFromStream(lkStrm); 
+    finally 
+      lkStrm.Free; 
+    end; 
+    ToolBar         := TxcGradientPanelVista(Result.FindComponent('ToolBar'));
+    PanelDoc       := TxcPanel(Result.FindComponent('PanelDoc'));
+    PanelClient     := TxcGradientPanel(Result.FindComponent('PanelClient'));
+    PanelToolBarDoc := TxcGradientPanelVista(Result.FindComponent('PanelToolBarDoc'));
+
+    lkLbl := TLabel(Result.FindComponent('lblDate'      )); lkLbl.Caption := msg_lbldate ;
+    lkLbl := TLabel(Result.FindComponent('lblNAME'      )); lkLbl.Caption := msg_lblname ;
+    lkLbl := TLabel(Result.FindComponent('lblFilial'    )); lkLbl.Caption := msg_lblfilial ;
+    lkLbl := TLabel(Result.FindComponent('lblUser'      )); lkLbl.Caption := msg_lbluser ;
+    lkLbl := TLabel(Result.FindComponent('lblID'        )); lkLbl.Caption := msg_lblid ;
+    lkLbl := TLabel(Result.FindComponent('lblNumber'    )); lkLbl.Caption := msg_lblnumber ;
+    lkLbl := TLabel(Result.FindComponent('lblNumberFull')); lkLbl.Caption := msg_lblnumberfull ;
+    lkLbl := TLabel(Result.FindComponent('lblNumberIn'  )); lkLbl.Caption := msg_lblnumberin ;
+    lkLbl := TLabel(Result.FindComponent('lblFirm'      )); lkLbl.Caption := msg_lblfirm ;
+    lkLbl := TLabel(Result.FindComponent('lblUserWrk'   )); lkLbl.Caption := msg_lbluserwrk ;
+    dbcbxNAME := TDBComboBoxEh(Result.FindComponent('dbcbxNAME'));
+    with dbcbxNAME do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      OnCloseUp  := @dbcbxNAME_OnCloseUp;
+      end; 
+    dbdtpDATE_COMMIT := TDBDateTimeEditEh(Result.FindComponent('dbdtpDATE_COMMIT'));
+    with dbdtpDATE_COMMIT do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      end; 
+    dbeID := TDBEditEh(Result.FindComponent('dbeID'));
+    with dbeID do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      ReadOnly   := true;
+      end; 
+    dbeDOCNUMBER := TDBEditEh(Result.FindComponent('dbeDOCNUMBER'));
+    with dbeDOCNUMBER do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      with EditButtons.Add do
+        begin
+        Glyph.LoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IMG/CONFIG/DBGRID/BTN007.BMP'));
+        Style   := ebsGlyphEh;
+        Visible := true;
+        Hint    := 'Генерировать номер документа';
+        OnClick := @dbeDOCNUMBER_OnEditButtonClick;
+        end;
+      end; 
+    dbeDOCNUMBERSTR := TDBEditEh(Result.FindComponent('dbeDOCNUMBERSTR'));
+    with dbeDOCNUMBERSTR do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      ReadOnly   := true;
+      end; 
+    dbeDOCNUMBERIN := TDBEditEh(Result.FindComponent('dbeDOCNUMBERIN'));
+    with dbeDOCNUMBERIN do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      end; 
+    dbeFIRM_ID_ := TDBEditEh(Result.FindComponent('dbeFIRM_ID_'));
+    with dbeFIRM_ID_ do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      ReadOnly   := true;
+      end; 
+    dbeFILIAL_ID_  := TDBEditEh(Result.FindComponent('dbeFILIAL_ID_'));
+    with dbeFILIAL_ID_ do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      ReadOnly   := true;
+      with EditButtons.Add do
+        begin
+        Glyph.LoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IMG/CONFIG/DBGRID/BTN000.BMP'));
+        Style   := ebsGlyphEh;
+        Visible := true;
+        OnClick := @dbeFILIAL_ID__OnEditButtonClick;
+        end;
+      end; 
+    dbeUSER_ID := TDBEditEh(Result.FindComponent('dbeUSER_ID'));
+    with dbeUSER_ID do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      ReadOnly   := true;
+      with EditButtons.Add do
+        begin
+        Glyph.LoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IMG/CONFIG/DBGRID/BTN000.BMP'));
+        Style   := ebsGlyphEh;
+        Visible := true;
+        OnClick := @dbeUSER_ID_OnEditButtonClick;
+        end;
+      end; 
+    dbeWRK_NAME  := TDBEditEh(Result.FindComponent('dbeWRK_NAME'));
+    with dbeWRK_NAME do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      ReadOnly   := true;
+      end; 
+    dbePAYSRC_ID_  := TDBEditEh(Result.FindComponent('dbePAYSRC_ID_'));
+    with dbePAYSRC_ID_ do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      ReadOnly   := true;
+      with EditButtons.Add do
+        begin
+        Glyph.LoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IMG/CONFIG/DBGRID/BTN000.BMP'));
+        Style   := ebsGlyphEh;
+        Visible := true;
+        OnClick := @dbePAYSRC_ID__OnEditButtonClick;
+        end;
+      end; 
+    dbeACC_ID  := TDBEditEh(Result.FindComponent('dbeACC_ID'));
+    with dbeACC_ID do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      ReadOnly   := true;
+      with EditButtons.Add do
+        begin
+        Glyph.LoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IMG/CONFIG/DBGRID/BTN000.BMP'));
+        Style   := ebsGlyphEh;
+        Visible := true;
+        OnClick := @dbeACC_ID_OnEditButtonClick;
+        end;
+      end; 
+    dbeACC_NAME  := TDBEditEh(Result.FindComponent('dbeACC_NAME'));
+    with dbeACC_NAME do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Foreground;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      ReadOnly   := true;
+      with EditButtons.Add do
+        begin
+        Glyph.LoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IMG/CONFIG/DBGRID/BTN000.BMP'));
+        Style   := ebsGlyphEh;
+        Visible := true;
+        OnClick := @dbeACC_ID_OnEditButtonClick;
+        end;
+      end; 
+    dbneDOCSUMVAL  := TDBNumberEditEh(Result.FindComponent('dbneDOCSUMVAL'));
+    with dbneDOCSUMVAL do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      end; 
+    dbeSUBKONTO_NAME  := TDBEditEh(Result.FindComponent('dbeSUBKONTO_NAME'));
+    with dbeSUBKONTO_NAME do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      ReadOnly   := true;
+      with EditButtons.Add do
+        begin
+        Glyph.LoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IMG/CONFIG/DBGRID/BTN000.BMP'));
+        Style   := ebsGlyphEh;
+        Visible := true;
+        OnClick := @dbeSUBKONTO_NAME_OnEditButtonClick;
+        end;
+      end; 
+    dbeEXPTYPE_ID_  := TDBEditEh(Result.FindComponent('dbeEXPTYPE_ID_'));
+    with dbeEXPTYPE_ID_ do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      ReadOnly   := true; 
+      with EditButtons.Add do
+        begin
+        Glyph.LoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IMG/CONFIG/DBGRID/BTN000.BMP'));
+        Style   := ebsGlyphEh;
+        Visible := true;
+        OnClick := @dbeEXPTYPE_ID__OnEditButtonClick;
+        end; 
+      end; 
+    dbeDOC_ID_  := TDBEditEh(Result.FindComponent('dbeDOC_ID_'));
+    with dbeDOC_ID_ do 
+      begin 
+      Color      := Amunhotep.MainForm.StyleManager.Colors.Window;
+      Font.Color := Amunhotep.MainForm.StyleManager.Colors.Border;
+      ReadOnly   := true; 
+      with EditButtons.Add do
+        begin
+        Glyph.LoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IMG/CONFIG/DBGRID/BTN000.BMP'));
+        Style   := ebsGlyphEh;
+        Visible := true;
+        OnClick := @dbeDOC_ID__OnEditButtonClick;
+        end; 
+      with EditButtons.Add do
+        begin
+        Glyph.LoadFromFile(PrepareAbsoleteFileName('PEAKTOP:IMG/CONFIG/DBGRID/BTN002.BMP'));
+        Style   := ebsGlyphEh;
+        Visible := true;
+        OnClick := @dbeDOC_ID__Clear_OnEditButtonClick;
+        end;
+      end; 
+    PCDoc := CreateTxcPageControlEx(Result, PanelDoc, 'PCDoc', 0,0,200,200,alClient);  
+    lkTS := CreateTxcTabSheet(PCDoc, 'tsREASON'   ,'Основание' , 291, Amunhotep.MainForm.StyleManager.Colors.Window);
+    lkTS := CreateTxcTabSheet(PCDoc, 'tsENCLOSURE','Дополнение', 291, Amunhotep.MainForm.StyleManager.Colors.Window);
+    TxcPageControlEx_ActivateDefaultPage(PCDoc);
+    
+
+    trJournal := TxFBTransaction(Result.FindComponent('trJournal'));
+    with trJournal do 
+      begin 
+      DefaultDataBase := FBDataBase; 
+      Params.Clear; 
+      Params.Add('isc_tpb_read_committed'); 
+      Params.Add('isc_tpb_write'); 
+      Params.Add('isc_tpb_rec_version'); 
+      Params.Add('isc_tpb_nowait'); 
+      end; 
+    dtsJournal := TxFBDataSet(Result.FindComponent('dtsJournal'));
+    with dtsJournal do
+      begin 
+      AfterOpen   := @dtsJournal_AfterOpen;
+      BeforeClose := @dtsJournal_BeforeClose;
+      AfterScroll := @dtsJournal_AfterScroll;
+      SelectSQL.Text  := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/DOC/1000016/EDIT_JRNL0001.SQL');
+      RefreshSQL.Text := StringsLoadFromFile('PEAKTOP:IDE/ERP/CONFIG/DOC/1000016/EDIT_JRNL0001.SQL');
+      ModifySQL.Text  := 
+        'EXECUTE BLOCK ( '+SQLCRLF+
+        '   Q_ID          TYPE OF COLUMN TABL$J_4.ID           = ?ID '+SQLCRLF+
+        '  ,Q_NAME        TYPE OF COLUMN TABL$J_4.NAME         = ?NAME '+SQLCRLF+
+        '  ,Q_FLAG_DELETE TYPE OF COLUMN TABL$J_4.FLAG_DELETE  = ?FLAG_DELETE '+SQLCRLF+
+        '  ,Q_FLAG_COMMIT TYPE OF COLUMN TABL$J_4.FLAG_COMMIT  = ?FLAG_COMMIT '+SQLCRLF+
+        '  ,Q_TYPE_ID     TYPE OF COLUMN TABL$J_4.TYPE_ID      = ?TYPE_ID '+SQLCRLF+
+        '  ,Q_DOCNUMBER   TYPE OF COLUMN TABL$J_4.DOCNUMBER    = ?DOCNUMBER '+SQLCRLF+
+        '  ,Q_DOCSUMVAL   TYPE OF COLUMN TABL$J_4.DOCSUMVAL    = ?DOCSUMVAL  '+SQLCRLF+
+        '  ,Q_FIRM_ID     TYPE OF COLUMN TABL$J_4.FIRM_ID      = ?FIRM_ID '+SQLCRLF+
+        '  ,Q_FILIAL_ID   TYPE OF COLUMN TABL$J_4.FILIAL_ID    = ?FILIAL_ID '+SQLCRLF+
+        '  ,Q_USER_ID     TYPE OF COLUMN TABL$J_4.USER_ID      = ?USER_ID '+SQLCRLF+
+        '  ,Q_DATE_COMMIT TYPE OF COLUMN TABL$J_4.DATE_COMMIT  = ?DATE_COMMIT '+SQLCRLF+
+        '  ,Q_REASON      TYPE OF COLUMN TABL$J_1000016.REASON = ?REASON '+SQLCRLF+
+        '  ,Q_ENCLOSURE   TYPE OF COLUMN TABL$J_1000016.ENCLOSURE = ?ENCLOSURE '+SQLCRLF+
+        ')AS '+SQLCRLF+
+        'BEGIN '+SQLCRLF+
+        '  UPDATE TABL$J_4 JF  SET '+SQLCRLF+
+        '     JF.NAME        = :Q_NAME '+SQLCRLF+
+        '    ,JF.FLAG_DELETE = :Q_FLAG_DELETE '+SQLCRLF+
+        '    ,JF.FLAG_COMMIT = :Q_FLAG_COMMIT '+SQLCRLF+
+        '    ,JF.DOCSUMVAL   = :Q_DOCSUMVAL '+SQLCRLF+
+        '    ,JF.DOCNUMBER   = :Q_DOCNUMBER '+SQLCRLF+
+        '    ,JF.FIRM_ID     = :Q_FIRM_ID '+SQLCRLF+
+        '    ,JF.FILIAL_ID   = :Q_FILIAL_ID '+SQLCRLF+
+        '    ,JF.USER_ID     = :Q_USER_ID '+SQLCRLF+
+        '    ,JF.DATE_COMMIT = :Q_DATE_COMMIT '+SQLCRLF+
+        '  WHERE (JF.ID   = :Q_ID); '+SQLCRLF+
+        '  UPDATE TABL$J_1000016 JC  SET '+SQLCRLF+
+        '     JC.REASON    = :Q_REASON '+SQLCRLF+
+        '    ,JC.ENCLOSURE = :Q_ENCLOSURE '+SQLCRLF+
+        '  WHERE (JC.J_ID   = :Q_ID); '+SQLCRLF+
+        'END ';
+      end 
+    DSdtsJournal := TDataSource(Result.FindComponent('DSdtsJournal'));
+    evDoc := TxFBEvents(Result.FindComponent('evDoc'));
+    with evDoc do
+      begin 
+      Events.Clear;
+      Events.Add('TABL$J_4');
+      Events.Add('TABL$J_1000016');
+      OnEventAlert := @evDoc_OnEventAlert;
+      //if not Registered then 
+      //  RegisterEvents; 
+      end; 
+    DBInterfaceCreateText(PCDoc.Pages[0], PCDoc.Pages[0], DSdtsJournal, 'REASON'   , false);  
+    DBInterfaceCreateText(PCDoc.Pages[1], PCDoc.Pages[1], DSdtsJournal, 'ENCLOSURE', false);  
+      
+    lkAct := FindTAction(Result,'actRefresh'      ,msg_actrefresh       ,msg_actrefresh_hint      ,SHORTCUT_DATA_REFRESH, 0,170); lkAct.OnExecute:=@actRefresh_OnExecute      ; 
+    lkAct := FindTAction(Result,'actPrint'        ,msg_actprint         ,msg_actprint_hint        ,SHORTCUT_PRINT       , 0,105); lkAct.OnExecute:=@actPrint_OnExecute        ; lkAct.OnUpdate:=@actPrint_OnUpdate; 
+    lkAct := FindTAction(Result,'actCommit'       ,msg_actcommit        ,msg_actcommit_hint       ,SHORTCUT_DOC_COMMIT  , 0,298); lkAct.OnExecute:=@actCommit_OnExecute       ; lkAct.OnUpdate:=@actCommit_OnUpdate; 
+    lkAct := FindTAction(Result,'actUnCommit'     ,msg_actuncommit      ,msg_actuncommit_hint     ,SHORTCUT_DOC_UNCOMMIT, 0,297); lkAct.OnExecute:=@actUnCommit_OnExecute     ; lkAct.OnUpdate:=@actUnCommit_OnUpdate; 
+    RefreshView;
+    Amunhotep.MainForm.TaskBar.ButtonByForm(Result).Down := true;
+  end;
+  //============================================================================
+begin
+  DocForm := DocForm_Create;
+end.

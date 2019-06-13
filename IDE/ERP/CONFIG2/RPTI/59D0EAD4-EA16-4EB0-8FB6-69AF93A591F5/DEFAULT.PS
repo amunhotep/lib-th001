@@ -1,0 +1,15 @@
+{$IFNDEF PEAKTOP:IDE/ERP/CONFIG2/RPTI/59D0EAD4-EA16-4EB0-8FB6-69AF93A591F5/DEFAULT.INC}  {$I ./DEFAULT.INC}  {$ENDIF}
+var
+  lkOwnr  :TAmunhotepForm;
+  lkAccId :Integer;
+  lkStr   :string;
+begin
+  lkAccId := 361;
+  lkStr   := '361';
+  GetField(FBDataBase, 'TABL$R_BUHG_ACCS', 'NAME', 'ID = '+IntToStr(lkAccId), lkStr);
+
+  lkOwnr := TERPFormRpti_Create('{59D0EAD4-EA16-4EB0-8FB6-69AF93A591F5}');
+
+  TxcEditCombo(lkOwnr.FindComponent(objname_acc)).Tag  := lkAccId;
+  TxcEditCombo(lkOwnr.FindComponent(objname_acc)).Text := lkStr;
+end.
